@@ -1,0 +1,33 @@
+
+if CLIENT then
+	SWEP.PrintName			= "CSS AWP"
+	SWEP.Slot				= 1
+	SWEP.SlotPos			= 4
+	killicon.AddFont( "weapon_cs_awp", "csd", "n", Color(255, 100, 100, 100) )
+	SWEP.ViewModelFlip = true
+end
+
+SWEP.HoldType			= "ar2"
+SWEP.Base				= "weapon_cs_base"
+SWEP.Category			= "Counter-Strike"
+SWEP.Spawnable			= true
+
+SWEP.ViewModel			= "models/weapons/v_snip_awp.mdl"
+SWEP.WorldModel			= "models/weapons/w_snip_awp.mdl"
+
+SWEP.Primary.Damage			= 114
+SWEP.Primary.NumShots		= 1
+SWEP.Primary.Sound			= Sound("weapons/awp/awp1.wav")
+SWEP.Primary.Cone			= 0.001
+SWEP.Primary.ClipSize		= 10
+SWEP.Primary.DefaultClip	= 20
+SWEP.Primary.Delay			= 1.5
+SWEP.Primary.Ammo			= "ar2"
+SWEP.Primary.Automatic = false
+
+SWEP.CoolDown = 0
+SWEP.RecoilMul	= 1
+SWEP.Type = "sniper" -- shotgun, sniper, selective, other
+SWEP.ZoomAmount = 32
+SWEP.EnableScope = true
+SWEP.EnableCrosshair = false

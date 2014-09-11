@@ -360,11 +360,11 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	bullet.Damage	= Damage*math.Rand(0.99,1.01)
 	self.Owner:FireBullets(bullet)
 
-	--if CLIENT or game.SinglePlayer() then
+	if CLIENT or game.SinglePlayer() then
 		--if self.Owner:GetPunchAngle().x != 0 then
 			self.Owner:SetEyeAngles( self.Owner:EyeAngles() + punchangle )
 		--end
-	--end
+	end
 
 end
 

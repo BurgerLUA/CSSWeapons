@@ -21,7 +21,7 @@ SWEP.Primary.Sound			= Sound("weapons/p90/p90-1.wav")
 SWEP.Primary.Cone			= .03
 SWEP.Primary.ClipSize		= 50
 SWEP.Primary.DefaultClip	= 50
-SWEP.Primary.Delay			= .14
+SWEP.Primary.Delay			= .10
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 

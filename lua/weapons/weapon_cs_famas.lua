@@ -21,7 +21,7 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Cone			= 0.01
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 30
-SWEP.Primary.Delay			= 0.13
+SWEP.Primary.Delay			= 0.15
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 

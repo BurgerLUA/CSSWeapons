@@ -78,8 +78,10 @@ function SWEP:PrimaryAttack()
 	
 		if self.FireMode == 1 then
 			self:Shoot()
+			--self.Primary.NumShots = 1
 			self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)	
 		else
+			--self.Primary.NumShots = 3
 			self:Shoot()
 			timer.Simple(self.Primary.Delay*0.33,function() self:Shoot() end)
 			timer.Simple(self.Primary.Delay*0.66,function() self:Shoot() end)
@@ -345,8 +347,8 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 
 	local punchangle = Angle(self.ViewKick,self.ViewKick*math.Rand(-1,1)*0.5,0)*1
 
-	print(self.ExtraSpread)
-	print(Cone)
+	--print(self.ExtraSpread)
+	--print(Cone)
 	
 	local bullet = {}
 	bullet.Num 		= Shots

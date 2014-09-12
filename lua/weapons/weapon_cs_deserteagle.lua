@@ -27,7 +27,7 @@ SWEP.Primary.Automatic = false
 
 SWEP.CoolDown = 0
 SWEP.RecoilMul	= 1
-SWEP.Type = "sniper" -- shotgun, sniper, selective, other
+SWEP.Type = "other" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 16
 SWEP.EnableScope = false
 SWEP.EnableCrosshair = true

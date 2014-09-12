@@ -343,7 +343,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	self.ViewKick = -(Damage*Shots/20)/2*Recoil
 	
 
-	--self.Owner:ViewPunch(Angle(self.ViewKick*3,self.ViewKick*math.Rand(-1,1)*1,0))
+	--
 
 	local punchangle = Angle(self.ViewKick,self.ViewKick*math.Rand(-1,1)*0.5,0)*1
 
@@ -353,7 +353,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	local bullet = {}
 	bullet.Num 		= Shots
 	bullet.Src 		= self.Owner:GetShootPos() 
-	bullet.Dir 		= (self.Owner:EyeAngles()):Forward()
+	bullet.Dir 		= (self.Owner:EyeAngles() + punchangle):Forward()
 	bullet.Spread 	= Vector(Cone, Cone, 0) + Vector(self.ExtraSpread,self.ExtraSpread,0)
 	bullet.Tracer	= 3
 	bullet.Force	= Damage/10
@@ -363,6 +363,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	if CLIENT or game.SinglePlayer() then
 		--if self.Owner:GetPunchAngle().x != 0 then
 			self.Owner:SetEyeAngles( self.Owner:EyeAngles() + punchangle )
+			self.Owner:ViewPunch(Angle(self.ViewKick*3,self.ViewKick*math.Rand(-1,1)*1,0))
 		--end
 	end
 

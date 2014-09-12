@@ -3,7 +3,7 @@ if CLIENT then
 	SWEP.PrintName			= "(WIP) CSS DUAL BERTTA"
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 1
-	killicon.AddFont( "weapon_cs_dualbertta", "csd", "s", Color(255, 100, 100, 100) )
+	killicon.AddFont( "weapon_cs_dualbertta", "csd", "s", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = true
 end
 
@@ -27,7 +27,7 @@ SWEP.Primary.Automatic = false
 
 SWEP.CoolDown = 0
 SWEP.RecoilMul	= 1
-SWEP.Type = "cant" -- shotgun, sniper, selective, other
+SWEP.Type = "dual" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 16
-SWEP.EnableScope = true
-SWEP.EnableCrosshair = false
+SWEP.EnableScope = false
+SWEP.EnableCrosshair = true

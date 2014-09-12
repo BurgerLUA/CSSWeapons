@@ -3,7 +3,7 @@ if CLIENT then
 	SWEP.PrintName			= "CSS AWP"
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 4
-	killicon.AddFont( "weapon_cs_awp", "csd", "n", Color(255, 100, 100, 100) )
+	killicon.AddFont( "weapon_cs_awp", "csd", "r", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = true
 end
 
@@ -28,6 +28,6 @@ SWEP.Primary.Automatic = false
 SWEP.CoolDown = 0
 SWEP.RecoilMul	= 1
 SWEP.Type = "sniper" -- shotgun, sniper, selective, other
-SWEP.ZoomAmount = 32
+SWEP.ZoomAmount = 10
 SWEP.EnableScope = true
 SWEP.EnableCrosshair = false

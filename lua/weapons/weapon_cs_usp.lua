@@ -3,7 +3,7 @@ if CLIENT then
 	SWEP.PrintName			= "CSS USP"
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 1
-	killicon.AddFont( "weapon_cs_usp", "csd", "y", Color(255, 100, 100, 100) )
+	killicon.AddFont( "weapon_cs_usp", "csd", "y", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = true
 end
 
@@ -18,7 +18,7 @@ SWEP.WorldModel			= "models/weapons/w_pist_usp.mdl"
 SWEP.Primary.Damage			= 32
 SWEP.Primary.NumShots 		= 1
 SWEP.Primary.Sound			= Sound("weapons/usp/usp_unsil-1.wav")
-SWEP.Primary.Cone			= .03
+SWEP.Primary.Cone			= .01
 SWEP.Primary.ClipSize		= 12
 SWEP.Primary.DefaultClip	= 12
 SWEP.Primary.Delay			= .01

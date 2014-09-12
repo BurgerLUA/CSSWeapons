@@ -3,7 +3,7 @@ if CLIENT then
 	SWEP.PrintName			= "CSS SCOUT"
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 4
-	killicon.AddFont( "weapon_cs_scout", "csd", "r", Color(255, 100, 100, 100) )
+	killicon.AddFont( "weapon_cs_scout", "csd", "n", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = true
 end
 
@@ -18,7 +18,7 @@ SWEP.WorldModel			= "models/weapons/w_snip_scout.mdl"
 SWEP.Primary.Damage			= 74
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/scout/scout_fire-1.wav")
-SWEP.Primary.Cone			= 0
+SWEP.Primary.Cone			= 0.001
 SWEP.Primary.ClipSize		= 10
 SWEP.Primary.DefaultClip	= 10
 SWEP.Primary.Delay			= 1.2

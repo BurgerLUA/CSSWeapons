@@ -3,7 +3,7 @@ if CLIENT then
 	SWEP.PrintName			= "(WIP) CSS FAMAS"
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 3
-	killicon.AddFont( "weapon_cs_famas", "csd", "t", Color(255, 100, 100, 100) )
+	killicon.AddFont( "weapon_cs_famas", "csd", "t", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
 end
 
@@ -27,7 +27,7 @@ SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
 SWEP.RecoilMul	= 1
-SWEP.Type = "selective" -- shotgun, sniper, selective, other
+SWEP.Type = "other" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 16
 SWEP.EnableScope = false
 SWEP.EnableCrosshair = true

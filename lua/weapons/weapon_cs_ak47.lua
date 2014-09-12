@@ -3,7 +3,7 @@ if CLIENT then
 	SWEP.PrintName			= "CSS AK47"
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 3
-	killicon.AddFont( "weapon_cs_ak47", "csd", "b", Color(255, 100, 100, 100) )
+	killicon.AddFont( "weapon_cs_ak47", "csd", "b", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = true
 end
 
@@ -18,7 +18,7 @@ SWEP.WorldModel			= "models/weapons/w_rif_ak47.mdl"
 SWEP.Primary.Damage			= 35
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
-SWEP.Primary.Cone			= .02
+SWEP.Primary.Cone			= .002
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 90
 SWEP.Primary.Delay			= .14

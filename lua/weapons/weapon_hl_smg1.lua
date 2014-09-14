@@ -59,7 +59,7 @@ end
 function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
 	
-	self.Owner:LagCompensation( true )
+	
 	
 	if self.EnableBurst == true then
 	
@@ -89,7 +89,7 @@ function SWEP:PrimaryAttack()
 	
 		self:Shoot()
 		
-	self.Owner:LagCompensation( false )
+	
 end
 
 

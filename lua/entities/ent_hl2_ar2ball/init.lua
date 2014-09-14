@@ -22,10 +22,8 @@ function ENT:Initialize()
 	end
 	
 	self.TotalDamage = self.Damage
-	
-	
-	--self.Delay = CurTime() + 3
-	ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+
+	ParticleEffectAttach("critical_rocket_blue", PATTACH_ABSORIGIN_FOLLOW, self, 0)
 	
 end
 

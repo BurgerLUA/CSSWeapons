@@ -34,22 +34,22 @@ SWEP.EnableScope = false
 SWEP.EnableCrosshair = false
 
 function SWEP:PrimaryAttack()
-	self.Owner:LagCompensation( true )
+	
 	self:SendWeaponAnim(ACT_VM_HITCENTER)
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
 	self:Swing(34)
-	self.Owner:LagCompensation( false )
+	
 end
 
 function SWEP:SecondaryAttack()
-	self.Owner:LagCompensation( true )
+	
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*1.5)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay*1.5)
 	self:Swing(55)
-	self.Owner:LagCompensation( false )
+	
 end
 
 function SWEP:Swing(damage)

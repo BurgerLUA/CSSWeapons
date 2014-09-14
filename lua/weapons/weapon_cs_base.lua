@@ -78,7 +78,7 @@ function SWEP:Holster()
 end
 
 function SWEP:PrimaryAttack()
-	self.Owner:LagCompensation( true )
+	
 	
 	if self.Type == "selective" then
 	
@@ -113,7 +113,7 @@ function SWEP:PrimaryAttack()
 		self:Shoot()
 		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)	
 	end
-	self.Owner:LagCompensation( false )
+	
 	
 	
 end

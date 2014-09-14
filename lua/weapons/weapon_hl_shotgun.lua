@@ -34,7 +34,7 @@ SWEP.EnableCrosshair = true
 
 
 function SWEP:PrimaryAttack()
-	self.Owner:LagCompensation( true )
+	
 	self.Primary.NumShots = 6
 	self:Shoot()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)	
@@ -51,7 +51,7 @@ end
 
 function SWEP:SecondaryAttack()
 	if self:Clip1() < 2 then return end
-	self.Owner:LagCompensation( true )
+	
 	self.Primary.NumShots = 12
 	self:Shoot()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)	

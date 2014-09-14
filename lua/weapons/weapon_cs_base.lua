@@ -64,10 +64,21 @@ end
 
 function SWEP:Holster()
 	self:SetNWBool("zoomed",false)
+	self:SendWeaponAnim(ACT_VM_HOLSTER)
+	
 	return true
+		
+	--local nextholster = self.Owner:GetViewModel():SequenceDuration() + CurTime()
+
+	--if CurTime() > nextholster then 
+	--	return true
+	--else
+	--	return false
+	--end
 end
 
 function SWEP:PrimaryAttack()
+	self.Owner:LagCompensation( true )
 	if self.Type == "selective" then
 	
 		if not self.FireMode then
@@ -101,7 +112,7 @@ function SWEP:PrimaryAttack()
 		self:Shoot()
 		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)	
 	end
-	
+	self.Owner:LagCompensation( false )
 	
 	
 end
@@ -387,23 +398,6 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 			self.Owner:SetEyeAngles( self.Owner:EyeAngles() + self.PunchAngle )
 		end
 	end
-end
-
-function SWEP:ThrowGrenade(force)
-	if CLIENT then return end
-	local EA =  self.Owner:EyeAngles()
-	local pos = self.Owner:GetShootPos() + EA:Right() * 5 - EA:Up() * 4 + EA:Forward() * 8	
-
-	local ent = ents.Create("ent_cs_he")		
-		ent:SetPos(pos)
-		ent:SetAngles(EA)
-		ent:Spawn()
-		ent:Activate()
-		ent:SetOwner(self.Owner)
-		ent:GetPhysicsObject():SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force + EA:Up()*50)
-		ent:GetPhysicsObject():AddAngleVelocity(Vector(1000,1000,1000))
-		--ent.Damage = 100
-		--ent.Radius = 100
 end
 
 function SWEP:Think()

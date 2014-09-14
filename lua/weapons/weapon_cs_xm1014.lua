@@ -1,8 +1,8 @@
 
 if CLIENT then
 	SWEP.PrintName			= "CSS XM1014"
-	SWEP.Slot				= 1
-	SWEP.SlotPos			= 2
+	SWEP.Slot				= 2
+	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_xm1014", "csd", "B", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = true
 end

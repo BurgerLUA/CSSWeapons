@@ -4,7 +4,7 @@ include("shared.lua")
 
 function ENT:Initialize()
 
-	self:SetModel("models/weapons/w_eq_fraggrenade.mdl") 
+	self:SetModel("models/weapons/w_eq_flashbang.mdl") 
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
@@ -14,7 +14,7 @@ function ENT:Initialize()
 		phys:Wake()
 		phys:SetBuoyancyRatio(0)
 	end
-	
+
 	self.Delay = CurTime() + 3
 	ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
 	
@@ -31,7 +31,7 @@ function ENT:PhysicsCollide(data, physobj)
 	--self:GetPhysicsObject():AddVelocity(data.OurOldVelocity*0.1)
 		
 	if self:GetVelocity():Length() > 50 then
-		self:EmitSound("weapons/hegrenade/he_bounce-1.wav",100,100)
+		self:EmitSound("weapons/flashbang/grenade_hit1.wav",100,100)
 	end
 		
 		
@@ -65,39 +65,44 @@ function ENT:Detonate(self,pos)
 		effectdata:SetOrigin( pos)
 		effectdata:SetScale( 100 )
 		effectdata:SetRadius( 5000 )
-	--util.Effect( "HelicopterMegaBomb", effectdata )	
-	util.Effect( "Explosion", effectdata)
+	util.Effect( "HelicopterMegaBomb", effectdata )	
 	
-	--print(pos)
-	util.BlastDamage(self, self.Owner, pos, 400, 100)
-	
-	self:EmitSound("weapons/hegrenade/explode"..math.random(3,5)..".wav",100,100)
-	
-	if table.Count(ents.FindInSphere(self:GetPos(),250)) > 0 then
-		for k,v in pairs(ents.FindInSphere(self:GetPos(),250)) do
-		
-			if v:GetClass() == "prop_physics" then
-		
-				--if math.Rand(0,100) >= 70 then
-				--	v:Ignite(250/20 - v:GetPos():Distance( self:GetPos() )/20,0)
-				--end
-			
-				timer.Simple(0,function() 
-					if v:IsValid() == false then return end
-					constraint.RemoveAll(v)
-					v:GetPhysicsObject():EnableMotion(true)
-					v:GetPhysicsObject():Wake()
-				 end)
+	self:EmitSound("weapons/flashbang/flashbang_explode2.wav",100,100)
 
+	if table.Count(ents.FindInSphere(self:GetPos(),1000)) > 0 then
+		for k,v in pairs(ents.FindInSphere(self:GetPos(),1000)) do
+		
+			local distancecount = 10 - self:GetPos():Distance(v:GetPos())/100
+			v:TakeDamage(distancecount/2,self.Owner,self)
+			
+			if v:GetClass() == "player" then
+			
+				
+				
+			
+				--print(distancecount)
+				
+				if distancecount > 1 then
+					v:SetDSP( 37, false )
+				end
+				
+				
+				v:ConCommand("pp_motionblur 1")
+				v:ConCommand("pp_motionblur_drawalpha 0.99")
+				v:ConCommand("pp_motionblur_addalpha 0.2")
+				v:ConCommand("pp_texturize effects/flashbang_white")
+			
+				timer.Create(v:EntIndex().."flashblind1",distancecount*0.25, 1, function()
+					v:ConCommand("pp_texturize \"\"")
+				end)
+			
+				timer.Create(v:EntIndex().."flashblind2",distancecount, 1, function()
+					v:ConCommand("pp_motionblur 0")
+				end)
+			
+				 
 			end
-			
-			--if v:GetClass() == "prop_door_rotating" then
-			--	v:Fire( "Unlock", 0 )
-			--	v:Fire( "Open", 0.1 )
-			--end
-		
 		end
-
 	end
 	
 					

@@ -47,7 +47,7 @@ SWEP.EnableCrosshair = true
 
 if SERVER then
 	SWEP.Weight				= SWEP.Primary.Damage * SWEP.Primary.NumShots
-	SWEP.AutoSwitchTo		= true
+	SWEP.AutoSwitchTo		= false
 	SWEP.AutoSwitchFrom		= false
 end
 
@@ -365,11 +365,8 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 		self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001)*self.CrouchMul
 	end
 	
-
-	
 	--print(Cone)
 	--print(self.ExtraSpread)
-
 	
 	local bullet = {}
 	bullet.Num 		= Shots
@@ -390,9 +387,23 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 			self.Owner:SetEyeAngles( self.Owner:EyeAngles() + self.PunchAngle )
 		end
 	end
-	
+end
 
+function SWEP:ThrowGrenade(force)
+	if CLIENT then return end
+	local EA =  self.Owner:EyeAngles()
+	local pos = self.Owner:GetShootPos() + EA:Right() * 5 - EA:Up() * 4 + EA:Forward() * 8	
 
+	local ent = ents.Create("ent_cs_he")		
+		ent:SetPos(pos)
+		ent:SetAngles(EA)
+		ent:Spawn()
+		ent:Activate()
+		ent:SetOwner(self.Owner)
+		ent:GetPhysicsObject():SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force + EA:Up()*50)
+		ent:GetPhysicsObject():AddAngleVelocity(Vector(1000,1000,1000))
+		--ent.Damage = 100
+		--ent.Radius = 100
 end
 
 function SWEP:Think()

@@ -13,7 +13,7 @@ SWEP.Spawnable			= true
 SWEP.Category			= "HL2"
 
 SWEP.ViewModel			= "models/weapons/c_irifle.mdl"
-SWEP.WorldModel			= "models/weapons/W_irifle.mdl"
+SWEP.WorldModel			= "models/weapons/w_irifle.mdl"
 
 SWEP.Primary.Damage			= 8
 SWEP.Primary.NumShots		= 1
@@ -35,7 +35,7 @@ SWEP.EnableCrosshair = true
 function SWEP:SecondaryAttack()
 	if !self:CanPrimaryAttack() then return end
 	self:TakePrimaryAmmo(self:Clip1())
-	self:ThrowCombineBall(damage)
+	self:ThrowCombineBall(self:Clip1()*self.Primary.Damage)
 end
 
 

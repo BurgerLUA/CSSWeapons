@@ -21,7 +21,7 @@ function ENT:Initialize()
 		phys:EnableDrag(false)
 	end
 	
-	
+	self.TotalDamage = self.Damage
 	
 	
 	self.Delay = CurTime() + 3
@@ -34,14 +34,8 @@ function ENT:PhysicsCollide(data, physobj)
 	self.HitP = data.HitPos
 	self.HitN = data.HitNormal
 
-
-
-	--self:SetVelocity(self:GetVelocity()/2)
-	--self:GetPhysicsObject():AddVelocity(data.OurOldVelocity*0.1)
-		
-	if self:GetVelocity():Length() > 50 then
-		self:EmitSound("weapons/hegrenade/he_bounce-1.wav",100,100)
-	end
+	self:EmitSound("npc/manhack/mh_blade_snick1.wav",100,100)
+	self.TotalDamage = self.TotalDamage - 1
 		
 	local LastSpeed = math.max( data.OurOldVelocity:Length(), data.Speed )
 	local NewVelocity = physobj:GetVelocity()
@@ -52,6 +46,11 @@ function ENT:PhysicsCollide(data, physobj)
 	local TargetVelocity = NewVelocity * LastSpeed * 1
 	
 	physobj:SetVelocity( TargetVelocity )
+	
+	
+	if data.HitEntity:IsPlayer() then 
+		data.HitEntity:TakeDamage(self.TotalDamage,self,self.Owner)
+	end
 
 	
 	
@@ -60,7 +59,7 @@ end
 
 
 function ENT:Think()
-	if CurTime() > self.Delay then 
+	if self.TotalDamage < 0 then 
 		self:Detonate(self,self:GetPos())
 	end
 end
@@ -86,7 +85,7 @@ function ENT:Detonate(self,pos)
 	util.Effect( "Explosion", effectdata)
 	
 	--print(pos)
-	util.BlastDamage(self, self.Owner, pos, 400, 100)
+	--util.BlastDamage(self, self.Owner, pos, 400, 100)
 	
 	self:EmitSound("weapons/hegrenade/explode"..math.random(3,5)..".wav",100,100)
 	

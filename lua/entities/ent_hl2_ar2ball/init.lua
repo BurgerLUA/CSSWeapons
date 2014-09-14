@@ -24,7 +24,7 @@ function ENT:Initialize()
 	self.TotalDamage = self.Damage
 	
 	
-	self.Delay = CurTime() + 3
+	--self.Delay = CurTime() + 3
 	ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
 	
 end

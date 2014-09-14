@@ -79,6 +79,7 @@ end
 
 function SWEP:PrimaryAttack()
 	self.Owner:LagCompensation( true )
+	
 	if self.Type == "selective" then
 	
 		if not self.FireMode then
@@ -253,6 +254,9 @@ function SWEP:Shoot()
 		end
 	end
 	
+
+	self.ReloadDelay = CurTime()+self.Primary.Delay/2
+	
 	
 	
 	self:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
@@ -281,14 +285,14 @@ function SWEP:Reload()
 	
 	if self.Type == "shotgun" then
 		
-		self.ShellTime = 0.5
-		self:SetNextPrimaryFire(CurTime() + self.ShellTime + 0.1 + (self.Primary.ClipSize-self:Clip1())*self.ShellTime)
+		self.WeaponShellTime = 0.5
+		self:SetNextPrimaryFire(CurTime() + self.WeaponShellTime + 0.1 + (self.Primary.ClipSize-self:Clip1())*self.WeaponShellTime)
 		
-		self.ReloadDelay = (self.Primary.ClipSize-self:Clip1())*self.ShellTime + CurTime()
+		self.ReloadDelay = (self.Primary.ClipSize-self:Clip1())*self.WeaponShellTime + CurTime()
 		for i=1, self.Primary.ClipSize-self:Clip1() do
-			timer.Simple(i*self.ShellTime - self.ShellTime,function()
+			timer.Simple(i*self.WeaponShellTime - self.WeaponShellTime,function()
 				if IsValid(self) then
-					--self:SetNextPrimaryFire(CurTime() + self.ShellTime)
+					--self:SetNextPrimaryFire(CurTime() + self.self.WeaponShellTime)
 					self:SetClip1(self:Clip1()+1)
 					--self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_START)
 					self:SendWeaponAnim( ACT_VM_RELOAD )
@@ -296,7 +300,7 @@ function SWEP:Reload()
 			end)
 		end
 		
-		timer.Simple((self.Primary.ClipSize-self:Clip1())*self.ShellTime, function() 
+		timer.Simple((self.Primary.ClipSize-self:Clip1())*self.WeaponShellTime, function() 
 			if IsValid(self) then
 				self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH ) 
 			end
@@ -304,9 +308,9 @@ function SWEP:Reload()
 		
 	else
 		self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration()  + 0.1)
-		self.ReloadDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
+		self.ReloadDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration() + 0.25
 		self.Owner:SetAnimation(PLAYER_RELOAD)
-		timer.Simple(self.Owner:GetViewModel():SequenceDuration(),function() 
+		timer.Simple(self.Owner:GetViewModel():SequenceDuration()*0.75,function() 
 			if IsValid(self) then
 				self:SetClip1(self.Primary.ClipSize) 
 			end

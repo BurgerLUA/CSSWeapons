@@ -3,8 +3,7 @@ if CLIENT then
 	SWEP.PrintName			= "CSS KNIFE"
 	SWEP.Slot				= 4
 	SWEP.SlotPos			= 1
-	killicon.AddFont( "weapon_cs_flash", "csd", "P", Color( 255, 80, 0, 255 ) )
-	killicon.AddFont( "ent_cs_flash", "csd", "P", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "weapon_cs_knife", "csd", "j", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
 end
 

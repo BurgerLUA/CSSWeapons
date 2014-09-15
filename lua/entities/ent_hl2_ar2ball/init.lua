@@ -83,9 +83,9 @@ function ENT:PhysicsCollide(data, physobj)
 			dmginfo:SetDamageForce( data.OurOldVelocity * 10000 ) --Launch upwards
 	
 		data.HitEntity:TakeDamageInfo(dmginfo)
-		self.TotalDamage = self.TotalDamage - 50
+		self.TotalDamage = self.TotalDamage - 100
 	else
-		self.TotalDamage = self.TotalDamage - 10
+		self.TotalDamage = self.TotalDamage - 50
 	end
 
 	

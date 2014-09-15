@@ -319,6 +319,7 @@ function SWEP:Reload()
 	end
 	
 	self:SetNWBool("zoomed",false)
+	self.ScopeMode = 0
 			
 	if SERVER then
 		self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov"),0.3)

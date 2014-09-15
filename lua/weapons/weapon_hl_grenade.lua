@@ -1,13 +1,13 @@
 
 if CLIENT then
 	SWEP.PrintName			= "HL2 FRAG"
-	SWEP.Slot				= 2
+	SWEP.Slot				= 4
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_xm1014", "csd", "B", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
 end
 
-SWEP.HoldType			= "shotgun"
+SWEP.HoldType			= "grenade"
 SWEP.Base				= "weapon_cs_base"
 SWEP.Spawnable			= true
 SWEP.Category			= "HL2"

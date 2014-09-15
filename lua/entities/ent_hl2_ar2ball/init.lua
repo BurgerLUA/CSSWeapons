@@ -5,10 +5,8 @@ include("shared.lua")
 function ENT:Initialize()
 
 	self:SetModel("models/Items/AR2_Grenade.mdl") 
-	--self:PhysicsInit(SOLID_VPHYSICS)
-	--self:SetMoveType(MOVETYPE_VPHYSICS)
-	--self:SetSolid(SOLID_VPHYSICS)
-	
+	self:SetRenderMode(RENDERMODE_NONE)
+
 	local r = 10
     self:PhysicsInitSphere(r)
     self:SetCollisionBounds(Vector(-r,-r,-r),Vector(r,r,r))
@@ -21,9 +19,38 @@ function ENT:Initialize()
 		phys:EnableDrag(false)
 	end
 	
-	self.TotalDamage = self.Damage
+	local ball = ents.Create("prop_effect")
+	ball:SetPos(self:GetPos())
+	ball:SetAngles(self:GetAngles())
+	ball:SetParent(self)
+	ball:SetModel("models/effects/combineball.mdl")
+	ball:Spawn()
+	ball:Activate()
+	
+	sound = CreateSound(self,"weapons/physcannon/energy_sing_loop4.wav")
+	sound:Play()
+	
+	
+	
+	--[[
+	local detail = ents.Create("prop_combine_ball")
+	detail:SetPos(self:GetPos())
+	detail:SetParent(self)
+	detail:SetOwner(self.Owner)
+	detail:SetSaveValue('m_flRadius',12)
+	detail:SetSaveValue("m_bEmit",false)
+	detail:SetSaveValue("m_bheld",true)
+	detail:SetSaveValue("m_bLaunched",true)
+	--detail:GetPhysicsObject():EnableCollisions(false)
+	detail:Spawn()
+	detail:Activate()
+	--]]
+	
+	
+	self.TotalDamage = self:GetNWInt("damage")
+	self.BoomTime = 9 * 10^10
 
-	ParticleEffectAttach("critical_rocket_blue", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+	--ParticleEffectAttach("critical_rocket_blue", PATTACH_ABSORIGIN_FOLLOW, self, 0)
 	
 end
 
@@ -32,8 +59,9 @@ function ENT:PhysicsCollide(data, physobj)
 	self.HitP = data.HitPos
 	self.HitN = data.HitNormal
 
-	self:EmitSound("npc/manhack/mh_blade_snick1.wav",100,100)
-	self.TotalDamage = self.TotalDamage - 1
+	self:EmitSound("weapons/physcannon/energy_bounce"..math.random(1,2)..".wav",100,100)
+	
+	
 		
 	local LastSpeed = math.max( data.OurOldVelocity:Length(), data.Speed )
 	local NewVelocity = physobj:GetVelocity()
@@ -46,21 +74,50 @@ function ENT:PhysicsCollide(data, physobj)
 	physobj:SetVelocity( TargetVelocity )
 	
 	
-	if data.HitEntity:IsPlayer() then 
-		data.HitEntity:TakeDamage(self.TotalDamage,self,self.Owner)
+	if data.HitEntity:IsPlayer() or data.HitEntity:IsNPC() then 
+		local dmginfo = DamageInfo()
+			dmginfo:SetDamage( self.TotalDamage )
+			dmginfo:SetDamageType( DMG_DISSOLVE )
+			dmginfo:SetAttacker( self.Owner )
+			dmginfo:SetInflictor( self )
+			dmginfo:SetDamageForce( data.OurOldVelocity * 10000 ) --Launch upwards
+	
+		data.HitEntity:TakeDamageInfo(dmginfo)
+		self.TotalDamage = self.TotalDamage - 50
+	else
+		self.TotalDamage = self.TotalDamage - 10
 	end
 
 	
 	
+	if self.TotalDamage < 0 then
+		self.BoomTime = CurTime() + 0.25
+	else
+		local effectdata = EffectData()
+		effectdata:SetScale(1)
+		effectdata:SetRadius(25)
+		effectdata:SetStart(data.HitPos)
+		effectdata:SetOrigin(data.HitPos)
+		effectdata:SetNormal(data.HitNormal)
+		util.Effect( "cball_bounce", effectdata)
+	end
+	
+	
 end
-
-
 
 function ENT:Think()
-	if self.TotalDamage < 0 then 
-		self:Detonate(self,self:GetPos())
+	if CurTime() >= self.BoomTime then
+		local boom = ents.Create("prop_combine_ball")
+		boom:SetPos(self:GetPos())
+		boom:Spawn()
+		boom:Activate()
+		boom:Fire("explode")
+		sound:Stop()
+		self:Remove()
+		SafeRemoveEntityDelayed(boom,1)
 	end
 end
+
 
 
 
@@ -69,55 +126,4 @@ end
 
 
 function ENT:OnTakeDamage( dmginfo )
-end
-
-
-function ENT:Detonate(self,pos)
-	if not self:IsValid() then return end
-	local effectdata = EffectData()
-		effectdata:SetStart( pos + Vector(0,0,100)) // not sure if we need a start and origin (endpoint) for this effect, but whatever
-		effectdata:SetOrigin( pos)
-		effectdata:SetScale( 100 )
-		effectdata:SetRadius( 5000 )
-	--util.Effect( "HelicopterMegaBomb", effectdata )	
-	util.Effect( "Explosion", effectdata)
-	
-	--print(pos)
-	--util.BlastDamage(self, self.Owner, pos, 400, 100)
-	
-	self:EmitSound("weapons/hegrenade/explode"..math.random(3,5)..".wav",100,100)
-	
-	if table.Count(ents.FindInSphere(self:GetPos(),250)) > 0 then
-		for k,v in pairs(ents.FindInSphere(self:GetPos(),250)) do
-		
-			if v:GetClass() == "prop_physics" then
-		
-				--if math.Rand(0,100) >= 70 then
-				--	v:Ignite(250/20 - v:GetPos():Distance( self:GetPos() )/20,0)
-				--end
-			
-				timer.Simple(0,function() 
-					if v:IsValid() == false then return end
-					constraint.RemoveAll(v)
-					v:GetPhysicsObject():EnableMotion(true)
-					v:GetPhysicsObject():Wake()
-				 end)
-
-			end
-			
-			--if v:GetClass() == "prop_door_rotating" then
-			--	v:Fire( "Unlock", 0 )
-			--	v:Fire( "Open", 0.1 )
-			--end
-		
-		end
-
-	end
-	
-					
-	self.Pos1 = self.HitP + self.HitN
-	self.Pos2 = self.HitP - self.HitN
-	util.Decal("Scorch", self.Pos1, self.Pos2)
-			
-	self:Remove()
 end

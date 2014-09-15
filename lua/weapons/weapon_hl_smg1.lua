@@ -15,7 +15,7 @@ SWEP.Category			= "HL2"
 SWEP.ViewModel			= "models/weapons/c_smg1.mdl"
 SWEP.WorldModel			= "models/weapons/w_smg1.mdl"
 
-SWEP.Primary.Damage			= 4
+SWEP.Primary.Damage			= 4*2
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/smg1/smg1_fire1.wav")
 SWEP.Primary.Cone			= .01
@@ -33,6 +33,17 @@ SWEP.EnableScope = false
 SWEP.EnableCrosshair = true
 
 SWEP.EnableBurst = false
+
+--Code from Kogitsune
+local BURST, AUTO = 0, 1
+function SWEP:SetupDataTables( )
+  self:NetworkVar( "Int", 0, "FireMode" )
+
+  if SERVER then 
+    self:SetFireMode( AUTO ) --defualt to auto
+  end
+  
+end
 
 function SWEP:Reload()
 	if self:Clip1() >= self.Primary.ClipSize then return end
@@ -59,13 +70,9 @@ end
 function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
 	
-	
-	
-	if self.EnableBurst == true then
-	
+	if self:GetFireMode( ) == BURST then
 		self.Primary.Delay = 0.39
 		self.Primary.Automatic = false
-	
 	
 		if self.Weapon:Clip1() >= 3 then
 			self:TakePrimaryAmmo(2)
@@ -77,8 +84,6 @@ function SWEP:PrimaryAttack()
 			self.Primary.Sound = Sound("weapons/smg1/smg1_fire1.wav")
 		end	
 		
-
-		
 	else
 		self.Primary.NumShots = 1
 		self.Primary.Delay = 0.13
@@ -88,19 +93,17 @@ function SWEP:PrimaryAttack()
 	end
 	
 		self:Shoot()
-		
-	
 end
 
 
 
 function SWEP:SecondaryAttack()
-	if self.EnableBurst == false then
-		self.EnableBurst = true
+	if self:GetFireMode( ) == AUTO then
+		self:SetFireMode( BURST )
 		self.Weapon:EmitSound("weapons/smg1/switch_burst.wav")
 		self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to Burst Fire Mode" )
 	else
-		self.EnableBurst = false
+		self:SetFireMode( AUTO )
 		self.Weapon:EmitSound("weapons/smg1/switch_single.wav")
 		self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to Automatic" )
 	end

@@ -15,7 +15,7 @@ SWEP.Category			= "HL2"
 SWEP.ViewModel			= "models/weapons/c_irifle.mdl"
 SWEP.WorldModel			= "models/weapons/w_irifle.mdl"
 
-SWEP.Primary.Damage			= 8
+SWEP.Primary.Damage			= 8*2
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ar2/fire1.wav")
 SWEP.Primary.Cone			= .01
@@ -34,24 +34,56 @@ SWEP.EnableCrosshair = true
 
 function SWEP:SecondaryAttack()
 	if !self:CanPrimaryAttack() then return end
-	self:TakePrimaryAmmo(self:Clip1())
-	self:ThrowCombineBall(self:Clip1()*self.Primary.Damage)
+	self:SetNextPrimaryFire(CurTime()+3)
+	self:EmitSound("weapons/cguard/charging.wav",100,100)
+	self:SendWeaponAnim(ACT_VM_FIDGET)
+	timer.Simple(1,function()
+		if self.Owner:GetActiveWeapon() ~= self then return end
+		self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
+		self:EmitSound("weapons/irifle/irifle_fire2.wav",100,100)
+		self:ThrowCombineBall(self:Clip1()*self.Primary.Damage)
+		self:TakePrimaryAmmo(self:Clip1())
+	end)
+	
 end
 
 
 function SWEP:ThrowCombineBall(damage)
+	--PrintTable(GetActivities(self))
 	if CLIENT then return end
+	self.Owner:ViewPunch(Angle(-5,0,0))
 	local EA =  self.Owner:EyeAngles()
-	local pos = self.Owner:GetShootPos() + EA:Right() * 5 - EA:Up() * 4 + EA:Forward()	
-
-	local ent = ents.Create("ent_hl2_ar2ball")		
+	local pos = self.Owner:GetShootPos() + EA:Right() * 5 - EA:Up() * 4 + EA:Forward()*25
+	
+	local ent = ents.Create("ent_hl2_ar2ball")
+	--local ent = ents.Create("prop_combine_ball")		
 		ent:SetPos(pos)
 		ent:SetAngles(EA)
+		ent:SetNWInt("damage",damage)
+		ent:SetOwner(self.Owner)
+		--ent:SetSaveValue('m_flRadius',12)
+		--ent:SetSaveValue("m_bEmit",false)
+		--ent:SetSaveValue("m_bheld",false)
+		--ent:SetSaveValue("m_bLaunched",true)
+		--PrintTable(ent:GetKeyValues())
 		ent:Spawn()
 		ent:Activate()
 		ent:SetOwner(self.Owner)
-		ent:GetPhysicsObject():SetVelocity(self.Owner:GetVelocity() + EA:Forward() * 10000 + EA:Up()*50)
-		--ent:GetPhysicsObject():AddAngleVelocity(Vector(1000,1000,1000))
-		ent.Damage = damage
-
+		ent:GetPhysicsObject():SetVelocity(self.Owner:GetVelocity() + EA:Forward() * 1000 + EA:Up()*0)
+		ent:GetPhysicsObject():AddAngleVelocity(Vector(100000,100000,100000))
 end
+
+--[[
+function GetActivities( ent )
+  local k, v, t
+
+  t = { }
+
+  for k, v in ipairs( ent:GetSequenceList( ) ) do
+    table.insert( t, { id = k, act = ent:GetSequenceActivity( k ), actname = ent:GetSequenceActivityName( k ) } )
+  end
+
+  return t
+end
+--]]
+

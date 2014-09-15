@@ -4,19 +4,31 @@ include("shared.lua")
 
 function ENT:Initialize()
 
-	self:SetModel("models/weapons/w_eq_fraggrenade.mdl") 
-	self:PhysicsInit(SOLID_VPHYSICS)
-	self:SetMoveType(MOVETYPE_VPHYSICS)
-	self:SetSolid(SOLID_VPHYSICS)
+	self:SetModel("models/weapons/w_missile.mdl") 
+	
+	local r = 3
+    self:PhysicsInitSphere(r)
+    self:SetCollisionBounds(Vector(-r,-r,-r),Vector(r,r,r))
+	
+	self.sound = CreateSound(self,"weapons/rpg/rocket1.wav")
+	self.sound:Play()
+	
 	
 	local phys = self:GetPhysicsObject()
 	if phys:IsValid() then
 		phys:Wake()
 		phys:SetBuoyancyRatio(0)
+		--phys:EnableDrag(false)
+		--phys:EnableGravity(false)
+		phys:AddGameFlag(FVPHYSICS_NO_IMPACT_DMG)
+		phys:AddGameFlag(FVPHYSICS_NO_NPC_IMPACT_DMG)
 	end
-	
-	self.Delay = CurTime() + 3
+	self.SpawnTime = CurTime()
+	self.LaunchDelay = CurTime()
 	ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+	ParticleEffectAttach("rockettrail", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+	
+	self.Damage = self:GetNWInt("damage")
 	
 end
 
@@ -24,63 +36,40 @@ function ENT:PhysicsCollide(data, physobj)
 
 	self.HitP = data.HitPos
 	self.HitN = data.HitNormal
-
-
-
-	--self:SetVelocity(self:GetVelocity()/2)
-	--self:GetPhysicsObject():AddVelocity(data.OurOldVelocity*0.1)
-		
-	if self:GetVelocity():Length() > 50 then
-		self:EmitSound("weapons/hegrenade/he_bounce-1.wav",100,100)
-	end
-		
-		
-
 	
-	
+	self:Detonate(self,data.HitPos)
+	self.sound:Stop()
+	self:Remove()
 end
-
-
 
 function ENT:Think()
-	if CurTime() > self.Delay then 
-		self:Detonate(self,self:GetPos())
+	if self.LaunchDelay <= CurTime() then
+		local phys = self:GetPhysicsObject()
+		phys:EnableDrag(false)
+		phys:EnableGravity(false)
+		phys:SetVelocity(self:GetForward()*1000)
+		phys:AddAngleVelocity(Vector(math.Rand(-1,1),math.Rand(-1,1),math.Rand(-1,1)))
 	end
 end
-
-
-
-function ENT:Use( activator, caller )
-end
-
-
-function ENT:OnTakeDamage( dmginfo )
-end
-
 
 function ENT:Detonate(self,pos)
 	if not self:IsValid() then return end
 	local effectdata = EffectData()
-		effectdata:SetStart( pos + Vector(0,0,100)) // not sure if we need a start and origin (endpoint) for this effect, but whatever
-		effectdata:SetOrigin( pos)
-		effectdata:SetScale( 100 )
-		effectdata:SetRadius( 5000 )
-	--util.Effect( "HelicopterMegaBomb", effectdata )	
-	util.Effect( "Explosion", effectdata)
-	
+		effectdata:SetStart( pos ) // not sure if we need a start and origin (endpoint) for this effect, but whatever
+		effectdata:SetOrigin( pos )
+		effectdata:SetScale( 1 )
+	util.Effect( "Explosion", effectdata )	
 	--print(pos)
-	util.BlastDamage(self, self.Owner, pos, 400, 100)
-	
-	self:EmitSound("weapons/hegrenade/explode"..math.random(3,5)..".wav",100,100)
+	util.BlastDamage(self, self.Owner, pos, 250, 100)
 	
 	if table.Count(ents.FindInSphere(self:GetPos(),250)) > 0 then
 		for k,v in pairs(ents.FindInSphere(self:GetPos(),250)) do
 		
 			if v:GetClass() == "prop_physics" then
 		
-				--if math.Rand(0,100) >= 70 then
-				--	v:Ignite(250/20 - v:GetPos():Distance( self:GetPos() )/20,0)
-				--end
+				if math.Rand(0,100) >= 70 then
+					v:Ignite(250/20 - v:GetPos():Distance( self:GetPos() )/20,0)
+				end
 			
 				timer.Simple(0,function() 
 					if v:IsValid() == false then return end
@@ -91,10 +80,10 @@ function ENT:Detonate(self,pos)
 
 			end
 			
-			--if v:GetClass() == "prop_door_rotating" then
-			--	v:Fire( "Unlock", 0 )
-			--	v:Fire( "Open", 0.1 )
-			--end
+			if v:GetClass() == "prop_door_rotating" then
+				v:Fire( "Unlock", 0 )
+				v:Fire( "Open", 0.1 )
+			end
 		
 		end
 
@@ -107,3 +96,5 @@ function ENT:Detonate(self,pos)
 			
 	self:Remove()
 end
+
+

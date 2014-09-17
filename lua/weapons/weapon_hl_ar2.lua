@@ -4,7 +4,7 @@ if CLIENT then
 	SWEP.Slot				= 2
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_hl_ar2", "HL2MPTypeDeath", "2", Color( 255, 80, 0, 255 ) )
-	killicon.AddFont( "ent_hl_ar2ball", "HL2MPTypeDeath", "8", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "ent_hl2_ar2ball", "HL2MPTypeDeath", "8", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
 end
 

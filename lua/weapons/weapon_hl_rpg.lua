@@ -3,7 +3,8 @@ if CLIENT then
 	SWEP.PrintName			= "HL2 RPG"
 	SWEP.Slot				= 4
 	SWEP.SlotPos			= 1
-	killicon.AddFont( "weapon_cs_xm1014", "csd", "B", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "weapon_hl_rpg", "HL2MPTypeDeath", "3", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "ent_hl2_rocket", "HL2MPTypeDeath", "3", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
 end
 
@@ -90,6 +91,8 @@ function SWEP:ThrowRocket(damage)
 		ent:Spawn()
 		ent:Activate()
 		ent:SetOwner(self.Owner)
-		ent:GetPhysicsObject():SetVelocity(EA:Forward() * 100 + EA:Up()*10)
+		ent:GetPhysicsObject():SetVelocity(EA:Forward() * 100 + EA:Up()*50)
+		ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, ent, 0)
+		ParticleEffectAttach("rockettrail", PATTACH_ABSORIGIN_FOLLOW, ent, 0)
 		--ent:GetPhysicsObject():AddAngleVelocity(Vector(100000,100000,100000))
 end

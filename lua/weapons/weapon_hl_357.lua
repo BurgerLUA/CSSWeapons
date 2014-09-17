@@ -3,7 +3,7 @@ if CLIENT then
 	SWEP.PrintName			= "HL2 REVOLVER"
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 1
-	killicon.AddFont( "weapon_cs_xm1014", "csd", "B", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "weapon_hl_357", "HL2MPTypeDeath", ".", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
 end
 
@@ -21,7 +21,7 @@ SWEP.Primary.Sound			= Sound("weapons/357/357_fire3.wav")
 SWEP.Primary.Cone			= .1
 SWEP.Primary.ClipSize		= 6
 SWEP.Primary.DefaultClip	= 6
-SWEP.Primary.Delay			= 0.3
+SWEP.Primary.Delay			= 0.4
 SWEP.Primary.Ammo			= "357"
 SWEP.Primary.Automatic = false
 

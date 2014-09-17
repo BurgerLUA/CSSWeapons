@@ -250,12 +250,17 @@ function SWEP:Shoot()
 		end
 		
 		if self.Weapon.Type == "sniper" then
-			Cone = 0
+			if self:GetNWBool("zoomed",false) == true then
+				Cone = 0
+			else
+				Cone = 0.1
+			end
 		end
+		
 	end
 	
 
-	self.ReloadDelay = CurTime()+self.Primary.Delay/2
+	self.ReloadDelay = CurTime()+math.min(0.1, self.Primary.Delay/2)
 	
 	
 	
@@ -296,6 +301,8 @@ function SWEP:Reload()
 					self:SetClip1(self:Clip1()+1)
 					--self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_START)
 					self:SendWeaponAnim( ACT_VM_RELOAD )
+					--self:SendWeaponAnim( ACT_VM_SHELL )
+					
 				end
 			end)
 		end
@@ -357,7 +364,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 
 	self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01),0,10)
 	--self.CoolTime = CurTime() + 0.25
-	self.CoolTime = CurTime() + (Damage*Shots*0.01) - 0.1
+	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*self.RecoilMul
 		
 	if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
 		self.CrouchMul = 0.5

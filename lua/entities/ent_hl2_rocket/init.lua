@@ -24,9 +24,7 @@ function ENT:Initialize()
 		phys:AddGameFlag(FVPHYSICS_NO_NPC_IMPACT_DMG)
 	end
 	self.SpawnTime = CurTime()
-	self.LaunchDelay = CurTime()
-	ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
-	ParticleEffectAttach("rockettrail", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+	self.LaunchDelay = 0
 	
 	self.Damage = self:GetNWInt("damage")
 	
@@ -43,13 +41,13 @@ function ENT:PhysicsCollide(data, physobj)
 end
 
 function ENT:Think()
-	if self.LaunchDelay <= CurTime() then
+	--if self.LaunchDelay <= CurTime() then
 		local phys = self:GetPhysicsObject()
 		phys:EnableDrag(false)
 		phys:EnableGravity(false)
 		phys:SetVelocity(self:GetForward()*1000)
 		phys:AddAngleVelocity(Vector(math.Rand(-1,1),math.Rand(-1,1),math.Rand(-1,1)))
-	end
+	--end
 end
 
 function ENT:Detonate(self,pos)

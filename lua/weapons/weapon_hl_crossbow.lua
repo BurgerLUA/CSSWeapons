@@ -3,7 +3,8 @@ if CLIENT then
 	SWEP.PrintName			= "HL2 Crossbow"
 	SWEP.Slot				= 3
 	SWEP.SlotPos			= 1
-	killicon.AddFont( "weapon_cs_xm1014", "csd", "B", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "weapon_hl_crossbow", "HL2MPTypeDeath", "1", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "ent_hl2_bolt", "HL2MPTypeDeath", "1", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
 end
 

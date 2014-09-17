@@ -3,7 +3,7 @@ if CLIENT then
 	SWEP.PrintName			= "HL2 SMG"
 	SWEP.Slot				= 2
 	SWEP.SlotPos			= 1
-	killicon.AddFont( "weapon_cs_xm1014", "csd", "B", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "weapon_hl_smg1", "HL2MPTypeDeath", "/", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
 end
 
@@ -15,7 +15,7 @@ SWEP.Category			= "HL2"
 SWEP.ViewModel			= "models/weapons/c_smg1.mdl"
 SWEP.WorldModel			= "models/weapons/w_smg1.mdl"
 
-SWEP.Primary.Damage			= 4*2
+SWEP.Primary.Damage			= 12
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/smg1/smg1_fire1.wav")
 SWEP.Primary.Cone			= .01

@@ -3,7 +3,7 @@ if CLIENT then
 	SWEP.PrintName			= "HL2 SHOTGUN"
 	SWEP.Slot				= 3
 	SWEP.SlotPos			= 1
-	killicon.AddFont( "weapon_cs_xm1014", "csd", "B", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "weapon_hl_shotgun", "HL2MPTypeDeath", "0", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
 end
 
@@ -15,13 +15,13 @@ SWEP.Category			= "HL2"
 SWEP.ViewModel			= "models/weapons/c_shotgun.mdl"
 SWEP.WorldModel			= "models/weapons/w_shotgun.mdl"
 
-SWEP.Primary.Damage			= 8*2
+SWEP.Primary.Damage			= 28/6
 SWEP.Primary.NumShots		= 6
 SWEP.Primary.Sound			= Sound("weapons/shotgun/shotgun_fire7.wav")
-SWEP.Primary.Cone			= .1
+SWEP.Primary.Cone			= .05
 SWEP.Primary.ClipSize		= 6
 SWEP.Primary.DefaultClip	= 6
-SWEP.Primary.Delay			= 1
+SWEP.Primary.Delay			= 0.75
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = false
 
@@ -40,30 +40,32 @@ function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)	
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)	
 	
-	timer.Simple(self.Primary.Delay*0.5, function() 
+	timer.Simple(0.3, function() 
 		if self.ReloadDelay > CurTime() then return end
 		self:SendWeaponAnim(ACT_SHOTGUN_PUMP)
-		self.Owner:EmitSound("weapons/shotgun/shotgun_cock.wav",90,100)
+		self.Owner:EmitSound("weapons/shotgun/shotgun_cock.wav",50,100)
 
 	end)
 
 end
 
 function SWEP:SecondaryAttack()
-	if self:Clip1() < 2 then return end
+	if self:Clip1() < 2 then
+		self:PrimaryAttack()
+	return end
 	
 	self.Primary.NumShots = 12
 	self:Shoot()
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)	
-	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)	
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*1.5)	
+	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay*1.5)	
 	
 	
 	self:TakePrimaryAmmo(1)
 	self.Weapon:EmitSound("weapons/shotgun/shotgun_dbl_fire.wav",100,100)
-	timer.Simple(self.Primary.Delay*0.5, function() 
+	timer.Simple(0.3, function() 
 		if self.ReloadDelay > CurTime() then return end
 		self:SendWeaponAnim(ACT_SHOTGUN_PUMP)
-		self.Owner:EmitSound("weapons/shotgun/shotgun_cock.wav",90,100)	
+		self.Owner:EmitSound("weapons/shotgun/shotgun_cock.wav",50,100)	
 	end)
 
 end

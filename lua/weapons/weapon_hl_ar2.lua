@@ -3,7 +3,8 @@ if CLIENT then
 	SWEP.PrintName			= "HL2 AR2"
 	SWEP.Slot				= 2
 	SWEP.SlotPos			= 1
-	killicon.AddFont( "weapon_cs_xm1014", "csd", "B", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "weapon_hl_ar2", "HL2MPTypeDeath", "2", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "ent_hl_ar2ball", "HL2MPTypeDeath", "8", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
 end
 
@@ -15,13 +16,13 @@ SWEP.Category			= "HL2"
 SWEP.ViewModel			= "models/weapons/c_irifle.mdl"
 SWEP.WorldModel			= "models/weapons/w_irifle.mdl"
 
-SWEP.Primary.Damage			= 8*2
+SWEP.Primary.Damage			= 11
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ar2/fire1.wav")
 SWEP.Primary.Cone			= .01
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 30
-SWEP.Primary.Delay			= 0.1
+SWEP.Primary.Delay			= 0.09
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 

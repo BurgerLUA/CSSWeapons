@@ -85,7 +85,7 @@ function ENT:PhysicsCollide(data, physobj)
 		data.HitEntity:TakeDamageInfo(dmginfo)
 		self.TotalDamage = self.TotalDamage - 100
 	else
-		self.TotalDamage = self.TotalDamage - 50
+		self.TotalDamage = self.TotalDamage - 20
 	end
 
 	

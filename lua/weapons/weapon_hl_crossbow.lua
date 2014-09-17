@@ -35,7 +35,7 @@ SWEP.EnableCrosshair = false
 
 function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
-	self:ThrowBolt(100)
+	self:ThrowBolt(95)
 	self:TakePrimaryAmmo(1)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)	
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)	

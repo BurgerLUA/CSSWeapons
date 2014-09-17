@@ -14,7 +14,7 @@ SWEP.Spawnable			= true
 SWEP.Category			= "HL2"
 
 SWEP.ViewModel			= "models/weapons/c_rpg.mdl"
-SWEP.WorldModel			= "models/weapons/w_rpg.mdl"
+SWEP.WorldModel			= "models/weapons/w_rocket_launcher.mdl"
 
 SWEP.Primary.Damage			= 0
 SWEP.Primary.NumShots		= 0

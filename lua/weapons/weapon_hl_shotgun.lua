@@ -15,7 +15,7 @@ SWEP.Category			= "HL2"
 SWEP.ViewModel			= "models/weapons/c_shotgun.mdl"
 SWEP.WorldModel			= "models/weapons/w_shotgun.mdl"
 
-SWEP.Primary.Damage			= 28/6
+SWEP.Primary.Damage			= 12
 SWEP.Primary.NumShots		= 6
 SWEP.Primary.Sound			= Sound("weapons/shotgun/shotgun_fire7.wav")
 SWEP.Primary.Cone			= .05
@@ -41,10 +41,12 @@ function SWEP:PrimaryAttack()
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)	
 	
 	timer.Simple(0.3, function() 
-		if self.ReloadDelay > CurTime() then return end
-		self:SendWeaponAnim(ACT_SHOTGUN_PUMP)
-		self.Owner:EmitSound("weapons/shotgun/shotgun_cock.wav",50,100)
-
+		if not IsValid(self) then return end
+		if self.IsReloading == 1 then return end
+		if self:Clip1() >= 1 then
+			self:SendWeaponAnim(ACT_SHOTGUN_PUMP)
+			self.Owner:EmitSound("weapons/shotgun/shotgun_cock.wav",50,100)
+		end	
 	end)
 
 end
@@ -55,15 +57,17 @@ function SWEP:SecondaryAttack()
 	return end
 	
 	self.Primary.NumShots = 12
+	self.Primary.Damage = 10
 	self:Shoot()
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*1.5)	
-	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay*1.5)	
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*2.25)	
+	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay*2.25)	
 	
 	
 	self:TakePrimaryAmmo(1)
 	self.Weapon:EmitSound("weapons/shotgun/shotgun_dbl_fire.wav",100,100)
 	timer.Simple(0.3, function() 
-		if self.ReloadDelay > CurTime() then return end
+		if not IsValid(self) then return end
+		if self.IsReloading == 1 then return end
 		self:SendWeaponAnim(ACT_SHOTGUN_PUMP)
 		self.Owner:EmitSound("weapons/shotgun/shotgun_cock.wav",50,100)	
 	end)

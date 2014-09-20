@@ -16,7 +16,7 @@ function ENT:Initialize()
 	end
 	
 	self.Delay = CurTime() + 3
-	ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+	self.First = true
 	
 end
 
@@ -43,20 +43,18 @@ end
 
 
 function ENT:Think()
+
+	if self.First == true then
+		ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+		--ParticleEffectAttach("rockettrail", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+		self.First = false
+	end
+
+	
 	if CurTime() > self.Delay then 
 		self:Detonate(self,self:GetPos())
 	end
 end
-
-
-
-function ENT:Use( activator, caller )
-end
-
-
-function ENT:OnTakeDamage( dmginfo )
-end
-
 
 function ENT:Detonate(self,pos)
 	if not self:IsValid() then return end

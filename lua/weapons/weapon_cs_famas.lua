@@ -21,13 +21,13 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Cone			= 0.01
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 30
-SWEP.Primary.Delay			= 0.15
+SWEP.Primary.Delay			= 0.1
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
 SWEP.RecoilMul	= 1
-SWEP.Type = "other" -- shotgun, sniper, selective, other
+SWEP.Type = "selective" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 16
 SWEP.EnableScope = false
 SWEP.EnableCrosshair = true

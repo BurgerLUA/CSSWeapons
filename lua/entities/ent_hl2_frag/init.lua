@@ -22,6 +22,7 @@ function ENT:Initialize()
 	
 	self.SoundTickDelay = 0.5
 	self.NextTick = 0
+	self.First = true
 end
 
 function ENT:PhysicsCollide(data, physobj)
@@ -47,6 +48,14 @@ end
 
 
 function ENT:Think()
+
+	if self.First == true then
+		ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+		--ParticleEffectAttach("rockettrail", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+		self.First = false
+	end
+
+
 	if CurTime() > self.Delay then 
 		self:Detonate(self,self:GetPos())
 	end

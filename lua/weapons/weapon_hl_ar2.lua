@@ -16,19 +16,19 @@ SWEP.Category			= "HL2"
 SWEP.ViewModel			= "models/weapons/c_irifle.mdl"
 SWEP.WorldModel			= "models/weapons/w_irifle.mdl"
 
-SWEP.Primary.Damage			= 11
+SWEP.Primary.Damage			= 33
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ar2/fire1.wav")
-SWEP.Primary.Cone			= .01
+SWEP.Primary.Cone			= .005
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 30
-SWEP.Primary.Delay			= 0.09
+SWEP.Primary.Delay			= 0.1
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
 SWEP.RecoilMul	= 1
-SWEP.Type = "sniper" -- shotgun, sniper, selective, other
+SWEP.Type = "other" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 4
 SWEP.EnableScope = true
 SWEP.EnableCrosshair = true
@@ -39,6 +39,7 @@ function SWEP:SecondaryAttack()
 	self:EmitSound("weapons/cguard/charging.wav",100,100)
 	self:SendWeaponAnim(ACT_VM_FIDGET)
 	timer.Simple(1,function()
+		if not IsValid(self) then return end
 		if self.Owner:GetActiveWeapon() ~= self then return end
 		self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
 		self:EmitSound("weapons/irifle/irifle_fire2.wav",100,100)

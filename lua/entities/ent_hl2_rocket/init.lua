@@ -27,6 +27,9 @@ function ENT:Initialize()
 	self.LaunchDelay = 0
 	
 	self.Damage = self:GetNWInt("damage")
+	self.First = true
+
+	
 	
 end
 
@@ -41,6 +44,14 @@ function ENT:PhysicsCollide(data, physobj)
 end
 
 function ENT:Think()
+
+	if self.First == true then
+		ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+		ParticleEffectAttach("rockettrail", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+		self.First = false
+	end
+
+
 	--if self.LaunchDelay <= CurTime() then
 		local phys = self:GetPhysicsObject()
 		phys:EnableDrag(false)
@@ -94,5 +105,7 @@ function ENT:Detonate(self,pos)
 			
 	self:Remove()
 end
+
+
 
 

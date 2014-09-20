@@ -72,6 +72,7 @@ function ENT:PhysicsCollide(data, physobj)
 	local TargetVelocity = NewVelocity * LastSpeed * 1
 	
 	physobj:SetVelocity( TargetVelocity )
+	--physobj:SetAngleVelocity( Vector(10000,10000,10000))
 	
 	
 	if data.HitEntity:IsPlayer() or data.HitEntity:IsNPC() then 
@@ -85,7 +86,7 @@ function ENT:PhysicsCollide(data, physobj)
 		data.HitEntity:TakeDamageInfo(dmginfo)
 		self.TotalDamage = self.TotalDamage - 100
 	else
-		self.TotalDamage = self.TotalDamage - 20
+		self.TotalDamage = self.TotalDamage - 50
 	end
 
 	

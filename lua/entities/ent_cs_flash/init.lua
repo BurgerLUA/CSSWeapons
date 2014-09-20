@@ -16,7 +16,7 @@ function ENT:Initialize()
 	end
 
 	self.Delay = CurTime() + 3
-	ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+	self.First = true
 	
 end
 
@@ -24,39 +24,27 @@ function ENT:PhysicsCollide(data, physobj)
 
 	self.HitP = data.HitPos
 	self.HitN = data.HitNormal
-
-
-
-	--self:SetVelocity(self:GetVelocity()/2)
-	--self:GetPhysicsObject():AddVelocity(data.OurOldVelocity*0.1)
 		
 	if self:GetVelocity():Length() > 50 then
 		self:EmitSound("weapons/flashbang/grenade_hit1.wav",100,100)
 	end
-		
-		
 
-	
-	
 end
 
 
 
 function ENT:Think()
+
+	if self.First == true then
+		ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+		--ParticleEffectAttach("rockettrail", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+		self.First = false
+	end
+
 	if CurTime() > self.Delay then 
 		self:Detonate(self,self:GetPos())
 	end
 end
-
-
-
-function ENT:Use( activator, caller )
-end
-
-
-function ENT:OnTakeDamage( dmginfo )
-end
-
 
 function ENT:Detonate(self,pos)
 	if not self:IsValid() then return end
@@ -73,42 +61,39 @@ function ENT:Detonate(self,pos)
 		for k,v in pairs(ents.FindInSphere(self:GetPos(),1000)) do
 		
 			local distancecount = 10 - self:GetPos():Distance(v:GetPos())/100
-			v:TakeDamage(distancecount/2,self.Owner,self)
 			
-			if v:GetClass() == "player" then
+			if distancecount < 0 then 
+				v:TakeDamage(distancecount,self.Owner,self)
 			
+				if v:GetClass() == "player" then
+					for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),1000,90)) do
+						if f == self.Entity then
+		
+							--print(distancecount)
 				
+							if distancecount > 1 then
+								v:SetDSP( 37, false )
+							end
 				
+							v:ConCommand("pp_motionblur 1")
+							v:ConCommand("pp_motionblur_drawalpha 0.99")
+							v:ConCommand("pp_motionblur_addalpha 0.2")
+							v:ConCommand("pp_texturize effects/flashbang_white")
 			
-				--print(distancecount)
-				
-				if distancecount > 1 then
-					v:SetDSP( 37, false )
+							timer.Create(v:EntIndex().."flashblind1",distancecount*0.25, 1, function()
+								v:ConCommand("pp_texturize \"\"")
+							end)
+			
+							timer.Create(v:EntIndex().."flashblind2",distancecount, 1, function()
+								v:ConCommand("pp_motionblur 0")
+							end)
+							
+						end
+					end
 				end
-				
-				
-				v:ConCommand("pp_motionblur 1")
-				v:ConCommand("pp_motionblur_drawalpha 0.99")
-				v:ConCommand("pp_motionblur_addalpha 0.2")
-				v:ConCommand("pp_texturize effects/flashbang_white")
-			
-				timer.Create(v:EntIndex().."flashblind1",distancecount*0.25, 1, function()
-					v:ConCommand("pp_texturize \"\"")
-				end)
-			
-				timer.Create(v:EntIndex().."flashblind2",distancecount, 1, function()
-					v:ConCommand("pp_motionblur 0")
-				end)
-			
-				 
 			end
 		end
 	end
-	
-					
-	self.Pos1 = self.HitP + self.HitN
-	self.Pos2 = self.HitP - self.HitN
-	util.Decal("Scorch", self.Pos1, self.Pos2)
 			
 	self:Remove()
 end

@@ -15,15 +15,15 @@ SWEP.Category			= "HL2"
 SWEP.ViewModel			= "models/weapons/c_pistol.mdl"
 SWEP.WorldModel			= "models/weapons/w_pistol.mdl"
 
-SWEP.Primary.Damage			= 12
+SWEP.Primary.Damage			= 13
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/pistol/pistol_fire2.wav")
 SWEP.Primary.Cone			= .1
 SWEP.Primary.ClipSize		= 18
 SWEP.Primary.DefaultClip	= 18
-SWEP.Primary.Delay			= 0.01
+SWEP.Primary.Delay			= 0.05
 SWEP.Primary.Ammo			= "ar2"
-SWEP.Primary.Automatic = false
+SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
 SWEP.RecoilMul	= 1
@@ -41,7 +41,7 @@ function SWEP:Reload()
 	
 	if self.ReloadDelay > CurTime() then return end
 
-	self.ReloadDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration() + 0.25
+	self.ReloadDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration() - 0.25
 	self.Owner:SetAnimation(PLAYER_RELOAD)
 	self:SendWeaponAnim( ACT_VM_RELOAD )
 	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration()  + 0.1)
@@ -53,3 +53,4 @@ function SWEP:Reload()
 		end	
 	end)
 end
+

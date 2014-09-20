@@ -43,6 +43,7 @@ function SWEP:PrimaryAttack()
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 	timer.Simple(0.25,function() 
 		--if self:GetNWBool("zoomed",false) == false then
+			if not IsValid(self) then return end
 			self:Reload()
 		--end
 	end)
@@ -92,7 +93,6 @@ function SWEP:ThrowRocket(damage)
 		ent:Activate()
 		ent:SetOwner(self.Owner)
 		ent:GetPhysicsObject():SetVelocity(EA:Forward() * 100 + EA:Up()*50)
-		ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, ent, 0)
-		ParticleEffectAttach("rockettrail", PATTACH_ABSORIGIN_FOLLOW, ent, 0)
+
 		--ent:GetPhysicsObject():AddAngleVelocity(Vector(100000,100000,100000))
 end

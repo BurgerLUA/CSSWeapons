@@ -27,6 +27,7 @@ function ENT:Initialize()
 	--ParticleEffectAttach("critical_rocket_redsparks", PATTACH_ABSORIGIN_FOLLOW, self, 0)
 	
 	self.Damage = self:GetNWInt("damage")
+	self.First = true
 	
 end
 
@@ -60,5 +61,12 @@ end
 
 
 function ENT:Think()
+	
+	if self.First == true then
+		ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+		--ParticleEffectAttach("rockettrail", PATTACH_ABSORIGIN_FOLLOW, self, 0)
+		self.First = false
+	end
+
 	self:GetPhysicsObject():AddVelocity(Vector(0,0,-10))
 end

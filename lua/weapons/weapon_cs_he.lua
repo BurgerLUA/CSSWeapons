@@ -37,9 +37,19 @@ function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + 2)
 	self:SendWeaponAnim(ACT_VM_PULLPIN)
 	--self:TakePrimaryAmmo(1)
-	timer.Simple(0.85, function() self:SendWeaponAnim(ACT_VM_THROW);self.Owner:SetAnimation(PLAYER_ATTACK1) end)
-	timer.Simple(1, function() self:ThrowHEGrenade(1000) end)
-	timer.Simple(2, function() self:SendWeaponAnim(ACT_VM_DRAW) end)
+	timer.Simple(0.85, function()
+		if not IsValid(self) then return end
+		self:SendWeaponAnim(ACT_VM_THROW)
+		self.Owner:SetAnimation(PLAYER_ATTACK1) 
+	end)
+	timer.Simple(1, function() 
+		if not IsValid(self) then return end
+		self:ThrowHEGrenade(1000) 
+	end)
+	timer.Simple(2, function()
+		if not IsValid(self) then return end
+		self:SendWeaponAnim(ACT_VM_DRAW)
+	end)
 end
 
 function SWEP:Think()

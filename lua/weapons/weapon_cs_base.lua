@@ -67,7 +67,7 @@ end
 
 
 function SWEP:Initialize()
-
+	self:RegisterCommands()
 	self:SetWeaponHoldType(self.HoldType)
 	util.PrecacheSound(self.Primary.Sound)
 

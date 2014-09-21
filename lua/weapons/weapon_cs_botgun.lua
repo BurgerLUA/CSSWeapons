@@ -26,7 +26,7 @@ SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 1
+SWEP.RecoilMul	= 0.25
 SWEP.Type = "other" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 1
 SWEP.EnableScope = false
@@ -78,7 +78,7 @@ function SWEP:BotThink()
 	
 	if SERVER then
 		
-		local target = Winner:GetAttachment( Winner:LookupAttachment("chest") )
+		local target = Winner:GetPos() + Vector(0,0,25)
 		
 		Main = (target.Pos - self.Owner:GetShootPos() ):Angle()
 		

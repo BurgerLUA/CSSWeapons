@@ -1,3 +1,5 @@
+AddCSLuaFile( "weapon_cs_base.lua" )
+
 CreateConVar("bur_weapon_recoil_method", "1", FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE , "Value 1 gives the classic CSS view-punch. Others give a custom viewpunch" )
 CreateConVar("bur_weapon_cone_method", "1", FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE , "Value 1 gives the classic CSS cone of 0.001" )
 
@@ -12,12 +14,11 @@ if CLIENT then
 	SWEP.DrawCrosshair		= false
 	SWEP.ViewModelFlip		= false
 	SWEP.ViewModelFOV		= 60
-	SWEP.BobScale			= 0
-	SWEP.SwayScale			= .1
+	SWEP.SwayScale = 3
+	SWEP.BobScale = 2
 end
 
-SWEP.SwayScale = 3
-SWEP.BobScale = 2
+
 
 SWEP.Author					= "Burger"
 SWEP.Contact				= ""
@@ -62,37 +63,54 @@ if SERVER then
 	SWEP.AutoSwitchTo		= false
 	SWEP.AutoSwitchFrom		= false
 
-	function GetClFOV(ply, command, args)
-		ply:SetNWFloat("desiredfov",args[1])
-		print("SETTING " .. string.upper(ply:Nick()) .."'S DESIRED FOV TO " .. args[1])
-	end
-
 end
-concommand.Add( "ComFOV", GetClFOV )
+
 
 function SWEP:Initialize()
 
 	self:SetWeaponHoldType(self.HoldType)
 	util.PrecacheSound(self.Primary.Sound)
 
-	if CLIENT and not game.SinglePlayer() then
-		RunConsoleCommand("ComFOV", self.Owner:GetFOV())
-		print("TELLING THE SERVER TO SET DESIRED FOV TO " .. self.Owner:GetFOV())
-	end
-
-	if game.SinglePlayer() and CLIENT then
-		self.Owner:SetNWFloat("desiredfov",self.Owner:GetFOV())
-	end
-
 end
 
 function SWEP:Deploy()
-
+	RegisterCommands()
 	self:SendWeaponAnim(ACT_VM_DRAW)
-	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-
+	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())	
 	return true
 end
+
+function RegisterCommands()
+	if SERVER then
+		util.AddNetworkString( "GetFOV" )
+
+		function GetData(len,ply)
+			local data = net.ReadInt(8)
+			--print("NET: RECIEVED "..data .. " FROM " .. string.upper(ply:Nick())) 
+			ply:SetNWInt("desiredfov",data)
+		end
+		
+		net.Receive( "GetFOV", GetData )
+		
+	end
+	
+	if CLIENT or game.SinglePlayer() then
+
+		ply = LocalPlayer()
+
+		
+		local data = ply:GetFOV()
+		
+		--print("NET: TRYING TO SEND DATA "..data .." TO SERVER.")
+		net.Start( "GetFOV" )
+			net.WriteInt( data, 8 )
+		--net.Broadcast()  
+		net.SendToServer()
+	end
+
+end
+
+
 
 function SWEP:Holster()
 
@@ -129,6 +147,8 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:SecondaryAttack()
+
+	if not IsFirstTimePredicted( ) then return end
 
 	if self.Type == "selective" then
 
@@ -467,6 +487,9 @@ end
 
 function SWEP:Think()
 
+	self:BotThink()
+
+
 	if not self.CoolTime then
 		self.CoolTime = 0
 	end
@@ -498,7 +521,7 @@ function SWEP:Think()
 	if self.NormalReload == 1 then
 		self.IsReloading = 1
 		if self.ReloadFinish <= CurTime() then
-			print("I AM DONE RELOADING")
+			--print("I AM DONE RELOADING")
 			self:SetClip1(self.Primary.ClipSize)
 			self.NormalReload = 0
 			self.IsReloading = 0
@@ -623,4 +646,8 @@ function SWEP:DrawHUD()
 			
 		end
 	end
+end
+
+function SWEP:BotThink()
+
 end

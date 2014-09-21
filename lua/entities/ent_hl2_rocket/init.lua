@@ -69,7 +69,7 @@ function ENT:Detonate(self,pos)
 		effectdata:SetScale( 1 )
 	util.Effect( "Explosion", effectdata )	
 	--print(pos)
-	util.BlastDamage(self, self.Owner, pos, 250, 100)
+	util.BlastDamage(self, self.Owner, pos, 250, 75)
 	
 	if table.Count(ents.FindInSphere(self:GetPos(),250)) > 0 then
 		for k,v in pairs(ents.FindInSphere(self:GetPos(),250)) do

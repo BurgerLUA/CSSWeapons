@@ -74,13 +74,16 @@ function SWEP:Initialize()
 end
 
 function SWEP:Deploy()
-	RegisterCommands()
+	self:RegisterCommands()
 	self:SendWeaponAnim(ACT_VM_DRAW)
 	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())	
 	return true
 end
 
-function RegisterCommands()
+function SWEP:RegisterCommands()
+
+	if game.SinglePlayer() then return end
+
 	if SERVER then
 		util.AddNetworkString( "GetFOV" )
 
@@ -94,9 +97,10 @@ function RegisterCommands()
 		
 	end
 	
-	if CLIENT or game.SinglePlayer() then
+	if CLIENT then
 
 		ply = LocalPlayer()
+
 
 		
 		local data = ply:GetFOV()

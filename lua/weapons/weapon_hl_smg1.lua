@@ -26,7 +26,7 @@ SWEP.Primary.Ammo			= "smg"
 SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 1
+SWEP.RecoilMul	= 0.75
 SWEP.Type = "selective" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 1
 SWEP.EnableScope = false

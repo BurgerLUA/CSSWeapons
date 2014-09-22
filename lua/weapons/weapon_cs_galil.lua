@@ -21,12 +21,12 @@ SWEP.Primary.Sound			= Sound("weapons/galil/galil-1.wav")
 SWEP.Primary.Cone			= 0.01
 SWEP.Primary.ClipSize		= 20
 SWEP.Primary.DefaultClip	= 20
-SWEP.Primary.Delay			= 0.13
+SWEP.Primary.Delay			= 0.11
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 1
+SWEP.RecoilMul	= 0.5
 SWEP.Type = "other" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 8
 SWEP.EnableScope = false

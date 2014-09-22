@@ -18,7 +18,7 @@ SWEP.WorldModel			= "models/weapons/w_snip_sg550.mdl"
 SWEP.Primary.Damage			= 69
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/sg550/sg550-1.wav")
-SWEP.Primary.Cone			= .001
+SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 60
 SWEP.Primary.Delay			= 0.3
@@ -26,7 +26,7 @@ SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 1
+SWEP.RecoilMul	= 0.5
 SWEP.Type = "sniper" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 6
 SWEP.EnableScope = true

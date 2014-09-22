@@ -1,7 +1,6 @@
 AddCSLuaFile( "weapon_cs_base.lua" )
 
 CreateConVar("bur_weapon_recoil_method", "1", FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE , "Value 1 gives the classic CSS view-punch. Others give a custom viewpunch" )
-CreateConVar("bur_weapon_cone_method", "1", FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE , "Value 1 gives the classic CSS cone of 0.001" )
 
 if CLIENT then
 	surface.CreateFont( "csd",{
@@ -45,6 +44,8 @@ SWEP.ZoomAmount = 1
 SWEP.EnableScope = true
 SWEP.EnableCrosshair = true
 
+SWEP.ZoomOutAfterShot = false
+
 --Code from Kogitsune
 local BURST, AUTO = 0, 1
 function SWEP:SetupDataTables( )
@@ -82,7 +83,11 @@ end
 
 function SWEP:RegisterCommands()
 
-	if game.SinglePlayer() then return end
+	if game.SinglePlayer() then
+
+		self.Owner:SetNWInt("desiredfov",GetConVarNumber("fov_desired"))
+		
+	return end
 
 	if SERVER then
 		util.AddNetworkString( "GetFOV" )
@@ -173,7 +178,8 @@ function SWEP:SecondaryAttack()
 		end
 
 	elseif self.Type == "sniper" then
-
+		if self.NextZoomTime >= CurTime() then return end
+		self.NextZoomTime = CurTime() + 0.3
 		self:EmitSound("weapons/zoom.wav",100,100)
 
 		if SERVER then
@@ -250,8 +256,7 @@ function SWEP:Shoot()
 		
 			if self:GetFireMode( ) == BURST then
 
-				Cone = Cone * 0.75
-				Recoil = Recoil * 0.5
+				Recoil = Recoil * 0.75
 			
 				if self.Primary.Automatic == true then
 					self.FakeDelay = CurTime() + 0.5
@@ -335,31 +340,46 @@ function SWEP:Shoot()
 
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 
-	if GetConVar("bur_weapon_cone_method"):GetInt() == 1 then
-	
-		if self.Weapon.Type ~= "shotgun" then
-			Cone = 0.001
+	if self.Weapon.Type == "sniper" and self.EnableCrosshair == false then
+		if self:GetNWBool("zoomed",false) == true then
+			Cone = self.Primary.Cone
+		else
+			Cone = 0.1
 		end
-
-		if self.Weapon.Type == "sniper" then
-			if self:GetNWBool("zoomed",false) == true then
-				Cone = 0
-			else
-				Cone = 0.1
-			end
-		end
-
 	end
 
+	if self.Type == "shotgun" then
+		self.ReloadDelay = CurTime() + 1
+	end
+	
+	
+	
 	self:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 
+	if self.ZoomOutAfterShot == true then
+	
+		self.NextZoomTime = CurTime() + 1
+		
+		if SERVER then
+			self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov"),0.3)
+		end
+	
+		self:SetNWBool("zoomed",false)
+		self.ScopeMode = 0
+	end
+		
+	
+	
+	
 end
 
 function SWEP:Reload()
 
 	if not IsFirstTimePredicted( ) then return end
 	if self.IsReloading == 1 then return end
+	if self.ReloadDelay > CurTime() then return end
 	if self:Clip1() >= self.Primary.ClipSize then return end
+	--if !self:CanPrimaryAttack() then return end
 	
 	if self.Type == "silenced" then
 	
@@ -377,7 +397,7 @@ function SWEP:Reload()
 
 	if self.Type == "shotgun" then
 
-		self.WeaponShellTime = 0.25
+		self.WeaponShellTime = 0.5
 		self:SetNextPrimaryFire(CurTime() + self.WeaponShellTime + 0.1 + (self.Primary.ClipSize-self:Clip1())*self.WeaponShellTime)
 		
 		self.NextShell = self.WeaponShellTime
@@ -449,24 +469,16 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 		self.CrouchMul = 1
 	end
 
-	self.ViewKick = -(Damage*Shots/20)/2*Recoil
+	self.ViewKick = -(Damage*Shots/20)/2*Recoil*self.RecoilMul
+	--self.PunchAngle = Angle(self.ViewKick,self.ViewKick*math.Rand(-1,1)*0.5,0)*math.Rand(-1,1)
+	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001)
 
-	-- 1 = CSS ViewPunch
-	-- 2 = Stiff Angle
-
-	if GetConVar("bur_weapon_recoil_method"):GetInt() == 1 then
-		self.ExtraSpread = (((self.CoolDown) - (Damage*Shots*0.01))/100 + self.Owner:GetVelocity():Length()*0.0001)*self.CrouchMul
-		self.PunchAngle = Angle(0,0,0)
-	else
-		self.PunchAngle = Angle(self.ViewKick,self.ViewKick*math.Rand(-1,1)*0.5,0)*1
-		self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001)*self.CrouchMul
-	end
 
 	local bullet = {}
 	bullet.Num		= Shots
 	bullet.Src		= self.Owner:GetShootPos()
 	bullet.Dir		= (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
-	bullet.Spread	= Vector(Cone, Cone, 0) + Vector(self.ExtraSpread,self.ExtraSpread,0)
+	bullet.Spread	= Vector(Cone*self.CrouchMul, Cone*self.CrouchMul, 0) + Vector(self.ExtraSpread,self.ExtraSpread,0)
 	bullet.Tracer	= 1
 	bullet.Force	= Damage/10
 	bullet.Damage	= Damage*math.Rand(0.99,1.01)
@@ -474,25 +486,23 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	self.Owner:FireBullets(bullet)
 	self:ShootEffects()
 
-	if GetConVar("bur_weapon_recoil_method"):GetInt() == 1 then
-	
-		if SERVER or game.SinglePlayer() then
-			self.Owner:ViewPunch(Angle(self.ViewKick*3,self.ViewKick*math.Rand(-1,1)*self.RecoilMul,0))
+	if SERVER or game.SinglePlayer() then
+		if self.Primary.Automatic == true then
+			bonusmul = math.Rand(-1,1)
+			sideways = 3
+		else
+			bonusmul = 1
+			sideways = 1
 		end
-		
-	else
-	
-		if CLIENT or game.SinglePlayer() then
-			self.Owner:SetEyeAngles( self.Owner:EyeAngles() + self.PunchAngle )
-		end
-		
+		-- P Y R
+		self.Owner:ViewPunch(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0))
 	end
+
 end
 
 function SWEP:Think()
 
 	self:BotThink()
-
 
 	if not self.CoolTime then
 		self.CoolTime = 0
@@ -522,6 +532,15 @@ function SWEP:Think()
 		self.ReloadFinish = 0
 	end
 	
+	if not self.NextZoomTime then
+		self.NextZoomTime = 0
+	end
+	
+	if not self.ReloadDelay then
+		self.ReloadDelay = 0
+	end
+	
+	
 	if self.NormalReload == 1 then
 		self.IsReloading = 1
 		if self.ReloadFinish <= CurTime() then
@@ -538,7 +557,7 @@ function SWEP:Think()
 			self:SetClip1(self:Clip1()+1)
 			self:SendWeaponAnim(ACT_VM_RELOAD)
 			if self:Clip1() < self.Primary.ClipSize then
-				self.NextShell = CurTime()+0.25
+				self.NextShell = CurTime()+self.WeaponShellTime
 			else
 				self.ShotgunReload = 0
 				self.IsReloading = 0
@@ -583,7 +602,7 @@ function SWEP:DrawHUD()
 	local x = ScrW() / 2
 	local y = ScrH() / 2
 
-	local length = 10
+	local length = 7
 	local convar = GetConVarNumber("fov_desired")
 	local mistake = 1.25
 
@@ -595,18 +614,6 @@ function SWEP:DrawHUD()
 
 	self.ActualCone = self.Primary.Cone
 
-	if GetConVar("bur_weapon_cone_method"):GetInt() == 1 then
-	
-		if self.Weapon.Type ~= "shotgun" then
-			self.ActualCone = 0.001
-		end
-
-		if self.Weapon.Type == "sniper" then
-			self.ActualCone = 0
-		end
-
-	end
-
 	local add = 2
 
 	if self:GetNWBool("zoomed",false) == true then
@@ -614,8 +621,9 @@ function SWEP:DrawHUD()
 	end
 
 	local heat = self:GetNWInt("weaponheat",0)
-	local extra = (heat*10 + (self.ActualCone*400) + self.Owner:GetVelocity():Length()*0.1)*crouchmul*self.RecoilMul*mistake + add
-
+	--local extra = (heat*10 + self.ActualCone*1000) + self.Owner:GetVelocity():Length()*0.1*crouchmul*mistake + add
+	local extra = (self.ActualCone*1000*crouchmul + ( heat*10 + self.Owner:GetVelocity():Length()*0.1 )) + add
+	
 	if self.EnableCrosshair == true then
 		if self:GetNWBool("zoomed",false) == false then
 			surface.SetDrawColor( 50, 255, 50, 200 )

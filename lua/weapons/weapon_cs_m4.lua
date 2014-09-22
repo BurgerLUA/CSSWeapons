@@ -18,7 +18,7 @@ SWEP.WorldModel			= "models/weapons/w_rif_m4a1.mdl"
 SWEP.Primary.Damage			= 32
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/m4a1/m4a1_unsil-1.wav")
-SWEP.Primary.Cone			= 0.02
+SWEP.Primary.Cone			= 0.01
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 30
 SWEP.Primary.Delay			= 0.1
@@ -28,7 +28,7 @@ SWEP.Primary.Automatic = true
 SWEP.Secondary.Sound			= Sound("weapons/m4a1/m4a1-1.wav")
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 1
+SWEP.RecoilMul	= 0.5
 SWEP.Type = "silenced" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 16
 SWEP.EnableScope = false

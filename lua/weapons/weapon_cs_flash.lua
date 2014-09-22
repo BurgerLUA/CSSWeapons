@@ -42,8 +42,16 @@ function SWEP:PrimaryAttack()
 	timer.Simple(2, function() self:SendWeaponAnim(ACT_VM_DRAW) end)
 end
 
-function SWEP:Think()
+function SWEP:Reload()
 
+end
+
+function SWEP:SecondaryAttack()
+
+end
+
+
+function SWEP:Think()
 end
 
 function SWEP:ThrowFlashGrenade(force)

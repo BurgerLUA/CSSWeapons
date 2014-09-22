@@ -18,7 +18,7 @@ SWEP.WorldModel			= "models/weapons/w_smg_mp5.mdl"
 SWEP.Primary.Damage			= 25
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/mp5navy/mp5-1.wav")
-SWEP.Primary.Cone			= .02
+SWEP.Primary.Cone			= .01
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 30
 SWEP.Primary.Delay			= .1
@@ -26,7 +26,7 @@ SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 1
+SWEP.RecoilMul	= 0.5
 SWEP.Type = "other" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 1
 SWEP.EnableScope = false

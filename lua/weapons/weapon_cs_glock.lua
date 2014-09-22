@@ -18,7 +18,7 @@ SWEP.WorldModel			= "models/weapons/w_pist_glock18.mdl"
 SWEP.Primary.Damage			= 25
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/glock/glock18-1.wav")
-SWEP.Primary.Cone			= 0.01
+SWEP.Primary.Cone			= 0.015
 SWEP.Primary.ClipSize		= 20
 SWEP.Primary.DefaultClip	= 20
 SWEP.Primary.Delay			= 0.01
@@ -26,7 +26,7 @@ SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = false
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 1
+SWEP.RecoilMul	= 0
 SWEP.Type = "selective" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 1
 SWEP.EnableScope = false

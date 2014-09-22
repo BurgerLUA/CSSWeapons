@@ -18,7 +18,7 @@ SWEP.WorldModel			= "models/weapons/w_shot_m3super90.mdl"
 SWEP.Primary.Damage			= 9.5
 SWEP.Primary.NumShots		= 12
 SWEP.Primary.Sound			= Sound("weapons/m3/m3-1.wav")
-SWEP.Primary.Cone			= 0.1
+SWEP.Primary.Cone			= 0.05
 SWEP.Primary.ClipSize		= 8
 SWEP.Primary.DefaultClip	= 8
 SWEP.Primary.Delay			= 1
@@ -26,7 +26,7 @@ SWEP.Primary.Ammo			= "shotgun"
 SWEP.Primary.Automatic = false
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 1
+SWEP.RecoilMul	= 0.5
 SWEP.Type = "shotgun" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 16
 SWEP.EnableScope = false

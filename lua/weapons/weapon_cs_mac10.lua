@@ -21,12 +21,12 @@ SWEP.Primary.Sound			= Sound("weapons/mac10/mac10-1.wav")
 SWEP.Primary.Cone			= 0.03
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 30
-SWEP.Primary.Delay			= 0.09
+SWEP.Primary.Delay			= 0.07
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 1
+SWEP.RecoilMul	= 0.75
 SWEP.Type = "other" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 16
 SWEP.EnableScope = false

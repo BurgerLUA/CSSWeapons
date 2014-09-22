@@ -18,7 +18,7 @@ SWEP.WorldModel			= "models/weapons/w_pist_deagle.mdl"
 SWEP.Primary.Damage			= 52
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/deagle/deagle-1.wav")
-SWEP.Primary.Cone			= 0.01
+SWEP.Primary.Cone			= 0.015
 SWEP.Primary.ClipSize		= 8
 SWEP.Primary.DefaultClip	= 16
 SWEP.Primary.Delay			= 0.3
@@ -26,7 +26,7 @@ SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = false
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 1
+SWEP.RecoilMul	= 0.5
 SWEP.Type = "other" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 16
 SWEP.EnableScope = false

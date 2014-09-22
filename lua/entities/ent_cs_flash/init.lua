@@ -56,20 +56,19 @@ function ENT:Detonate(self,pos)
 	util.Effect( "HelicopterMegaBomb", effectdata )	
 	
 	self:EmitSound("weapons/flashbang/flashbang_explode2.wav",100,100)
-
+	
 	if table.Count(ents.FindInSphere(self:GetPos(),1000)) > 0 then
+	
 		for k,v in pairs(ents.FindInSphere(self:GetPos(),1000)) do
-		
-			local distancecount = 10 - self:GetPos():Distance(v:GetPos())/100
+			if v:GetClass() == "player" then
 			
-			if distancecount < 0 then 
-				v:TakeDamage(distancecount,self.Owner,self)
-			
-				if v:GetClass() == "player" then
+				local distancecount = 10 - self:GetPos():Distance(v:GetPos())/100
+				
+				if distancecount > 0 then 
+					v:TakeDamage(distancecount,self.Owner,self)
+					
 					for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),1000,90)) do
 						if f == self.Entity then
-		
-							--print(distancecount)
 				
 							if distancecount > 1 then
 								v:SetDSP( 37, false )

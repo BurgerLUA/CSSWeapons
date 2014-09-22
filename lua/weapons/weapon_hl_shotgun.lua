@@ -36,6 +36,7 @@ SWEP.EnableCrosshair = true
 function SWEP:PrimaryAttack()
 	
 	self.Primary.NumShots = 6
+	self.Primary.Damage = 12
 	self:Shoot()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)	
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)	
@@ -52,6 +53,8 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:SecondaryAttack()
+
+
 	if self:Clip1() < 2 then
 		self:PrimaryAttack()
 	return end
@@ -59,11 +62,12 @@ function SWEP:SecondaryAttack()
 	self.Primary.NumShots = 12
 	self.Primary.Damage = 10
 	self:Shoot()
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*2.25)	
+	self:TakePrimaryAmmo(1)
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*1.25)	
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay*2.25)	
 	
 	
-	self:TakePrimaryAmmo(1)
+
 	self.Weapon:EmitSound("weapons/shotgun/shotgun_dbl_fire.wav",100,100)
 	timer.Simple(0.3, function() 
 		if not IsValid(self) then return end

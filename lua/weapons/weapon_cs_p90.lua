@@ -18,7 +18,7 @@ SWEP.WorldModel			= "models/weapons/w_smg_p90.mdl"
 SWEP.Primary.Damage			= 25
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/p90/p90-1.wav")
-SWEP.Primary.Cone			= .03
+SWEP.Primary.Cone			= .005
 SWEP.Primary.ClipSize		= 50
 SWEP.Primary.DefaultClip	= 50
 SWEP.Primary.Delay			= .10
@@ -26,7 +26,7 @@ SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 1
+SWEP.RecoilMul	= 0.5
 SWEP.Type = "sniper" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 2
 SWEP.EnableScope = true

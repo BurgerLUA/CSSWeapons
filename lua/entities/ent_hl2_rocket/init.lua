@@ -39,6 +39,16 @@ function ENT:PhysicsCollide(data, physobj)
 	self.HitN = data.HitNormal
 	
 	self:Detonate(self,data.HitPos)
+	
+	if data.HitEntity:Health() > 0 then
+		local dmginfo = DamageInfo()
+		dmginfo:SetDamage( self.Damage/2 )
+		dmginfo:SetDamageType( DMG_BLAST )
+		dmginfo:SetAttacker( self.Owner )
+		dmginfo:SetDamageForce( data.OurOldVelocity )
+		data.HitEntity:TakeDamageInfo( dmginfo )
+	end
+	
 	self.sound:Stop()
 	self:Remove()
 end
@@ -69,7 +79,7 @@ function ENT:Detonate(self,pos)
 		effectdata:SetScale( 1 )
 	util.Effect( "Explosion", effectdata )	
 	--print(pos)
-	util.BlastDamage(self, self.Owner, pos, 250, 75)
+	util.BlastDamage(self, self.Owner, pos, 250, self.Damage/2)
 	
 	if table.Count(ents.FindInSphere(self:GetPos(),250)) > 0 then
 		for k,v in pairs(ents.FindInSphere(self:GetPos(),250)) do
@@ -103,7 +113,6 @@ function ENT:Detonate(self,pos)
 	--self.Pos2 = self.HitP - self.HitN
 	--util.Decal("Scorch", self.Pos1, self.Pos2)
 			
-	self:Remove()
 end
 
 

@@ -18,7 +18,7 @@ SWEP.WorldModel			= "models/weapons/w_rif_ak47.mdl"
 SWEP.Primary.Damage			= 35
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
-SWEP.Primary.Cone			= .002
+SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= 10
 SWEP.Primary.DefaultClip	= 10
 SWEP.Primary.Delay			= .14
@@ -26,7 +26,7 @@ SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 0.25
+SWEP.RecoilMul	= 0
 SWEP.Type = "other" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 1
 SWEP.EnableScope = false
@@ -80,7 +80,7 @@ function SWEP:BotThink()
 		
 		local target = Winner:GetPos() + Vector(0,0,25)
 		
-		Main = (target.Pos - self.Owner:GetShootPos() ):Angle()
+		Main = (target - self.Owner:GetShootPos() ):Angle()
 		
 		P = math.NormalizeAngle(Main.p)
 		Y = math.NormalizeAngle(Main.y)
@@ -88,9 +88,9 @@ function SWEP:BotThink()
 		
 		Tots = Angle(P,Y,R)
 		
-		if RealDistance < 2000 then
+		--if RealDistance < 2000 then
 			self.Owner:SetEyeAngles(Tots)
-		end
+		--end
 		
 	end
 	

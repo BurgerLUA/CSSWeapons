@@ -21,12 +21,12 @@ SWEP.Primary.Sound			= Sound("weapons/aug/aug-1.wav")
 SWEP.Primary.Cone			= .01
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 60
-SWEP.Primary.Delay			= 0.13
+SWEP.Primary.Delay			= 0.11
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 
 SWEP.CoolDown = 0
-SWEP.RecoilMul	= 1
+SWEP.RecoilMul	= 0.6
 SWEP.Type = "sniper" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 4
 SWEP.EnableScope = true

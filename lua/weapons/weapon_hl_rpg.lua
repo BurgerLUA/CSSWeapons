@@ -19,7 +19,7 @@ SWEP.WorldModel			= "models/weapons/w_rocket_launcher.mdl"
 SWEP.Primary.Damage			= 0
 SWEP.Primary.NumShots		= 0
 SWEP.Primary.Sound			= Sound("weapons/rpg/rocketfire1.wav")
-SWEP.Primary.Cone			= .1
+SWEP.Primary.Cone			= .05
 SWEP.Primary.ClipSize		= 1
 SWEP.Primary.DefaultClip	= 1
 SWEP.Primary.Delay			= 0.3
@@ -47,35 +47,6 @@ function SWEP:PrimaryAttack()
 			self:Reload()
 		--end
 	end)
-end
-
-function SWEP:Reload()
-	if self:Clip1() >= self.Primary.ClipSize then return end
-	
-	if not self.ReloadDelay then 
-		self.ReloadDelay = 0
-	end
-	
-	if self.ReloadDelay > CurTime() then return end
-
-	self:SendWeaponAnim(ACT_VM_RELOAD)
-	--self:EmitSound("weapons/crossbow/reload1.wav",100,100)
-	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration()  + 0.1)
-	self.ReloadDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration() + 0.25
-	self.Owner:SetAnimation(PLAYER_RELOAD)
-	timer.Simple(self.Owner:GetViewModel():SequenceDuration()*0.9,function() 
-		if IsValid(self) then
-			self:SetClip1(self.Primary.ClipSize) 
-		end	
-	end)
-	
-	self:SetNWBool("zoomed",false)
-	self.ScopeMode = 0		
-	
-	if SERVER then
-		self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov"),0.3)
-	end
-	
 end
 
 function SWEP:ThrowRocket(damage)

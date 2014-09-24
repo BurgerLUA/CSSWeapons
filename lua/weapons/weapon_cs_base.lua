@@ -356,16 +356,18 @@ function SWEP:Shoot()
 	
 	self:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 
-	if self.ZoomOutAfterShot == true then
+	if SERVER then
+		if self.ZoomOutAfterShot == true then
 	
-		self.NextZoomTime = CurTime() + 1
+			self.NextZoomTime = CurTime() + 1
 		
-		if SERVER then
-			self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov"),0.3)
-		end
+			if SERVER then
+				self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov"),0.3)
+			end
 	
-		self:SetNWBool("zoomed",false)
-		self.ScopeMode = 0
+			self:SetNWBool("zoomed",false)
+			self.ScopeMode = 0
+		end
 	end
 		
 	

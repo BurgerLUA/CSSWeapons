@@ -47,6 +47,7 @@ SWEP.ZoomAmount = 1
 SWEP.EnableScope = true
 SWEP.EnableCrosshair = true
 SWEP.ZoomOutAfterShot = false
+SWEP.ReloadWhileZoomed = false
 
 
 SWEP.CoolDown = 0
@@ -67,14 +68,26 @@ end
 
 function SWEP:ZoomOut(delay)
 	if SERVER then
-		self:SetNWBool("zoomed",true)
+	
+		if delay == nil then
+			delay = 0
+		end
+	
+		self:SetNWBool("zoomed",false)
+		--print(delay)
+		--print(self.Owner:GetNWInt("desiredfov"))
 		self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov"),delay)
 	end
 end
 
 function SWEP:ZoomIn(delay)
 	if SERVER then
-		self:SetNWBool("zoomed",false)
+	
+		if delay == nil then
+			delay = 0
+		end
+	
+		self:SetNWBool("zoomed",true)
 		self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov")/self.ZoomAmount,delay)
 	end
 end
@@ -134,15 +147,14 @@ end
 
 function SWEP:Holster()
 
-	self:ZoomOut()
+	self:ZoomOut(0)
 	self:SendWeaponAnim(ACT_VM_HOLSTER)
 
-	if self.IsReloading == 0 then 
-		return true
-	else
+	if self.IsReloading == 1  then 
 		return false
 	end
 	
+	return true
 	
 end
 
@@ -229,13 +241,15 @@ function SWEP:SecondaryAttack()
 
 		if self.AttachDelay < CurTime() then
 		
-			self.AttachDelay = CurTime() + 3
+
 			
 			if self.IsSilenced == 1 then
 				self:SendWeaponAnim(ACT_VM_DETACH_SILENCER)
 				self.IsSilenced = 0
+				self.AttachDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
 			else
 				self:SendWeaponAnim(ACT_VM_ATTACH_SILENCER)
+				self.AttachDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
 				self.IsSilenced = 1
 			end
 			
@@ -248,6 +262,9 @@ end
 function SWEP:Shoot()
 	if !self:CanPrimaryAttack() then return end
 
+	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	
+	
 	local Damage = self.Primary.Damage
 	local Shots = self.Primary.NumShots
 	local Cone = self.Primary.Cone
@@ -341,7 +358,7 @@ function SWEP:Shoot()
 		
 	end
 
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	
 
 	if self.Weapon.Type == "sniper" and self.EnableCrosshair == false then
 		if self:GetNWBool("zoomed",false) == true then
@@ -419,8 +436,9 @@ function SWEP:Reload()
 		end
 
 	end
-
-	self:ZoomOut()
+	if self.ReloadWhileZoomed == false then
+		self:ZoomOut()
+	end
 	self.IsReloading = 1
 	
 end
@@ -453,6 +471,21 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	if not self.CoolDown then
 		self.CoolDown = 0
 	end
+	
+	self.ViewKick = -(Damage*Shots/20)/2*Recoil*self.RecoilMul
+	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001)
+	
+	if SERVER or game.SinglePlayer() then
+		if self.CoolDown > 0 then
+			bonusmul = math.Rand(-1,1)
+			sideways = 3
+		else
+			bonusmul = 1
+			sideways = 1
+		end
+		self.Owner:ViewPunch(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0))
+	end
+	
 
 	self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01),0,10)
 	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*self.RecoilMul
@@ -462,11 +495,6 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	else
 		self.CrouchMul = 1
 	end
-
-	self.ViewKick = -(Damage*Shots/20)/2*Recoil*self.RecoilMul
-	--self.PunchAngle = Angle(self.ViewKick,self.ViewKick*math.Rand(-1,1)*0.5,0)*math.Rand(-1,1)
-	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001)
-
 
 	local bullet = {}
 	bullet.Num		= Shots
@@ -479,18 +507,6 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	
 	self.Owner:FireBullets(bullet)
 	self:ShootEffects()
-
-	if SERVER or game.SinglePlayer() then
-		if self.Primary.Automatic == true then
-			bonusmul = math.Rand(-1,1)
-			sideways = 3
-		else
-			bonusmul = 1
-			sideways = 1
-		end
-		-- P Y R
-		self.Owner:ViewPunch(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0))
-	end
 
 end
 

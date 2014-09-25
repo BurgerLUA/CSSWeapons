@@ -17,7 +17,11 @@ if CLIENT then
 	SWEP.BobScale = 2
 end
 
-
+if SERVER then
+	SWEP.Weight				= 0
+	SWEP.AutoSwitchTo		= false
+	SWEP.AutoSwitchFrom		= false
+end
 
 SWEP.Author					= "Burger"
 SWEP.Contact				= ""
@@ -37,14 +41,17 @@ SWEP.Primary.Delay			= .14
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = true
 
-SWEP.CoolDown = 0
 SWEP.RecoilMul	= 1
 SWEP.Type = "other" -- shotgun, sniper, selective, other, silenced
 SWEP.ZoomAmount = 1
 SWEP.EnableScope = true
 SWEP.EnableCrosshair = true
-
 SWEP.ZoomOutAfterShot = false
+
+
+SWEP.CoolDown = 0
+
+
 
 --Code from Kogitsune
 local BURST, AUTO = 0, 1
@@ -58,20 +65,24 @@ function SWEP:SetupDataTables( )
 
 end
 
-if SERVER then
-
-	SWEP.Weight				= SWEP.Primary.Damage * SWEP.Primary.NumShots
-	SWEP.AutoSwitchTo		= false
-	SWEP.AutoSwitchFrom		= false
-
+function SWEP:ZoomOut(delay)
+	if SERVER then
+		self:SetNWBool("zoomed",true)
+		self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov"),delay)
+	end
 end
 
+function SWEP:ZoomIn(delay)
+	if SERVER then
+		self:SetNWBool("zoomed",false)
+		self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov")/self.ZoomAmount,delay)
+	end
+end
 
 function SWEP:Initialize()
 	self:RegisterCommands()
 	self:SetWeaponHoldType(self.HoldType)
 	util.PrecacheSound(self.Primary.Sound)
-
 end
 
 function SWEP:Deploy()
@@ -123,15 +134,21 @@ end
 
 function SWEP:Holster()
 
-	self:SetNWBool("zoomed",false)
+	self:ZoomOut()
 	self:SendWeaponAnim(ACT_VM_HOLSTER)
 
-	if self.IsReloading == 1 then return false end
+	if self.IsReloading == 0 then 
+		return true
+	else
+		return false
+	end
 	
-	return true
+	
 end
 
 function SWEP:PrimaryAttack()
+
+	if not IsFirstTimePredicted( ) then return end
 
 	if self.IsReloading == 1 then return end
 
@@ -193,21 +210,11 @@ function SWEP:SecondaryAttack()
 
 			self.ScopeDelay = delay + CurTime()
 
-			if not self.ScopeMode then
-				self.ScopeMode = 0
+			if self:GetNWBool("zoomed",false) == true then
+				self:ZoomOut(delay)
+			else
+				self:ZoomIn(delay)
 			end
-
-			if self.ScopeMode == 1 then
-				self.ScopeMode = 0
-				self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov"),delay)
-				self:SetNWBool("zoomed",false)
-			elseif self.ScopeMode == 0 then
-				self.ScopeMode = 1
-				--print(self.Owner:GetNWInt("desiredfov"))
-				self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov")/self.ZoomAmount,delay)
-				self:SetNWBool("zoomed",true)
-			end
-			
 		end
 
 	elseif self.Type == "silenced" then
@@ -247,10 +254,6 @@ function SWEP:Shoot()
 	local Recoil = self.RecoilMul
 	
 	if self.Type == "selective" then
-
-		if not self.FakeDelay then
-			self.FakeDelay = 0
-		end
 
 		if self.FakeDelay <= CurTime() then 
 		
@@ -361,12 +364,8 @@ function SWEP:Shoot()
 	
 			self.NextZoomTime = CurTime() + 1
 		
-			if SERVER then
-				self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov"),0.3)
-			end
-	
-			self:SetNWBool("zoomed",false)
-			self.ScopeMode = 0
+			self:ZoomOut(0.3)
+
 		end
 	end
 		
@@ -421,14 +420,7 @@ function SWEP:Reload()
 
 	end
 
-
-
-	if SERVER then
-		self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov"),0.3)
-	end
-	
-	self:SetNWBool("zoomed",false)
-	self.ScopeMode = 0
+	self:ZoomOut()
 	self.IsReloading = 1
 	
 end
@@ -540,6 +532,10 @@ function SWEP:Think()
 	
 	if not self.ReloadDelay then
 		self.ReloadDelay = 0
+	end
+	
+	if not self.FakeDelay then
+		self.FakeDelay = 0
 	end
 	
 	

@@ -27,7 +27,7 @@ SWEP.Primary.Automatic = false
 
 SWEP.Secondary.Sound 		= Sound("weapons/usp/usp1.wav")
 
-SWEP.CoolDown = 0
+
 SWEP.RecoilMul	= 0.5
 SWEP.Type = "silenced" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 1

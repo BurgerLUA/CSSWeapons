@@ -26,7 +26,7 @@ SWEP.Primary.Ammo			= "none"
 SWEP.Primary.Automatic = true
 SWEP.Secondary.Automatic = true
 
-SWEP.CoolDown = 0
+
 SWEP.RecoilMul	= 0
 SWEP.Type = "knife" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 1

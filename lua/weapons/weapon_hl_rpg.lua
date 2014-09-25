@@ -26,7 +26,7 @@ SWEP.Primary.Delay			= 0.3
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic = false
 
-SWEP.CoolDown = 0
+
 SWEP.RecoilMul	= 1
 SWEP.Type = "sniper" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 4

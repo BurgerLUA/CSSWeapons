@@ -14,7 +14,7 @@ SWEP.Spawnable			= true
 SWEP.Category			= "HL2"
 
 SWEP.ViewModel			= "models/weapons/c_crossbow.mdl"
-SWEP.WorldModel			= "models/weapons/v_crossbow.mdl"
+SWEP.WorldModel			= "models/weapons/w_crossbow.mdl"
 
 SWEP.Primary.Damage			= 1
 SWEP.Primary.NumShots		= 1

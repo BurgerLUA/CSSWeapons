@@ -317,7 +317,7 @@ function SWEP:Shoot()
 		
 		end
 
-	elseif self.Type == "sniper"
+	elseif self.Type == "sniper" then
 	
 		if self.EnableCrosshair == false then
 			if self:GetNWBool("zoomed",false) == true then

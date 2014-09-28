@@ -12,7 +12,7 @@ SWEP.Base				= "weapon_cs_base"
 SWEP.Spawnable			= true
 SWEP.Category			= "EXPERIMENTAL"
 
-SWEP.ViewModel			= "models/weapons/v_rif_ak47.mdl"
+SWEP.ViewModel			= "models/weapons/cstrike/c_rif_ak47.mdl"
 SWEP.WorldModel			= "models/weapons/w_rif_ak47.mdl"
 
 SWEP.Primary.Damage			= 35

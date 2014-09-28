@@ -12,7 +12,7 @@ SWEP.Base				= "weapon_cs_base"
 SWEP.Category			= "Counter-Strike"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/weapons/v_pist_glock18.mdl"
+SWEP.ViewModel			= "models/weapons/cstrike/c_pist_glock18.mdl"
 SWEP.WorldModel			= "models/weapons/w_pist_glock18.mdl"
 
 SWEP.Primary.Damage			= 25

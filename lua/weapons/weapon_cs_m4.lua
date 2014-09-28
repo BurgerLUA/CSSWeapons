@@ -12,7 +12,7 @@ SWEP.Base				= "weapon_cs_base"
 SWEP.Category			= "Counter-Strike"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/weapons/v_rif_m4a1.mdl"
+SWEP.ViewModel			= "models/weapons/cstrike/c_rif_m4a1.mdl"
 SWEP.WorldModel			= "models/weapons/w_rif_m4a1.mdl"
 
 SWEP.Primary.Damage			= 32

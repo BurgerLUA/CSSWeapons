@@ -12,7 +12,7 @@ SWEP.Base				= "weapon_cs_base"
 SWEP.Spawnable			= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel			= "models/weapons/v_smg_ump45.mdl"
+SWEP.ViewModel			= "models/weapons/cstrike/c_smg_ump45.mdl"
 SWEP.WorldModel			= "models/weapons/w_smg_ump45.mdl"
 
 SWEP.Primary.Damage			= 29

@@ -13,7 +13,7 @@ SWEP.Base				= "weapon_cs_base"
 SWEP.Spawnable			= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel			= "models/weapons/v_eq_flashbang.mdl"
+SWEP.ViewModel			= "models/weapons/cstrike/c_eq_flashbang.mdl"
 SWEP.WorldModel			= "models/weapons/w_eq_flashbang.mdl"
 
 SWEP.Primary.Damage			= 0

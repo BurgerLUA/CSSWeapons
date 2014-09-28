@@ -15,7 +15,7 @@ if CLIENT then
 	SWEP.ViewModelFOV		= 60
 	SWEP.SwayScale = 3
 	SWEP.BobScale = 2
-	--SWEP.CSMuzzleFlashes = true
+	SWEP.CSMuzzleFlashes = true
 end
 
 if SERVER then
@@ -268,6 +268,7 @@ end
 
 function SWEP:Shoot()
 	if !self:CanPrimaryAttack() then return end
+	if not IsFirstTimePredicted( ) then return end
 
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:TakePrimaryAmmo(1)
@@ -445,7 +446,7 @@ function SWEP:Reload()
 end
 
 function SWEP:CanPrimaryAttack()
-
+	if not IsFirstTimePredicted( ) then return end
 	if self:GetNextPrimaryFire() > CurTime() then return false end
 
 	if not self.ClickSoundDelay then
@@ -467,7 +468,7 @@ function SWEP:CanPrimaryAttack()
 end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
-
+	if not IsFirstTimePredicted( ) then return end
 	self.Weapon:EmitSound(GunSound,100,100)
 
 	if not self.CoolDown then

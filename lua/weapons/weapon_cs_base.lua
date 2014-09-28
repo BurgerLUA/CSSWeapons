@@ -15,6 +15,7 @@ if CLIENT then
 	SWEP.ViewModelFOV		= 60
 	SWEP.SwayScale = 3
 	SWEP.BobScale = 2
+	SWEP.CSMuzzleFlashes = true
 end
 
 if SERVER then

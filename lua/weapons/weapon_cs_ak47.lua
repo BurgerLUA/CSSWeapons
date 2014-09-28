@@ -1,10 +1,11 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS AK47"
+	SWEP.PrintName			= "CSS AKDUDE47"
 	SWEP.Slot				= 3
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_ak47", "csd", "b", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = true
+	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/ak47")
 end
 
 SWEP.HoldType			= "ar2"

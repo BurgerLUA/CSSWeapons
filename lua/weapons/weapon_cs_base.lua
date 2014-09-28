@@ -15,7 +15,7 @@ if CLIENT then
 	SWEP.ViewModelFOV		= 60
 	SWEP.SwayScale = 3
 	SWEP.BobScale = 2
-	SWEP.CSMuzzleFlashes = true
+	--SWEP.CSMuzzleFlashes = true
 end
 
 if SERVER then
@@ -508,7 +508,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	bullet.Damage	= Damage*math.Rand(0.99,1.01)
 	
 	self.Owner:FireBullets(bullet)
-	self:ShootEffects()
+	--self:ShootEffects()
 
 end
 

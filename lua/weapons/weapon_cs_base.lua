@@ -320,14 +320,6 @@ function SWEP:Shoot()
 
 	elseif self.Type == "sniper" then
 	
-		if self.EnableCrosshair == false then
-			if self:GetNWBool("zoomed",false) == true then
-				Cone = self.Primary.Cone
-			else
-				Cone = 0.1
-			end
-		end
-	
 		if SERVER then
 			if self.ZoomOutAfterShot == true then
 	
@@ -336,28 +328,6 @@ function SWEP:Shoot()
 				self:ZoomOut(0.3)
 
 			end
-		end
-	
-		if self:GetNWBool("zoomed",false) == true then -- If you're zoomed
-	
-			if self.EnableCrosshair == true then --And you can hip fire
-				Cone = self.Primary.Cone * 0.5
-				Recoil = self.RecoilMul*0.75
-			else -- And you can't hip fire
-				Cone = self.Primary.Cone
-				Recoil = self.RecoilMul*0.25
-			end
-		
-		else --If you're not zoomed
-	
-			if self.EnableCrosshair == true then --And you can hip fire
-				Cone = self.Primary.Cone
-				Recoil = self.RecoilMul
-			else -- And you can't hip fire
-				Cone = 0.1
-				Recoil = self.RecoilMul
-			end
-		
 		end
 		
 	end
@@ -384,6 +354,16 @@ function SWEP:Shoot()
 		GunSound = self.Primary.Sound
 		
 	end
+	
+	if self.EnableCrosshair == false then
+		if self:GetNWBool("zoomed",false) == true then
+			Cone = self.Primary.Cone
+		else
+			Cone = 0.1
+		end
+	end
+	
+	
 	
 	
 	self.ReloadDelay = CurTime() + 1

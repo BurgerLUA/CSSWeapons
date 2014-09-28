@@ -4,7 +4,7 @@ if CLIENT then
 	SWEP.Slot				= 3
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_ak47", "csd", "b", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip = true
+	SWEP.ViewModelFlip = false
 	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/ak47")
 end
 

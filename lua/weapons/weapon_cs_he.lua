@@ -5,7 +5,7 @@ if CLIENT then
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_he", "csd", "O", Color( 255, 80, 0, 255 ) )
 	killicon.AddFont( "ent_cs_he", "csd", "O", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip = true
+	SWEP.ViewModelFlip = false
 end
 
 SWEP.HoldType			= "melee"

@@ -59,7 +59,11 @@ SWEP.CoolDown = 0
 local BURST, AUTO = 0, 1
 function SWEP:SetupDataTables( )
 
-  self:NetworkVar( "Int", 0, "FireMode" )
+	if self.Type ~= "selective" then
+		--self:SetFireMode(AUTO)
+	return end
+
+	self:NetworkVar( "Int", 0, "FireMode" )
 
   if SERVER then
 	self:SetFireMode( AUTO ) --default to auto

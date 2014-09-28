@@ -57,8 +57,6 @@ SWEP.CoolDown = 0
 
 --Code from Kogitsune
 local BURST, AUTO = 0, 1
-
---[[
 function SWEP:SetupDataTables( )
 
 	if self.Type ~= "selective" then
@@ -72,7 +70,7 @@ function SWEP:SetupDataTables( )
   end
 
 end
---]]
+
 
 function SWEP:ZoomOut(delay)
 	if SERVER then
@@ -195,7 +193,7 @@ end
 function SWEP:SecondaryAttack()
 
 	if not IsFirstTimePredicted( ) then return end
-	--[[
+
 	if self.Type == "selective" then
 
 		if self.Primary.Automatic == true then
@@ -213,9 +211,9 @@ function SWEP:SecondaryAttack()
 			self.Weapon:EmitSound("weapons/smg1/switch_single.wav")
 			self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to "..message )
 		end
-	]]-- else
 
-	if self.Type == "sniper" then
+
+	elseif self.Type == "sniper" then
 		if self.NextZoomTime >= CurTime() then return end
 		self.NextZoomTime = CurTime() + 0.3
 		self:EmitSound("weapons/zoom.wav",100,100)

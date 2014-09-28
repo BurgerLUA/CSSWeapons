@@ -7,7 +7,7 @@ if CLIENT then
 	SWEP.ViewModelFlip = false
 end
 
-SWEP.HoldType			= "pistol"
+SWEP.HoldType			= "duel"
 SWEP.Base				= "weapon_cs_base"
 SWEP.Category			= "Counter-Strike"
 SWEP.Spawnable			= true

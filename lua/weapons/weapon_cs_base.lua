@@ -270,6 +270,7 @@ function SWEP:Shoot()
 	if !self:CanPrimaryAttack() then return end
 
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:TakePrimaryAmmo(1)
 	
 	
 	local Damage = self.Primary.Damage
@@ -316,28 +317,46 @@ function SWEP:Shoot()
 		
 		end
 
-	end
+	elseif self.Type == "sniper"
 	
-	self:TakePrimaryAmmo(1)
-
-	if self:GetNWBool("zoomed",false) == true then -- If you're zoomed
-	
-		if self.EnableCrosshair == true then --And you can hip fire
-			Cone = self.Primary.Cone * 0.5
-			Recoil = self.RecoilMul*0.75
-		else -- And you can't hip fire
-			Cone = self.Primary.Cone
-			Recoil = self.RecoilMul*0.25
+		if self.EnableCrosshair == false then
+			if self:GetNWBool("zoomed",false) == true then
+				Cone = self.Primary.Cone
+			else
+				Cone = 0.1
+			end
 		end
-		
-	else --If you're not zoomed
 	
-		if self.EnableCrosshair == true then --And you can hip fire
-			Cone = self.Primary.Cone
-			Recoil = self.RecoilMul
-		else -- And you can't hip fire
-			Cone = 0.1
-			Recoil = self.RecoilMul
+		if SERVER then
+			if self.ZoomOutAfterShot == true then
+	
+				self.NextZoomTime = CurTime() + 1
+		
+				self:ZoomOut(0.3)
+
+			end
+		end
+	
+		if self:GetNWBool("zoomed",false) == true then -- If you're zoomed
+	
+			if self.EnableCrosshair == true then --And you can hip fire
+				Cone = self.Primary.Cone * 0.5
+				Recoil = self.RecoilMul*0.75
+			else -- And you can't hip fire
+				Cone = self.Primary.Cone
+				Recoil = self.RecoilMul*0.25
+			end
+		
+		else --If you're not zoomed
+	
+			if self.EnableCrosshair == true then --And you can hip fire
+				Cone = self.Primary.Cone
+				Recoil = self.RecoilMul
+			else -- And you can't hip fire
+				Cone = 0.1
+				Recoil = self.RecoilMul
+			end
+		
 		end
 		
 	end
@@ -364,38 +383,11 @@ function SWEP:Shoot()
 		GunSound = self.Primary.Sound
 		
 	end
-
-	
-
-	if self.Weapon.Type == "sniper" and self.EnableCrosshair == false then
-		if self:GetNWBool("zoomed",false) == true then
-			Cone = self.Primary.Cone
-		else
-			Cone = 0.1
-		end
-	end
-
-	if self.Type == "shotgun" then
-		self.ReloadDelay = CurTime() + 1
-	end
 	
 	
-	
+	self.ReloadDelay = CurTime() + 1
 	self:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 
-	if SERVER then
-		if self.ZoomOutAfterShot == true then
-	
-			self.NextZoomTime = CurTime() + 1
-		
-			self:ZoomOut(0.3)
-
-		end
-	end
-		
-	
-	
-	
 end
 
 function SWEP:Reload()
@@ -443,9 +435,11 @@ function SWEP:Reload()
 		end
 
 	end
+	
 	if self.ReloadWhileZoomed == false then
 		self:ZoomOut()
 	end
+	
 	self.IsReloading = 1
 	
 end
@@ -469,6 +463,7 @@ function SWEP:CanPrimaryAttack()
 	end
 
 	return true
+	
 end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
@@ -561,7 +556,6 @@ function SWEP:Think()
 		self.FakeDelay = 0
 	end
 	
-	
 	if self.NormalReload == 1 then
 		self.IsReloading = 1
 		if self.ReloadFinish <= CurTime() then
@@ -570,9 +564,7 @@ function SWEP:Think()
 			self.NormalReload = 0
 			self.IsReloading = 0
 		end
-	end
-		
-	if self.ShotgunReload == 1 then
+	elseif self.ShotgunReload == 1 then
 		self.IsReloading = 1
 		if self.NextShell <= CurTime() then
 			self:SetClip1(self:Clip1()+1)

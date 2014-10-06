@@ -12,7 +12,7 @@ if CLIENT then
 	SWEP.DrawAmmo			= true
 	SWEP.DrawCrosshair		= false
 	SWEP.ViewModelFlip		= false
-	SWEP.ViewModelFOV		= 60
+	SWEP.ViewModelFOV		= 45
 	SWEP.SwayScale = 3
 	SWEP.BobScale = 2
 	SWEP.CSMuzzleFlashes = true
@@ -271,8 +271,6 @@ function SWEP:Shoot()
 	if not IsFirstTimePredicted( ) then return end
 
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
-	self:TakePrimaryAmmo(1)
-	
 	
 	local Damage = self.Primary.Damage
 	local Shots = self.Primary.NumShots
@@ -282,7 +280,7 @@ function SWEP:Shoot()
 	if self.Type == "selective" then
 
 		if self.FakeDelay <= CurTime() then 
-		
+
 			if self:GetFireMode( ) == BURST then
 
 				Recoil = Recoil * 0.75
@@ -296,18 +294,17 @@ function SWEP:Shoot()
 				if self.Weapon:Clip1() >= 3 then
 					self:TakePrimaryAmmo(2)
 					Shots = 3
-				elseif self.Weapon:Clip1() == 2 then
-					self:TakePrimaryAmmo(1)
-					self:TakePrimaryAmmo(self.Weapon:Clip1()-1)
-					Shots = self.Weapon:Clip1()
 				else
-					return
+					self:TakePrimaryAmmo(self.Weapon:Clip1())
+					Shots = self.Weapon:Clip1()
 				end
 
-			else
-			
-				self.FakeDelay = CurTime() + self.Primary.Delay
+				self.FakeDelay = CurTime() + self.Primary.Delay*4
 				
+			else
+				self:TakePrimaryAmmo(1)
+				self.FakeDelay = CurTime() + self.Primary.Delay
+
 			end
 			
 		else return end
@@ -317,8 +314,12 @@ function SWEP:Shoot()
 			timer.Simple(self.Primary.Delay*0.50*i, function() self.Weapon:EmitSound(self.Primary.Sound) end )
 		
 		end
+	else
+		self:TakePrimaryAmmo(1)
+	end
+		
 
-	elseif self.Type == "sniper" then
+	if self.Type == "sniper" then
 	
 		if SERVER then
 			if self.ZoomOutAfterShot == true then
@@ -366,7 +367,7 @@ function SWEP:Shoot()
 	
 	
 	
-	self.ReloadDelay = CurTime() + 1
+	self.ReloadDelay = CurTime() + 0.25
 	self:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 
 end
@@ -459,7 +460,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001)
 	
 	if SERVER or game.SinglePlayer() then
-		if self.CoolDown > 0 then
+		if self.CoolDown > 0.25 and self.Primary.Automatic == true then
 			bonusmul = math.Rand(-1,1)
 			sideways = 3
 		else

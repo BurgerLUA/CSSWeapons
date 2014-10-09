@@ -61,7 +61,7 @@ SWEP.Primary.DefaultClip	= 0
 SWEP.Primary.Delay			= .14
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic 		= true
-SWEP.Primary.SpareClip		= 90 -- custom ammo shit
+SWEP.Primary.DefaultClip		= 90 -- custom ammo shit
 
 
 SWEP.RecoilMul				= 1

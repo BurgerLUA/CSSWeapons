@@ -8,30 +8,33 @@ if CLIENT then
 	SWEP.ViewModelFlip = false
 end
 
-SWEP.HoldType			= "melee"
-SWEP.Base				= "weapon_cs_base"
-SWEP.Spawnable			= true
+SWEP.HoldType				= "melee"
+SWEP.Base					= "weapon_cs_base"
+SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel			= "models/weapons/cstrike/c_eq_fraggrenade.mdl"
-SWEP.WorldModel			= "models/weapons/w_eq_fraggrenade.mdl"
+SWEP.ViewModel				= "models/weapons/cstrike/c_eq_fraggrenade.mdl"
+SWEP.WorldModel				= "models/weapons/w_eq_fraggrenade.mdl"
 
 SWEP.Primary.Damage			= 0
 SWEP.Primary.NumShots		= 0
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
 SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= -1
-SWEP.Primary.DefaultClip	= -1
+SWEP.Primary.SpareClip	= -1
 SWEP.Primary.Delay			= 1
 SWEP.Primary.Ammo			= "ar2"
-SWEP.Primary.Automatic = false
+SWEP.Primary.Automatic 		= false
 
+SWEP.RecoilMul				= 1
+SWEP.EnableScope 			= false
+SWEP.ZoomAmount 			= 0
+SWEP.EnableCrosshair 		= true
 
-SWEP.RecoilMul	= 0
-SWEP.Type = "throwable" -- shotgun, sniper, selective, other
-SWEP.ZoomAmount = 1
-SWEP.EnableScope = false
-SWEP.EnableCrosshair = false
+SWEP.HasPumpAction 			= false
+SWEP.HasBoltAction 			= false
+SWEP.HasBurstFire 			= false
+SWEP.HasSilencer 			= false
 
 function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + 2)

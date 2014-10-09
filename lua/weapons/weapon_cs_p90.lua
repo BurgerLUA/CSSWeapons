@@ -20,14 +20,18 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/p90/p90-1.wav")
 SWEP.Primary.Cone			= .005
 SWEP.Primary.ClipSize		= 50
-SWEP.Primary.DefaultClip	= 50
+SWEP.Primary.SpareClip	= 100
 SWEP.Primary.Delay			= .10
-SWEP.Primary.Ammo			= "ar2"
+SWEP.Primary.Ammo			= "AlyxGun"
 SWEP.Primary.Automatic = true
 
 
-SWEP.RecoilMul	= 0.5
-SWEP.Type = "sniper" -- shotgun, sniper, selective, other
-SWEP.ZoomAmount = 2
-SWEP.EnableScope = true
-SWEP.EnableCrosshair = true
+SWEP.RecoilMul				= 0.5
+SWEP.EnableScope 			= false
+SWEP.ZoomAmount 			= 0
+SWEP.EnableCrosshair 		= true
+
+SWEP.HasPumpAction 			= false
+SWEP.HasBoltAction 			= false
+SWEP.HasBurstFire 			= false
+SWEP.HasSilencer 			= false

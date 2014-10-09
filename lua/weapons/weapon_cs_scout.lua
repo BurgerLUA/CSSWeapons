@@ -10,7 +10,7 @@ end
 SWEP.HoldType			= "ar2"
 SWEP.Base				= "weapon_cs_base"
 SWEP.Spawnable			= true
-SWEP.Category				= "Counter-Strike"
+SWEP.Category			= "Counter-Strike"
 
 SWEP.ViewModel			= "models/weapons/cstrike/c_snip_scout.mdl"
 SWEP.WorldModel			= "models/weapons/w_snip_scout.mdl"
@@ -20,16 +20,18 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/scout/scout_fire-1.wav")
 SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= 10
-SWEP.Primary.DefaultClip	= 10
+SWEP.Primary.SpareClip	= 90
 SWEP.Primary.Delay			= 1.2
-SWEP.Primary.Ammo			= "ar2"
+SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic = false
 
+SWEP.RecoilMul				= 1
+SWEP.EnableScope 			= true
+SWEP.ZoomAmount 			= 12
+SWEP.EnableCrosshair 		= false
 
-SWEP.RecoilMul	= 1
-SWEP.Type = "sniper" -- shotgun, sniper, selective, other
-SWEP.ZoomAmount = 8
-SWEP.EnableScope = true
-SWEP.EnableCrosshair = false
+SWEP.HasPumpAction 			= false
+SWEP.HasBoltAction 			= true
+SWEP.HasBurstFire 			= false
+SWEP.HasSilencer 			= false
 
-SWEP.ZoomOutAfterShot = true

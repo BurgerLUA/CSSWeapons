@@ -20,14 +20,18 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/mp5navy/mp5-1.wav")
 SWEP.Primary.Cone			= .01
 SWEP.Primary.ClipSize		= 30
-SWEP.Primary.DefaultClip	= 30
+SWEP.Primary.SpareClip	= 120
 SWEP.Primary.Delay			= .1
-SWEP.Primary.Ammo			= "ar2"
+SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic = true
 
 
-SWEP.RecoilMul	= 0.5
-SWEP.Type = "other" -- shotgun, sniper, selective, other
-SWEP.ZoomAmount = 1
-SWEP.EnableScope = false
-SWEP.EnableCrosshair = true
+SWEP.RecoilMul				= 0.5
+SWEP.EnableScope 			= false
+SWEP.ZoomAmount 			= 0
+SWEP.EnableCrosshair 		= true
+
+SWEP.HasPumpAction 			= false
+SWEP.HasBoltAction 			= false
+SWEP.HasBurstFire 			= false
+SWEP.HasSilencer 			= false

@@ -20,14 +20,17 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/m249/m249-1.wav")
 SWEP.Primary.Cone			= .015
 SWEP.Primary.ClipSize		= 100
-SWEP.Primary.DefaultClip	= 100
+SWEP.Primary.SpareClip	= 200
 SWEP.Primary.Delay			= .09
-SWEP.Primary.Ammo			= "ar2"
+SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic = true
 
+SWEP.RecoilMul				= 0.6
+SWEP.EnableScope 			= false
+SWEP.ZoomAmount 			= 0
+SWEP.EnableCrosshair 		= true
 
-SWEP.RecoilMul	= 0.6
-SWEP.Type = "other" -- shotgun, sniper, selective, other
-SWEP.ZoomAmount = 1
-SWEP.EnableScope = false
-SWEP.EnableCrosshair = true
+SWEP.HasPumpAction 			= false
+SWEP.HasBoltAction 			= false
+SWEP.HasBurstFire 			= false
+SWEP.HasSilencer 			= false

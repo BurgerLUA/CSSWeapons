@@ -15,24 +15,24 @@ SWEP.Category			= "Counter-Strike"
 SWEP.ViewModel			= "models/weapons/cstrike/c_pist_p228.mdl"
 SWEP.WorldModel			= "models/weapons/w_pist_p228.mdl"
 
--- 
-
-
 SWEP.Primary.Damage			= 39
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/p228/p228-1.wav")
 SWEP.Primary.Cone			= .01
 SWEP.Primary.ClipSize		= 13
-SWEP.Primary.DefaultClip	= 13
+SWEP.Primary.SpareClip	= 52
 SWEP.Primary.Delay			= 0.01
-SWEP.Primary.Ammo			= "ar2"
+SWEP.Primary.Ammo			= "GaussEnergy"
 SWEP.Primary.Automatic = false
 
+SWEP.RecoilMul				= 0.5
+SWEP.EnableScope 			= false
+SWEP.ZoomAmount 			= 0
+SWEP.EnableCrosshair 		= true
 
-SWEP.RecoilMul	= 0.5
-SWEP.Type = "other" -- shotgun, sniper, selective, other
-SWEP.ZoomAmount = 1
-SWEP.EnableScope = false
-SWEP.EnableCrosshair = true
+SWEP.HasPumpAction 			= false
+SWEP.HasBoltAction 			= false
+SWEP.HasBurstFire 			= false
+SWEP.HasSilencer 			= false
 
 

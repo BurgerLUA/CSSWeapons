@@ -7,27 +7,31 @@ if CLIENT then
 	SWEP.ViewModelFlip = false
 end
 
-SWEP.HoldType			= "smg"
-SWEP.Base				= "weapon_cs_base"
-SWEP.Category			= "Counter-Strike"
-SWEP.Spawnable			= true
+SWEP.HoldType				= "smg"
+SWEP.Base					= "weapon_cs_base"
+SWEP.Category				= "Counter-Strike"
+SWEP.Spawnable				= true
 
-SWEP.ViewModel			= "models/weapons/cstrike/c_smg_mac10.mdl"
-SWEP.WorldModel			= "models/weapons/w_smg_mac10.mdl"
+SWEP.ViewModel				= "models/weapons/cstrike/c_smg_mac10.mdl"
+SWEP.WorldModel				= "models/weapons/w_smg_mac10.mdl"
 
 SWEP.Primary.Damage			= 28
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/mac10/mac10-1.wav")
 SWEP.Primary.Cone			= 0.03
 SWEP.Primary.ClipSize		= 30
-SWEP.Primary.DefaultClip	= 30
+SWEP.Primary.SpareClip	= 100
 SWEP.Primary.Delay			= 0.07
-SWEP.Primary.Ammo			= "ar2"
-SWEP.Primary.Automatic = true
+SWEP.Primary.Ammo			= "SniperPenetratedRound"
+SWEP.Primary.Automatic 		= true
 
 
-SWEP.RecoilMul	= 0.75
-SWEP.Type = "other" -- shotgun, sniper, selective, other
-SWEP.ZoomAmount = 16
-SWEP.EnableScope = false
-SWEP.EnableCrosshair = true
+SWEP.RecoilMul				= 0.75
+SWEP.EnableScope 			= false
+SWEP.ZoomAmount 			= 0
+SWEP.EnableCrosshair 		= true
+
+SWEP.HasPumpAction 			= false
+SWEP.HasBoltAction 			= false
+SWEP.HasBurstFire 			= false
+SWEP.HasSilencer 			= false

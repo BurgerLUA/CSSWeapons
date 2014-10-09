@@ -20,14 +20,17 @@ SWEP.Primary.NumShots 		= 1
 SWEP.Primary.Sound			= Sound("weapons/tmp/tmp-1.wav")
 SWEP.Primary.Cone			= .03
 SWEP.Primary.ClipSize		= 30
-SWEP.Primary.DefaultClip	= 60
+SWEP.Primary.SpareClip	= 120
 SWEP.Primary.Delay			= 0.1
-SWEP.Primary.Ammo			= "ar2"
+SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic = true
 
+SWEP.RecoilMul				= 0.5
+SWEP.EnableScope 			= false
+SWEP.ZoomAmount 			= 0
+SWEP.EnableCrosshair 		= true
 
-SWEP.RecoilMul	= 0.5
-SWEP.Type = "other" -- shotgun, sniper, selective, other
-SWEP.ZoomAmount = 6
-SWEP.EnableScope = false
-SWEP.EnableCrosshair = true
+SWEP.HasPumpAction 			= false
+SWEP.HasBoltAction 			= false
+SWEP.HasBurstFire 			= false
+SWEP.HasSilencer 			= false

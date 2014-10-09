@@ -7,27 +7,30 @@ if CLIENT then
 	SWEP.ViewModelFlip = false
 end
 
-SWEP.HoldType			= "pistol"
-SWEP.Base				= "weapon_cs_base"
-SWEP.Category			= "Counter-Strike"
-SWEP.Spawnable			= true
+SWEP.HoldType				= "pistol"
+SWEP.Base					= "weapon_cs_base"
+SWEP.Category				= "Counter-Strike"
+SWEP.Spawnable				= true
 
-SWEP.ViewModel			= "models/weapons/cstrike/c_pist_fiveseven.mdl"
-SWEP.WorldModel			= "models/weapons/w_pist_fiveseven.mdl"
+SWEP.ViewModel				= "models/weapons/cstrike/c_pist_fiveseven.mdl"
+SWEP.WorldModel				= "models/weapons/w_pist_fiveseven.mdl"
 
 SWEP.Primary.Damage			= 24
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/fiveseven/fiveseven-1.wav")
 SWEP.Primary.Cone			= 0.01
-SWEP.Primary.ClipSize		= 21
-SWEP.Primary.DefaultClip	= 21
+SWEP.Primary.ClipSize		= 20
+SWEP.Primary.SpareClip	= 100
 SWEP.Primary.Delay			= 0.01
-SWEP.Primary.Ammo			= "ar2"
-SWEP.Primary.Automatic = false
+SWEP.Primary.Ammo			= "AlyxGun"
+SWEP.Primary.Automatic 		= false
 
+SWEP.RecoilMul 				= 0.5
+SWEP.EnableScope 			= false
+SWEP.ZoomAmount 			= 0
+SWEP.EnableCrosshair 		= true
 
-SWEP.RecoilMul	= 0.5
-SWEP.Type = "other" -- shotgun, sniper, selective, other
-SWEP.ZoomAmount = 16
-SWEP.EnableScope = false
-SWEP.EnableCrosshair = true
+SWEP.HasPumpAction 			= false
+SWEP.HasBoltAction 			= false
+SWEP.HasBurstFire 			= false
+SWEP.HasSilencer 			= false

@@ -7,27 +7,30 @@ if CLIENT then
 	SWEP.ViewModelFlip = false
 end
 
-SWEP.HoldType			= "duel"
-SWEP.Base				= "weapon_cs_base"
-SWEP.Category			= "Counter-Strike"
-SWEP.Spawnable			= true
+SWEP.HoldType				= "duel"
+SWEP.Base					= "weapon_cs_base"
+SWEP.Category				= "Counter-Strike"
+SWEP.Spawnable				= true
 
-SWEP.ViewModel			= "models/weapons/cstrike/c_pist_elite.mdl"
-SWEP.WorldModel			= "models/weapons/w_pist_elite.mdl"
+SWEP.ViewModel				= "models/weapons/cstrike/c_pist_elite.mdl"
+SWEP.WorldModel				= "models/weapons/w_pist_elite.mdl"
 
 SWEP.Primary.Damage			= 44
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/elite/elite-1.wav")
 SWEP.Primary.Cone			= 0.005
 SWEP.Primary.ClipSize		= 30
-SWEP.Primary.DefaultClip	= 30
+SWEP.Primary.SpareClip	= 120
 SWEP.Primary.Delay			= 0.005
-SWEP.Primary.Ammo			= "ar2"
-SWEP.Primary.Automatic = false
+SWEP.Primary.Ammo			= "Battery"
+SWEP.Primary.Automatic 		= false
 
+SWEP.RecoilMul 				= 0.5
+SWEP.EnableScope 			= false
+SWEP.ZoomAmount				= 0
+SWEP.EnableCrosshair 		= true
 
-SWEP.RecoilMul	= 0.5
-SWEP.Type = "dual" -- shotgun, sniper, selective, other
-SWEP.ZoomAmount = 16
-SWEP.EnableScope = false
-SWEP.EnableCrosshair = true
+SWEP.HasPumpAction 			= false
+SWEP.HasBoltAction			= false
+SWEP.HasBurstFire 			= false
+SWEP.HasSilencer 			= false

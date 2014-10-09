@@ -20,22 +20,25 @@ SWEP.Primary.NumShots		= 0
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
 SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= -1
-SWEP.Primary.DefaultClip	= -1
+SWEP.Primary.SpareClip	= -1
 SWEP.Primary.Delay			= 0.75
 SWEP.Primary.Ammo			= "none"
-SWEP.Primary.Automatic = true
-SWEP.Secondary.Automatic = true
+SWEP.Primary.Automatic 		= true
+SWEP.Secondary.Automatic 	= true
 
+SWEP.RecoilMul				= 1
+SWEP.EnableScope 			= false
+SWEP.ZoomAmount 			= 0
+SWEP.EnableCrosshair 		= true
 
-SWEP.RecoilMul	= 0
-SWEP.Type = "knife" -- shotgun, sniper, selective, other
-SWEP.ZoomAmount = 1
-SWEP.EnableScope = false
-SWEP.EnableCrosshair = false
+SWEP.HasPumpAction 			= false
+SWEP.HasBoltAction 			= false
+SWEP.HasBurstFire 			= false
+SWEP.HasSilencer 			= false
 
 function SWEP:PrimaryAttack()
 	
-	self:SendWeaponAnim(ACT_VM_HITCENTER)
+	--self:SendWeaponAnim(ACT_VM_HITCENTER)
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
@@ -52,20 +55,33 @@ function SWEP:SecondaryAttack()
 	
 end
 
+function SWEP:Reload()
+	PrintTable(GetActivities(self))
+end
+
+function SWEP:Deploy()
+
+	self:EmitSound("weapons/knife/knife_deploy1.wav",100,100)
+	self.Owner:DrawViewModel(true)
+	self:SendWeaponAnim(ACT_VM_DRAW)
+	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())	
+	
+	return true
+end
+
+
 function SWEP:Swing(damage)
 
-	local light = ACT_VM_HITCENTER
-	local heavy = ACT_VM_HITCENTER
+
+	local heavy = ACT_VM_PRIMARYATTACK
+	local light = ACT_VM_PRIMARYATTACK
 	local miss = ACT_VM_MISSCENTER
-	
+
 
 
 	local coneents = ents.FindInCone(self.Owner:GetShootPos(),self.Owner:GetAimVector(),40,5)
 	
 	table.RemoveByValue( coneents, self.Owner )
-	
-	
-	
 	
 	local conecount = table.Count(coneents)
 	local trace = self.Owner:GetEyeTrace()
@@ -81,9 +97,15 @@ function SWEP:Swing(damage)
 					end
 				end
 				
-				self:StabDamage(damage,v)
 				self.HitAThing = true
+				
+			else
+				damage = 10
 			end
+			
+			self:StabDamage(damage,v)
+
+
 		end
 	end
 	--print(trace.StartPos:Distance(trace.HitPos))
@@ -104,6 +126,7 @@ function SWEP:Swing(damage)
 		end
 	elseif trace.StartPos:Distance(trace.HitPos) < 40 then
 		self.Weapon:EmitSound("weapons/knife/knife_hitwall1.wav",100,100)
+		
 		if damage == 34 then
 			self:SendWeaponAnim(light)
 		else
@@ -136,6 +159,18 @@ function SWEP:StabEffect(StartPos,HitPos,SurfaceProp)
 		effect:SetDamageType(DMG_SLASH)
 		--print("EFFECT")
 	util.Effect("Impact", effect)
+end
+
+function GetActivities( ent )
+  local k, v, t
+
+  t = { }
+
+  for k, v in ipairs( ent:GetSequenceList( ) ) do
+    table.insert( t, { id = k, act = ent:GetSequenceActivity( k ), actname = ent:GetSequenceActivityName( k ) } )
+  end
+
+  return t
 end
 
 

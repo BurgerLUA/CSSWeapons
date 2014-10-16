@@ -33,9 +33,16 @@ if CLIENT then
 	SWEP.DrawCrosshair		= false
 	SWEP.ViewModelFlip		= false
 	SWEP.ViewModelFOV		= 45
-	SWEP.SwayScale = 3
-	SWEP.BobScale = 2
+	SWEP.SwayScale			= 3
+	SWEP.BobScale 			= 2
+	SWEP.BounceWeaponIcon	= false
+	SWEP.DrawWeaponInfoBox	= false
+	
+	
 	SWEP.CSMuzzleFlashes = true
+	
+	
+	
 end
 
 if SERVER then
@@ -61,7 +68,7 @@ SWEP.Primary.DefaultClip	= 0
 SWEP.Primary.Delay			= .14
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic 		= true
-SWEP.Primary.DefaultClip		= 90 -- custom ammo shit
+SWEP.Primary.DefaultClip	= 90 -- custom ammo shit
 
 
 SWEP.RecoilMul				= 1
@@ -74,10 +81,23 @@ SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 
-
-SWEP.CoolDown = 0
-
-
+SWEP.CoolDown 				= 0
+SWEP.CoolTime 				= 0
+SWEP.CoolDown 				= 0
+SWEP.ShotgunReload 			= 0
+SWEP.NextShell 				= 0
+SWEP.IsReloading 			= 0
+SWEP.NormalReload 			= 0
+SWEP.ReloadFinish 			= 0
+SWEP.NextZoomTime 			= 0
+SWEP.ReloadDelay 			= 0
+SWEP.FakeDelay 				= 0
+SWEP.First					= 0
+SWEP.ZoomData 				= 1
+SWEP.AttachDelay 			= 0
+SWEP.ScopeDelay 			= 0
+SWEP.IsSilenced 			= 0
+SWEP.ClickSoundDelay 		= 0
 
 --Burst fire Code from Kogitsune
 local BURST, AUTO = 0, 1
@@ -198,10 +218,6 @@ function SWEP:PrimaryAttack()
 
 	if self.HasSilencer == true then
 
-		if not self.AttachDelay then
-			self.AttachDelay = 0
-		end
-
 		if self.AttachDelay < CurTime() then
 			self:Shoot()
 			self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
@@ -210,7 +226,12 @@ function SWEP:PrimaryAttack()
 	else
 	
 		self:Shoot()
-		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+		
+		if self.HasBurstFire == true and self.Primary.Automatic == false and self:GetFireMode( ) == BURST then
+			self:SetNextPrimaryFire(CurTime() + 0.25)
+		else
+			self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+		end
 		
 	end
 
@@ -245,10 +266,6 @@ function SWEP:SecondaryAttack()
 		
 		local delay = 0.3
 
-		if not self.ScopeDelay then
-			self.ScopeDelay = 0
-		end
-
 		if self.ScopeDelay > CurTime() then return end
 
 		if SERVER then
@@ -267,14 +284,6 @@ function SWEP:SecondaryAttack()
 		
 
 	elseif self.HasSilencer == true then
-
-		if not self.AttachDelay then
-			self.AttachDelay = 0
-		end
-
-		if not self.IsSilenced then
-			self.IsSilenced = 0
-		end
 
 		if self.AttachDelay < CurTime() then
 		
@@ -312,6 +321,7 @@ function SWEP:Shoot()
 			if self:GetFireMode( ) == BURST then
 
 				Recoil = Recoil * 0.75
+				Cone = Cone * 1.5
 			
 				if self.Primary.Automatic == true then
 					self.FakeDelay = CurTime() + 0.5
@@ -320,11 +330,14 @@ function SWEP:Shoot()
 				end
 
 				if self.Weapon:Clip1() >= 3 then
-					self:TakePrimaryAmmo(2)
+					self:TakePrimaryAmmo(3)
 					Shots = 3
-				else
-					self:TakePrimaryAmmo(self.Weapon:Clip1())
-					Shots = self.Weapon:Clip1()
+				elseif self.Weapon:Clip1() == 2 then
+					self:TakePrimaryAmmo(2)
+					Shots = 2
+				elseif self.Weapon:Clip1() == 1 then
+					self:TakePrimaryAmmo(1)
+					Shots = 1
 				end
 
 				self.FakeDelay = CurTime() + self.Primary.Delay*4
@@ -463,10 +476,6 @@ function SWEP:CanPrimaryAttack()
 	if not IsFirstTimePredicted( ) then return end
 	if self:GetNextPrimaryFire() > CurTime() then return false end
 
-	if not self.ClickSoundDelay then
-		self.ClickSoundDelay = 0
-	end
-
 	if self:Clip1() <= 0 then
 		--self:Reload()
 		if self.ClickSoundDelay <= CurTime() then
@@ -564,54 +573,6 @@ end
 function SWEP:Think()
 
 	self:BotThink()
-
-	if not self.CoolTime then
-		self.CoolTime = 0
-	end
-
-	if not self.CoolDown then
-		self.CoolDown = 0
-	end
-	
-	if not self.ShotgunReload then
-		self.ShotgunReload = 0
-	end
-	
-	if not self.NextShell then
-		self.NextShell = 0
-	end	
-	
-	if not self.IsReloading then
-		self.IsReloading = 0
-	end
-	
-	if not self.NormalReload then
-		self.NormalReload = 0
-	end
-	
-	if not self.ReloadFinish then
-		self.ReloadFinish = 0
-	end
-	
-	if not self.NextZoomTime then
-		self.NextZoomTime = 0
-	end
-	
-	if not self.ReloadDelay then
-		self.ReloadDelay = 0
-	end
-	
-	if not self.FakeDelay then
-		self.FakeDelay = 0
-	end
-	
-	if not self.First then
-		self.First = 0
-	end
-	
-	if not self.zoomdata then
-		self.zoomdata = 1
-	end
 	
 	function AddBonus(len,ply)
 		local data = net.ReadFloat(8)
@@ -628,24 +589,24 @@ function SWEP:Think()
 			
 			if input.WasMousePressed(MOUSE_WHEEL_UP) then
 				
-				if self.zoomdata < 1.5 then 
-					self.zoomdata = self.zoomdata + 0.25/2
+				if self.ZoomData < 1.5 then 
+					self.ZoomData = self.ZoomData + 0.25/2
 					self:EmitSound("common/talk.wav")
 				end
 				
 				net.Start( "GetFOVBonus" )
-				net.WriteFloat( self.zoomdata, 8 )
+				net.WriteFloat( self.ZoomData, 8 )
 				net.SendToServer()
 
 			elseif input.WasMousePressed(MOUSE_WHEEL_DOWN) then
 				
-				if self.zoomdata > 0.5 then 
-					self.zoomdata = self.zoomdata - 0.25/2
+				if self.ZoomData > 0.5 then 
+					self.ZoomData = self.ZoomData - 0.25/2
 					self:EmitSound("common/talk.wav")
 				end
 				
 				net.Start( "GetFOVBonus" )
-					net.WriteFloat( self.zoomdata, 8 )
+					net.WriteFloat( self.ZoomData, 8 )
 				net.SendToServer()
 				
 			end
@@ -810,16 +771,16 @@ function SWEP:DrawHUD()
 		if self:GetNWBool("zoomed",false) == false then
 		
 		
-			if self.HasPumpAction == true then
-				surface.DrawCircle(x/2,y/2, extra, Color(50,255,50,200))
+			--if self.HasPumpAction == true then
+				--surface.DrawCircle(x/2,y/2, extra, Color(50,255,50,200))
 		
-			else
+			--else
 				surface.SetDrawColor( 50, 255, 50, 200 )
 				surface.DrawLine( x/2+1+extra+length, y/2, x/2+0.5+extra, y/2 )
 				surface.DrawLine( x/2-1-extra-length, y/2, x/2-0.5-extra, y/2 )
 				surface.DrawLine( x/2, y/2+1+extra+length, x/2, y/2+0.5+extra )
 				surface.DrawLine( x/2, y/2-1-extra-length, x/2, y/2-0.5-extra )
-			end
+			--end
 			
 			
 		end

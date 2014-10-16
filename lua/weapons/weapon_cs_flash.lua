@@ -6,6 +6,7 @@ if CLIENT then
 	killicon.AddFont( "weapon_cs_flash", "csd", "P", Color( 255, 80, 0, 255 ) )
 	killicon.AddFont( "ent_cs_flash", "csd", "P", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
+	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/flashbang")
 end
 
 SWEP.HoldType				= "melee"
@@ -23,38 +24,64 @@ SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= -1
 SWEP.Primary.DefaultClip	= -1
 SWEP.Primary.Delay			= 1
-SWEP.Primary.Ammo			= "ar2"
+SWEP.Primary.Ammo			= "none"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 1
 SWEP.EnableScope 			= false
 SWEP.ZoomAmount 			= 0
-SWEP.EnableCrosshair 		= true
+SWEP.EnableCrosshair 		= false
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 
+SWEP.IsThrowing 			= false
+SWEP.HasAnimated			= false
+SWEP.HasThrown				= false
+
 function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + 2)
 	self:SendWeaponAnim(ACT_VM_PULLPIN)
 	--self:TakePrimaryAmmo(1)
-	timer.Simple(0.85, function() self:SendWeaponAnim(ACT_VM_THROW);self.Owner:SetAnimation(PLAYER_ATTACK1) end)
-	timer.Simple(1, function() self:ThrowFlashGrenade(1000) end)
-	timer.Simple(2, function() self:SendWeaponAnim(ACT_VM_DRAW) end)
+	
+	self.IsThrowing = true
+	
+	self.ThrowAnimation = CurTime() + 0.85
+	self.Throw = CurTime() + 1
+	self.ThrowRemove = CurTime() + 2
+	
+end
+
+function SWEP:Think()
+	if self.IsThrowing == true then
+	
+		if self.ThrowAnimation < CurTime() then
+			if self.HasAnimated == false then
+				self:SendWeaponAnim(ACT_VM_THROW)
+				self.Owner:SetAnimation(PLAYER_ATTACK1) 
+				self.HasAnimated = true
+			end
+		end
+		
+		if self.Throw < CurTime() then
+			if self.HasThrown == false then
+				self:ThrowFlashGrenade(1000)
+				self.HasThrown = true
+			end
+		end
+		
+		if self.ThrowRemove < CurTime() then
+			if CLIENT then return end
+			self.Owner:SelectWeapon(self.Owner:GetWeapons()[1]:GetClass() )
+			self:Remove() 
+		end
+		
+	end
 end
 
 function SWEP:Reload()
-
-end
-
-function SWEP:SecondaryAttack()
-
-end
-
-
-function SWEP:Think()
 end
 
 function SWEP:ThrowFlashGrenade(force)

@@ -1,6 +1,6 @@
 "UnlitGeneric"
 {
-	"$basetexture"	"vgui/gfx/vgui/fav_weap/glock18"
+	"$basetexture"	"vgui/achievements/kill_enemy_glock"
 	"$translucent" "1"
 	"$ignorez" "1"
 	"$vertexcolor" "1"

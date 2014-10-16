@@ -1,6 +1,6 @@
 "UnlitGeneric"
 {
-	"$basetexture"	"vgui/gfx/vgui/hegrenade_square"
+	"$basetexture"	"vgui/achievements/kill_enemy_hegrenade"
 	"$translucent" "1"
 	"$ignorez" "1"
 	"$vertexcolor" "1"

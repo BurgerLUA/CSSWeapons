@@ -5,6 +5,7 @@ if CLIENT then
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_knife", "csd", "j", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
+	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/ak47")
 end
 
 SWEP.HoldType			= "knife"
@@ -29,7 +30,7 @@ SWEP.Secondary.Automatic 	= true
 SWEP.RecoilMul				= 1
 SWEP.EnableScope 			= false
 SWEP.ZoomAmount 			= 0
-SWEP.EnableCrosshair 		= true
+SWEP.EnableCrosshair 		= false
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
@@ -145,7 +146,7 @@ function SWEP:StabDamage(damage, entity)
 		dmginfo:SetDamageType( DMG_SLASH )
 		dmginfo:SetAttacker( self.Owner )
 		dmginfo:SetInflictor( self )
-		dmginfo:SetDamageForce( self.Owner:GetForward()*1000 )
+		dmginfo:SetDamageForce( self.Owner:GetForward()*100 )
 	if SERVER then
 		entity:TakeDamageInfo( dmginfo )
 	end

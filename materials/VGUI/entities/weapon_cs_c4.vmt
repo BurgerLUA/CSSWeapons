@@ -1,6 +1,6 @@
 "UnlitGeneric"
 {
-	"$basetexture"	"vgui/achievements/kill_enemy_g3sg1"
+	"$basetexture"	"vgui/achievements/win_bomb_plant"
 	"$translucent" "1"
 	"$ignorez" "1"
 	"$vertexcolor" "1"

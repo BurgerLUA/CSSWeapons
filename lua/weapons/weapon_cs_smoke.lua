@@ -1,21 +1,22 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS HE GRENADE"
+	SWEP.PrintName			= "CSS SMOKE GRENADE"
 	SWEP.Slot				= 4
 	SWEP.SlotPos			= 1
-	killicon.AddFont( "weapon_cs_he", "csd", "O", Color( 255, 80, 0, 255 ) )
-	killicon.AddFont( "ent_cs_he", "csd", "O", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "weapon_cs_flash", "csd", "P", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "ent_cs_flash", "csd", "P", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip = false
-	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/hegrenade")
+	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/smokegrenade")
 end
 
 SWEP.HoldType				= "melee"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Spawnable				= true
+SWEP.AdminOnly				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_eq_fraggrenade.mdl"
-SWEP.WorldModel				= "models/weapons/w_eq_fraggrenade.mdl"
+SWEP.ViewModel				= "models/weapons/cstrike/c_eq_smokegrenade.mdl"
+SWEP.WorldModel				= "models/weapons/w_eq_smokegrenade.mdl"
 
 SWEP.Primary.Damage			= 0
 SWEP.Primary.NumShots		= 0
@@ -67,7 +68,7 @@ function SWEP:Think()
 		
 		if self.Throw < CurTime() then
 			if self.HasThrown == false then
-				self:ThrowHEGrenade(1000)
+				self:ThrowSmokeGrenade(1000)
 				self.HasThrown = true
 			end
 		end
@@ -84,12 +85,12 @@ end
 function SWEP:Reload()
 end
 
-function SWEP:ThrowHEGrenade(force)
+function SWEP:ThrowSmokeGrenade(force)
 	if CLIENT then return end
 	local EA =  self.Owner:EyeAngles()
 	local pos = self.Owner:GetShootPos() + EA:Right() * 5 - EA:Up() * 4 + EA:Forward() * 8	
 
-	local ent = ents.Create("ent_cs_he")		
+	local ent = ents.Create("ent_cs_smoke")		
 		ent:SetPos(pos)
 		ent:SetAngles(EA)
 		ent:Spawn()
@@ -97,7 +98,6 @@ function SWEP:ThrowHEGrenade(force)
 		ent:SetOwner(self.Owner)
 		ent:GetPhysicsObject():SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force + EA:Up()*50)
 		ent:GetPhysicsObject():AddAngleVelocity(Vector(1000,1000,1000))
-		ent.Damage = 100
-		ent.Radius = 100
+		--ent.Damage = 100
+		--ent.Radius = 100
 end
-

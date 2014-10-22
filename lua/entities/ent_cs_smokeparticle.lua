@@ -14,7 +14,7 @@ function ENT:Initialize()
 	
 		local size = 1
 		self:SetModel("models/Combine_Helicopter/helicopter_bomb01.mdl") 
-		self:PhysicsInitSphere( size, "metal_bouncy" )
+		self:PhysicsInitSphere( size, "wood" )
 		self:SetCollisionBounds( Vector( -size, -size, -size ), Vector( size, size, size ) )
 		
 		
@@ -24,7 +24,7 @@ function ENT:Initialize()
 		if phys:IsValid() then
 			phys:Wake()
 			phys:SetBuoyancyRatio(0)
-			phys:EnableGravity(false)
+			phys:EnableGravity(false)q
 			phys:EnableDrag(true)
 		end
 		

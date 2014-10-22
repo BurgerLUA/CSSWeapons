@@ -30,7 +30,7 @@ function ENT:Initialize()
 		
 		
 	
-		self.Delay = CurTime() + 30
+		self.Delay = CurTime() + 45
 		self.First = true
 		self.NextBeep = 0
 		self.BeepLatch = 0
@@ -42,6 +42,8 @@ function ENT:Initialize()
 		
 		self.NextTick = 0
 		self.Progress = 0
+		self.StopEverytingOhGod = false
+		self.SendMessage = true
 
 		
 	end
@@ -69,6 +71,11 @@ end
 
 function ENT:Use(activator,caller,useType,value)
  
+	if self.Progress == 0 then
+		self:EmitSound("items/ammopickup.wav",100,100)
+		self:SetNWBool("defusing",true)
+	end
+	
 	
 	if ( activator:IsPlayer() ) then
 		if self.NextTick <= CurTime() then
@@ -76,6 +83,9 @@ function ENT:Use(activator,caller,useType,value)
 			self.NextTick = CurTime() + 0.05
 		end
 
+	self:SetNWInt("defusecount",self.Progress*10)	
+		
+		
 	else
 		--print("WHAT ARE YOU")
 	end
@@ -90,30 +100,31 @@ function ENT:Think()
 	if SERVER then
 	
 		if self.Progress >= 10 then
-			for n,p in pairs(player.GetAll()) do
-				--print(p:Nick())
+		
+			if self.SendMessage == true then
+				for n,p in pairs(player.GetAll()) do
+					--print(p:Nick())
 				
-				p:PrintMessage(HUD_PRINTCENTER,"Bomb has been defused")
-				p:SendLua("LocalPlayer():EmitSound(\"radio/bombdef.wav\")")
+					p:PrintMessage(HUD_PRINTCENTER,"Bomb has been defused")
+					p:SendLua("LocalPlayer():EmitSound(\"radio/bombdef.wav\")")
 				
 				
-				timer.Simple(2, function()
-					p:PrintMessage(HUD_PRINTCENTER,"Counter-Terrorists Win")
-					p:SendLua("LocalPlayer():EmitSound(\"radio/ctwin.wav\")")
-				end)
+					timer.Simple(2, function()
+						p:PrintMessage(HUD_PRINTCENTER,"Counter-Terrorists Win")
+						p:SendLua("LocalPlayer():EmitSound(\"radio/ctwin.wav\")")
+					end)
+				
+				end
+				self.SendMessage = false
 			end
 		
 		
-			self:Remove()
+			self.StopEverytingOhGod = true
 		end
 		
-	
-		if self.First == true then
-			--ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
-			--ParticleEffectAttach("rockettrail", PATTACH_ABSORIGIN_FOLLOW, self, 0)
-			self.First = false
-		end
-
+		if self.StopEverytingOhGod == true then
+			SafeRemoveEntityDelayed(self,5)
+		return end
 	
 		if CurTime() > self.Delay then 
 			self:Detonate(self,self:GetPos())
@@ -206,9 +217,64 @@ local mat = Material("sprites/redglow1")
 function ENT:Draw()
 	if CLIENT then
 		self:DrawModel()
+		
+		local Size = 100
+		local Var = Size - self:GetNWInt("defusecount",0)
+		
+		
+		--cam.Start3D2D( self:GetPos() + self:GetUp()*9 + self:GetForward()*3 + self:GetRight()*4.5, self:GetAngles() + Angle(0,-90,0), 1/20 ) -- for progressbar
+		cam.Start3D2D( self:GetPos() + self:GetUp()*9 + self:GetForward()*3.5 + self:GetRight()*2, self:GetAngles() + Angle(0,-90,0), 0.125 )	
+			
+			
+			--[[
+
+		
+		
+			
+		
+			--				box	x			y			width	height	color
+			draw.RoundedBox( 0, -Size/2 - 0, -Size/20 - 0, Size + 2, Size/10 + 2, Color(255,255,255) ) -- border
+			
+			draw.RoundedBox( 0, -Size/2 + 1, -Size/20 + 1, Var, Size/10, Color(255,0,0) ) -- actual
+			]]--
+			
+			--800813
+			
+			rand1 = math.random(0,9)
+			rand2 = math.random(0,9)
+			rand3 = math.random(0,9)
+			rand4 = math.random(0,9)
+			rand5 = math.random(0,9)
+			rand6 = math.random(0,9)
+			
+			
+			
+			if Var >= (Size/6)*5 then
+				text = rand1 .. rand2.. rand3 .. rand4 .. rand5 .. rand6
+			elseif Var >= (Size/6)*4 then
+				text = "8" .. rand2.. rand3 .. rand4 .. rand5 .. rand6
+			elseif Var >= (Size/6)*3 then
+				text = "8" .. "0" .. rand3 .. rand4 .. rand5 .. rand6
+			elseif Var >= (Size/6)*2 then
+				text = "8" .. "0" .. "0" .. rand4 .. rand5 .. rand6
+			elseif Var >= (Size/6)*1 then
+				text = "8" .. "0" .. "0" .. "8" .. rand5 .. rand6
+			elseif Var >= 0 then
+				text = "8" .. "0" .. "0" .. "8" .. "1" .. rand6
+			else
+				text = "8" .. "0" .. "0" .. "8" .. "1" .. "3"
+			end
+			
+			
+			if self:GetNWBool("defusing",false) == true then
+				draw.SimpleText( text, "DebugFixed", 0, 0, Color(255,0,0,255), 0, 0 )
+			end
+			
+		cam.End3D2D()
+		
 	
 		if self:GetNWBool("beep",false) == true then
-	
+
 			cam.Start3D(EyePos(),EyeAngles())
 				render.SetMaterial( mat )
 				render.DrawSprite( self:GetPos() + self:GetUp()*10, 32, 32, Color(255,0,0,255))

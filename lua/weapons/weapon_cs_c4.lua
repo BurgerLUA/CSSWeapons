@@ -72,8 +72,8 @@ function SWEP:PrimaryAttack()
 	self.IsThrowing = true
 	
 	self.ThrowAnimation = CurTime() + 3
-	self.Throw = CurTime() + 3
-	self.ThrowRemove = CurTime() + 4
+	self.Throw = CurTime() + 3.1
+	self.ThrowRemove = CurTime() + 3.5
 	
 end
 

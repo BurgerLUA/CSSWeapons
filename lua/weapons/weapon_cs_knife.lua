@@ -4,17 +4,17 @@ if CLIENT then
 	SWEP.Slot				= 4
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_knife", "csd", "j", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip = false
-	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/ak47")
+	SWEP.ViewModelFlip 		= false
+	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/ak47")
 end
 
-SWEP.HoldType			= "knife"
-SWEP.Base				= "weapon_cs_base"
-SWEP.Spawnable			= true
+SWEP.HoldType				= "knife"
+SWEP.Base					= "weapon_cs_base"
+SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel			= "models/weapons/cstrike/c_knife_t.mdl"
-SWEP.WorldModel			= "models/weapons/w_knife_t.mdl"
+SWEP.ViewModel				= "models/weapons/cstrike/c_knife_t.mdl"
+SWEP.WorldModel				= "models/weapons/w_knife_t.mdl"
 
 SWEP.Primary.Damage			= 0
 SWEP.Primary.NumShots		= 0
@@ -36,6 +36,7 @@ SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
+SWEP.HasDoubleZoom			= false
 
 function SWEP:PrimaryAttack()
 	

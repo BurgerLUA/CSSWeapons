@@ -4,17 +4,17 @@ if CLIENT then
 	SWEP.Slot				= 2
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_mp5", "csd", "x", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip = false
-	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/mp5")
+	SWEP.ViewModelFlip 		= false
+	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/mp5")
 end
 
-SWEP.HoldType			= "smg"
-SWEP.Base				= "weapon_cs_base"
-SWEP.Spawnable			= true
+SWEP.HoldType				= "smg"
+SWEP.Base					= "weapon_cs_base"
+SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel			= "models/weapons/cstrike/c_smg_mp5.mdl"
-SWEP.WorldModel			= "models/weapons/w_smg_mp5.mdl"
+SWEP.ViewModel				= "models/weapons/cstrike/c_smg_mp5.mdl"
+SWEP.WorldModel				= "models/weapons/w_smg_mp5.mdl"
 
 SWEP.Primary.Damage			= 25
 SWEP.Primary.NumShots		= 1
@@ -24,7 +24,7 @@ SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 120
 SWEP.Primary.Delay			= .1
 SWEP.Primary.Ammo			= "Battery"
-SWEP.Primary.Automatic = true
+SWEP.Primary.Automatic 		= true
 
 
 SWEP.RecoilMul				= 0.5
@@ -36,3 +36,4 @@ SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
+SWEP.HasDoubleZoom			= false

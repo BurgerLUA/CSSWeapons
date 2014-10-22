@@ -4,8 +4,8 @@ if CLIENT then
 	SWEP.Slot				= 4
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_g3", "csd", "i", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip = false
-	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/g3sg1")
+	SWEP.ViewModelFlip 		= false
+	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/g3sg1")
 end
 
 SWEP.HoldType				= "ar2"
@@ -34,4 +34,5 @@ SWEP.EnableCrosshair 		= false
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
-SWEP.HasSilencer 			= false
+SWEP.HasSilencer 			= false 
+SWEP.HasDoubleZoom			= false

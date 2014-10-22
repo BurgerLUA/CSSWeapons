@@ -4,8 +4,8 @@ if CLIENT then
 	SWEP.Slot				= 3
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_m4", "csd", "w", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip = false
-	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/m4a1")
+	SWEP.ViewModelFlip 		= false
+	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/m4a1")
 end
 
 SWEP.HoldType				= "ar2"
@@ -24,7 +24,7 @@ SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 90
 SWEP.Primary.Delay			= 0.1
 SWEP.Primary.Ammo			= "AirboatGun"
-SWEP.Primary.Automatic = true
+SWEP.Primary.Automatic 		= true
 
 SWEP.Secondary.Sound		= Sound("weapons/m4a1/m4a1-1.wav")
 
@@ -38,3 +38,4 @@ SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= true
+SWEP.HasDoubleZoom			= false

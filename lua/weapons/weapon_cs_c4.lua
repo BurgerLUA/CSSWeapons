@@ -5,8 +5,8 @@ if CLIENT then
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_he", "csd", "O", Color( 255, 80, 0, 255 ) )
 	killicon.AddFont( "ent_cs_he", "csd", "O", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip = false
-	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/last_match_performance")
+	SWEP.ViewModelFlip 		= false
+	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/last_match_performance")
 end
 
 SWEP.HoldType				= "slam"
@@ -37,6 +37,7 @@ SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
+SWEP.HasDoubleZoom			= false
 
 SWEP.IsThrowing 			= false
 SWEP.HasAnimated			= false

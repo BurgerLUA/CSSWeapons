@@ -54,6 +54,9 @@ function ENT:Think()
 end
 
 function ENT:Detonate(self,pos)
+
+	local maxdistance = 1000
+
 	if SERVER then
 		if not self:IsValid() then return end
 		local effectdata = EffectData()
@@ -65,17 +68,17 @@ function ENT:Detonate(self,pos)
 	
 		self:EmitSound("weapons/flashbang/flashbang_explode2.wav",100,100)
 		
-		if table.Count(ents.FindInSphere(self:GetPos(),1000)) > 0 then
+		if table.Count(ents.FindInSphere(self:GetPos(),maxdistance)) > 0 then
 		
-			for k,v in pairs(ents.FindInSphere(self:GetPos(),1000)) do
+			for k,v in pairs(ents.FindInSphere(self:GetPos(),maxdistance)) do
 				if v:GetClass() == "player" then
 				
-					local distancecount = 18 - self:GetPos():Distance(v:GetPos())/100
-					print(distancecount)
+					local distancecount = maxdistance/100 - self:GetPos():Distance(v:GetPos())/100
+					--print(distancecount)
 					if distancecount > 0 and distancecount < 8 then 
 						v:TakeDamage(distancecount,self.Owner,self)
 						
-						for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),1000,90)) do
+						for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),maxdistance,90)) do
 							if f == self.Entity then
 								self:BlindEffects(v,distancecount)
 							end

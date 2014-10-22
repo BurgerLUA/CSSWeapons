@@ -4,8 +4,8 @@ if CLIENT then
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_fiveseven", "csd", "u", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip = false
-	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/fiveseven")
+	SWEP.ViewModelFlip 		= false
+	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/fiveseven")
 end
 
 SWEP.HoldType				= "pistol"
@@ -34,4 +34,5 @@ SWEP.EnableCrosshair 		= true
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
-SWEP.HasSilencer 			= false
+SWEP.HasSilencer 			= false 
+SWEP.HasDoubleZoom			= false

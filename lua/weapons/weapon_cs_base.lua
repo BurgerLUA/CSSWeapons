@@ -1,4 +1,4 @@
-AddCSLuaFile( "weapon_cs_base.lua" )
+AddCSLuaFile()
 
 CreateConVar("bur_weapon_recoil_method", "1", FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE , "Value 1 gives the classic CSS view-punch. Others give a custom viewpunch" )
 
@@ -39,7 +39,7 @@ if CLIENT then
 	SWEP.DrawWeaponInfoBox	= false
 	
 	
-	SWEP.CSMuzzleFlashes = true
+	SWEP.CSMuzzleFlashes 	= true
 	
 	
 	
@@ -79,7 +79,8 @@ SWEP.EnableCrosshair 		= true
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
-SWEP.HasSilencer 			= false
+SWEP.HasSilencer 			= false 
+SWEP.HasDoubleZoom			= false
 
 SWEP.CoolDown 				= 0
 SWEP.CoolTime 				= 0
@@ -99,6 +100,31 @@ SWEP.ScopeDelay 			= 0
 SWEP.IsSilenced 			= 0
 SWEP.ClickSoundDelay 		= 0
 
+
+
+
+SWEP.ZoomCurTime			= 1
+
+SWEP.BurgerBase				= true
+
+
+hook.Add("DoPlayerDeath", "drop weapon after death", function(ply)
+
+	
+	for k,v in pairs(ply:GetWeapons()) do
+		if v.BurgerBase ~= nil then
+			local dropped = ents.Create("ent_cs_droppedweapon")
+				dropped:SetPos(ply:GetShootPos())
+				dropped:SetAngles(ply:EyeAngles())
+				dropped:SetModel(v:GetModel())
+				dropped:Spawn()
+				dropped:Activate()
+				dropped:SetNWString("class",v:GetClass())
+		end
+	end
+	
+end)
+
 --Burst fire Code from Kogitsune
 local BURST, AUTO = 0, 1
 function SWEP:SetupDataTables( )
@@ -113,39 +139,91 @@ function SWEP:SetupDataTables( )
 
 end
 
-function SWEP:ZoomOut(delay)
-	if SERVER then
-		if delay == nil then
-			delay = 0
-		end
+--[[
+function SWEP:ZoomFunctionThink()
+
+	function AddBonus(len,ply)
+		local data = net.ReadFloat(8) -- data is the bonus zoom determined by the mousewheel scroll
+		local ent = net.ReadEntity() --the weapon that called it
+		
+		--if ent ~= self then return end
+		
+		print("---------------")
+		print("FUNCTION AddBonus()")
+		print("NET: RECIEVED ".. data .. " FROM " .. string.upper(ply:Nick()) .. " FOR " .. string.upper(self.Owner:Nick()) ) 
+		print("FROM " .. tostring(ent) .. " TO " .. tostring(self))
+		print("---------------")
+		
+		self:SetNWFloat("bonuszoom",data)
+		
+		self:ZoomIn()
+	end
+		
+	net.Receive( "GetFOVBonus", AddBonus )
 	
-		self.Owner:DrawViewModel(true)
-		self:SetNWBool("zoomed",false)
-		self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov"),delay)
+	if CLIENT then
+		if self:GetNWInt("zoommode",0) ~= 0 then
+			
+			if input.WasMousePressed(MOUSE_WHEEL_UP) then
+				
+				if self.ZoomData < 1.5 then 
+					self.ZoomData = self.ZoomData + 0.25/2
+					self:EmitSound("common/talk.wav")
+				end
+				
+				net.Start( "GetFOVBonus" )
+					net.WriteFloat(self.ZoomData, 8 )
+					net.WriteEntity(self)
+				net.SendToServer()
+
+			elseif input.WasMousePressed(MOUSE_WHEEL_DOWN) then
+				
+				if self.ZoomData > 0.5 then 
+					self.ZoomData = self.ZoomData - 0.25/2
+					self:EmitSound("common/talk.wav")
+				end
+				
+				net.Start( "GetFOVBonus" )
+					net.WriteFloat( self.ZoomData, 8 )
+					net.WriteEntity(self)
+				net.SendToServer()
+				
+			end
+		end
 	end
 end
+--]]
 
-function SWEP:ZoomIn(delay)
-	if SERVER then
-		if delay == nil then
-			delay = 0
+function SWEP:TranslateFOV(oldfov)
+
+	--print(self.ZoomedIn)
+	if self:GetNWInt("zoommode",0) > 0 then
+		--local maths = oldfov/(self.ZoomAmount *  )
+		
+		if self.HasDoubleZoom == true then
+			newfov = 90 / (self.ZoomAmount*(self:GetNWInt("zoommode",0)/2))
+		else
+			newfov = 90 / self.ZoomAmount
 		end
+		
 		self.Owner:DrawViewModel(false)
-		self:SetNWBool("zoomed",true)
-		self.Owner:SetFOV(self.Owner:GetNWInt("desiredfov") / (self.ZoomAmount * self:GetNWFloat("bonuszoom",1)  ),delay)
-		--print(self:GetNWInt("bonuszoom",0))
+		
+		return newfov
+	else
+	
+		self.Owner:DrawViewModel(true)
+		
+		return oldfov
 	end
 end
 
 function SWEP:Initialize()
-	self:RegisterCommands()
 	self:SetWeaponHoldType(self.HoldType)
 	util.PrecacheSound(self.Primary.Sound)
 end
 
 function SWEP:Deploy()
 	self.Owner:DrawViewModel(true)
-	self:RegisterCommands()
 	
 	if self.IsSilenced == 1 then
 		self:SendWeaponAnim(ACT_VM_DRAW_SILENCED)
@@ -157,62 +235,28 @@ function SWEP:Deploy()
 	return true
 end
 
-function SWEP:RegisterCommands()
-
-	if SERVER then
-		util.AddNetworkString( "GetFOVBonus" )
-	end
-
-	if game.SinglePlayer() then
-
-		self.Owner:SetNWInt("desiredfov",GetConVarNumber("fov_desired"))
-		
-	return end
-
-	if SERVER then
-		util.AddNetworkString( "GetFOV" )
-
-		function GetData(len,ply)
-			local data = net.ReadInt(8)
-			--print("NET: RECIEVED "..data .. " FROM " .. string.upper(ply:Nick())) 
-			ply:SetNWInt("desiredfov",data)
-		end
-		
-		net.Receive( "GetFOV", GetData )
-		
-	end
-	
-	if CLIENT then
-		local data = LocalPlayer():GetFOV()
-
-		net.Start( "GetFOV" )
-			net.WriteInt( data, 8 )
-		net.SendToServer()
-		
-	end
-
-end
-
 function SWEP:Holster()
 	
-	if self:GetNWBool("zoomed",false) == true then
+	if self:GetNWInt("zoommode",0) ~= 0 then
 		return false 
 	end
-	
-	self:ZoomOut(0)
-	self:SendWeaponAnim(ACT_VM_HOLSTER)
 
 	if self.IsReloading == 1  then 
 		return false
 	end
 	
+	self:SendWeaponAnim(ACT_VM_HOLSTER)
+	
 	return true
 	
 end
 
+
+
+
 function SWEP:PrimaryAttack()
 
-	if not IsFirstTimePredicted( ) then return end
+	--if not IsFirstTimePredicted( ) then return end
 
 	if self.IsReloading == 1 then return end
 
@@ -239,7 +283,7 @@ end
 
 function SWEP:SecondaryAttack()
 
-	if not IsFirstTimePredicted( ) then return end
+	--if not IsFirstTimePredicted( ) then return end
 
 	if self.HasBurstFire == true then
 
@@ -262,17 +306,23 @@ function SWEP:SecondaryAttack()
 
 	elseif self.EnableScope == true then
 		if self.NextZoomTime >= CurTime() then return end
-		self.NextZoomTime = CurTime() + 0.3
+		self.NextZoomTime = CurTime() + 0.1
 		
-		local delay = 0.3
+		local delay = 0.1
 
 		if self.ScopeDelay > CurTime() then return end
 
 		if SERVER then
-			if self:GetNWBool("zoomed",false) == true then
-				self:ZoomOut(delay)
-			else
-				self:ZoomIn(delay)
+			if self:GetNWInt("zoommode",0) == 0 then
+				self:SetNWInt("zoommode",1)
+			elseif self:GetNWInt("zoommode",0) == 1 then
+				if self.HasDoubleZoom == true then
+					self:SetNWInt("zoommode",2)
+				else
+					self:SetNWInt("zoommode",0)
+				end
+			elseif self:GetNWInt("zoommode",0) == 2 then
+				self:SetNWInt("zoommode",0)
 			end
 		end
 		
@@ -305,7 +355,7 @@ end
 
 function SWEP:Shoot()
 	if !self:CanPrimaryAttack() then return end
-	if not IsFirstTimePredicted( ) then return end
+	--if not IsFirstTimePredicted( ) then return end
 
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	
@@ -355,6 +405,11 @@ function SWEP:Shoot()
 			timer.Simple(self.Primary.Delay*0.50*i,function() 
 				if IsValid(self) == true then 
 					self.Weapon:EmitSound(self.Primary.Sound) 
+					
+					self.Weapon:EmitSound(self.Primary.Sound, SNDLVL_GUNFIRE, 100, 1, CHAN_WEAPON )
+					
+					
+					
 				end
 			end )
 		
@@ -371,7 +426,7 @@ function SWEP:Shoot()
 	
 				self.NextZoomTime = CurTime() + 1.5
 		
-				self:ZoomOut(0.3)
+				self:SetNWInt("zoommode",0)
 
 			end
 		end
@@ -399,10 +454,10 @@ function SWEP:Shoot()
 	end
 	
 	if self.EnableCrosshair == false then
-		if self:GetNWBool("zoomed",false) == true then
-			Cone = self.Primary.Cone
-		else
+		if self:GetNWInt("zoommode",0) == 0 then
 			Cone = 0.1
+		else
+			Cone = self.Primary.Cone
 		end
 	end
 	
@@ -418,7 +473,7 @@ end
 
 function SWEP:Reload()
 
-	if not IsFirstTimePredicted( ) then return end
+	--if not IsFirstTimePredicted( ) then return end
 	if self.IsReloading == 1 then return end
 	if self.ReloadDelay > CurTime() then return end
 	if self:Clip1() >= self.Primary.ClipSize then return end
@@ -464,7 +519,7 @@ function SWEP:Reload()
 	end
 	
 	if self.EnableScope == true then
-		self:ZoomOut(0.15)
+		self:SetNWInt("zoommode",0)
 		self.NextZoomTime = CurTime() + self.Owner:GetViewModel():SequenceDuration()
 	end
 	
@@ -473,7 +528,7 @@ function SWEP:Reload()
 end
 
 function SWEP:CanPrimaryAttack()
-	if not IsFirstTimePredicted( ) then return end
+	--if not IsFirstTimePredicted( ) then return end
 	if self:GetNextPrimaryFire() > CurTime() then return false end
 
 	if self:Clip1() <= 0 then
@@ -491,7 +546,8 @@ function SWEP:CanPrimaryAttack()
 end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
-	if not IsFirstTimePredicted( ) then return end
+
+	--if not IsFirstTimePredicted( ) then return end
 	self.Weapon:EmitSound(GunSound,100,100)
 
 	if not self.CoolDown then
@@ -501,7 +557,9 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	self.ViewKick = -(Damage*Shots/20)/2*Recoil*self.RecoilMul
 	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001)
 	
-	if SERVER or game.SinglePlayer() then
+	--if SERVER or game.SinglePlayer() then
+	
+	--if CLIENT then
 		if self.CoolDown > 0.25 and self.Primary.Automatic == true and self.EnableScope == false then
 			bonusmul = math.Rand(-1,1)
 			sideways = 3
@@ -509,8 +567,34 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 			bonusmul = 1
 			sideways = 1
 		end
-		self.Owner:ViewPunch(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0))
-	end
+		--[[
+		print("-----------")
+		print("COOLDOWN:" .. self.CoolDown)
+		print("DAMAGE:" .. Damage)
+		print("SHOTS:" .. Shots)
+		print("CONE:" .. Cone)
+		print("RECOIL:" .. Recoil)
+		print("VIEWKICK:" .. self.ViewKick)
+		print("TOTAL:" .. tostring(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0)))
+		print(LocalPlayer())
+		print(self.Owner)
+		print("-----------")
+		--]]
+		
+		
+		
+		
+		
+		
+		--self.Owner:ViewPunch(Angle(100,100,100))
+		
+	--end
+	
+	self.Owner:ViewPunch(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0))
+	
+	
+	
+	--end
 	
 
 	self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01),0,10)
@@ -574,49 +658,7 @@ function SWEP:Think()
 
 	self:BotThink()
 	
-	function AddBonus(len,ply)
-		local data = net.ReadFloat(8)
-		--print("NET: RECIEVED "..data .. " FROM " .. string.upper(ply:Nick())) 
-		self:SetNWFloat("bonuszoom",data)
-		
-		self:ZoomIn()
-	end
-		
-	net.Receive( "GetFOVBonus", AddBonus )
-	
-	if CLIENT then
-		if self:GetNWBool("zoomed",false) == true then
-			
-			if input.WasMousePressed(MOUSE_WHEEL_UP) then
-				
-				if self.ZoomData < 1.5 then 
-					self.ZoomData = self.ZoomData + 0.25/2
-					self:EmitSound("common/talk.wav")
-				end
-				
-				net.Start( "GetFOVBonus" )
-				net.WriteFloat( self.ZoomData, 8 )
-				net.SendToServer()
-
-			elseif input.WasMousePressed(MOUSE_WHEEL_DOWN) then
-				
-				if self.ZoomData > 0.5 then 
-					self.ZoomData = self.ZoomData - 0.25/2
-					self:EmitSound("common/talk.wav")
-				end
-				
-				net.Start( "GetFOVBonus" )
-					net.WriteFloat( self.ZoomData, 8 )
-				net.SendToServer()
-				
-			end
-		end
-	end
-	
-	
-	
-	
-	
+	--self:ZoomFunctionThink()
 	
 	local ammotype = self:GetPrimaryAmmoType()
 	
@@ -686,8 +728,12 @@ end
 function SWEP:AdjustMouseSensitivity()
 
 	if self.EnableScope == true then
-		if self:GetNWBool("zoomed",false) == true then
-			sen = 1/ (self.ZoomAmount * self:GetNWFloat("bonuszoom",1))
+		if self:GetNWInt("zoommode",0) ~= 0 then
+			if self.HasDoubleZoom == true then
+				sen = 1 / (self.ZoomAmount*(self:GetNWInt("zoommode",0)/2))
+			else
+				sen = 1 / self.ZoomAmount
+			end
 		else
 			sen = 1
 		end
@@ -759,7 +805,7 @@ function SWEP:DrawHUD()
 
 	local add = 2
 
-	if self:GetNWBool("zoomed",false) == true then
+	if self:GetNWInt("zoommode",0) ~= 0 then
 		add = 0.1
 	end
 
@@ -768,7 +814,7 @@ function SWEP:DrawHUD()
 	local extra = (self.ActualCone*1000*crouchmul + ( heat*10 + self.Owner:GetVelocity():Length()*0.1 )) + add  --+ result*2
 	
 	if self.EnableCrosshair == true then
-		if self:GetNWBool("zoomed",false) == false then
+		if self:GetNWInt("zoommode",0) == 0 then
 		
 		
 			--if self.HasPumpAction == true then
@@ -790,7 +836,7 @@ function SWEP:DrawHUD()
 	end
 
 	if self.EnableScope == true then
-		if self:GetNWBool("zoomed",false) == true then
+		if self:GetNWInt("zoommode",0) ~= 0 then
 
 			local fovbonus = convar/self.Owner:GetFOV()
 			local offset = 0
@@ -836,7 +882,7 @@ end
 
 
 function SWEP:HUDShouldDraw( element )
-	if self:GetNWBool("zoomed",false) == true and element == "CHudWeaponSelection" then return false end
+	if self:GetNWInt("zoommode",0) ~= 0 and element == "CHudWeaponSelection" then return false end
 	return true
 end
 

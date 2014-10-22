@@ -4,16 +4,16 @@ if CLIENT then
 	SWEP.Slot				= 3
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_botgun", "csd", "bD", Color( 0, 80, 255, 255 ) )
-	SWEP.ViewModelFlip = false
+	SWEP.ViewModelFlip 		= false
 end
 
-SWEP.HoldType			= "ar2"
-SWEP.Base				= "weapon_cs_base"
-SWEP.Spawnable			= true
-SWEP.Category			= "EXPERIMENTAL"
+SWEP.HoldType				= "ar2"
+SWEP.Base					= "weapon_cs_base"
+SWEP.Spawnable				= true
+SWEP.Category				= "EXPERIMENTAL"
 
-SWEP.ViewModel			= "models/weapons/cstrike/c_rif_ak47.mdl"
-SWEP.WorldModel			= "models/weapons/w_rif_ak47.mdl"
+SWEP.ViewModel				= "models/weapons/cstrike/c_rif_ak47.mdl"
+SWEP.WorldModel				= "models/weapons/w_rif_ak47.mdl"
 
 SWEP.Primary.Damage			= 35
 SWEP.Primary.NumShots		= 1
@@ -23,11 +23,11 @@ SWEP.Primary.ClipSize		= 10
 SWEP.Primary.DefaultClip	= 10
 SWEP.Primary.Delay			= .14
 SWEP.Primary.Ammo			= "ar2"
-SWEP.Primary.Automatic = true
+SWEP.Primary.Automatic 		= true
 
 
-SWEP.RecoilMul	= 0
-SWEP.Type = "other" -- shotgun, sniper, selective, other
+SWEP.RecoilMul				= 0
+SWEP.Type 					= "other" -- shotgun, sniper, selective, other
 SWEP.ZoomAmount = 1
 SWEP.EnableScope = false
 SWEP.EnableCrosshair = true
@@ -35,12 +35,11 @@ SWEP.EnableCrosshair = true
 SWEP.AutoSwitchTo		= true
 SWEP.AutoSwitchFrom		= false
 
+
 SWEP.Bot = {}
 SWEP.Bot.SearchDelay = 0
 SWEP.Bot.ShootDelay = 0
 SWEP.Bot.SwitchTime = 0
-
-nex = 0
 
 
 function SWEP:BotThink()

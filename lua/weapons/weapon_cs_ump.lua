@@ -8,13 +8,13 @@ if CLIENT then
 	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/ump45")
 end
 
-SWEP.HoldType			= "smg"
-SWEP.Base				= "weapon_cs_base"
-SWEP.Spawnable			= true
+SWEP.HoldType				= "smg"
+SWEP.Base					= "weapon_cs_base"
+SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel			= "models/weapons/cstrike/c_smg_ump45.mdl"
-SWEP.WorldModel			= "models/weapons/w_smg_ump45.mdl"
+SWEP.ViewModel				= "models/weapons/cstrike/c_smg_ump45.mdl"
+SWEP.WorldModel				= "models/weapons/w_smg_ump45.mdl"
 
 SWEP.Primary.Damage			= 29
 SWEP.Primary.NumShots		= 1
@@ -24,7 +24,7 @@ SWEP.Primary.ClipSize		= 25
 SWEP.Primary.DefaultClip	= 100
 SWEP.Primary.Delay			= .1
 SWEP.Primary.Ammo			= "SniperPenetratedRound"
-SWEP.Primary.Automatic = true
+SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 0.5
 SWEP.EnableScope 			= false
@@ -35,3 +35,4 @@ SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
+SWEP.HasDoubleZoom			= false

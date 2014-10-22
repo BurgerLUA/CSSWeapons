@@ -4,17 +4,17 @@ if CLIENT then
 	SWEP.Slot				= 4
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_awp", "csd", "r", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip = false
-	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/awp")
+	SWEP.ViewModelFlip 		= false
+	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/awp")
 end
 
-SWEP.HoldType			= "ar2"
-SWEP.Base				= "weapon_cs_base"
-SWEP.Category			= "Counter-Strike"
-SWEP.Spawnable			= true
+SWEP.HoldType				= "ar2"
+SWEP.Base					= "weapon_cs_base"
+SWEP.Category				= "Counter-Strike"
+SWEP.Spawnable				= true
 
-SWEP.ViewModel			= "models/weapons/cstrike/c_snip_awp.mdl"
-SWEP.WorldModel			= "models/weapons/w_snip_awp.mdl"
+SWEP.ViewModel				= "models/weapons/cstrike/c_snip_awp.mdl"
+SWEP.WorldModel				= "models/weapons/w_snip_awp.mdl"
 
 SWEP.Primary.Damage			= 114
 SWEP.Primary.NumShots		= 1
@@ -24,7 +24,7 @@ SWEP.Primary.ClipSize		= 10
 SWEP.Primary.DefaultClip	= 20
 SWEP.Primary.Delay			= 1.75
 SWEP.Primary.Ammo			= "SniperRound"
-SWEP.Primary.Automatic = false
+SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 1
 SWEP.EnableScope 			= true
@@ -35,3 +35,4 @@ SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= true
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
+SWEP.HasDoubleZoom			= true

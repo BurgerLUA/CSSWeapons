@@ -4,8 +4,8 @@ if CLIENT then
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_glock", "csd", "c", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip = false
-	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/glock18")
+	SWEP.ViewModelFlip 		= false
+	SWEP.WepSelectIcon		= surface.GetTextureID("vgui/gfx/vgui/glock18")
 end
 
 SWEP.HoldType				= "pistol"
@@ -35,3 +35,4 @@ SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= true
 SWEP.HasSilencer 			= false
+SWEP.HasDoubleZoom			= false

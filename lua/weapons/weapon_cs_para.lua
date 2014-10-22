@@ -4,17 +4,17 @@ if CLIENT then
 	SWEP.Slot				= 4
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_para", "csd", "z", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip = false
-	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/m249")
+	SWEP.ViewModelFlip 		= false
+	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/m249")
 end
 
-SWEP.HoldType			= "shotgun"
-SWEP.Base				= "weapon_cs_base"
-SWEP.Spawnable			= true
-SWEP.Category			= "Counter-Strike"
+SWEP.HoldType				= "shotgun"
+SWEP.Base					= "weapon_cs_base"
+SWEP.Spawnable				= true
+SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel			= "models/weapons/cstrike/c_mach_m249para.mdl"
-SWEP.WorldModel			= "models/weapons/w_mach_m249para.mdl"
+SWEP.ViewModel				= "models/weapons/cstrike/c_mach_m249para.mdl"
+SWEP.WorldModel				= "models/weapons/w_mach_m249para.mdl"
 
 SWEP.Primary.Damage			= 31
 SWEP.Primary.NumShots		= 1
@@ -24,7 +24,7 @@ SWEP.Primary.ClipSize		= 100
 SWEP.Primary.DefaultClip	= 200
 SWEP.Primary.Delay			= .09
 SWEP.Primary.Ammo			= "AirboatGun"
-SWEP.Primary.Automatic = true
+SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 0.6
 SWEP.EnableScope 			= false
@@ -34,4 +34,5 @@ SWEP.EnableCrosshair 		= true
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
-SWEP.HasSilencer 			= false
+SWEP.HasSilencer 			= false 
+SWEP.HasDoubleZoom			= false

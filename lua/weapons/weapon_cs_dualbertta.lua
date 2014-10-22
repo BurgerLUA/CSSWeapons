@@ -4,8 +4,8 @@ if CLIENT then
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_dualbertta", "csd", "s", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip = false
-	SWEP.WepSelectIcon = surface.GetTextureID("vgui/gfx/vgui/elites")
+	SWEP.ViewModelFlip 		= false
+	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/elites")
 end
 
 SWEP.HoldType				= "duel"
@@ -21,7 +21,7 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/elite/elite-1.wav")
 SWEP.Primary.Cone			= 0.005
 SWEP.Primary.ClipSize		= 30
-SWEP.Primary.DefaultClip		= 120
+SWEP.Primary.DefaultClip	= 120
 SWEP.Primary.Delay			= 0.005
 SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic 		= false
@@ -34,4 +34,5 @@ SWEP.EnableCrosshair 		= true
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction			= false
 SWEP.HasBurstFire 			= false
-SWEP.HasSilencer 			= false
+SWEP.HasSilencer 			= false 
+SWEP.HasDoubleZoom			= false

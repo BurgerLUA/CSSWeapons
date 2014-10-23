@@ -371,7 +371,7 @@ function SWEP:Shoot()
 			if self:GetFireMode( ) == BURST then
 
 				Recoil = Recoil * 0.75
-				Cone = Cone * 1.5
+				Cone = Cone * 2
 			
 				if self.Primary.Automatic == true then
 					self.FakeDelay = CurTime() + 0.5

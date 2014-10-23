@@ -453,6 +453,7 @@ function SWEP:Shoot()
 		
 	end
 	
+	--[[
 	if self.EnableCrosshair == false then
 		if self:GetNWInt("zoommode",0) == 0 then
 			Cone = 0.1
@@ -460,6 +461,7 @@ function SWEP:Shoot()
 			Cone = self.Primary.Cone
 		end
 	end
+	--]]
 	
 	if self.HasPumpAction == true then
 		self.ReloadDelay = CurTime() + 1

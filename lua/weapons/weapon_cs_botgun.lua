@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "weapon_cs_botgun"
+	SWEP.PrintName			= "Aimbot Gun for Bots"
 	SWEP.Slot				= 3
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_botgun", "csd", "bD", Color( 0, 80, 255, 255 ) )
@@ -10,6 +10,7 @@ end
 SWEP.HoldType				= "ar2"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Spawnable				= true
+SWEP.AdminOnly				= true
 SWEP.Category				= "EXPERIMENTAL"
 
 SWEP.ViewModel				= "models/weapons/cstrike/c_rif_ak47.mdl"

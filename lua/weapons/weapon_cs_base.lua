@@ -404,12 +404,7 @@ function SWEP:Shoot()
 		
 			timer.Simple(self.Primary.Delay*0.50*i,function() 
 				if IsValid(self) == true then 
-					self.Weapon:EmitSound(self.Primary.Sound) 
-					
 					self.Weapon:EmitSound(self.Primary.Sound, SNDLVL_GUNFIRE, 100, 1, CHAN_WEAPON )
-					
-					
-					
 				end
 			end )
 		

@@ -27,46 +27,39 @@ function ENT:Initialize()
 			--phys:EnableMotion(false)
 			--phys:EnableCollisions(false)
 		end
-		
-		
 	
-		self.Delay = CurTime() + 45
+		self.Delay = CurTime() + GetConVar("sv_css_c4_time_explosion"):GetInt()
+		self.DefuseTime = GetConVar("sv_css_c4_time_defuse"):GetInt()
+		
 		self.First = true
 		self.NextBeep = 0
 		self.BeepLatch = 0
 		self.DebugDelay = 0
-		
-		--print(Entity(0))
-		
-		--self:SetParent(Entity(0))
-		
 		self.NextTick = 0
 		self.Progress = 0
 		self.StopEverytingOhGod = false
 		self.SendMessage = true
 
 		
-	end
 	
+	
+		if GetConVar("sv_css_c4_notifyplayers"):GetInt() == 1 then
+			for n,p in pairs(player.GetAll()) do
+				p:PrintMessage(HUD_PRINTCENTER,"Bomb has been planted")
+				p:SendLua("LocalPlayer():EmitSound(\"radio/bombpl.wav\")")
+			end
+		end
+		
+		
+		
+	end
 	
 end
 
 function ENT:PhysicsCollide(data, physobj)
-
 	if SERVER then
-	
 		self:SetMoveType(MOVETYPE_NONE)
-	
-	
-		self.HitP = data.HitPos
-		self.HitN = data.HitNormal
-		
-		if self:GetVelocity():Length() > 50 then
-			self:EmitSound("weapons/hegrenade/he_bounce-1.wav",100,100)
-		end
-		
 	end
-	
 end
 
 function ENT:Use(activator,caller,useType,value)
@@ -83,7 +76,7 @@ function ENT:Use(activator,caller,useType,value)
 			self.NextTick = CurTime() + 0.05
 		end
 
-	self:SetNWInt("defusecount",self.Progress*10)	
+	self:SetNWInt("defusecount",self.Progress)	
 		
 		
 	else
@@ -97,23 +90,26 @@ end
 
 
 function ENT:Think()
+			
 	if SERVER then
-	
-		if self.Progress >= 10 then
+
+		if self.Progress >= self.DefuseTime  then
 		
 			if self.SendMessage == true then
-				for n,p in pairs(player.GetAll()) do
-					--print(p:Nick())
+				if GetConVar("sv_css_c4_notifyplayers"):GetInt() == 1 then
+					for n,p in pairs(player.GetAll()) do
+						--print(p:Nick())
 				
-					p:PrintMessage(HUD_PRINTCENTER,"Bomb has been defused")
-					p:SendLua("LocalPlayer():EmitSound(\"radio/bombdef.wav\")")
+						p:PrintMessage(HUD_PRINTCENTER,"Bomb has been defused")
+						p:SendLua("LocalPlayer():EmitSound(\"radio/bombdef.wav\")")
 				
 				
-					timer.Simple(2, function()
-						p:PrintMessage(HUD_PRINTCENTER,"Counter-Terrorists Win")
-						p:SendLua("LocalPlayer():EmitSound(\"radio/ctwin.wav\")")
-					end)
+						timer.Simple(2, function()
+							p:PrintMessage(HUD_PRINTCENTER,"Counter-Terrorists Win")
+							p:SendLua("LocalPlayer():EmitSound(\"radio/ctwin.wav\")")
+						end)
 				
+					end
 				end
 				self.SendMessage = false
 			end
@@ -148,6 +144,12 @@ end
 
 function ENT:Detonate(self,pos)
 	if SERVER then
+	
+		local c4damage = GetConVar("sv_css_c4_damage"):GetInt()
+		local c4radius = GetConVar("sv_css_c4_radius"):GetInt()
+	
+	
+	
 		if not self:IsValid() then return end
 		local effectdata = EffectData()
 			effectdata:SetStart( pos + Vector(0,0,100)) // not sure if we need a start and origin (endpoint) for this effect, but whatever
@@ -158,16 +160,15 @@ function ENT:Detonate(self,pos)
 		--util.Effect( "Explosion", effectdata)
 	
 
-		util.BlastDamage(self, self:GetNWEntity("owner"), pos, 1000,1000)
+		--util.BlastDamage(self, self:GetNWEntity("owner"), pos, c4radius,c4damage)
 	
-	
+		
 		for i = 1, 50 do
 			local ent = ents.Create("ent_cs_smokeparticle")
 				ent:SetPos(self:GetPos())
 				ent:SetAngles(Angle(0,0,0))
 				ent:Spawn()
 				ent:Activate()
-				ent:SetOwner(self.Owner)
 				ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-2500,2500),math.Rand(-2500,2500),math.Rand(0,25)))
 				if i == 2 then
 					timer.Simple(1, function()
@@ -175,39 +176,77 @@ function ENT:Detonate(self,pos)
 					end)
 				end
 		end
+		
 	
 		self:EmitSound("weapons/c4/c4_explode1.wav",100,100)
 		
 	
-		if table.Count(ents.FindInSphere(self:GetPos(),1000)) > 0 then
-			for k,v in pairs(ents.FindInSphere(self:GetPos(),1000)) do
+		if table.Count(ents.FindInSphere(self:GetPos(),c4radius)) > 0 then
+			for k,v in pairs(ents.FindInSphere(self:GetPos(),c4radius)) do
 		
-				if v:GetClass() == "prop_physics" then
+				local distance = v:GetPos():Distance( self:GetPos() )
 		
-					if math.Rand(0,100) >= 70 then
-						local ignitetime = (1000 - v:GetPos():Distance( self:GetPos() ))/250
-						v:Ignite(ignitetime,5)
-					end
+				local dmginfo = DamageInfo()
+					dmginfo:SetDamage( c4damage * (distance/c4radius) )
+					dmginfo:SetDamageType( DMG_BLAST )
+					dmginfo:SetAttacker( self:GetNWEntity("owner",self) )
+					
+					local DDD_Distance = (self:GetPos() - v:GetPos()):GetNormalized( )
+					local DDD_Radius = Vector(c4radius,c4radius,c4radius)
+					
+					--dmginfo:SetDamageForce( (DDD_Distance - DDD_Radius )*100   )
+					
+					v:TakeDamageInfo(dmginfo)
+		
+		
+		
+		
 			
-					timer.Simple(0,function() 
+				local ent = ents.Create("ent_cs_smokeparticle")
+					ent:SetPos(v:GetPos())
+					ent:SetAngles(Angle(0,0,0))
+					ent:Spawn()
+					ent:Activate()
+					ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-2500,2500),math.Rand(-2500,2500),math.Rand(0,25)))
+			
+		
+		
+				--if v:GetClass() == "prop_physics" then
+					--[[
+					if math.Rand(0,100) >= 1 then
+						local ignitetime = (c4damage/10) * math.abs(distance - c4radius)/c4radius
+						print(v)
+						print(ignitetime)
+						v:Ignite(ignitetime,0)
+					end
+					--]]
+					
+					--[[
+					timer.Simple(0.05,function() 
 						if v:IsValid() == false then return end
 						constraint.RemoveAll(v)
 						v:GetPhysicsObject():EnableMotion(true)
 						v:GetPhysicsObject():Wake()
 					end)
-
-				end
+					--]]
+					
+				--end
 		
 			end
 
 		end
-	
-		for n,p in pairs(player.GetAll()) do
-			--print(p:Nick())
-			p:PrintMessage(HUD_PRINTCENTER,"Terrorists Win")
-			p:SendLua("LocalPlayer():EmitSound(\"radio/terwin.wav\")")
+		
+
+		if SERVER then
+			if GetConVar("sv_css_c4_notifyplayers"):GetInt() == 1 then
+				for n,p in pairs(player.GetAll()) do
+					--print(p:Nick())
+					p:PrintMessage(HUD_PRINTCENTER,"Terrorists Win")
+					p:SendLua("LocalPlayer():EmitSound(\"radio/terwin.wav\")")
+				end
+			end
 		end
-	
+		
 		self:Remove()
 	end
 end
@@ -218,7 +257,7 @@ function ENT:Draw()
 	if CLIENT then
 		self:DrawModel()
 		
-		local Size = 100
+		local Size = GetConVar("sv_css_c4_time_defuse"):GetInt()
 		local Var = Size - self:GetNWInt("defusecount",0)
 		
 		

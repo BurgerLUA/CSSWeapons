@@ -129,13 +129,6 @@ function SWEP:PlantC4()
 		
 	ent:EmitSound("weapons/c4/c4_plant.wav")
 	
-	for n,p in pairs(player.GetAll()) do
-		--print(p:Nick())
-		p:PrintMessage(HUD_PRINTCENTER,"Bomb has been planted")
-		p:SendLua("LocalPlayer():EmitSound(\"radio/bombpl.wav\")")
-	end
-	
-	
 	--self.Owner:Freeze(false)
 	
 end

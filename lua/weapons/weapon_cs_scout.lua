@@ -36,4 +36,5 @@ SWEP.HasBoltAction 			= true
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= true
+SWEP.HasSideRecoil			= false
 

@@ -24,10 +24,14 @@ function ENT:Initialize()
 			phys:SetBuoyancyRatio(0)
 		end
 		
+		
+		
+		if GetConVar("sv_css_timed_drops"):GetInt() == 1 then
+			SafeRemoveEntityDelayed(self,GetConVar("sv_css_drop_timer"):GetInt())
+		end
+		
 	end
-	
-	
-	SafeRemoveEntityDelayed(self,60)
+
 	
 	
 end
@@ -35,6 +39,11 @@ end
 function ENT:Use(activator,caller,useType,value)
 	
 	if ( activator:IsPlayer() ) then
+	
+		if self:GetNWString("class") == "weapon_cs_c4" and GetConVar("sv_css_enable_c4nonadmin"):GetInt() ~= 1 and activator:IsAdmin() == false then
+			activator:ChatPrint("You are not allowed to pick up C4")
+		return end
+		
 		
 		local hasweapon = false
 		

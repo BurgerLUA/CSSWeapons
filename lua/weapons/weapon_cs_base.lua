@@ -1,9 +1,30 @@
 AddCSLuaFile()
 
-CreateConVar("bur_weapon_recoil_method", "1", FCVAR_REPLICATED + FCVAR_NOTIFY + FCVAR_ARCHIVE , "Value 1 gives the classic CSS view-punch. Others give a custom viewpunch" )
 
+if SERVER then
+	CreateConVar("sv_css_damage_scale", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value that all damage from CSS weapons is multiplied. Default is 1." )
+	CreateConVar("sv_css_recoil_scale", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value that all recoil from CSS weapons is multiplied. Default is 1." )
+	CreateConVar("sv_css_cone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
+	CreateConVar("sv_css_velcone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
+	
+	CreateConVar("sv_css_enable_drops", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables players to drop css weapons on death, all other values disables it. Default is 1." )
+	CreateConVar("sv_css_timed_drops", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 creates a removal time limit for weapons that drop. 0 never removes weapon drops." )
+	CreateConVar("sv_css_drop_timer", "60", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in seconds that determines how long the weapons are removed after they are dropped. Default is 60." )
+	
+	CreateConVar("sv_css_enable_c4", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables non-admins to use c4, all other values disables it. Default is 1." )
+	CreateConVar("sv_css_enable_c4nonadmin", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables non-admins to use c4, all other values disables it. Default is 1." )
+	
+	CreateConVar("sv_css_c4_time_explosion", "45", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in seconds that the C4 detonates when planted. Default is 45." )
+	CreateConVar("sv_css_c4_time_defuse", "10", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in seconds that the C4 is defused. Default is 10." )
+	CreateConVar("sv_css_c4_damage", "500", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in points that determines maximum damage. Default is 500." )
+	CreateConVar("sv_css_c4_radius", "1500", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in units that determines the maximum blast radius. Default is 1500." )
+	CreateConVar("sv_css_c4_notifyplayers", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables players to receive cosmetic round winning notifications and sounds, all other values disables it. Default is 1." )
+end
+
+	
 if CLIENT then
-
+	CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
+	
 	language.Add("AlyxGun_ammo","5.7mm")
 	language.Add("SniperPenetratedRound_ammo",".45 ACP")
 	language.Add("Gravity_ammo","4.6mm")
@@ -13,15 +34,6 @@ if CLIENT then
 	language.Add("StriderMinigun_ammo","7.62mm")
 	language.Add("SniperRound_ammo",".338")
 	language.Add("GaussEnergy_ammo",".357 SIG")
-	--language.Add("Battery_ammo","9mm")
-	--language.Add("Battery_ammo","9mm")
-	--language.Add("Battery_ammo","9mm")
-	--language.Add("Battery_ammo","9mm")
-	--language.Add("Battery_ammo","9mm")
-	--language.Add("Battery_ammo","9mm")
-	
-
-
 
 	surface.CreateFont( "csd",{
 	font	  = "csd",
@@ -32,16 +44,13 @@ if CLIENT then
 	SWEP.DrawAmmo			= true
 	SWEP.DrawCrosshair		= false
 	SWEP.ViewModelFlip		= false
-	SWEP.ViewModelFOV		= 45
+	SWEP.ViewModelFOV		= 47
 	SWEP.SwayScale			= 3
 	SWEP.BobScale 			= 2
 	SWEP.BounceWeaponIcon	= false
 	SWEP.DrawWeaponInfoBox	= false
-	
-	
+
 	SWEP.CSMuzzleFlashes 	= true
-	
-	
 	
 end
 
@@ -81,6 +90,7 @@ SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false 
 SWEP.HasDoubleZoom			= false
+SWEP.HasSideRecoil			= false
 
 SWEP.CoolDown 				= 0
 SWEP.CoolTime 				= 0
@@ -99,30 +109,23 @@ SWEP.AttachDelay 			= 0
 SWEP.ScopeDelay 			= 0
 SWEP.IsSilenced 			= 0
 SWEP.ClickSoundDelay 		= 0
-
-
-
-
 SWEP.ZoomCurTime			= 1
-
 SWEP.BurgerBase				= true
 
-
 hook.Add("DoPlayerDeath", "drop weapon after death", function(ply)
-
-	
-	for k,v in pairs(ply:GetWeapons()) do
-		if v.BurgerBase ~= nil then
-			local dropped = ents.Create("ent_cs_droppedweapon")
+	if GetConVar("sv_css_enable_drops"):GetInt() == 1 then
+		for k,v in pairs(ply:GetWeapons()) do
+			if v.BurgerBase ~= nil then
+				local dropped = ents.Create("ent_cs_droppedweapon")
 				dropped:SetPos(ply:GetShootPos())
 				dropped:SetAngles(ply:EyeAngles())
 				dropped:SetModel(v:GetModel())
 				dropped:Spawn()
 				dropped:Activate()
 				dropped:SetNWString("class",v:GetClass())
+			end
 		end
 	end
-	
 end)
 
 --Burst fire Code from Kogitsune
@@ -223,6 +226,7 @@ function SWEP:Initialize()
 end
 
 function SWEP:Deploy()
+	self.Owner:GetHands():SetMaterial("")
 	self.Owner:DrawViewModel(true)
 	
 	if self.IsSilenced == 1 then
@@ -405,6 +409,7 @@ function SWEP:Shoot()
 			timer.Simple(self.Primary.Delay*0.50*i,function() 
 				if IsValid(self) == true then 
 					self.Weapon:EmitSound(self.Primary.Sound, SNDLVL_GUNFIRE, 100, 1, CHAN_WEAPON )
+					self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 				end
 			end )
 		
@@ -551,13 +556,13 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 		self.CoolDown = 0
 	end
 	
-	self.ViewKick = -(Damage*Shots/20)/2*Recoil*self.RecoilMul
-	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001)
+	self.ViewKick = -(Damage*Shots/20)/2*Recoil*self.RecoilMul*GetConVar("sv_css_recoil_scale"):GetFloat()
+	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001*GetConVar("sv_css_velcone_scale"):GetInt())
 	
 	--if SERVER or game.SinglePlayer() then
 	
 	--if CLIENT then
-		if self.CoolDown > 0.25 and self.Primary.Automatic == true and self.EnableScope == false then
+		if self.CoolDown > 0.25 and self.HasSideRecoil == true then
 			bonusmul = math.Rand(-1,1)
 			sideways = 3
 		else
@@ -598,10 +603,14 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*self.RecoilMul
 
 	if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
-		self.CrouchMul = 0.5
+		self.CrouchMul = 0.5 * GetConVar("sv_css_cone_scale"):GetFloat()
 	else
-		self.CrouchMul = 1
+		self.CrouchMul = 1 * GetConVar("sv_css_cone_scale"):GetFloat()
 	end
+	
+	
+	
+	
 
 	local bullet = {}
 	bullet.Num		= Shots
@@ -611,7 +620,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	bullet.Tracer	= 1
 	bullet.TracerName = "none"
 	bullet.Force	= Damage/10
-	bullet.Damage	= Damage*math.Rand(0.99,1.01)
+	bullet.Damage	= Damage*math.Rand(0.99,1.01)*GetConVar("sv_css_damage_scale"):GetFloat()
 	
 	self.Owner:FireBullets(bullet)
 	--self:ShootEffects()
@@ -652,6 +661,11 @@ end
 
 
 function SWEP:Think()
+
+	if CLIENT then
+		self.ViewModelFOV = GetConVar("cl_css_viewmodel_fov"):GetFloat()
+	end
+
 
 	self:BotThink()
 	
@@ -798,7 +812,7 @@ function SWEP:DrawHUD()
 		crouchmul = 1
 	end
 
-	self.ActualCone = self.Primary.Cone
+	self.ActualCone = self.Primary.Cone * GetConVar("sv_css_cone_scale"):GetFloat()
 
 	local add = 2
 
@@ -808,7 +822,7 @@ function SWEP:DrawHUD()
 
 	local heat = self:GetNWInt("weaponheat",0)
 	--local extra = (heat*10 + self.ActualCone*1000) + self.Owner:GetVelocity():Length()*0.1*crouchmul*mistake + add
-	local extra = (self.ActualCone*1000*crouchmul + ( heat*10 + self.Owner:GetVelocity():Length()*0.1 )) + add  --+ result*2
+	local extra = (self.ActualCone*1000*crouchmul + ( heat*10 + self.Owner:GetVelocity():Length()*0.1*GetConVar("sv_css_velcone_scale"):GetFloat() )) + add
 	
 	if self.EnableCrosshair == true then
 		if self:GetNWInt("zoommode",0) == 0 then

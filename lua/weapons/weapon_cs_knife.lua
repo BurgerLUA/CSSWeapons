@@ -101,6 +101,7 @@ function SWEP:Swing(damage)
 				
 				self.HitAThing = true
 				
+				
 			else
 				damage = 10
 			end
@@ -126,6 +127,7 @@ function SWEP:Swing(damage)
 			self:SendWeaponAnim(heavy)
 			self.Weapon:EmitSound("weapons/knife/knife_stab.wav",100,100)
 		end
+		
 	elseif trace.StartPos:Distance(trace.HitPos) < 40 then
 		self.Weapon:EmitSound("weapons/knife/knife_hitwall1.wav",100,100)
 		

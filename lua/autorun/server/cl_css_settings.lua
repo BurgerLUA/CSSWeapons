@@ -1,3 +1,5 @@
+AddCSLuaFile()
+
 function ISaid( ply, text, public )
     if (string.sub(text, 1, 4) == "/css") or (string.sub(text, 1, 4) == "!css")	then
 	

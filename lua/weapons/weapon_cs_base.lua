@@ -1,7 +1,5 @@
 AddCSLuaFile()
 
-
-if SERVER then
 	CreateConVar("sv_css_damage_scale", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value that all damage from CSS weapons is multiplied. Default is 1." )
 	CreateConVar("sv_css_recoil_scale", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value that all recoil from CSS weapons is multiplied. Default is 1." )
 	CreateConVar("sv_css_cone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
@@ -19,11 +17,11 @@ if SERVER then
 	CreateConVar("sv_css_c4_damage", "500", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in points that determines maximum damage. Default is 500." )
 	CreateConVar("sv_css_c4_radius", "1500", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in units that determines the maximum blast radius. Default is 1500." )
 	CreateConVar("sv_css_c4_notifyplayers", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables players to receive cosmetic round winning notifications and sounds, all other values disables it. Default is 1." )
-end
+	
+	CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
 
 	
 if CLIENT then
-	CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
 	
 	language.Add("AlyxGun_ammo","5.7mm")
 	language.Add("SniperPenetratedRound_ammo",".45 ACP")
@@ -78,6 +76,11 @@ SWEP.Primary.Delay			= .14
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic 		= true
 SWEP.Primary.DefaultClip	= 90 -- custom ammo shit
+
+SWEP.Secondary.Ammo 		= "none"
+SWEP.Secondary.ClipSize 	= -1
+SWEP.Secondary.DefaultClip 	= -1
+SWEP.Secondary.DefaultClip 	= -1
 
 
 SWEP.RecoilMul				= 1

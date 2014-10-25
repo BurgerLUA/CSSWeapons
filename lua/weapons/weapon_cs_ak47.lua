@@ -1,4 +1,3 @@
-
 if CLIENT then
 	SWEP.PrintName			= "CSS AK47"
 	SWEP.Slot				= 3

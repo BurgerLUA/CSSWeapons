@@ -1,9 +1,5 @@
 function CSSServersideWeaponSettings()
 
-	if LocalPlayer():IsAdmin() == false then 
-		LocalPlayer():ChatPrint("Only admins can access the weapon settings menu.")
-	return end
-
 	local MenuBase = vgui.Create("DFrame")
 		MenuBase:SetSize(ScrW()/2,ScrH()/2)
 		MenuBase:SetPos(0,0)

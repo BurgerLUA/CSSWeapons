@@ -21,7 +21,7 @@ SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
 SWEP.Primary.Cone			= .002
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 90
-SWEP.Primary.Delay			= .11
+SWEP.Primary.Delay			= 1/(600/60)
 SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic 		= true
 

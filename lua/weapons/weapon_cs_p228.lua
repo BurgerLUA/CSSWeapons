@@ -22,7 +22,7 @@ SWEP.Primary.Sound			= Sound("weapons/p228/p228-1.wav")
 SWEP.Primary.Cone			= .01
 SWEP.Primary.ClipSize		= 13
 SWEP.Primary.DefaultClip	= 52
-SWEP.Primary.Delay			= 0.01
+SWEP.Primary.Delay			= 1/(400/60)
 SWEP.Primary.Ammo			= "GaussEnergy"
 SWEP.Primary.Automatic 		= false
 

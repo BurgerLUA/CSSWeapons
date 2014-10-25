@@ -1,9 +1,14 @@
-function CSSServersideWeaponSettings()
 
+surface.CreateFont("TitleFont", {size = 30, weight = 400, antialias = true, font = "Arial"})
+surface.CreateFont("SliderFont", {size = 15, weight = 400, antialias = true, font = "Arial"})
+
+
+function CSSServersideWeaponSettings()
+	
 	local MenuBase = vgui.Create("DFrame")
 		MenuBase:SetSize(ScrW()/2,ScrH()/2)
 		MenuBase:SetPos(0,0)
-		MenuBase:SetTitle("Counter Strike Source Serverside Weapon Settings")
+		MenuBase:SetTitle("Counter Strike Source Server Settings")
 		MenuBase:SetDeleteOnClose(false)
 		MenuBase:SetDraggable( false )
 		MenuBase:SetBackgroundBlur(false)
@@ -30,14 +35,14 @@ function CSSServersideWeaponSettings()
 	
 	local Title1 = vgui.Create("DLabel", Base1)
 		Title1:SetPos(5,5)
-		Title1:SetFont("DermaLarge")
+		Title1:SetFont("TitleFont")
 		Title1:SetColor(Color(0,0,0,255))
 		Title1:SetText( "WEAPON SETTINGS" )
 		Title1:SizeToContents()
 		
 	local DamageSliderTitle = vgui.Create("DLabel", Base1)
 		DamageSliderTitle:SetPos(25,35)
-		DamageSliderTitle:SetFont("DefaultLarge")
+		DamageSliderTitle:SetFont("SliderFont")
 		DamageSliderTitle:SetColor(Color(0,0,0,255))
 		DamageSliderTitle:SetText( "Damage Multiplier" )
 		DamageSliderTitle:SizeToContents()
@@ -52,7 +57,7 @@ function CSSServersideWeaponSettings()
 		
 	local RecoilSliderTitle = vgui.Create("DLabel", Base1)
 		RecoilSliderTitle:SetPos(25,75)
-		RecoilSliderTitle:SetFont("DefaultLarge")
+		RecoilSliderTitle:SetFont("SliderFont")
 		RecoilSliderTitle:SetColor(Color(0,0,0,255))
 		RecoilSliderTitle:SetText( "Recoil Multiplier" )
 		RecoilSliderTitle:SizeToContents()
@@ -67,7 +72,7 @@ function CSSServersideWeaponSettings()
 		
 	local ConeSliderTitle = vgui.Create("DLabel", Base1)
 		ConeSliderTitle:SetPos(25,115)
-		ConeSliderTitle:SetFont("DefaultLarge")
+		ConeSliderTitle:SetFont("SliderFont")
 		ConeSliderTitle:SetColor(Color(0,0,0,255))
 		ConeSliderTitle:SetText( "Cone Multiplier" )
 		ConeSliderTitle:SizeToContents()
@@ -82,7 +87,7 @@ function CSSServersideWeaponSettings()
 		
 	local RunConeSliderTitle = vgui.Create("DLabel", Base1)
 		RunConeSliderTitle:SetPos(25,155)
-		RunConeSliderTitle:SetFont("DefaultLarge")
+		RunConeSliderTitle:SetFont("SliderFont")
 		RunConeSliderTitle:SetColor(Color(0,0,0,255))
 		RunConeSliderTitle:SetText( "Velocity Cone Multiplier" )
 		RunConeSliderTitle:SizeToContents()
@@ -97,14 +102,14 @@ function CSSServersideWeaponSettings()
 
 	local Title2 = vgui.Create("DLabel", Base1)
 		Title2:SetPos(5,205)
-		Title2:SetFont("DermaLarge")
+		Title2:SetFont("TitleFont")
 		Title2:SetColor(Color(0,0,0,255))
 		Title2:SetText( "C4 SETTINGS" )
 		Title2:SizeToContents()
 		
 	local C4TimeSliderTitle = vgui.Create("DLabel", Base1)
 		C4TimeSliderTitle:SetPos(25,235)
-		C4TimeSliderTitle:SetFont("DefaultLarge")
+		C4TimeSliderTitle:SetFont("SliderFont")
 		C4TimeSliderTitle:SetColor(Color(0,0,0,255))
 		C4TimeSliderTitle:SetText( "C4 Detonation Time (Seconds)" )
 		C4TimeSliderTitle:SizeToContents()
@@ -119,7 +124,7 @@ function CSSServersideWeaponSettings()
 		
 	local C4DefuseSliderTitle = vgui.Create("DLabel", Base1)
 		C4DefuseSliderTitle:SetPos(25,275)
-		C4DefuseSliderTitle:SetFont("DefaultLarge")
+		C4DefuseSliderTitle:SetFont("SliderFont")
 		C4DefuseSliderTitle:SetColor(Color(0,0,0,255))
 		C4DefuseSliderTitle:SetText( "C4 Defuse Time (Seconds)" )
 		C4DefuseSliderTitle:SizeToContents()
@@ -134,7 +139,7 @@ function CSSServersideWeaponSettings()
 		
 	local C4DamageSliderTitle = vgui.Create("DLabel", Base1)
 		C4DamageSliderTitle:SetPos(25,315)
-		C4DamageSliderTitle:SetFont("DefaultLarge")
+		C4DamageSliderTitle:SetFont("SliderFont")
 		C4DamageSliderTitle:SetColor(Color(0,0,0,255))
 		C4DamageSliderTitle:SetText( "C4 Max Damage" )
 		C4DamageSliderTitle:SizeToContents()
@@ -149,7 +154,7 @@ function CSSServersideWeaponSettings()
 		
 	local C4RadiusSliderTitle = vgui.Create("DLabel", Base1)
 		C4RadiusSliderTitle:SetPos(25,355)
-		C4RadiusSliderTitle:SetFont("DefaultLarge")
+		C4RadiusSliderTitle:SetFont("SliderFont")
 		C4RadiusSliderTitle:SetColor(Color(0,0,0,255))
 		C4RadiusSliderTitle:SetText( "C4 Blast Radius (Units)" )
 		C4RadiusSliderTitle:SizeToContents()
@@ -178,7 +183,7 @@ function CSSServersideWeaponSettings()
 	
 	local Title3 = vgui.Create("DLabel", Base1)
 		Title3:SetPos(5,440)
-		Title3:SetFont("DermaLarge")
+		Title3:SetFont("TitleFont")
 		Title3:SetColor(Color(0,0,0,255))
 		Title3:SetText( "WEAPON DROPPING" )
 		Title3:SizeToContents()
@@ -199,7 +204,7 @@ function CSSServersideWeaponSettings()
 	
 	local  WeaponDropTimeSliderTitle = vgui.Create("DLabel", Base1 )
 		WeaponDropTimeSliderTitle:SetPos(25,515)
-		WeaponDropTimeSliderTitle:SetFont("DefaultLarge")
+		WeaponDropTimeSliderTitle:SetFont("SliderFont")
 		WeaponDropTimeSliderTitle:SetColor(Color(0,0,0,255))
 		WeaponDropTimeSliderTitle:SetText( "Removal Delay (Seconds)" )
 		WeaponDropTimeSliderTitle:SizeToContents()
@@ -221,10 +226,13 @@ concommand.Add("cssadminsettings", CSSServersideWeaponSettings)
 
 function CSSClientsideWeaponSettings()
 
+	print(LocalPlayer():IsAdmin())
+	print(LocalPlayer():IsSuperAdmin())
+	
 	local MenuBase = vgui.Create("DFrame")
 		MenuBase:SetSize(ScrW()/2,ScrH()/2)
 		MenuBase:SetPos(0,0)
-		MenuBase:SetTitle("Counter Strike Source Weapon Clientside Settings")
+		MenuBase:SetTitle("Counter Strike Source Client Settings")
 		MenuBase:SetDeleteOnClose(false)
 		MenuBase:SetDraggable( false )
 		MenuBase:SetBackgroundBlur(false)
@@ -235,7 +243,41 @@ function CSSClientsideWeaponSettings()
 		end
 		MenuBase:MakePopup()
 		
-	--checkbox1 = vgui.Create( "DCheckBox", ListItem )
+	
+	local ScrollBar = vgui.Create( "DScrollPanel", MenuBase )
+		ScrollBar:SetSize( MenuBase:GetWide() - 50, MenuBase:GetTall() - 50 )
+		ScrollBar:SetPos( 25,25 )
+	
+	
+	local Base1 = vgui.Create("DPanel", ScrollBar)
+		Base1:SetPos(0,0)
+		Base1:SetSize(MenuBase:GetWide() - 50, 1000)
+		Base1:SizeToContents()
+		Base1.Paint = function()
+			draw.RoundedBox( 8, 0, 0, Base1:GetWide(), Base1:GetTall(), Color( 255, 255, 255, 255 ) )
+		end
+	
+	local Title1 = vgui.Create("DLabel", Base1)
+		Title1:SetPos(5,5)
+		Title1:SetFont("TitleFont")
+		Title1:SetColor(Color(0,0,0,255))
+		Title1:SetText( "WEAPON SETTINGS" )
+		Title1:SizeToContents()
+		
+	local DamageSliderTitle = vgui.Create("DLabel", Base1)
+		DamageSliderTitle:SetPos(25,35)
+		DamageSliderTitle:SetFont("SliderFont")
+		DamageSliderTitle:SetColor(Color(0,0,0,255))
+		DamageSliderTitle:SetText( "Weapon FOV" )
+		DamageSliderTitle:SizeToContents()
+	
+	local DamageSlider = vgui.Create( "Slider", Base1 )
+		DamageSlider:SetPos( 5,40 )
+		DamageSlider:SetWide( Base1:GetWide() - 10 - 20 )
+		DamageSlider:SetMin( 10 ) -- Minimum number of the slider
+		DamageSlider:SetMax( 90 ) -- Maximum number of the slider
+		DamageSlider:SetDecimals( 1 ) -- Sets a decimal. Zero means it's a whole number
+		DamageSlider:SetConVar( "cl_css_viewmodel_fov" ) -- Set the convar
 
 end
 

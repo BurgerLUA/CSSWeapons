@@ -379,12 +379,13 @@ function SWEP:Shoot()
 
 				Recoil = Recoil * 0.75
 				Cone = Cone * 2
-			
+				
 				if self.Primary.Automatic == true then
-					self.FakeDelay = CurTime() + 0.5
+					self.FakeDelay = CurTime() + self.Primary.Delay*3
 				else
-					self.FakeDelay = CurTime() + self.Primary.Delay*4
+					self:SetNextPrimaryFire(self.Primary.Delay*3)
 				end
+
 
 				if self.Weapon:Clip1() >= 3 then
 					self:TakePrimaryAmmo(3)
@@ -397,11 +398,13 @@ function SWEP:Shoot()
 					Shots = 1
 				end
 
-				self.FakeDelay = CurTime() + self.Primary.Delay*4
+
 				
 			else
+			
 				self:TakePrimaryAmmo(1)
-				self.FakeDelay = CurTime() + self.Primary.Delay
+				--self.FakeDelay = CurTime() + self.Primary.Delay
+				self:SetNextPrimaryFire(self.Primary.Delay)
 
 			end
 			
@@ -409,7 +412,7 @@ function SWEP:Shoot()
 		
 		for i=1, Shots-1 do
 		
-			timer.Simple(self.Primary.Delay*0.50*i,function() 
+			timer.Simple(0.01*i,function() 
 				if IsValid(self) == true then 
 					self.Weapon:EmitSound(self.Primary.Sound, SNDLVL_GUNFIRE, 100, 1, CHAN_WEAPON )
 					self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)

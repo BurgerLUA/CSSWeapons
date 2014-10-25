@@ -22,7 +22,7 @@ SWEP.Primary.Sound			= Sound("weapons/sg550/sg550-1.wav")
 SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 90
-SWEP.Primary.Delay			= 0.3
+SWEP.Primary.Delay			= 1/(240/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 

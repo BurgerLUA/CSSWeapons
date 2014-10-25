@@ -16,13 +16,13 @@ SWEP.Category				= "Counter-Strike"
 SWEP.ViewModel				= "models/weapons/cstrike/c_shot_xm1014.mdl"
 SWEP.WorldModel				= "models/weapons/w_shot_xm1014.mdl"
 
-SWEP.Primary.Damage			= 105/12
-SWEP.Primary.NumShots		= 12
+SWEP.Primary.Damage			= 105/6
+SWEP.Primary.NumShots		= 6
 SWEP.Primary.Sound			= Sound("weapons/xm1014/xm1014-1.wav")
 SWEP.Primary.Cone			= .1
 SWEP.Primary.ClipSize		= 7
 SWEP.Primary.DefaultClip	= 32
-SWEP.Primary.Delay			= 0.3
+SWEP.Primary.Delay			= 1/(240/60)
 SWEP.Primary.Ammo			= "Buckshot"
 SWEP.Primary.Automatic 		= false
 

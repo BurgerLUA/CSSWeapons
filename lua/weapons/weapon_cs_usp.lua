@@ -22,7 +22,7 @@ SWEP.Primary.Sound			= Sound("weapons/usp/usp_unsil-1.wav")
 SWEP.Primary.Cone			= .01
 SWEP.Primary.ClipSize		= 12
 SWEP.Primary.DefaultClip	= 100
-SWEP.Primary.Delay			= .01
+SWEP.Primary.Delay			= 1/(400/60)
 SWEP.Primary.Ammo			= "SniperPenetratedRound"
 SWEP.Primary.Automatic 		= false
 

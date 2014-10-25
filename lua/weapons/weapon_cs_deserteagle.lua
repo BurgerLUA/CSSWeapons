@@ -16,13 +16,13 @@ SWEP.Spawnable				= true
 SWEP.ViewModel				= "models/weapons/cstrike/c_pist_deagle.mdl"
 SWEP.WorldModel				= "models/weapons/w_pist_deagle.mdl"
 
-SWEP.Primary.Damage			= 52
+SWEP.Primary.Damage			= 50
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/deagle/deagle-1.wav")
 SWEP.Primary.Cone			= 0.015
-SWEP.Primary.ClipSize		= 8
+SWEP.Primary.ClipSize		= 7
 SWEP.Primary.DefaultClip	= 35
-SWEP.Primary.Delay			= 0.3
+SWEP.Primary.Delay			= 1/(267/60)
 SWEP.Primary.Ammo			= "CombineCannon"
 SWEP.Primary.Automatic 		= false
 

@@ -22,7 +22,7 @@ SWEP.Primary.Sound			= Sound("weapons/mp5navy/mp5-1.wav")
 SWEP.Primary.Cone			= .01
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.DefaultClip	= 120
-SWEP.Primary.Delay			= .1
+SWEP.Primary.Delay			= 1/(750/60)
 SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic 		= true
 

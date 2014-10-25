@@ -22,7 +22,7 @@ SWEP.Primary.Sound			= Sound("weapons/scout/scout_fire-1.wav")
 SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= 10
 SWEP.Primary.DefaultClip	= 90
-SWEP.Primary.Delay			= 1.2
+SWEP.Primary.Delay			= 1/(48/60)
 SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic 		= false
 

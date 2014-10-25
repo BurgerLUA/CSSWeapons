@@ -16,13 +16,13 @@ SWEP.Spawnable				= true
 SWEP.ViewModel				= "models/weapons/cstrike/c_shot_m3super90.mdl"
 SWEP.WorldModel				= "models/weapons/w_shot_m3super90.mdl"
 
-SWEP.Primary.Damage			= 9.5
-SWEP.Primary.NumShots		= 12
+SWEP.Primary.Damage			= 120/9
+SWEP.Primary.NumShots		= 9
 SWEP.Primary.Sound			= Sound("weapons/m3/m3-1.wav")
 SWEP.Primary.Cone			= 0.05
 SWEP.Primary.ClipSize		= 8
 SWEP.Primary.DefaultClip	= 32
-SWEP.Primary.Delay			= 1
+SWEP.Primary.Delay			= 1/(68/60)
 SWEP.Primary.Ammo			= "Buckshot"
 SWEP.Primary.Automatic 		= false
 

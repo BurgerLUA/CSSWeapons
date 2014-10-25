@@ -16,13 +16,13 @@ SWEP.Spawnable				= true
 SWEP.ViewModel				= "models/weapons/cstrike/c_pist_glock18.mdl"
 SWEP.WorldModel				= "models/weapons/w_pist_glock18.mdl"
 
-SWEP.Primary.Damage			= 25
+SWEP.Primary.Damage			= 28
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/glock/glock18-1.wav")
 SWEP.Primary.Cone			= 0.015
 SWEP.Primary.ClipSize		= 20
 SWEP.Primary.DefaultClip	= 120
-SWEP.Primary.Delay			= 0.01
+SWEP.Primary.Delay			= 1/(400/60)
 SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic 		= false
 

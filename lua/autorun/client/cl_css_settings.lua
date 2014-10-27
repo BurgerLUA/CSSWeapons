@@ -190,7 +190,7 @@ function CSSServersideWeaponSettings()
 	
 	local WeaponDropEnableCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
 		WeaponDropEnableCheckBox:SetPos( 10,475)
-		WeaponDropEnableCheckBox:SetText( "Enable CSS Weapon Drops" )
+		WeaponDropEnableCheckBox:SetText( "Enable CSS Weapon and Ammo Drops" )
 		WeaponDropEnableCheckBox:SetTextColor( Color(0, 0, 0, 255) )
 		WeaponDropEnableCheckBox:SetConVar( "sv_css_enable_drops" ) -- ConCommand must be a 1 or 0 value
 		WeaponDropEnableCheckBox:SizeToContents() -- Make its size to the contents. Duh?
@@ -202,7 +202,7 @@ function CSSServersideWeaponSettings()
 		WeaponDropTimedCheckBox:SetConVar( "sv_css_timed_drops" ) -- ConCommand must be a 1 or 0 value
 		WeaponDropTimedCheckBox:SizeToContents() -- Make its size to the contents. Duh?
 	
-	local  WeaponDropTimeSliderTitle = vgui.Create("DLabel", Base1 )
+	local WeaponDropTimeSliderTitle = vgui.Create("DLabel", Base1 )
 		WeaponDropTimeSliderTitle:SetPos(25,515)
 		WeaponDropTimeSliderTitle:SetFont("SliderFont")
 		WeaponDropTimeSliderTitle:SetColor(Color(0,0,0,255))
@@ -217,6 +217,26 @@ function CSSServersideWeaponSettings()
 		WeaponDropTimeSlider:SetDecimals( 0 ) -- Sets a decimal. Zero means it's a whole number
 		WeaponDropTimeSlider:SetConVar( "sv_css_drop_timer" ) -- Set the convar
 		
+	local Title4 = vgui.Create("DLabel", Base1)
+		Title4:SetPos(5,560)
+		Title4:SetFont("TitleFont")
+		Title4:SetColor(Color(0,0,0,255))
+		Title4:SetText( "AMMO SETTINGS" )
+		Title4:SizeToContents()
+		
+	local LoadedGunsCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
+		LoadedGunsCheckBox:SetPos( 10,600)
+		LoadedGunsCheckBox:SetText( "Give loaded guns" )
+		LoadedGunsCheckBox:SetTextColor( Color(0, 0, 0, 255) )
+		LoadedGunsCheckBox:SetConVar( "sv_css_ammo_loaded" ) -- ConCommand must be a 1 or 0 value
+		LoadedGunsCheckBox:SizeToContents() -- Make its size to the contents. Duh?	
+	
+	local SpareAmmoCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
+		SpareAmmoCheckBox:SetPos( 10,620)
+		SpareAmmoCheckBox:SetText( "Give spare ammo" )
+		SpareAmmoCheckBox:SetTextColor( Color(0, 0, 0, 255) )
+		SpareAmmoCheckBox:SetConVar( "sv_css_ammo_givespare" ) -- ConCommand must be a 1 or 0 value
+		SpareAmmoCheckBox:SizeToContents() -- Make its size to the contents. Duh?	
 		
 
 end

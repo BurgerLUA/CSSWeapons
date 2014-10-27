@@ -16,6 +16,7 @@ function ENT:Initialize()
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
 		self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+		
 		self:SetUseType(SIMPLE_USE)
 	
 		local phys = self:GetPhysicsObject()
@@ -58,8 +59,9 @@ function ENT:Use(activator,caller,useType,value)
 		return end
 		
 		
-		activator:Give(self:GetNWString("class"))
+		local givenweapon = activator:Give(self:GetNWString("class"))
 		activator:SelectWeapon(self:GetNWString("class"))
+		givenweapon:SetClip1(self:GetNWInt("clip"))
 		self:Remove()
 	else
 	

@@ -5,6 +5,9 @@ AddCSLuaFile()
 	CreateConVar("sv_css_cone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
 	CreateConVar("sv_css_velcone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
 	
+	CreateConVar("sv_css_ammo_loaded", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables giving weapons already loaded. Default is 1." )
+	CreateConVar("sv_css_ammo_givespare", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables giving spare ammo to players upon pickup. Default is 1." )
+	
 	CreateConVar("sv_css_enable_drops", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables players to drop css weapons on death, all other values disables it. Default is 1." )
 	CreateConVar("sv_css_timed_drops", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 creates a removal time limit for weapons that drop. 0 never removes weapon drops." )
 	CreateConVar("sv_css_drop_timer", "60", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in seconds that determines how long the weapons are removed after they are dropped. Default is 60." )
@@ -53,9 +56,11 @@ if CLIENT then
 end
 
 if SERVER then
+
 	SWEP.Weight				= 0
 	SWEP.AutoSwitchTo		= false
 	SWEP.AutoSwitchFrom		= false
+	
 end
 
 SWEP.Author					= "Burger"
@@ -75,7 +80,7 @@ SWEP.Primary.DefaultClip	= 0
 SWEP.Primary.Delay			= .14
 SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.Automatic 		= true
-SWEP.Primary.DefaultClip	= 90 -- custom ammo shit
+SWEP.Primary.SpareClip		= 90 -- custom ammo shit
 
 SWEP.Secondary.Ammo 		= "none"
 SWEP.Secondary.ClipSize 	= -1
@@ -115,6 +120,36 @@ SWEP.ClickSoundDelay 		= 0
 SWEP.ZoomCurTime			= 1
 SWEP.BurgerBase				= true
 
+SWEP.AlreadyGiven			= false
+
+local allammo = {}
+
+allammo[1] = 	"AR2"
+allammo[2] =	"AR2AltFire"
+allammo[3] =	"Pistol"
+allammo[4] =	"SMG1"
+allammo[5] =	"357"
+allammo[6] =	"XBowBolt"
+allammo[7] =	"Buckshot"
+allammo[8] =	"RPG_Round"
+allammo[9] =	"SMG1_Grenade"
+allammo[10] =	"Grenade"
+allammo[11] =	"slam"
+
+allammo[12] = 	"AlyxGun"
+allammo[13] =	"SniperRound"
+allammo[14] =	"SniperPenetratedRound"
+allammo[15] =	"Thumper"
+allammo[16] =	"Gravity"
+allammo[17] =	"Battery"
+allammo[18] =	"GaussEnergy"
+allammo[19] =	"CombineCannon"
+allammo[20] =	"AirboatGun"
+allammo[21] =	"StriderMinigun"
+allammo[22] =	"HelicopterGun"
+
+
+
 hook.Add("DoPlayerDeath", "drop weapon after death", function(ply)
 	if GetConVar("sv_css_enable_drops"):GetInt() == 1 then
 		for k,v in pairs(ply:GetWeapons()) do
@@ -126,8 +161,35 @@ hook.Add("DoPlayerDeath", "drop weapon after death", function(ply)
 				dropped:Spawn()
 				dropped:Activate()
 				dropped:SetNWString("class",v:GetClass())
+				dropped:SetNWInt("clip",v:Clip1())
 			end
 		end
+		
+		for i=1, 22 do
+		
+			if i >= 11 then
+
+				if ply:GetAmmoCount( i ) > 0 then
+					local dropammo = ents.Create("ent_cs_ammo_base")
+				
+					dropammo.AmmoType = allammo[i]
+					dropammo.AmmoAmount = ply:GetAmmoCount( i )
+					dropammo.AmmoModel = "models/weapons/w_defuser.mdl"
+					dropammo:SetPos(ply:GetShootPos())
+					dropammo:SetAngles(ply:EyeAngles() + Angle( math.Rand(1,360),math.Rand(1,360),math.Rand(1,360)) )
+					dropammo:Spawn()
+					dropammo:Activate()
+					dropammo:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+					
+					if GetConVar("sv_css_timed_drops"):GetInt() == 1 then
+						SafeRemoveEntityDelayed(dropammo,GetConVar("sv_css_drop_timer"):GetInt())
+					end
+					
+				end
+				
+			end
+		end
+		
 	end
 end)
 
@@ -229,6 +291,31 @@ function SWEP:Initialize()
 end
 
 function SWEP:Deploy()
+
+	if SERVER then
+	
+		
+		if self.AlreadyGiven == false then
+		
+			if GetConVar("sv_css_ammo_loaded"):GetInt() == 1 then
+				self:SetClip1(self.Primary.ClipSize)
+			end
+			
+			if GetConVar("sv_css_ammo_givespare"):GetInt() == 1 then
+				self.Owner:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
+			end
+			
+			
+			
+			
+			
+			self.AlreadyGiven = true
+		end
+
+	end
+
+
+
 	self.Owner:GetHands():SetMaterial("")
 	self.Owner:DrawViewModel(true)
 	
@@ -623,8 +710,9 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	bullet.Src		= self.Owner:GetShootPos()
 	bullet.Dir		= (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
 	bullet.Spread	= Vector(Cone*self.CrouchMul, Cone*self.CrouchMul, 0) + Vector(self.ExtraSpread,self.ExtraSpread,0)
-	bullet.Tracer	= 1
-	bullet.TracerName = "none"
+	bullet.Tracer	= 0
+	bullet.AmmoType = self.Primary.Ammo
+	bullet.TracerName = "Tracer"
 	bullet.Force	= Damage/10
 	bullet.Damage	= Damage*math.Rand(0.99,1.01)*GetConVar("sv_css_damage_scale"):GetFloat()
 	

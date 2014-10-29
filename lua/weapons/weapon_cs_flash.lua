@@ -9,7 +9,7 @@ if CLIENT then
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/flashbang")
 end
 
-SWEP.HoldType				= "melee"
+SWEP.HoldType				= "grenade"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"

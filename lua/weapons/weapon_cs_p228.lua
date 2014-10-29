@@ -8,7 +8,7 @@ if CLIENT then
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/p228")
 end
 
-SWEP.HoldType				= "pistol"
+SWEP.HoldType				= "revolver"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"

@@ -286,7 +286,8 @@ function SWEP:TranslateFOV(oldfov)
 end
 
 function SWEP:Initialize()
-	self:SetWeaponHoldType(self.HoldType)
+	--self:SetWeaponHoldType(self.HoldType)
+	self:SetHoldType( self.HoldType )
 	util.PrecacheSound(self.Primary.Sound)
 end
 
@@ -713,7 +714,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	bullet.Tracer	= 0
 	bullet.AmmoType = self.Primary.Ammo
 	bullet.TracerName = "Tracer"
-	bullet.Force	= Damage/10
+	bullet.Force	= Damage/100
 	bullet.Damage	= Damage*math.Rand(0.99,1.01)*GetConVar("sv_css_damage_scale"):GetFloat()
 	
 	self.Owner:FireBullets(bullet)

@@ -246,17 +246,14 @@ concommand.Add("cssadminsettings", CSSServersideWeaponSettings)
 
 function CSSClientsideWeaponSettings()
 
-	print(LocalPlayer():IsAdmin())
-	print(LocalPlayer():IsSuperAdmin())
-	
 	local MenuBase = vgui.Create("DFrame")
-		MenuBase:SetSize(ScrW()/2,ScrH()/2)
+		MenuBase:SetSize(ScrH()/2,ScrH()/2)
 		MenuBase:SetPos(0,0)
 		MenuBase:SetTitle("Counter Strike Source Client Settings")
 		MenuBase:SetDeleteOnClose(false)
-		MenuBase:SetDraggable( false )
+		MenuBase:SetDraggable( true )
 		MenuBase:SetBackgroundBlur(false)
-		MenuBase:Center(true)
+		--MenuBase:Center(true)
 		MenuBase:SetVisible( true )
 		MenuBase.Paint = function()
 			draw.RoundedBox( 8, 0, 0, MenuBase:GetWide(), MenuBase:GetTall(), Color( 0, 0, 0, 150 ) )
@@ -281,7 +278,7 @@ function CSSClientsideWeaponSettings()
 		Title1:SetPos(5,5)
 		Title1:SetFont("TitleFont")
 		Title1:SetColor(Color(0,0,0,255))
-		Title1:SetText( "WEAPON SETTINGS" )
+		Title1:SetText( "VIEWMODEL SETTINGS" )
 		Title1:SizeToContents()
 		
 	local DamageSliderTitle = vgui.Create("DLabel", Base1)
@@ -298,6 +295,102 @@ function CSSClientsideWeaponSettings()
 		DamageSlider:SetMax( 90 ) -- Maximum number of the slider
 		DamageSlider:SetDecimals( 1 ) -- Sets a decimal. Zero means it's a whole number
 		DamageSlider:SetConVar( "cl_css_viewmodel_fov" ) -- Set the convar
+	
+	local StaticViewmodelCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
+		StaticViewmodelCheckBox:SetPos( 10,80)
+		StaticViewmodelCheckBox:SetText( "Always use CSS hands" )
+		StaticViewmodelCheckBox:SetTextColor( Color(0, 0, 0, 255) )
+		StaticViewmodelCheckBox:SetConVar( "cl_css_csshands" ) -- ConCommand must be a 1 or 0 value
+		StaticViewmodelCheckBox:SizeToContents() -- Make its size to the contents. Duh?	
+	
+	local Title1 = vgui.Create("DLabel", Base1)
+		Title1:SetPos(5,120)
+		Title1:SetFont("TitleFont")
+		Title1:SetColor(Color(0,0,0,255))
+		Title1:SetText( "CROSSHAIR SETTINGS" )
+		Title1:SizeToContents()
+	
+	local Mixer = vgui.Create( "DColorMixer", Base1 )
+		Mixer:SetPos( 5,160 )
+		Mixer:SizeToContents()
+		Mixer:SetPalette( true ) 		--Show/hide the palette			DEF:true
+		Mixer:SetAlphaBar( true ) 		--Show/hide the alpha bar		DEF:true
+		Mixer:SetWangs( true )	 		--Show/hide the R G B A indicators 	DEF:true
+		Mixer:SetColor( Color( GetConVarNumber("cl_css_crosshair_color_r"),GetConVarNumber("cl_css_crosshair_color_g"),GetConVarNumber("cl_css_crosshair_color_b"), GetConVarNumber("cl_css_crosshair_color_a") ) )--Set the default color
+	
+	local ColorButton = vgui.Create( "DButton", Base1 )
+		ColorButton:SetPos( 10, 160 + 250 )
+		ColorButton:SetSize( 250, 30 )
+		ColorButton:SetText( "Apply Color" )
+		ColorButton.DoClick = function()
+			local col = Mixer:GetColor()
+			print("Color: " .. col.r .. ",".. col.g .. ",".. col.b .. ",".. col.a)
+			RunConsoleCommand("cl_css_crosshair_color_r",col.r)
+			RunConsoleCommand("cl_css_crosshair_color_g",col.g)
+			RunConsoleCommand("cl_css_crosshair_color_b",col.b)
+			RunConsoleCommand("cl_css_crosshair_color_a",col.a)
+		end
+		
+	--[[
+	local mat = vgui.Create( "DImage", Base1 )
+		mat:SetPos( 20 + 250, 160 )
+		mat:SetSize( 64*3, 64*3 )
+		mat:SetImage( "vgui/gfx/vgui/crosshair" )	-- Path to material VMT
+	--]]
+	
+	local CrossStyleTitle = vgui.Create("DLabel", Base1)
+		CrossStyleTitle:SetPos(25, 160 + 250 + 30 + 10 )
+		CrossStyleTitle:SetFont("SliderFont")
+		CrossStyleTitle:SetColor(Color(0,0,0,255))
+		CrossStyleTitle:SetText( "Crosshair Style" )
+		CrossStyleTitle:SizeToContents()
+	
+	local CrossStyle = vgui.Create( "Slider", Base1 )
+		CrossStyle:SetPos( 5, 160 + 250 + 30 + 10 + 10 )
+		CrossStyle:SetWide( Base1:GetWide() - 10 - 20 )
+		CrossStyle:SetMin( 0 ) -- Minimum number of the slider
+		CrossStyle:SetMax( 5 ) -- Maximum number of the slider
+		CrossStyle:SetDecimals( 0 ) -- Sets a decimal. Zero means it's a whole number
+		CrossStyle:SetConVar( "cl_css_crosshair_style" ) -- Set the convar
+	
+	local LengthSliderTitle = vgui.Create("DLabel", Base1)
+		LengthSliderTitle:SetPos(25, 160 + 250 + 30 + 10 + 40 )
+		LengthSliderTitle:SetFont("SliderFont")
+		LengthSliderTitle:SetColor(Color(0,0,0,255))
+		LengthSliderTitle:SetText( "Crosshair Length" )
+		LengthSliderTitle:SizeToContents()
+	
+	local LengthSlider = vgui.Create( "Slider", Base1 )
+		LengthSlider:SetPos( 5, 160 + 250 + 30 + 10 + 10 + 40 )
+		LengthSlider:SetWide( Base1:GetWide() - 10 - 20 )
+		LengthSlider:SetMin( 1 ) -- Minimum number of the slider
+		LengthSlider:SetMax( 30 ) -- Maximum number of the slider
+		LengthSlider:SetDecimals( 0 ) -- Sets a decimal. Zero means it's a whole number
+		LengthSlider:SetConVar( "cl_css_crosshair_length" ) -- Set the convar
+		
+	local WidthSliderTitle = vgui.Create("DLabel", Base1)
+		WidthSliderTitle:SetPos(25, 160 + 250 + 30 + 10 + 40 + 40)
+		WidthSliderTitle:SetFont("SliderFont")
+		WidthSliderTitle:SetColor(Color(0,0,0,255))
+		WidthSliderTitle:SetText( "Crosshair Width" )
+		WidthSliderTitle:SizeToContents()
+	
+	local WidthSlider = vgui.Create( "Slider", Base1 )
+		WidthSlider:SetPos( 5, 160 + 250 + 30 + 10 + 10 + 40 + 40 )
+		WidthSlider:SetWide( Base1:GetWide() - 10 - 20 )
+		WidthSlider:SetMin( 1 ) -- Minimum number of the slider
+		WidthSlider:SetMax( 30 ) -- Maximum number of the slider
+		WidthSlider:SetDecimals( 0 ) -- Sets a decimal. Zero means it's a whole number
+		WidthSlider:SetConVar( "cl_css_crosshair_width" ) -- Set the convar
+	
+		
+	
+		
+	
+		
+		
+		
+		
 
 end
 

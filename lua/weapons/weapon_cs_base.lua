@@ -22,6 +22,16 @@ AddCSLuaFile()
 	CreateConVar("sv_css_c4_notifyplayers", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables players to receive cosmetic round winning notifications and sounds, all other values disables it. Default is 1." )
 	
 	CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
+	
+	CreateClientConVar("cl_css_crosshair_style", "1", true, true )
+	
+	CreateClientConVar("cl_css_crosshair_length", "15", true, true )
+	CreateClientConVar("cl_css_crosshair_width", "1", true, true )
+	CreateClientConVar("cl_css_crosshair_color_r", "50", true, true )
+	CreateClientConVar("cl_css_crosshair_color_g", "255", true, true )
+	CreateClientConVar("cl_css_crosshair_color_b", "50", true, true )
+	CreateClientConVar("cl_css_crosshair_color_a", "200", true, true )
+	
 
 	
 if CLIENT then
@@ -712,7 +722,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	bullet.Dir		= (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
 	bullet.Spread	= Vector(Cone*self.CrouchMul, Cone*self.CrouchMul, 0) + Vector(self.ExtraSpread,self.ExtraSpread,0)
 	bullet.Tracer	= 0
-	bullet.AmmoType = self.Primary.Ammo
+	--bullet.AmmoType = self.Primary.Ammo
 	bullet.TracerName = "Tracer"
 	bullet.Force	= Damage/100
 	bullet.Damage	= Damage*math.Rand(0.99,1.01)*GetConVar("sv_css_damage_scale"):GetFloat()
@@ -897,10 +907,16 @@ function SWEP:DrawHUD()
 	local x = ScrW()
 	local y = ScrH()
 
-	local length = 7
+	local length = GetConVarNumber("cl_css_crosshair_length")
+	local width = GetConVarNumber("cl_css_crosshair_width")
 	local convar = GetConVarNumber("fov_desired")
-	local mistake = 1.25
+	
 
+	local r = GetConVarNumber("cl_css_crosshair_color_r")
+	local g = GetConVarNumber("cl_css_crosshair_color_g")
+	local b = GetConVarNumber("cl_css_crosshair_color_b")
+	local a = GetConVarNumber("cl_css_crosshair_color_a")
+	
 	if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
 		crouchmul = 0.5
 	else
@@ -916,29 +932,43 @@ function SWEP:DrawHUD()
 	end
 
 	local heat = self:GetNWInt("weaponheat",0)
-	--local extra = (heat*10 + self.ActualCone*1000) + self.Owner:GetVelocity():Length()*0.1*crouchmul*mistake + add
 	local extra = (self.ActualCone*1000*crouchmul + ( heat*10 + self.Owner:GetVelocity():Length()*0.1*GetConVar("sv_css_velcone_scale"):GetFloat() )) + add
 	
 	if self.EnableCrosshair == true then
 		if self:GetNWInt("zoommode",0) == 0 then
 		
+			if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
 		
-			--if self.HasPumpAction == true then
-				--surface.DrawCircle(x/2,y/2, extra, Color(50,255,50,200))
+				if width > 1 then
+					local fix = length/2
+				
+					surface.SetDrawColor(r,g,b,a)
+					surface.DrawRect( x/2 - width/2, y/2 - length/2 + extra + fix , width, length )
+					surface.DrawRect( x/2 - width/2, y/2 - length/2 - extra - fix, width, length )
+					surface.DrawRect( x/2 - length/2 + extra + fix, y/2 - width/2, length, width )
+					surface.DrawRect( x/2 - length/2 - extra - fix, y/2 - width/2, length, width )
+				else
+					surface.SetDrawColor(r,g,b,a)
+					surface.DrawLine( x/2+1+extra+length, y/2, x/2+0.5+extra, y/2 )
+					surface.DrawLine( x/2-1-extra-length, y/2, x/2-0.5-extra, y/2 )
+					surface.DrawLine( x/2, y/2+1+extra+length, x/2, y/2+0.5+extra )
+					surface.DrawLine( x/2, y/2-1-extra-length, x/2, y/2-0.5-extra )
+				end
+			
+			end
 		
-			--else
-				surface.SetDrawColor( 50, 255, 50, 200 )
-				surface.DrawLine( x/2+1+extra+length, y/2, x/2+0.5+extra, y/2 )
-				surface.DrawLine( x/2-1-extra-length, y/2, x/2-0.5-extra, y/2 )
-				surface.DrawLine( x/2, y/2+1+extra+length, x/2, y/2+0.5+extra )
-				surface.DrawLine( x/2, y/2-1-extra-length, x/2, y/2-0.5-extra )
-			--end
-			
-			
+			if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
+				if GetConVarNumber("cl_css_crosshair_style") == 4 then
+					surface.DrawCircle(x/2,y/2, extra + length, Color(r,g,b,a))
+				elseif GetConVarNumber("cl_css_crosshair_style") == 3 then
+					surface.DrawCircle(x/2,y/2, extra + length/2, Color(r,g,b,a))
+				else
+					surface.DrawCircle(x/2,y/2, extra, Color(r,g,b,a))
+				end
+			end
+		
 		end
-		
-		
-		
+
 	end
 
 	if self.EnableScope == true then

@@ -281,27 +281,28 @@ function CSSClientsideWeaponSettings()
 		Title1:SetText( "VIEWMODEL SETTINGS" )
 		Title1:SizeToContents()
 		
-	local DamageSliderTitle = vgui.Create("DLabel", Base1)
-		DamageSliderTitle:SetPos(25,35)
-		DamageSliderTitle:SetFont("SliderFont")
-		DamageSliderTitle:SetColor(Color(0,0,0,255))
-		DamageSliderTitle:SetText( "Weapon FOV" )
-		DamageSliderTitle:SizeToContents()
+	local ViewmodelSliderTitle = vgui.Create("DLabel", Base1)
+		ViewmodelSliderTitle:SetPos(25,35)
+		ViewmodelSliderTitle:SetFont("SliderFont")
+		ViewmodelSliderTitle:SetColor(Color(0,0,0,255))
+		ViewmodelSliderTitle:SetText( "Weapon FOV" )
+		ViewmodelSliderTitle:SizeToContents()
 	
-	local DamageSlider = vgui.Create( "Slider", Base1 )
-		DamageSlider:SetPos( 5,40 )
-		DamageSlider:SetWide( Base1:GetWide() - 10 - 20 )
-		DamageSlider:SetMin( 10 ) -- Minimum number of the slider
-		DamageSlider:SetMax( 90 ) -- Maximum number of the slider
-		DamageSlider:SetDecimals( 1 ) -- Sets a decimal. Zero means it's a whole number
-		DamageSlider:SetConVar( "cl_css_viewmodel_fov" ) -- Set the convar
-	
+	local ViewmodelSlider = vgui.Create( "Slider", Base1 )
+		ViewmodelSlider:SetPos( 5,40 )
+		ViewmodelSlider:SetWide( Base1:GetWide() - 10 - 20 )
+		ViewmodelSlider:SetMin( 10 ) -- Minimum number of the slider
+		ViewmodelSlider:SetMax( 90 ) -- Maximum number of the slider
+		ViewmodelSlider:SetDecimals( 1 ) -- Sets a decimal. Zero means it's a whole number
+		ViewmodelSlider:SetConVar( "cl_css_viewmodel_fov" ) -- Set the convar
+	--[[
 	local StaticViewmodelCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
 		StaticViewmodelCheckBox:SetPos( 10,80)
 		StaticViewmodelCheckBox:SetText( "Always use CSS hands" )
 		StaticViewmodelCheckBox:SetTextColor( Color(0, 0, 0, 255) )
 		StaticViewmodelCheckBox:SetConVar( "cl_css_csshands" ) -- ConCommand must be a 1 or 0 value
 		StaticViewmodelCheckBox:SizeToContents() -- Make its size to the contents. Duh?	
+	--]]
 	
 	local Title1 = vgui.Create("DLabel", Base1)
 		Title1:SetPos(5,120)

@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS C4 EXPLOSIVE"
+	SWEP.PrintName			= "C4 EXPLOSIVE"
 	SWEP.Slot				= 4
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_he", "csd", "O", Color( 255, 80, 0, 255 ) )

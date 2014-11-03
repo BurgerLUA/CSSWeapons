@@ -21,6 +21,9 @@ AddCSLuaFile()
 	CreateConVar("sv_css_c4_radius", "1500", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in units that determines the maximum blast radius. Default is 1500." )
 	CreateConVar("sv_css_c4_notifyplayers", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables players to receive cosmetic round winning notifications and sounds, all other values disables it. Default is 1." )
 	
+	CreateConVar("sv_css_enable_penetration", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enable penetration through objects, 0 disables. Default is 1." )
+	CreateConVar("sv_css_penetration_scale", "0.5", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that all damage from CSS weapons is multiplied from penetration. Default is 0.5." )
+	
 	CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
 	
 	CreateClientConVar("cl_css_crosshair_style", "1", true, true )
@@ -31,6 +34,7 @@ AddCSLuaFile()
 	CreateClientConVar("cl_css_crosshair_color_g", "255", true, true )
 	CreateClientConVar("cl_css_crosshair_color_b", "50", true, true )
 	CreateClientConVar("cl_css_crosshair_color_a", "200", true, true )
+	
 	
 
 	
@@ -95,7 +99,7 @@ SWEP.Primary.SpareClip		= 90 -- custom ammo shit
 SWEP.Secondary.Ammo 		= "none"
 SWEP.Secondary.ClipSize 	= -1
 SWEP.Secondary.DefaultClip 	= -1
-SWEP.Secondary.DefaultClip 	= -1
+SWEP.Secondary.Automatic	= false
 
 
 SWEP.RecoilMul				= 1
@@ -712,56 +716,145 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 		self.CrouchMul = 1 * GetConVar("sv_css_cone_scale"):GetFloat()
 	end
 	
-	
+	local Number = Shots
+	local Source = self.Owner:GetShootPos()
+	local Direction =  (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
+	local Spread = Vector(Cone*self.CrouchMul, Cone*self.CrouchMul, 0) + Vector(self.ExtraSpread,self.ExtraSpread,0)
+	local Force	= Damage/100
+	local Damage = Damage*GetConVar("sv_css_damage_scale"):GetFloat()
 	
 	
 
-	local bullet = {}
-	bullet.Num		= Shots
-	bullet.Src		= self.Owner:GetShootPos()
-	bullet.Dir		= (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
-	bullet.Spread	= Vector(Cone*self.CrouchMul, Cone*self.CrouchMul, 0) + Vector(self.ExtraSpread,self.ExtraSpread,0)
-	bullet.Tracer	= 0
-	--bullet.AmmoType = self.Primary.Ammo
-	bullet.TracerName = "Tracer"
-	bullet.Force	= Damage/100
-	bullet.Damage	= Damage*math.Rand(0.99,1.01)*GetConVar("sv_css_damage_scale"):GetFloat()
 	
-	self.Owner:FireBullets(bullet)
+	self:LaunchBullet(Number,Source,Direction,Spread,Force,Damage)
+	
+	
+	
 	--self:ShootEffects()
 
 end
 
---[[
-function SWEP:Equip() -- when the player doesn't have the weapon
-	self:GiveFakeAmmo()
+
+function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
+
+	local bullet = {}
+	bullet.Num		= Num
+	bullet.Src		= Src
+	bullet.Dir		= Dir
+	bullet.Spread	= Spread
+	bullet.Tracer	= 0
+	bullet.TracerName = "Tracer"
+	bullet.Force	= Force
+	bullet.Damage	= Damage
+	bullet.Callback = function( attacker, tr, dmginfo)
+			
+		if GetConVar("sv_css_enable_penetration"):GetInt() == 1 then
+		
+			local matmul = 1
+		
+			local mat = tr.MatType
+		
+			if mat == MAT_GLASS or MAT_SAND or MAT_SNOW or MAT_DIRT then
+				matmul = 1/3
+			elseif mat == MAT_ANTLION or mat == MAT_ALIENFLESH or mat == MAT_FLESH then
+				matmul = 1/2
+			elseif mat == MAT_CONCRETE or mat == MAT_METAL then
+				matmul = 1/0.85
+			else
+				matmul = 1
+			end
+			
+			if tr.HitWorld == true then
+				WorldOffset = tr.Normal*32
+			else
+				WorldOffset = Vector(0,0,0)
+			end
+			
+			
+			
+			local newtrace = {}
+				newtrace.start = tr.HitPos + WorldOffset
+				newtrace.endpos = tr.HitPos + Dir*(8*10^10)
+				--newtrace.mask = MASK_SHOT
+				newtrace.filter = tr.Entity
+			local newtracedone = util.TraceLine(newtrace)
+				
+			local newtrace2 = {}
+				newtrace2.start = newtracedone.HitPos
+				newtrace2.endpos = newtracedone.HitPos - Dir*(8*10^10)
+				--newtrace.mask = MASK_SHOT
+				--newtrace2.filter = tr.Entity
+			local newtracedone2 = util.TraceLine(newtrace2)
+				
+			
+			
+			--[[
+			if SERVER then	
+		
+				timer.Simple(1,function() 
+				
+					local debugmodel1 = ents.Create("prop_physics")
+						debugmodel1:SetPos(newtracedone.HitPos)
+						debugmodel1:SetModel("models/weapons/w_models/w_baseball.mdl")
+						debugmodel1:SetColor(Color(0,255,0,255)) -- green
+						debugmodel1:Spawn()
+						debugmodel1:Activate()
+						debugmodel1:GetPhysicsObject():EnableMotion(false)
+						debugmodel1:GetPhysicsObject():EnableCollisions(false)
+						
+					SafeRemoveEntityDelayed(debugmodel1,5)
+						
+					local debugmodel2 = ents.Create("prop_physics")
+						debugmodel2:SetPos(tr.HitPos + Dir)
+						debugmodel2:SetModel("models/weapons/w_models/w_baseball.mdl")
+						debugmodel2:SetColor(Color(255,0,0,255)) -- red
+						debugmodel2:Spawn()
+						debugmodel2:Activate()
+						debugmodel2:GetPhysicsObject():EnableMotion(false)
+						debugmodel2:GetPhysicsObject():EnableCollisions(false)
+						
+					SafeRemoveEntityDelayed(debugmodel2,5)
+					
+					local debugmodel3 = ents.Create("prop_physics")
+						debugmodel3:SetPos(newtracedone2.HitPos)
+						debugmodel3:SetModel("models/weapons/w_models/w_baseball.mdl")
+						debugmodel3:SetColor(Color(0,0,255,255)) --blue
+						debugmodel3:Spawn()
+						debugmodel3:Activate()
+						debugmodel3:GetPhysicsObject():EnableMotion(false)
+						debugmodel3:GetPhysicsObject():EnableCollisions(false)
+						
+					SafeRemoveEntityDelayed(debugmodel3,5)
+
+				end)
+				
+			end
+			--]]
+
+			local distance = (tr.HitPos + Dir):Distance(newtracedone2.HitPos)
+			
+			--print(distance)
+			
+			local newdamage = Damage - ( GetConVar("sv_css_penetration_scale"):GetFloat() * distance * matmul )
+			
+			if newdamage > 0 and tr.HitSky == false then
+				--print(newdamage)
+				self:LaunchBullet(1,newtracedone.HitPos, Dir, Vector(0,0,0), Force, newdamage )
+			else
+				--print("Did not have enough damage to penetrate " .. distance .. " units.")
+			end
+			
+			
+			
+		end
+		
+		--print(Damage)
+	
+	end
+	
+	self.Owner:FireBullets(bullet)
+	
 end
-
-
-
-function SWEP:EquipAmmo() -- when the player already has the weapon
-	self:GiveFakeAmmo()
-end
-
-function SWEP:GiveFakeAmmo()
-
-	local ammoname = self.Primary.Ammo .. "count"
-	local oldammo = self.Owner:GetNWInt(ammoname)
-
-	self.Owner:SetNWInt(ammoname, oldammo + self.Primary.SpareClip)
-	
-	local newammo = self.Owner:GetNWInt(ammoname)
-	
-	
-	print("Old Ammo Count: " .. oldammo)
-	print("Ammo To Add: " .. self.Primary.SpareClip)
-	print("New Ammo Count: " .. newammo)
-	
-	
-	
-end
---]]
-
 
 
 

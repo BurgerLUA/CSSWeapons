@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS P90"
+	SWEP.PrintName			= "5.7MM P90"
 	SWEP.Slot				= 2
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_p90", "csd", "m", Color( 255, 80, 0, 255 ) )
@@ -21,7 +21,7 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/p90/p90-1.wav")
 SWEP.Primary.Cone			= .005
 SWEP.Primary.ClipSize		= 50
-SWEP.Primary.SpareClip	= 100
+SWEP.Primary.SpareClip		= 100
 SWEP.Primary.Delay			= 1/(857/60)
 SWEP.Primary.Ammo			= "AlyxGun"
 SWEP.Primary.Automatic 		= true

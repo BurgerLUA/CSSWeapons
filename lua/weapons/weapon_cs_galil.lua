@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS GALIL"
+	SWEP.PrintName			= "5.56MM GALIL"
 	SWEP.Slot				= 3
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_galil", "csd", "v", Color( 255, 80, 0, 255 ) )

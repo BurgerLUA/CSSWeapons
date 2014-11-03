@@ -1,5 +1,5 @@
 if CLIENT then
-	SWEP.PrintName			= "CSS AK47"
+	SWEP.PrintName			= "7.62MM AK47"
 	SWEP.Slot				= 3
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_ak47", "csd", "b", Color( 255, 80, 0, 255 ) )
@@ -20,7 +20,7 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
 SWEP.Primary.Cone			= .002
 SWEP.Primary.ClipSize		= 30
-SWEP.Primary.SpareClip	= 90
+SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 1/(600/60)
 SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic 		= true

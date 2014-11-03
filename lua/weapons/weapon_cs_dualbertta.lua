@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "(WIP) CSS DUAL BERTTA"
+	SWEP.PrintName			= "9MM DUAL BERTTA"
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_dualbertta", "csd", "s", Color( 255, 80, 0, 255 ) )

@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS SIG550"
+	SWEP.PrintName			= "5.56MM SIG550"
 	SWEP.Slot				= 4
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_sig550", "csd", "o", Color( 255, 80, 0, 255 ) )
@@ -21,7 +21,7 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/sg550/sg550-1.wav")
 SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= 30
-SWEP.Primary.SpareClip	= 90
+SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 1/(240/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true

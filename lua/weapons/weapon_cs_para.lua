@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS M249 PARA"
+	SWEP.PrintName			= "5.56MM M249 PARA"
 	SWEP.Slot				= 4
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_para", "csd", "z", Color( 255, 80, 0, 255 ) )

@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS DESERT EAGLE"
+	SWEP.PrintName			= ".50AE DESERT EAGLE"
 	SWEP.Slot				= 1
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_deserteagle", "csd", "f", Color( 255, 80, 0, 255 ) )

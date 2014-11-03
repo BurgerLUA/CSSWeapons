@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS FAMAS"
+	SWEP.PrintName			= "5.56MM FAMAS"
 	SWEP.Slot				= 3
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_famas", "csd", "t", Color( 255, 80, 0, 255 ) )

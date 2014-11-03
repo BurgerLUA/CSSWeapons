@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS UMP"
+	SWEP.PrintName			= ".45 UMP"
 	SWEP.Slot				= 2
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_ump", "csd", "q", Color( 255, 80, 0, 255 ) )
@@ -21,7 +21,7 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ump45/ump45-1.wav")
 SWEP.Primary.Cone			= .03
 SWEP.Primary.ClipSize		= 25
-SWEP.Primary.SpareClip	= 100
+SWEP.Primary.SpareClip		= 100
 SWEP.Primary.Delay			= 1/(666/60)
 SWEP.Primary.Ammo			= "SniperPenetratedRound"
 SWEP.Primary.Automatic 		= true

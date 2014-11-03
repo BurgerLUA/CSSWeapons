@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS MP5"
+	SWEP.PrintName			= "9MM MP5"
 	SWEP.Slot				= 2
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_mp5", "csd", "x", Color( 255, 80, 0, 255 ) )

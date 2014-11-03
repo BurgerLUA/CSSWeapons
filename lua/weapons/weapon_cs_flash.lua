@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS FLASH GRENADE"
+	SWEP.PrintName			= "FLASH GRENADE"
 	SWEP.Slot				= 4
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_flash", "csd", "P", Color( 255, 80, 0, 255 ) )

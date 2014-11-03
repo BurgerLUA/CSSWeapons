@@ -1,6 +1,6 @@
 
 if CLIENT then
-	SWEP.PrintName			= "CSS M3"
+	SWEP.PrintName			= "12 GAUGE M3SUPER90"
 	SWEP.Slot				= 2
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_m3", "csd", "k", Color( 255, 80, 0, 255 ) )

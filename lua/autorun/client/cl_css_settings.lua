@@ -1,6 +1,7 @@
 
 surface.CreateFont("TitleFont", {size = 30, weight = 400, antialias = true, font = "Arial"})
 surface.CreateFont("SliderFont", {size = 15, weight = 400, antialias = true, font = "Arial"})
+surface.CreateFont("WarningFont", {size = 20, weight = 400, antialias = false, bold = true, outline = true, font = "Arial"})
 
 
 function CSSServersideWeaponSettings()
@@ -238,6 +239,44 @@ function CSSServersideWeaponSettings()
 		SpareAmmoCheckBox:SetConVar( "sv_css_ammo_givespare" ) -- ConCommand must be a 1 or 0 value
 		SpareAmmoCheckBox:SizeToContents() -- Make its size to the contents. Duh?	
 		
+	local Title5 = vgui.Create("DLabel", Base1)
+		Title5:SetPos(5,660)
+		Title5:SetFont("TitleFont")
+		Title5:SetColor(Color(0,0,0,255))
+		Title5:SetText( "PENETRATION SETTINGS" )
+		Title5:SizeToContents()
+	
+	local PenetrationCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
+		PenetrationCheckBox:SetPos( 10,700)
+		PenetrationCheckBox:SetText( "Enable Penetration" )
+		PenetrationCheckBox:SetTextColor( Color(0, 0, 0, 255) )
+		PenetrationCheckBox:SetConVar( "sv_css_enable_penetration" ) -- ConCommand must be a 1 or 0 value
+		PenetrationCheckBox:SizeToContents() -- Make its size to the contents. Duh?	
+		
+	local PenetrationSliderTitle = vgui.Create("DLabel", Base1 )
+		PenetrationSliderTitle:SetPos(25,720)
+		PenetrationSliderTitle:SetFont("SliderFont")
+		PenetrationSliderTitle:SetColor(Color(0,0,0,255))
+		PenetrationSliderTitle:SetText( "Points of damage lost for each unit penetrated" )
+		PenetrationSliderTitle:SizeToContents()
+
+	local PenetrationSlider = vgui.Create( "Slider", Base1 )
+		PenetrationSlider:SetPos( 5,730 )
+		PenetrationSlider:SetWide( Base1:GetWide() - 10 - 20 )
+		PenetrationSlider:SetMin( 0.1 ) -- Minimum number of the slider
+		PenetrationSlider:SetMax( 2 ) -- Maximum number of the slider
+		PenetrationSlider:SetDecimals( 1 ) -- Sets a decimal. Zero means it's a whole number
+		PenetrationSlider:SetConVar( "sv_css_penetration_scale" ) -- Set the convar
+		
+	local WarningTitle = vgui.Create("DLabel", Base1 )
+		WarningTitle:SetPos(25,750)
+		WarningTitle:SetFont("WarningFont")
+		WarningTitle:SetColor(Color(255,0,0,255))
+		WarningTitle:SetText( "WARNING: SETTING THE VALUE OF THE ABOVE SLIDER CLOSE TO 0 MAY CAUSE LAG." )
+		WarningTitle:SetSize(Base1:GetWide() - 10 - 20, 500)
+		WarningTitle:SetAutoStretchVertical(true)
+		WarningTitle:SetWrap(true)
+		
 
 end
 
@@ -375,6 +414,7 @@ function CSSClientsideWeaponSettings()
 		WidthSliderTitle:SetColor(Color(0,0,0,255))
 		WidthSliderTitle:SetText( "Crosshair Width" )
 		WidthSliderTitle:SizeToContents()
+		
 	
 	local WidthSlider = vgui.Create( "Slider", Base1 )
 		WidthSlider:SetPos( 5, 160 + 250 + 30 + 10 + 10 + 40 + 40 )

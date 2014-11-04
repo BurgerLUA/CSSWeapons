@@ -221,6 +221,15 @@ function SWEP:SetupDataTables( )
 
 end
 
+function SWEP:GetViewModelPosition(pos,ang)
+
+	if not self.HasIronSights then return pos, ang end
+
+
+end
+
+
+
 --[[
 function SWEP:ZoomFunctionThink()
 

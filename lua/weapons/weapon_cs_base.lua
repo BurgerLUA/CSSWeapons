@@ -113,6 +113,11 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false 
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= false
+SWEP.HasIronSights 			= false
+SWEP.IronSightTime			= 1
+
+SWEP.IronSightsPos 		= Vector( 0, 0, 0 )
+SWEP.IronSightsAng 		= Vector( 0, 0, 0 )
 
 SWEP.CoolDown 				= 0
 SWEP.CoolTime 				= 0
@@ -132,6 +137,14 @@ SWEP.ScopeDelay 			= 0
 SWEP.IsSilenced 			= 0
 SWEP.ClickSoundDelay 		= 0
 SWEP.ZoomCurTime			= 1
+
+SWEP.IronTime				= 0
+
+
+
+
+
+
 SWEP.BurgerBase				= true
 
 SWEP.AlreadyGiven			= false
@@ -221,12 +234,7 @@ function SWEP:SetupDataTables( )
 
 end
 
-function SWEP:GetViewModelPosition(pos,ang)
 
-	if not self.HasIronSights then return pos, ang end
-
-
-end
 
 
 
@@ -285,29 +293,6 @@ function SWEP:ZoomFunctionThink()
 end
 --]]
 
-function SWEP:TranslateFOV(oldfov)
-
-	--print(self.ZoomedIn)
-	if self:GetNWInt("zoommode",0) > 0 then
-		--local maths = oldfov/(self.ZoomAmount *  )
-		
-		if self.HasDoubleZoom == true then
-			newfov = 90 / (self.ZoomAmount*(self:GetNWInt("zoommode",0)/2))
-		else
-			newfov = 90 / self.ZoomAmount
-		end
-		
-		self.Owner:DrawViewModel(false)
-		
-		return newfov
-	else
-	
-		self.Owner:DrawViewModel(true)
-		
-		return oldfov
-	end
-end
-
 function SWEP:Initialize()
 	--self:SetWeaponHoldType(self.HoldType)
 	self:SetHoldType( self.HoldType )
@@ -345,8 +330,12 @@ function SWEP:Deploy()
 	
 	if self.IsSilenced == 1 then
 		self:SendWeaponAnim(ACT_VM_DRAW_SILENCED)
+		self.WorldModel = self.WorldModel2
 	else
 		self:SendWeaponAnim(ACT_VM_DRAW)
+		if self.HasSilencer then
+			self.WorldModel = self.WorldModel1
+		end
 	end
 	
 	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())	
@@ -423,33 +412,18 @@ function SWEP:SecondaryAttack()
 
 
 	elseif self.EnableScope == true then
-		if self.NextZoomTime >= CurTime() then return end
-		self.NextZoomTime = CurTime() + 0.1
 		
-		local delay = 0.1
-
-		if self.ScopeDelay > CurTime() then return end
-
-		if SERVER then
-			if self:GetNWInt("zoommode",0) == 0 then
-				self:SetNWInt("zoommode",1)
-			elseif self:GetNWInt("zoommode",0) == 1 then
-				if self.HasDoubleZoom == true then
-					self:SetNWInt("zoommode",2)
-				else
-					self:SetNWInt("zoommode",0)
-				end
-			elseif self:GetNWInt("zoommode",0) == 2 then
-				self:SetNWInt("zoommode",0)
-			end
+		self:ScopeZoom()
+	
+	elseif self.HasIronSights == true then
+	
+		if self:GetNWBool("IronSights",false) == true then
+			self.Owner:SetFOV(0,self.IronSightTime)
+			self:SetNWBool("IronSights",false)
+		else
+			self.Owner:SetFOV(45,self.IronSightTime)
+			self:SetNWBool("IronSights",true)
 		end
-		
-		if CLIENT or game.SinglePlayer() == true then
-			self:EmitSound("weapons/zoom.wav",100,100)
-		end
-		
-		self.ScopeDelay = delay + CurTime()
-		
 
 	elseif self.HasSilencer == true then
 
@@ -458,9 +432,11 @@ function SWEP:SecondaryAttack()
 			if self.IsSilenced == 1 then
 				self:SendWeaponAnim(ACT_VM_DETACH_SILENCER)
 				self.IsSilenced = 0
+				self.WorldModel = self.WorldModel1
 				self.AttachDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
 			else
 				self:SendWeaponAnim(ACT_VM_ATTACH_SILENCER)
+				self.WorldModel = self.WorldModel2
 				self.AttachDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
 				self.IsSilenced = 1
 			end
@@ -470,6 +446,147 @@ function SWEP:SecondaryAttack()
 	end
 	
 end
+
+
+function SWEP:TranslateFOV(oldfov)
+	
+	--if self:GetNWBool("IronSights",false) == true then
+	
+		--local clamp = math.Clamp( 1 + (CurTime() - self.fIronTime) / self.IronSightTime,1,self.ZoomAmount)
+		
+		--print(clamp)
+	
+		--newfov = oldfov / clamp
+		
+		--print(newfov)
+		
+		
+		--
+		
+		--return newfov
+	
+	
+	if self:GetNWInt("zoommode",0) > 0 then
+		--local maths = oldfov/(self.ZoomAmount *  )
+		
+		if self.HasDoubleZoom == true then
+			newfov = 90 / (self.ZoomAmount*(self:GetNWInt("zoommode",0)/2))
+		else
+			newfov = 90 / self.ZoomAmount
+		end
+		
+		self.Owner:DrawViewModel(false)
+		
+		return newfov
+	else
+		local clamp = 1
+		self.Owner:DrawViewModel(true)
+		
+		return oldfov
+	end
+end
+
+
+--Respectfully taken from Garry's weapon_cs_base
+
+/*---------------------------------------------------------
+   Name: GetViewModelPosition
+   Desc: Allows you to re-position the view model
+---------------------------------------------------------*/
+function SWEP:GetViewModelPosition( pos, ang )
+
+	if ( !self.IronSightsPos ) then return pos, ang end
+
+	local bIron = self.Weapon:GetNetworkedBool( "Ironsights" )
+	
+	if ( bIron != self.bLastIron ) then
+	
+		self.bLastIron = bIron 
+		self.fIronTime = CurTime()
+		
+		if ( bIron ) then 
+			self.SwayScale 	= 0.3
+			self.BobScale 	= 0.1
+		else 
+			self.SwayScale 	= 3
+			self.BobScale 	= 2
+		end
+	
+	end
+	
+	local fIronTime = self.fIronTime or 0
+
+	if ( !bIron && fIronTime < CurTime() - self.IronSightTime ) then 
+		return pos, ang 
+	end
+	
+	local Mul = 1.0
+	
+	if ( fIronTime > CurTime() - self.IronSightTime ) then
+	
+		Mul = math.Clamp( (CurTime() - fIronTime) / self.IronSightTime, 0, 1 )
+		
+		if (!bIron) then Mul = 1 - Mul end
+	
+	end
+
+	local Offset	= self.IronSightsPos
+	
+	if ( self.IronSightsAng ) then
+	
+		ang = ang * 1
+		ang:RotateAroundAxis( ang:Right(), 		self.IronSightsAng.x * Mul )
+		ang:RotateAroundAxis( ang:Up(), 		self.IronSightsAng.y * Mul )
+		ang:RotateAroundAxis( ang:Forward(), 	self.IronSightsAng.z * Mul )
+	
+	
+	end
+	
+	local Right 	= ang:Right()
+	local Up 		= ang:Up()
+	local Forward 	= ang:Forward()
+	
+	
+
+	pos = pos + Offset.x * Right * Mul
+	pos = pos + Offset.y * Forward * Mul
+	pos = pos + Offset.z * Up * Mul
+
+	return pos, ang
+	
+end
+
+function SWEP:ScopeZoom()
+	if self.NextZoomTime >= CurTime() then return end
+	self.NextZoomTime = CurTime() + 0.1
+	
+	local delay = 0.1
+
+	if self.ScopeDelay > CurTime() then return end
+
+	if SERVER then
+		if self:GetNWInt("zoommode",0) == 0 then
+			self:SetNWInt("zoommode",1)
+		elseif self:GetNWInt("zoommode",0) == 1 then
+			if self.HasDoubleZoom == true then
+				self:SetNWInt("zoommode",2)
+			else
+				self:SetNWInt("zoommode",0)
+			end
+		elseif self:GetNWInt("zoommode",0) == 2 then
+			self:SetNWInt("zoommode",0)
+		end
+	end
+	
+	if CLIENT or game.SinglePlayer() == true then
+		self:EmitSound("weapons/zoom.wav",100,100)
+	end
+	
+	self.ScopeDelay = delay + CurTime()
+end
+
+
+
 
 function SWEP:Shoot()
 	if !self:CanPrimaryAttack() then return end
@@ -525,7 +642,7 @@ function SWEP:Shoot()
 		
 			timer.Simple(0.01*i,function() 
 				if IsValid(self) == true then 
-					self.Weapon:EmitSound(self.Primary.Sound, SNDLVL_GUNFIRE, 100, 1, CHAN_WEAPON )
+					self:EmitGunSound(GunSound)
 					self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 				end
 			end )
@@ -589,6 +706,9 @@ function SWEP:Shoot()
 	self:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 
 end
+
+
+
 
 function SWEP:Reload()
 
@@ -667,14 +787,17 @@ end
 function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 
 	--if not IsFirstTimePredicted( ) then return end
-	self.Weapon:EmitSound(GunSound,100,100)
+	
+	self:EmitGunSound(GunSound)
 
 	if not self.CoolDown then
 		self.CoolDown = 0
 	end
 	
+	
 	self.ViewKick = -(Damage*Shots/20)/2*Recoil*self.RecoilMul*GetConVar("sv_css_recoil_scale"):GetFloat()
 	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001*GetConVar("sv_css_velcone_scale"):GetInt())
+
 	
 	--if SERVER or game.SinglePlayer() then
 	
@@ -709,6 +832,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 		
 	--end
 	
+	--if not IsFirstTimePredicted() then return end
 	self.Owner:ViewPunch(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0))
 	
 	
@@ -741,6 +865,11 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	
 	--self:ShootEffects()
 
+end
+
+
+function SWEP:EmitGunSound(GunSound)
+	self.Weapon:EmitSound(GunSound, SNDLVL_GUNFIRE, 100, 1, CHAN_WEAPON )
 end
 
 
@@ -873,7 +1002,6 @@ function SWEP:Think()
 		self.ViewModelFOV = GetConVar("cl_css_viewmodel_fov"):GetFloat()
 	end
 
-
 	self:BotThink()
 	
 	--self:ZoomFunctionThink()
@@ -945,7 +1073,9 @@ end
 
 function SWEP:AdjustMouseSensitivity()
 
-	if self.EnableScope == true then
+	if self:GetNWBool("IronSights",false) == true then
+		sen = 1 / self.ZoomAmount
+	elseif self.EnableScope == true then
 		if self:GetNWInt("zoommode",0) ~= 0 then
 			if self.HasDoubleZoom == true then
 				sen = 1 / (self.ZoomAmount*(self:GetNWInt("zoommode",0)/2))
@@ -1037,7 +1167,7 @@ function SWEP:DrawHUD()
 	local extra = (self.ActualCone*1000*crouchmul + ( heat*10 + self.Owner:GetVelocity():Length()*0.1*GetConVar("sv_css_velcone_scale"):GetFloat() )) + add
 	
 	if self.EnableCrosshair == true then
-		if self:GetNWInt("zoommode",0) == 0 then
+		if self:GetNWInt("zoommode",0) == 0 and self:GetNWBool("IronSights",false) == false then
 		
 			if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
 		

@@ -102,10 +102,14 @@ function ENT:Detonate(self,pos)
 
 		end
 		
-						
-		self.Pos1 = self.HitP + self.HitN
-		self.Pos2 = self.HitP - self.HitN
-		util.Decal("Scorch", self.Pos1, self.Pos2)
+		
+		if IsValid(self.HitP) then
+		
+			self.Pos1 = self.HitP + self.HitN
+			self.Pos2 = self.HitP - self.HitN
+			util.Decal("Scorch", self.Pos1, self.Pos2)
+			
+		end
 				
 		self:Remove()
 	end

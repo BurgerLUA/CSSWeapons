@@ -833,8 +833,10 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	--end
 	
 	--if not IsFirstTimePredicted() then return end
-	self.Owner:ViewPunch(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0))
 	
+	if self.Owner:IsPlayer() then
+		self.Owner:ViewPunch(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0))
+	end
 	
 	
 	--end
@@ -843,15 +845,31 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01),0,10)
 	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*self.RecoilMul
 
-	if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
-		self.CrouchMul = 0.5 * GetConVar("sv_css_cone_scale"):GetFloat()
+	if self.Owner:IsPlayer() then
+		if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
+			self.CrouchMul = 0.5 * GetConVar("sv_css_cone_scale"):GetFloat()
+		else
+			self.CrouchMul = 1 * GetConVar("sv_css_cone_scale"):GetFloat()
+		end
 	else
 		self.CrouchMul = 1 * GetConVar("sv_css_cone_scale"):GetFloat()
 	end
 	
 	local Number = Shots
 	local Source = self.Owner:GetShootPos()
-	local Direction =  (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
+	
+	
+	local Direction
+	
+	if self.Owner:IsPlayer() then
+		Direction =  (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
+	else
+		Direction = self.Owner:GetAimVector()
+	end
+	
+	
+	
+	
 	local Spread = Vector(Cone*self.CrouchMul, Cone*self.CrouchMul, 0) + Vector(self.ExtraSpread,self.ExtraSpread,0)
 	local Force	= Damage/100
 	local Damage = Damage*GetConVar("sv_css_damage_scale"):GetFloat()
@@ -886,108 +904,112 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 	bullet.Damage	= Damage
 	bullet.Callback = function( attacker, tr, dmginfo)
 			
-		if GetConVar("sv_css_enable_penetration"):GetInt() == 1 then
-		
-			local matmul = 1
-		
-			local mat = tr.MatType
-		
-			if mat == MAT_GLASS or MAT_SAND or MAT_SNOW or MAT_DIRT then
-				matmul = 1/3
-			elseif mat == MAT_ANTLION or mat == MAT_ALIENFLESH or mat == MAT_FLESH then
-				matmul = 1/2
-			elseif mat == MAT_CONCRETE or mat == MAT_METAL then
-				matmul = 1/0.85
-			else
-				matmul = 1
-			end
-			
-			if tr.HitWorld == true then
-				WorldOffset = tr.Normal*32
-			else
-				WorldOffset = Vector(0,0,0)
-			end
+		if attacker:IsPlayer()  then
 			
 			
+			if GetConVar("sv_css_enable_penetration"):GetInt() == 1 then
 			
-			local newtrace = {}
-				newtrace.start = tr.HitPos + WorldOffset
-				newtrace.endpos = tr.HitPos + Dir*(8*10^10)
-				--newtrace.mask = MASK_SHOT
-				newtrace.filter = tr.Entity
-			local newtracedone = util.TraceLine(newtrace)
+				local matmul = 1
+			
+				local mat = tr.MatType
+			
+				if mat == MAT_GLASS or MAT_SAND or MAT_SNOW or MAT_DIRT then
+					matmul = 1/3
+				elseif mat == MAT_ANTLION or mat == MAT_ALIENFLESH or mat == MAT_FLESH then
+					matmul = 1/2
+				elseif mat == MAT_CONCRETE or mat == MAT_METAL then
+					matmul = 1/0.85
+				else
+					matmul = 1
+				end
 				
-			local newtrace2 = {}
-				newtrace2.start = newtracedone.HitPos
-				newtrace2.endpos = newtracedone.HitPos - Dir*(8*10^10)
-				--newtrace.mask = MASK_SHOT
-				--newtrace2.filter = tr.Entity
-			local newtracedone2 = util.TraceLine(newtrace2)
+				if tr.HitWorld == true then
+					WorldOffset = tr.Normal*32
+				else
+					WorldOffset = Vector(0,0,0)
+				end
 				
-			
-			
-			--[[
-			if SERVER then	
-		
-				timer.Simple(1,function() 
 				
-					local debugmodel1 = ents.Create("prop_physics")
-						debugmodel1:SetPos(newtracedone.HitPos)
-						debugmodel1:SetModel("models/weapons/w_models/w_baseball.mdl")
-						debugmodel1:SetColor(Color(0,255,0,255)) -- green
-						debugmodel1:Spawn()
-						debugmodel1:Activate()
-						debugmodel1:GetPhysicsObject():EnableMotion(false)
-						debugmodel1:GetPhysicsObject():EnableCollisions(false)
-						
-					SafeRemoveEntityDelayed(debugmodel1,5)
-						
-					local debugmodel2 = ents.Create("prop_physics")
-						debugmodel2:SetPos(tr.HitPos + Dir)
-						debugmodel2:SetModel("models/weapons/w_models/w_baseball.mdl")
-						debugmodel2:SetColor(Color(255,0,0,255)) -- red
-						debugmodel2:Spawn()
-						debugmodel2:Activate()
-						debugmodel2:GetPhysicsObject():EnableMotion(false)
-						debugmodel2:GetPhysicsObject():EnableCollisions(false)
-						
-					SafeRemoveEntityDelayed(debugmodel2,5)
+				
+				local newtrace = {}
+					newtrace.start = tr.HitPos + WorldOffset
+					newtrace.endpos = tr.HitPos + Dir*(8*10^10)
+					--newtrace.mask = MASK_SHOT
+					newtrace.filter = tr.Entity
+				local newtracedone = util.TraceLine(newtrace)
 					
-					local debugmodel3 = ents.Create("prop_physics")
-						debugmodel3:SetPos(newtracedone2.HitPos)
-						debugmodel3:SetModel("models/weapons/w_models/w_baseball.mdl")
-						debugmodel3:SetColor(Color(0,0,255,255)) --blue
-						debugmodel3:Spawn()
-						debugmodel3:Activate()
-						debugmodel3:GetPhysicsObject():EnableMotion(false)
-						debugmodel3:GetPhysicsObject():EnableCollisions(false)
+				local newtrace2 = {}
+					newtrace2.start = newtracedone.HitPos
+					newtrace2.endpos = newtracedone.HitPos - Dir*(8*10^10)
+					--newtrace.mask = MASK_SHOT
+					--newtrace2.filter = tr.Entity
+				local newtracedone2 = util.TraceLine(newtrace2)
+					
+				
+				
+				--[[
+				if SERVER then	
+			
+					timer.Simple(1,function() 
+					
+						local debugmodel1 = ents.Create("prop_physics")
+							debugmodel1:SetPos(newtracedone.HitPos)
+							debugmodel1:SetModel("models/weapons/w_models/w_baseball.mdl")
+							debugmodel1:SetColor(Color(0,255,0,255)) -- green
+							debugmodel1:Spawn()
+							debugmodel1:Activate()
+							debugmodel1:GetPhysicsObject():EnableMotion(false)
+							debugmodel1:GetPhysicsObject():EnableCollisions(false)
+							
+						SafeRemoveEntityDelayed(debugmodel1,5)
+							
+						local debugmodel2 = ents.Create("prop_physics")
+							debugmodel2:SetPos(tr.HitPos + Dir)
+							debugmodel2:SetModel("models/weapons/w_models/w_baseball.mdl")
+							debugmodel2:SetColor(Color(255,0,0,255)) -- red
+							debugmodel2:Spawn()
+							debugmodel2:Activate()
+							debugmodel2:GetPhysicsObject():EnableMotion(false)
+							debugmodel2:GetPhysicsObject():EnableCollisions(false)
+							
+						SafeRemoveEntityDelayed(debugmodel2,5)
 						
-					SafeRemoveEntityDelayed(debugmodel3,5)
+						local debugmodel3 = ents.Create("prop_physics")
+							debugmodel3:SetPos(newtracedone2.HitPos)
+							debugmodel3:SetModel("models/weapons/w_models/w_baseball.mdl")
+							debugmodel3:SetColor(Color(0,0,255,255)) --blue
+							debugmodel3:Spawn()
+							debugmodel3:Activate()
+							debugmodel3:GetPhysicsObject():EnableMotion(false)
+							debugmodel3:GetPhysicsObject():EnableCollisions(false)
+							
+						SafeRemoveEntityDelayed(debugmodel3,5)
 
-				end)
+					end)
+					
+				end
+				--]]
+
+				local distance = (tr.HitPos + Dir):Distance(newtracedone2.HitPos)
+				
+				--print(distance)
+				
+				local newdamage = Damage - ( GetConVar("sv_css_penetration_scale"):GetFloat() * distance * matmul )
+				
+				if newdamage > 0 and tr.HitSky == false then
+					--print(newdamage)
+					self:LaunchBullet(1,newtracedone.HitPos, Dir, Vector(0,0,0), Force, newdamage )
+				else
+					--print("Did not have enough damage to penetrate " .. distance .. " units.")
+				end
+				
+				
 				
 			end
-			--]]
-
-			local distance = (tr.HitPos + Dir):Distance(newtracedone2.HitPos)
 			
-			--print(distance)
-			
-			local newdamage = Damage - ( GetConVar("sv_css_penetration_scale"):GetFloat() * distance * matmul )
-			
-			if newdamage > 0 and tr.HitSky == false then
-				--print(newdamage)
-				self:LaunchBullet(1,newtracedone.HitPos, Dir, Vector(0,0,0), Force, newdamage )
-			else
-				--print("Did not have enough damage to penetrate " .. distance .. " units.")
-			end
-			
-			
-			
+			--print(Damage)
 		end
 		
-		--print(Damage)
-	
 	end
 	
 	self.Owner:FireBullets(bullet)
@@ -1255,6 +1277,76 @@ function SWEP:HUDShouldDraw( element )
 end
 
 function SWEP:BotThink()
+
+end
+
+function SWEP:SetupWeaponHoldTypeForAI(t)
+
+	self.ActivityTranslateAI = {}
+	self.ActivityTranslateAI [ACT_IDLE] 					= ACT_IDLE_PISTOL
+	self.ActivityTranslateAI [ACT_IDLE_ANGRY] 				= ACT_IDLE_ANGRY_PISTOL
+	self.ActivityTranslateAI [ACT_RANGE_ATTACK1] 				= ACT_RANGE_ATTACK_PISTOL
+	self.ActivityTranslateAI [ACT_RELOAD] 					= ACT_RELOAD_PISTOL
+	self.ActivityTranslateAI [ACT_WALK_AIM] 					= ACT_WALK_AIM_PISTOL
+	self.ActivityTranslateAI [ACT_RUN_AIM] 					= ACT_RUN_AIM_PISTOL
+	self.ActivityTranslateAI [ACT_GESTURE_RANGE_ATTACK1] 			= ACT_GESTURE_RANGE_ATTACK_PISTOL
+	self.ActivityTranslateAI [ACT_RELOAD_LOW] 				= ACT_RELOAD_PISTOL_LOW
+	self.ActivityTranslateAI [ACT_RANGE_ATTACK1_LOW] 			= ACT_RANGE_ATTACK_PISTOL_LOW
+	self.ActivityTranslateAI [ACT_COVER_LOW] 					= ACT_COVER_PISTOL_LOW
+	self.ActivityTranslateAI [ACT_RANGE_AIM_LOW] 				= ACT_RANGE_AIM_PISTOL_LOW
+	self.ActivityTranslateAI [ACT_GESTURE_RELOAD] 				= ACT_GESTURE_RELOAD_PISTOL
+	
+	if (t == "ar2") or (t == "shotgun") or (t == "rpg") then
+	
+		self.ActivityTranslateAI [ACT_RANGE_ATTACK1] 			= ACT_RANGE_ATTACK_AR2
+		self.ActivityTranslateAI [ACT_RELOAD] 				= ACT_RELOAD_SMG1
+		self.ActivityTranslateAI [ACT_IDLE] 				= ACT_IDLE_SMG1
+		self.ActivityTranslateAI [ACT_IDLE_ANGRY] 			= ACT_IDLE_ANGRY_SMG1
+		self.ActivityTranslateAI [ACT_WALK] 				= ACT_WALK_RIFLE
+
+		self.ActivityTranslateAI [ACT_IDLE_RELAXED] 			= ACT_IDLE_SMG1_RELAXED
+		self.ActivityTranslateAI [ACT_IDLE_STIMULATED] 			= ACT_IDLE_SMG1_STIMULATED
+		self.ActivityTranslateAI [ACT_IDLE_AGITATED] 			= ACT_IDLE_ANGRY_SMG1
+
+		self.ActivityTranslateAI [ACT_WALK_RELAXED] 			= ACT_WALK_RIFLE_RELAXED
+		self.ActivityTranslateAI [ACT_WALK_STIMULATED] 			= ACT_WALK_RIFLE_STIMULATED
+		self.ActivityTranslateAI [ACT_WALK_AGITATED] 			= ACT_WALK_AIM_RIFLE
+
+		self.ActivityTranslateAI [ACT_RUN_RELAXED] 			= ACT_RUN_RIFLE_RELAXED
+		self.ActivityTranslateAI [ACT_RUN_STIMULATED] 			= ACT_RUN_RIFLE_STIMULATED
+		self.ActivityTranslateAI [ACT_RUN_AGITATED] 			= ACT_RUN_AIM_RIFLE
+
+		self.ActivityTranslateAI [ACT_IDLE_AIM_RELAXED] 		= ACT_IDLE_SMG1_RELAXED
+		self.ActivityTranslateAI [ACT_IDLE_AIM_STIMULATED] 		= ACT_IDLE_AIM_RIFLE_STIMULATED
+		self.ActivityTranslateAI [ACT_IDLE_AIM_AGITATED] 		= ACT_IDLE_ANGRY_SMG1
+
+		self.ActivityTranslateAI [ACT_WALK_AIM_RELAXED] 		= ACT_WALK_RIFLE_RELAXED
+		self.ActivityTranslateAI [ACT_WALK_AIM_STIMULATED] 		= ACT_WALK_AIM_RIFLE_STIMULATED
+		self.ActivityTranslateAI [ACT_WALK_AIM_AGITATED] 		= ACT_WALK_AIM_RIFLE
+
+		self.ActivityTranslateAI [ACT_RUN_AIM_RELAXED] 			= ACT_RUN_RIFLE_RELAXED
+		self.ActivityTranslateAI [ACT_RUN_AIM_STIMULATED] 		= ACT_RUN_AIM_RIFLE_STIMULATED
+		self.ActivityTranslateAI [ACT_RUN_AIM_AGITATED] 		= ACT_RUN_AIM_RIFLE
+
+		self.ActivityTranslateAI [ACT_WALK_AIM] 				= ACT_WALK_AIM_RIFLE
+		self.ActivityTranslateAI [ACT_WALK_CROUCH] 			= ACT_WALK_CROUCH_RIFLE
+		self.ActivityTranslateAI [ACT_WALK_CROUCH_AIM] 			= ACT_WALK_CROUCH_AIM_RIFLE
+		self.ActivityTranslateAI [ACT_RUN] 					= ACT_RUN_RIFLE
+		self.ActivityTranslateAI [ACT_RUN_AIM] 				= ACT_RUN_AIM_RIFLE
+		self.ActivityTranslateAI [ACT_RUN_CROUCH] 			= ACT_RUN_CROUCH_RIFLE
+		self.ActivityTranslateAI [ACT_RUN_CROUCH_AIM] 			= ACT_RUN_CROUCH_AIM_RIFLE
+		self.ActivityTranslateAI [ACT_GESTURE_RANGE_ATTACK1] 		= ACT_GESTURE_RANGE_ATTACK_AR2
+		self.ActivityTranslateAI [ACT_COVER_LOW] 				= ACT_COVER_SMG1_LOW
+		self.ActivityTranslateAI [ACT_RANGE_AIM_LOW] 			= ACT_RANGE_AIM_AR2_LOW
+		self.ActivityTranslateAI [ACT_RANGE_ATTACK1_LOW] 		= ACT_RANGE_ATTACK_SMG1_LOW
+		self.ActivityTranslateAI [ACT_RELOAD_LOW] 			= ACT_RELOAD_SMG1_LOW
+		self.ActivityTranslateAI [ACT_GESTURE_RELOAD] 			= ACT_GESTURE_RELOAD_SMG1
+		
+		return
+	elseif (t == "smg") then
+		self.ActivityTranslateAI [ACT_GESTURE_RANGE_ATTACK1] 		= ACT_GESTURE_RANGE_ATTACK_SMG1	
+		self.ActivityTranslateAI [ACT_RANGE_ATTACK1] 			= ACT_RANGE_ATTACK_SMG1	
+	end
 
 end
 

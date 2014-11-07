@@ -1,11 +1,11 @@
 
 if CLIENT then
 	SWEP.PrintName			= "COMBAT KNIFE"
-	SWEP.Slot				= 4
+	SWEP.Slot				= 0
 	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_knife", "csd", "j", Color( 255, 80, 0, 255 ) )
 	SWEP.ViewModelFlip 		= false
-	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/ak47")
+	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/achievements/pistol_round_knife_kill")
 end
 
 SWEP.HoldType				= "knife"
@@ -21,7 +21,7 @@ SWEP.Primary.NumShots		= 0
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
 SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= -1
-SWEP.Primary.SpareClip	= -1
+SWEP.Primary.SpareClip		= -1
 SWEP.Primary.Delay			= 0.75
 SWEP.Primary.Ammo			= "none"
 SWEP.Primary.Automatic 		= true
@@ -44,7 +44,9 @@ function SWEP:PrimaryAttack()
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
-	self:Swing(34)
+	self:SetNWInt("damage",34)
+	self:Swing()
+
 	
 end
 
@@ -53,12 +55,15 @@ function SWEP:SecondaryAttack()
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*1.5)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay*1.5)
-	self:Swing(55)
+	self:SetNWInt("damage",55)
+	self:Swing()
+	
+	
 	
 end
 
 function SWEP:Reload()
-	PrintTable(GetActivities(self))
+	--PrintTable(GetActivities(self))
 end
 
 function SWEP:Deploy()
@@ -72,8 +77,11 @@ function SWEP:Deploy()
 end
 
 
-function SWEP:Swing(damage)
+function SWEP:Swing()
 
+	--if CLIENT then return end
+
+	local damage = self:GetNWInt("damage")
 
 	local heavy = ACT_VM_PRIMARYATTACK
 	local light = ACT_VM_PRIMARYATTACK
@@ -92,6 +100,7 @@ function SWEP:Swing(damage)
 	for k,v in pairs(coneents) do
 		if v ~= self.Owner then
 			if v:IsPlayer() or v:IsNPC() then
+			
 				local angle = math.abs(v:GetAngles().y - self.Owner:GetAngles().y)
 				if damage == 55 then
 					if angle > 330 or angle < 30 then
@@ -118,9 +127,10 @@ function SWEP:Swing(damage)
 		end
 	end
 	
+	print(damage)
 
 	if self.HitAThing == true then
-		if damage == 34 then
+		if damage <= 50 then
 			self:SendWeaponAnim(light)
 			self.Weapon:EmitSound("weapons/knife/knife_hit"..math.random(1,4)..".wav",100,100)
 		else

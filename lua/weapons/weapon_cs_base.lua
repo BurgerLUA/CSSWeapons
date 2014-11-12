@@ -27,7 +27,6 @@ AddCSLuaFile()
 	CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
 	
 	CreateClientConVar("cl_css_crosshair_style", "1", true, true )
-	
 	CreateClientConVar("cl_css_crosshair_length", "15", true, true )
 	CreateClientConVar("cl_css_crosshair_width", "1", true, true )
 	CreateClientConVar("cl_css_crosshair_color_r", "50", true, true )
@@ -50,11 +49,7 @@ if CLIENT then
 	language.Add("SniperRound_ammo",".338")
 	language.Add("GaussEnergy_ammo",".357 SIG")
 
-	surface.CreateFont( "csd",{
-	font	  = "csd",
-	size	  = 48,
-	weight	  = 700}
-	)
+	surface.CreateFont( "csd",{font = "csd",size = 48,weight = 700})
 
 	SWEP.DrawAmmo			= true
 	SWEP.DrawCrosshair		= false
@@ -64,7 +59,6 @@ if CLIENT then
 	SWEP.BobScale 			= 2
 	SWEP.BounceWeaponIcon	= false
 	SWEP.DrawWeaponInfoBox	= false
-
 	SWEP.CSMuzzleFlashes 	= true
 	
 end
@@ -119,6 +113,7 @@ SWEP.IronSightTime			= 1
 SWEP.IronSightsPos 		= Vector( 0, 0, 0 )
 SWEP.IronSightsAng 		= Vector( 0, 0, 0 )
 
+SWEP.BurgerBase				= true
 SWEP.CoolDown 				= 0
 SWEP.CoolTime 				= 0
 SWEP.CoolDown 				= 0
@@ -137,16 +132,7 @@ SWEP.ScopeDelay 			= 0
 SWEP.IsSilenced 			= 0
 SWEP.ClickSoundDelay 		= 0
 SWEP.ZoomCurTime			= 1
-
 SWEP.IronTime				= 0
-
-
-
-
-
-
-SWEP.BurgerBase				= true
-
 SWEP.AlreadyGiven			= false
 
 local allammo = {}
@@ -175,8 +161,6 @@ allammo[20] =	"AirboatGun"
 allammo[21] =	"StriderMinigun"
 allammo[22] =	"HelicopterGun"
 
-
-
 hook.Add("DoPlayerDeath", "drop weapon after death", function(ply)
 	if GetConVar("sv_css_enable_drops"):GetInt() == 1 then
 		for k,v in pairs(ply:GetWeapons()) do
@@ -184,7 +168,7 @@ hook.Add("DoPlayerDeath", "drop weapon after death", function(ply)
 				local dropped = ents.Create("ent_cs_droppedweapon")
 				dropped:SetPos(ply:GetShootPos())
 				dropped:SetAngles(ply:EyeAngles())
-				dropped:SetModel(v:GetModel())
+				dropped:SetModel(weapons.GetStored(v:GetClass()).WorldModel)
 				dropped:Spawn()
 				dropped:Activate()
 				dropped:SetNWString("class",v:GetClass())
@@ -218,6 +202,7 @@ hook.Add("DoPlayerDeath", "drop weapon after death", function(ply)
 		end
 		
 	end
+	
 end)
 
 --Burst fire Code from Kogitsune
@@ -233,10 +218,6 @@ function SWEP:SetupDataTables( )
   end
 
 end
-
-
-
-
 
 --[[
 function SWEP:ZoomFunctionThink()
@@ -294,7 +275,7 @@ end
 --]]
 
 function SWEP:Initialize()
-	--self:SetWeaponHoldType(self.HoldType)
+	self.WorldModel = self.WorldModel1
 	self:SetHoldType( self.HoldType )
 	util.PrecacheSound(self.Primary.Sound)
 end
@@ -302,8 +283,7 @@ end
 function SWEP:Deploy()
 
 	if SERVER then
-	
-		
+
 		if self.AlreadyGiven == false then
 		
 			if GetConVar("sv_css_ammo_loaded"):GetInt() == 1 then
@@ -313,17 +293,12 @@ function SWEP:Deploy()
 			if GetConVar("sv_css_ammo_givespare"):GetInt() == 1 then
 				self.Owner:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
 			end
-			
-			
-			
-			
-			
+
 			self.AlreadyGiven = true
+			
 		end
 
 	end
-
-
 
 	self.Owner:GetHands():SetMaterial("")
 	self.Owner:DrawViewModel(true)
@@ -394,22 +369,7 @@ function SWEP:SecondaryAttack()
 
 	if self.HasBurstFire == true then
 
-		if self.Primary.Automatic == true then
-			message = "Automatic"
-		else
-			message = "Semi-Automatic"
-		end
-	
-		if self:GetFireMode( ) == AUTO then
-			self:SetFireMode( BURST )
-			self.Weapon:EmitSound("weapons/smg1/switch_burst.wav")
-			self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to Burst Fire Mode" )
-		else
-			self:SetFireMode( AUTO )
-			self.Weapon:EmitSound("weapons/smg1/switch_single.wav")
-			self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to "..message )
-		end
-
+		self:SwitchFireMode()
 
 	elseif self.EnableScope == true then
 		
@@ -417,143 +377,62 @@ function SWEP:SecondaryAttack()
 	
 	elseif self.HasIronSights == true then
 	
-		if self:GetNWBool("IronSights",false) == true then
-			self.Owner:SetFOV(0,self.IronSightTime)
-			self:SetNWBool("IronSights",false)
-		else
-			self.Owner:SetFOV(45,self.IronSightTime)
-			self:SetNWBool("IronSights",true)
-		end
+		self:IronSights()
 
 	elseif self.HasSilencer == true then
 
-		if self.AttachDelay < CurTime() then
-		
-			if self.IsSilenced == 1 then
-				self:SendWeaponAnim(ACT_VM_DETACH_SILENCER)
-				self.IsSilenced = 0
-				self.WorldModel = self.WorldModel1
-				self.AttachDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
-			else
-				self:SendWeaponAnim(ACT_VM_ATTACH_SILENCER)
-				self.WorldModel = self.WorldModel2
-				self.AttachDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
-				self.IsSilenced = 1
-			end
-			
-		end
+		self:Silencer()
 		
 	end
 	
 end
 
+function SWEP:SwitchFireMode()
 
-function SWEP:TranslateFOV(oldfov)
-	
-	--if self:GetNWBool("IronSights",false) == true then
-	
-		--local clamp = math.Clamp( 1 + (CurTime() - self.fIronTime) / self.IronSightTime,1,self.ZoomAmount)
-		
-		--print(clamp)
-	
-		--newfov = oldfov / clamp
-		
-		--print(newfov)
-		
-		
-		--
-		
-		--return newfov
-	
-	
-	if self:GetNWInt("zoommode",0) > 0 then
-		--local maths = oldfov/(self.ZoomAmount *  )
-		
-		if self.HasDoubleZoom == true then
-			newfov = 90 / (self.ZoomAmount*(self:GetNWInt("zoommode",0)/2))
-		else
-			newfov = 90 / self.ZoomAmount
-		end
-		
-		self.Owner:DrawViewModel(false)
-		
-		return newfov
+	if self.Primary.Automatic == true then
+		message = "Automatic"
 	else
-		local clamp = 1
-		self.Owner:DrawViewModel(true)
+		message = "Semi-Automatic"
+	end
+	
+	if self:GetFireMode( ) == AUTO then
+		self:SetFireMode( BURST )
+		self.Weapon:EmitSound("weapons/smg1/switch_burst.wav")
+		self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to Burst Fire Mode" )
+	else
+		self:SetFireMode( AUTO )
+		self.Weapon:EmitSound("weapons/smg1/switch_single.wav")
+		self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to "..message )
+	end
+
+end
+
+function SWEP:Silencer()
+	if self.AttachDelay < CurTime() then
 		
-		return oldfov
+		if self.IsSilenced == 1 then
+			self:SendWeaponAnim(ACT_VM_DETACH_SILENCER)
+			self.IsSilenced = 0
+			self.WorldModel = self.WorldModel1
+			self.AttachDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
+		else
+			self:SendWeaponAnim(ACT_VM_ATTACH_SILENCER)
+			self.WorldModel = self.WorldModel2
+			self.AttachDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
+			self.IsSilenced = 1
+		end
+			
 	end
 end
 
-
---Respectfully taken from Garry's weapon_cs_base
-
-/*---------------------------------------------------------
-   Name: GetViewModelPosition
-   Desc: Allows you to re-position the view model
----------------------------------------------------------*/
-function SWEP:GetViewModelPosition( pos, ang )
-
-	if ( !self.IronSightsPos ) then return pos, ang end
-
-	local bIron = self.Weapon:GetNetworkedBool( "Ironsights" )
-	
-	if ( bIron != self.bLastIron ) then
-	
-		self.bLastIron = bIron 
-		self.fIronTime = CurTime()
-		
-		if ( bIron ) then 
-			self.SwayScale 	= 0.3
-			self.BobScale 	= 0.1
-		else 
-			self.SwayScale 	= 3
-			self.BobScale 	= 2
-		end
-	
+function SWEP:IronSights()
+	if self:GetNWBool("IronSights",false) == true then
+		self.Owner:SetFOV(0,self.IronSightTime)
+		self:SetNWBool("IronSights",false)
+	else
+		self.Owner:SetFOV(45,self.IronSightTime)
+		self:SetNWBool("IronSights",true)
 	end
-	
-	local fIronTime = self.fIronTime or 0
-
-	if ( !bIron && fIronTime < CurTime() - self.IronSightTime ) then 
-		return pos, ang 
-	end
-	
-	local Mul = 1.0
-	
-	if ( fIronTime > CurTime() - self.IronSightTime ) then
-	
-		Mul = math.Clamp( (CurTime() - fIronTime) / self.IronSightTime, 0, 1 )
-		
-		if (!bIron) then Mul = 1 - Mul end
-	
-	end
-
-	local Offset	= self.IronSightsPos
-	
-	if ( self.IronSightsAng ) then
-	
-		ang = ang * 1
-		ang:RotateAroundAxis( ang:Right(), 		self.IronSightsAng.x * Mul )
-		ang:RotateAroundAxis( ang:Up(), 		self.IronSightsAng.y * Mul )
-		ang:RotateAroundAxis( ang:Forward(), 	self.IronSightsAng.z * Mul )
-	
-	
-	end
-	
-	local Right 	= ang:Right()
-	local Up 		= ang:Up()
-	local Forward 	= ang:Forward()
-	
-	
-
-	pos = pos + Offset.x * Right * Mul
-	pos = pos + Offset.y * Forward * Mul
-	pos = pos + Offset.z * Up * Mul
-
-	return pos, ang
-	
 end
 
 function SWEP:ScopeZoom()
@@ -585,8 +464,28 @@ function SWEP:ScopeZoom()
 	self.ScopeDelay = delay + CurTime()
 end
 
+function SWEP:TranslateFOV(oldfov)
 
-
+	if self:GetNWInt("zoommode",0) > 0 then
+		--local maths = oldfov/(self.ZoomAmount *  )
+		
+		if self.HasDoubleZoom == true then
+			newfov = 90 / (self.ZoomAmount*(self:GetNWInt("zoommode",0)/2))
+		else
+			newfov = 90 / self.ZoomAmount
+		end
+		
+		self.Owner:DrawViewModel(false)
+		
+		return newfov
+	else
+		local clamp = 1
+		self.Owner:DrawViewModel(true)
+		
+		return oldfov
+	end
+	
+end
 
 function SWEP:Shoot()
 	if !self:CanPrimaryAttack() then return end
@@ -613,8 +512,7 @@ function SWEP:Shoot()
 				else
 					self:SetNextPrimaryFire(self.Primary.Delay*3)
 				end
-
-
+				
 				if self.Weapon:Clip1() >= 3 then
 					self:TakePrimaryAmmo(3)
 					Shots = 3
@@ -707,8 +605,209 @@ function SWEP:Shoot()
 
 end
 
+function SWEP:CanPrimaryAttack()
+	--if not IsFirstTimePredicted( ) then return end
+	if self:GetNextPrimaryFire() > CurTime() then return false end
 
+	if self:Clip1() <= 0 then
+		--self:Reload()
+		if self.ClickSoundDelay <= CurTime() then
+			self.ClickSoundDelay = CurTime()+0.25
+			self:EmitSound("weapons/clipempty_pistol.wav",100,100)
+		end
 
+		return false
+	end
+
+	return true
+	
+end
+
+function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
+
+	--if not IsFirstTimePredicted( ) then return end
+	
+	local direction, bonusmul, sideways
+	
+	self:EmitGunSound(GunSound)
+
+	self.ViewKick = -(Damage*Shots/20)/2*Recoil*self.RecoilMul*GetConVar("sv_css_recoil_scale"):GetFloat()
+	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001*GetConVar("sv_css_velcone_scale"):GetInt())
+	self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01),0,10)
+	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*self.RecoilMul
+	
+	if self.CoolDown > 0.25 and self.HasSideRecoil == true then
+		bonusmul = math.Rand(-1,1)
+		sideways = 3
+	else
+		bonusmul = 1
+		sideways = 1
+	end
+
+	if self.Owner:IsPlayer() then
+	
+		self.Owner:ViewPunch(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0))
+		Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
+	
+		if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
+			self.CrouchMul = 0.5 * GetConVar("sv_css_cone_scale"):GetFloat()
+		else
+			self.CrouchMul = 1 * GetConVar("sv_css_cone_scale"):GetFloat()
+		end
+		
+	else
+	
+		self.CrouchMul = 0.25
+		Direction = self.Owner:GetAimVector()
+		
+	end
+	
+	local Number = Shots
+	local Source = self.Owner:GetShootPos()
+	local Spread = Vector(Cone*self.CrouchMul, Cone*self.CrouchMul, 0) + Vector(self.ExtraSpread,self.ExtraSpread,0)
+	local Force	= Damage/100
+	local Damage = Damage*GetConVar("sv_css_damage_scale"):GetFloat()
+
+	self:LaunchBullet(Number,Source,Direction,Spread,Force,Damage)
+
+end
+
+function SWEP:EmitGunSound(GunSound)
+	self.Weapon:EmitSound(GunSound, SNDLVL_GUNFIRE, 100, 1, CHAN_WEAPON )
+end
+
+function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
+
+	local bullet = {}
+	bullet.Num		= Num
+	bullet.Src		= Src
+	bullet.Dir		= Dir
+	bullet.Spread	= Spread
+	bullet.Tracer	= 0
+	bullet.TracerName = "Tracer"
+	bullet.Force	= Force
+	bullet.Damage	= Damage
+	bullet.Callback = function( attacker, tr, dmginfo)
+		if attacker:IsPlayer() then
+			if GetConVar("sv_css_enable_penetration"):GetInt() == 1 then
+			
+				local matmul = 1
+				local mat = tr.MatType
+			
+				if mat == MAT_GLASS or MAT_SAND or MAT_SNOW or MAT_DIRT then
+					matmul = 1/3
+				elseif mat == MAT_ANTLION or mat == MAT_ALIENFLESH or mat == MAT_FLESH then
+					matmul = 1/2
+				elseif mat == MAT_CONCRETE or mat == MAT_METAL then
+					matmul = 1/0.85
+				else
+					matmul = 1
+				end
+				
+				if tr.HitWorld == true then
+					WorldOffset = tr.Normal*32
+				else
+					WorldOffset = Vector(0,0,0)
+				end
+				
+				local newtrace = {}
+					newtrace.start = tr.HitPos + WorldOffset
+					newtrace.endpos = tr.HitPos + Dir*(8*10^10)
+					--newtrace.mask = MASK_SHOT
+					newtrace.filter = tr.Entity
+				local newtracedone = util.TraceLine(newtrace)
+					
+				local newtrace2 = {}
+					newtrace2.start = newtracedone.HitPos
+					newtrace2.endpos = newtracedone.HitPos - Dir*(8*10^10)
+					--newtrace.mask = MASK_SHOT
+					--newtrace2.filter = tr.Entity
+				local newtracedone2 = util.TraceLine(newtrace2)
+
+				--[[
+				if SERVER then	
+				
+					timer.Simple(1,function() 
+					
+						local debugmodel1 = ents.Create("prop_physics")
+							debugmodel1:SetPos(newtracedone.HitPos)
+							debugmodel1:SetModel("models/weapons/w_models/w_baseball.mdl")
+							debugmodel1:SetColor(Color(0,255,0,255)) -- green
+							debugmodel1:Spawn()
+							debugmodel1:Activate()
+							debugmodel1:GetPhysicsObject():EnableMotion(false)
+							debugmodel1:GetPhysicsObject():EnableCollisions(false)
+							
+						SafeRemoveEntityDelayed(debugmodel1,5)
+							
+						local debugmodel2 = ents.Create("prop_physics")
+							debugmodel2:SetPos(tr.HitPos + Dir)
+							debugmodel2:SetModel("models/weapons/w_models/w_baseball.mdl")
+							debugmodel2:SetColor(Color(255,0,0,255)) -- red
+							debugmodel2:Spawn()
+							debugmodel2:Activate()
+							debugmodel2:GetPhysicsObject():EnableMotion(false)
+							debugmodel2:GetPhysicsObject():EnableCollisions(false)
+							
+						SafeRemoveEntityDelayed(debugmodel2,5)
+						
+						local debugmodel3 = ents.Create("prop_physics")
+							debugmodel3:SetPos(newtracedone2.HitPos)
+							debugmodel3:SetModel("models/weapons/w_models/w_baseball.mdl")
+							debugmodel3:SetColor(Color(0,0,255,255)) --blue
+							debugmodel3:Spawn()
+							debugmodel3:Activate()
+							debugmodel3:GetPhysicsObject():EnableMotion(false)
+							debugmodel3:GetPhysicsObject():EnableCollisions(false)
+							
+						SafeRemoveEntityDelayed(debugmodel3,5)
+
+					end)
+					
+				end
+				--]]
+
+				local distance = (tr.HitPos + Dir):Distance(newtracedone2.HitPos)
+				local newdamage = Damage - ( GetConVar("sv_css_penetration_scale"):GetFloat() * distance * matmul )
+				
+				self:BulletEffect(newtracedone2.HitPos , newtracedone.HitPos, newtracedone.SurfaceProps)
+				self:BulletEffect(newtracedone.HitPos , newtracedone2.HitPos, newtracedone.SurfaceProps)
+				
+				if newdamage > 0 and tr.HitSky == false then
+					self:LaunchBullet(1,newtracedone.HitPos, Dir, Vector(0,0,0), Force, newdamage )
+				end
+
+			end
+			
+		end
+		
+	end
+	
+	self.Owner:FireBullets(bullet)
+	
+end
+
+function SWEP:BulletEffect(HitPos,StartPos,SurfaceProp)
+	
+	local effect = EffectData()
+		effect:SetOrigin(HitPos)
+		effect:SetStart(StartPos)
+		effect:SetSurfaceProp(SurfaceProp)
+		effect:SetDamageType(DMG_BULLET)
+	util.Effect("Impact", effect)
+	
+	local hit = util.GetSurfacePropName(SurfaceProp)
+	local impact = "Impact.Concrete"
+
+	if hit == "flesh" then
+		impact = "Blood"
+	elseif hit == "concrete" or hit == "tile" then
+		impact = "Impact.Concrete"
+	end
+	
+	util.Decal(impact, StartPos, HitPos)
+	
+end
 
 function SWEP:Reload()
 
@@ -717,6 +816,14 @@ function SWEP:Reload()
 	if self.ReloadDelay > CurTime() then return end
 	if self:Clip1() >= self.Primary.ClipSize then return end
 	if self.Owner:GetAmmoCount( self:GetPrimaryAmmoType()) == 0  then return end
+	
+	if self.HoldType ~= "revolver" then
+		if self:GetNWBool("Ironsights",false) == true then
+			self:SetNWBool("Ironsights",false)
+			self.Owner:SetFOV(0,self.IronSightTime)
+		end
+	end
+	
 	--if !self:CanPrimaryAttack() then return end
 	
 	if self.HasSilencer == true then
@@ -766,257 +873,68 @@ function SWEP:Reload()
 	
 end
 
-function SWEP:CanPrimaryAttack()
-	--if not IsFirstTimePredicted( ) then return end
-	if self:GetNextPrimaryFire() > CurTime() then return false end
+--Respectfully taken from Garry's weapon_cs_base
 
-	if self:Clip1() <= 0 then
-		--self:Reload()
-		if self.ClickSoundDelay <= CurTime() then
-			self.ClickSoundDelay = CurTime()+0.25
-			self:EmitSound("weapons/clipempty_pistol.wav",100,100)
+function SWEP:GetViewModelPosition( pos, ang )
+
+	if ( !self.IronSightsPos ) then return pos, ang end
+
+	local bIron = self.Weapon:GetNetworkedBool( "Ironsights" )
+	
+	if ( bIron != self.bLastIron ) then
+	
+		self.bLastIron = bIron 
+		self.fIronTime = CurTime()
+		
+		if ( bIron ) then 
+			self.SwayScale 	= 0.3
+			self.BobScale 	= 0.1
+		else 
+			self.SwayScale 	= 3
+			self.BobScale 	= 2
 		end
+	
+	end
+	
+	local fIronTime = self.fIronTime or 0
 
-		return false
+	if ( !bIron && fIronTime < CurTime() - self.IronSightTime ) then 
+		return pos, ang 
+	end
+	
+	local Mul = 1.0
+	
+	if ( fIronTime > CurTime() - self.IronSightTime ) then
+	
+		Mul = math.Clamp( (CurTime() - fIronTime) / self.IronSightTime, 0, 1 )
+		
+		if (!bIron) then Mul = 1 - Mul end
+	
 	end
 
-	return true
+	local Offset	= self.IronSightsPos
+	
+	if ( self.IronSightsAng ) then
+	
+		ang = ang * 1
+		ang:RotateAroundAxis( ang:Right(), 		self.IronSightsAng.x * Mul )
+		ang:RotateAroundAxis( ang:Up(), 		self.IronSightsAng.y * Mul )
+		ang:RotateAroundAxis( ang:Forward(), 	self.IronSightsAng.z * Mul )
+	
+	
+	end
+	
+	local Right 	= ang:Right()
+	local Up 		= ang:Up()
+	local Forward 	= ang:Forward()
+
+	pos = pos + Offset.x * Right * Mul
+	pos = pos + Offset.y * Forward * Mul
+	pos = pos + Offset.z * Up * Mul
+
+	return pos, ang
 	
 end
-
-function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
-
-	--if not IsFirstTimePredicted( ) then return end
-	
-	self:EmitGunSound(GunSound)
-
-	if not self.CoolDown then
-		self.CoolDown = 0
-	end
-	
-	
-	self.ViewKick = -(Damage*Shots/20)/2*Recoil*self.RecoilMul*GetConVar("sv_css_recoil_scale"):GetFloat()
-	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001*GetConVar("sv_css_velcone_scale"):GetInt())
-
-	
-	--if SERVER or game.SinglePlayer() then
-	
-	--if CLIENT then
-		if self.CoolDown > 0.25 and self.HasSideRecoil == true then
-			bonusmul = math.Rand(-1,1)
-			sideways = 3
-		else
-			bonusmul = 1
-			sideways = 1
-		end
-		--[[
-		print("-----------")
-		print("COOLDOWN:" .. self.CoolDown)
-		print("DAMAGE:" .. Damage)
-		print("SHOTS:" .. Shots)
-		print("CONE:" .. Cone)
-		print("RECOIL:" .. Recoil)
-		print("VIEWKICK:" .. self.ViewKick)
-		print("TOTAL:" .. tostring(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0)))
-		print(LocalPlayer())
-		print(self.Owner)
-		print("-----------")
-		--]]
-		
-		
-		
-		
-		
-		
-		--self.Owner:ViewPunch(Angle(100,100,100))
-		
-	--end
-	
-	--if not IsFirstTimePredicted() then return end
-	
-	if self.Owner:IsPlayer() then
-		self.Owner:ViewPunch(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0))
-	end
-	
-	
-	--end
-	
-
-	self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01),0,10)
-	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*self.RecoilMul
-
-	if self.Owner:IsPlayer() then
-		if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
-			self.CrouchMul = 0.5 * GetConVar("sv_css_cone_scale"):GetFloat()
-		else
-			self.CrouchMul = 1 * GetConVar("sv_css_cone_scale"):GetFloat()
-		end
-	else
-		self.CrouchMul = 1 * GetConVar("sv_css_cone_scale"):GetFloat()
-	end
-	
-	local Number = Shots
-	local Source = self.Owner:GetShootPos()
-	
-	
-	local Direction
-	
-	if self.Owner:IsPlayer() then
-		Direction =  (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
-	else
-		Direction = self.Owner:GetAimVector()
-	end
-	
-	
-	
-	
-	local Spread = Vector(Cone*self.CrouchMul, Cone*self.CrouchMul, 0) + Vector(self.ExtraSpread,self.ExtraSpread,0)
-	local Force	= Damage/100
-	local Damage = Damage*GetConVar("sv_css_damage_scale"):GetFloat()
-	
-	
-
-	
-	self:LaunchBullet(Number,Source,Direction,Spread,Force,Damage)
-	
-	
-	
-	--self:ShootEffects()
-
-end
-
-
-function SWEP:EmitGunSound(GunSound)
-	self.Weapon:EmitSound(GunSound, SNDLVL_GUNFIRE, 100, 1, CHAN_WEAPON )
-end
-
-
-function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
-
-	local bullet = {}
-	bullet.Num		= Num
-	bullet.Src		= Src
-	bullet.Dir		= Dir
-	bullet.Spread	= Spread
-	bullet.Tracer	= 0
-	bullet.TracerName = "Tracer"
-	bullet.Force	= Force
-	bullet.Damage	= Damage
-	bullet.Callback = function( attacker, tr, dmginfo)
-			
-		if attacker:IsPlayer()  then
-			
-			
-			if GetConVar("sv_css_enable_penetration"):GetInt() == 1 then
-			
-				local matmul = 1
-			
-				local mat = tr.MatType
-			
-				if mat == MAT_GLASS or MAT_SAND or MAT_SNOW or MAT_DIRT then
-					matmul = 1/3
-				elseif mat == MAT_ANTLION or mat == MAT_ALIENFLESH or mat == MAT_FLESH then
-					matmul = 1/2
-				elseif mat == MAT_CONCRETE or mat == MAT_METAL then
-					matmul = 1/0.85
-				else
-					matmul = 1
-				end
-				
-				if tr.HitWorld == true then
-					WorldOffset = tr.Normal*32
-				else
-					WorldOffset = Vector(0,0,0)
-				end
-				
-				
-				
-				local newtrace = {}
-					newtrace.start = tr.HitPos + WorldOffset
-					newtrace.endpos = tr.HitPos + Dir*(8*10^10)
-					--newtrace.mask = MASK_SHOT
-					newtrace.filter = tr.Entity
-				local newtracedone = util.TraceLine(newtrace)
-					
-				local newtrace2 = {}
-					newtrace2.start = newtracedone.HitPos
-					newtrace2.endpos = newtracedone.HitPos - Dir*(8*10^10)
-					--newtrace.mask = MASK_SHOT
-					--newtrace2.filter = tr.Entity
-				local newtracedone2 = util.TraceLine(newtrace2)
-					
-				
-				
-				--[[
-				if SERVER then	
-			
-					timer.Simple(1,function() 
-					
-						local debugmodel1 = ents.Create("prop_physics")
-							debugmodel1:SetPos(newtracedone.HitPos)
-							debugmodel1:SetModel("models/weapons/w_models/w_baseball.mdl")
-							debugmodel1:SetColor(Color(0,255,0,255)) -- green
-							debugmodel1:Spawn()
-							debugmodel1:Activate()
-							debugmodel1:GetPhysicsObject():EnableMotion(false)
-							debugmodel1:GetPhysicsObject():EnableCollisions(false)
-							
-						SafeRemoveEntityDelayed(debugmodel1,5)
-							
-						local debugmodel2 = ents.Create("prop_physics")
-							debugmodel2:SetPos(tr.HitPos + Dir)
-							debugmodel2:SetModel("models/weapons/w_models/w_baseball.mdl")
-							debugmodel2:SetColor(Color(255,0,0,255)) -- red
-							debugmodel2:Spawn()
-							debugmodel2:Activate()
-							debugmodel2:GetPhysicsObject():EnableMotion(false)
-							debugmodel2:GetPhysicsObject():EnableCollisions(false)
-							
-						SafeRemoveEntityDelayed(debugmodel2,5)
-						
-						local debugmodel3 = ents.Create("prop_physics")
-							debugmodel3:SetPos(newtracedone2.HitPos)
-							debugmodel3:SetModel("models/weapons/w_models/w_baseball.mdl")
-							debugmodel3:SetColor(Color(0,0,255,255)) --blue
-							debugmodel3:Spawn()
-							debugmodel3:Activate()
-							debugmodel3:GetPhysicsObject():EnableMotion(false)
-							debugmodel3:GetPhysicsObject():EnableCollisions(false)
-							
-						SafeRemoveEntityDelayed(debugmodel3,5)
-
-					end)
-					
-				end
-				--]]
-
-				local distance = (tr.HitPos + Dir):Distance(newtracedone2.HitPos)
-				
-				--print(distance)
-				
-				local newdamage = Damage - ( GetConVar("sv_css_penetration_scale"):GetFloat() * distance * matmul )
-				
-				if newdamage > 0 and tr.HitSky == false then
-					--print(newdamage)
-					self:LaunchBullet(1,newtracedone.HitPos, Dir, Vector(0,0,0), Force, newdamage )
-				else
-					--print("Did not have enough damage to penetrate " .. distance .. " units.")
-				end
-				
-				
-				
-			end
-			
-			--print(Damage)
-		end
-		
-	end
-	
-	self.Owner:FireBullets(bullet)
-	
-end
-
-
 
 function SWEP:Think()
 
@@ -1025,8 +943,6 @@ function SWEP:Think()
 	end
 
 	self:BotThink()
-	
-	--self:ZoomFunctionThink()
 	
 	local ammotype = self:GetPrimaryAmmoType()
 	
@@ -1041,7 +957,6 @@ function SWEP:Think()
 			end
 		end
 		
-		
 		if self.ReloadFinish <= CurTime() then
 			--print("I AM DONE RELOADING")
 			
@@ -1052,7 +967,6 @@ function SWEP:Think()
 				self:SetClip1(self.Owner:GetAmmoCount(ammotype))
 				self.Owner:RemoveAmmo(self.Owner:GetAmmoCount(ammotype),ammotype)
 			end
-			
 			
 			self.NormalReload = 0
 			self.IsReloading = 0
@@ -1073,9 +987,7 @@ function SWEP:Think()
 				self.IsReloading = 0
 				self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
 			end
-			
-			
-			
+
 		end
 	end
 	

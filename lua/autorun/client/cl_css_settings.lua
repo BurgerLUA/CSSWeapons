@@ -41,12 +41,14 @@ function CSSServersideWeaponSettings()
 		Title1:SetText( "WEAPON SETTINGS" )
 		Title1:SizeToContents()
 		
+		
 	local DamageSliderTitle = vgui.Create("DLabel", Base1)
 		DamageSliderTitle:SetPos(25,35)
 		DamageSliderTitle:SetFont("SliderFont")
 		DamageSliderTitle:SetColor(Color(0,0,0,255))
 		DamageSliderTitle:SetText( "Damage Multiplier" )
 		DamageSliderTitle:SizeToContents()
+		
 	
 	local DamageSlider = vgui.Create( "Slider", Base1 )
 		DamageSlider:SetPos( 5,40 )
@@ -54,7 +56,8 @@ function CSSServersideWeaponSettings()
 		DamageSlider:SetMin( 0 ) -- Minimum number of the slider
 		DamageSlider:SetMax( 10 ) -- Maximum number of the slider
 		DamageSlider:SetDecimals( 1 ) -- Sets a decimal. Zero means it's a whole number
-		DamageSlider:SetConVar( "sv_css_damage_scale" ) -- Set the convar
+		--DamageSlider:SetConVar( "sv_css_damage_scale" ) -- Set the convar
+		DamageSlider:OnValueChanged(CSSNetCommandSend("sv_css_damage_scale",DamageSlider:GetValue()))
 		
 	local RecoilSliderTitle = vgui.Create("DLabel", Base1)
 		RecoilSliderTitle:SetPos(25,75)
@@ -423,16 +426,26 @@ function CSSClientsideWeaponSettings()
 		WidthSlider:SetMax( 30 ) -- Maximum number of the slider
 		WidthSlider:SetDecimals( 0 ) -- Sets a decimal. Zero means it's a whole number
 		WidthSlider:SetConVar( "cl_css_crosshair_width" ) -- Set the convar
-	
 		
-	
-		
-	
-		
-		
-		
-		
-
 end
 
 concommand.Add("cssplayersettings", CSSClientsideWeaponSettings)
+
+
+function CSSNetCommandSend(command,value)
+
+	if not (LocalPlayer():IsAdmin() or LocalPlayer:IsSuperAdmin()) then
+	
+	--LocalPlayer:ChatPrint("You need to be an admin to modify these settings")
+	
+	return
+	end
+
+	net.Start("CSSNetCommand")
+		net.WriteString(command)
+		net.WriteFloat(value)
+	net.SendToServer()
+end
+
+
+

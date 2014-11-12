@@ -28,7 +28,7 @@ SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 0.6
 SWEP.EnableScope 			= false
-SWEP.ZoomAmount 			= 0
+SWEP.ZoomAmount 			= 1
 SWEP.EnableCrosshair 		= true
 
 SWEP.HasPumpAction 			= false
@@ -38,7 +38,7 @@ SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
 SWEP.HasIronSights 			= false
-SWEP.IronSightTime			= 1
+SWEP.IronSightTime			= 0.25
 
-SWEP.IronSightsPos = Vector(0, 0, 0)
-SWEP.IronSightsAng = Vector(0, 0, 0)
+SWEP.IronSightsPos = Vector(-5.961, 0, 2.68)
+SWEP.IronSightsAng = Vector(-0.5, 0, 0)

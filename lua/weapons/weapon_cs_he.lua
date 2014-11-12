@@ -29,7 +29,7 @@ SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 1
 SWEP.EnableScope 			= false
-SWEP.ZoomAmount 			= 0
+SWEP.ZoomAmount 			= 1
 SWEP.EnableCrosshair 		= false
 
 SWEP.HasPumpAction 			= false

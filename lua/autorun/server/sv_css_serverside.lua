@@ -41,4 +41,27 @@ end
 
 hook.Add( "PlayerInitialSpawn", "OnSpawn", OnSpawn )
 
+util.AddNetworkString( "CSSNetCommand" )
+
+net.Receive("CSSNetCommand", function(len,ply)
+
+	if not (ply:IsAdmin() or ply:IsAdmin()) then
+
+	ply:ChatPrint("You're not an Admin")
+	
+	return
+	end
+
+	
+	local command = net.ReadString()
+	local value = net.ReadFloat()
+	
+	print(value)
+
+end)
+
+
+
+
+
 

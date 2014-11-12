@@ -162,20 +162,26 @@ function ENT:Detonate(self,pos)
 
 		--util.BlastDamage(self, self:GetNWEntity("owner"), pos, c4radius,c4damage)
 	
-		
-		for i = 1, 50 do
-			local ent = ents.Create("ent_cs_smokeparticle")
-				ent:SetPos(self:GetPos())
-				ent:SetAngles(Angle(0,0,0))
-				ent:Spawn()
-				ent:Activate()
-				ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-2500,2500),math.Rand(-2500,2500),math.Rand(0,25)))
+		if GetConVar("sv_css_c4smoke"):GetInt() == 1 then
+			for i = 1, 50 do
+				local ent = ents.Create("ent_cs_smokeparticle")
+					ent:SetPos(self:GetPos())
+					ent:SetAngles(Angle(0,0,0))
+					ent:Spawn()
+					ent:Activate()
+					ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-2500,2500),math.Rand(-2500,2500),math.Rand(0,25)))
 				if i == 2 then
 					timer.Simple(1, function()
 						ent:EmitSound("weapons/c4/c4_exp_deb2.wav",100,100)
 					end)
 				end
+			end
+		else
+		
+		self:EmitSound("weapons/c4/c4_exp_deb2.wav",100,100)
+		
 		end
+			
 		
 	
 		self:EmitSound("weapons/c4/c4_explode1.wav",100,100)
@@ -201,13 +207,14 @@ function ENT:Detonate(self,pos)
 		
 		
 		
-			
-				local ent = ents.Create("ent_cs_smokeparticle")
-					ent:SetPos(v:GetPos())
-					ent:SetAngles(Angle(0,0,0))
-					ent:Spawn()
-					ent:Activate()
-					ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-2500,2500),math.Rand(-2500,2500),math.Rand(0,25)))
+				if GetConVar("sv_css_c4smoke"):GetInt() == 1 then
+					local ent = ents.Create("ent_cs_smokeparticle")
+						ent:SetPos(v:GetPos())
+						ent:SetAngles(Angle(0,0,0))
+						ent:Spawn()
+						ent:Activate()
+						ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-2500,2500),math.Rand(-2500,2500),math.Rand(0,25)))
+				end
 			
 		
 		

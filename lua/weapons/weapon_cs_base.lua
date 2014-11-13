@@ -280,7 +280,7 @@ end
 --]]
 
 function SWEP:Initialize()
-	self.WorldModel = self.WorldModel1
+	--self.WorldModel = self.WorldModel1
 	self:SetHoldType( self.HoldType )
 	util.PrecacheSound(self.Primary.Sound)
 end
@@ -308,15 +308,21 @@ function SWEP:Deploy()
 	self.Owner:GetHands():SetMaterial("")
 	self.Owner:DrawViewModel(true)
 	
-	if self.IsSilenced == 1 then
-		self:SendWeaponAnim(ACT_VM_DRAW_SILENCED)
-		self.WorldModel = self.WorldModel2
-	else
-		self:SendWeaponAnim(ACT_VM_DRAW)
-		if self.HasSilencer then
-			self.WorldModel = self.WorldModel1
+	
+	if not game.SinglePlayer then
+		if self.IsSilenced == 1 then
+			self:SendWeaponAnim(ACT_VM_DRAW_SILENCED)
+			self.WorldModel = self.WorldModel2
+		else
+			self:SendWeaponAnim(ACT_VM_DRAW)
+			if self.HasSilencer then
+				self.WorldModel = self.WorldModel1
+			end
 		end
 	end
+	
+	
+	
 	
 	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())	
 	return true
@@ -887,6 +893,22 @@ function SWEP:Reload()
 		end
 		
 	else
+		
+		--[[
+		if self.MagModel then
+			local empt = ents.Create("prop_physics")
+				empt:SetModel(self.MagModel)
+				empt:SetPos(self.Owner:GetEyeTrace().StartPos)
+				empt:SetAngles(self.Owner:EyeAngles())
+				empt:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+				empt:Spawn()
+				empt:Activate()
+				
+				
+			SafeRemoveEntityDelayed(empt,5)
+		end
+		--]]
+		
 	
 		self.Owner:SetAnimation(PLAYER_RELOAD)
 		--self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())

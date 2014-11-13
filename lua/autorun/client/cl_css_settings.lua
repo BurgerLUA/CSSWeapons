@@ -24,8 +24,7 @@ function CSSServersideWeaponSettings()
 	local ScrollBar = vgui.Create( "DScrollPanel", MenuBase )
 		ScrollBar:SetSize( MenuBase:GetWide() - 50, MenuBase:GetTall() - 50 )
 		ScrollBar:SetPos( 25,25 )
-	
-	
+		
 	local Base1 = vgui.Create("DPanel", ScrollBar)
 		Base1:SetPos(0,0)
 		Base1:SetSize(MenuBase:GetWide() - 50, 1000)
@@ -33,6 +32,83 @@ function CSSServersideWeaponSettings()
 		Base1.Paint = function()
 			draw.RoundedBox( 8, 0, 0, Base1:GetWide(), Base1:GetTall(), Color( 255, 255, 255, 255 ) )
 		end
+		
+	--[[
+	local ItemTable = {}
+	local count = 1
+	
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Damage Multiplier"
+	ItemTable[count]["command"] = "sv_css_damage_scale"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 1
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Recoil Multiplier"
+	ItemTable[count]["command"] = "sv_css_recoil_scale"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 1
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Spread Multiplier"
+	ItemTable[count]["command"] = "sv_css_cone_scale"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 1
+	count = count + 1
+	
+	
+	
+	
+	local DermaTitle = {}
+	local DermaObj = {}
+	
+	for k,v in pairs(ItemTable) do
+		
+		local Num = k
+		local Table = v
+		
+		DermaTitle[k] = vgui.Create("DLabel",Base1)
+		DermaTitle[k]:SetPos(25, 35 * k - 20)
+		DermaTitle[k]:SetFont("SliderFont")
+		DermaTitle[k]:SetColor(Color(0,0,0,255))
+		DermaTitle[k]:SetText( Table["name"] )
+		DermaTitle[k]:SizeToContents()
+		
+		
+		DermaObj[k] = vgui.Create(Table["type"],Base1)
+		DermaObj[k]:SetPos(5, 40 * k - 20)
+		DermaObj[k]:SetWide( Base1:GetWide() - 10 - 20 )
+		DermaObj[k]:SetMin( Table["min"] ) -- Minimum number of the slider
+		DermaObj[k]:SetMax( Table["max"] ) -- Maximum number of the slider
+		DermaObj[k]:SetDecimals( Table["decimals"] ) -- Sets a decimal. Zero means it's a whole number
+		DermaObj[k]:SetConVar( Table["command"] ) -- Set the convar
+		
+		--DermaObj[k]:OnValueChanged(CSSNetCommandSend("sv_css_damage_scale",DamageSlider:GetValue()))
+		
+		
+	
+	
+	
+	
+	end
+	
+	
+	
+	
+	
+		
+		
+	--]]
+
 	
 	local Title1 = vgui.Create("DLabel", Base1)
 		Title1:SetPos(5,5)
@@ -56,8 +132,8 @@ function CSSServersideWeaponSettings()
 		DamageSlider:SetMin( 0 ) -- Minimum number of the slider
 		DamageSlider:SetMax( 10 ) -- Maximum number of the slider
 		DamageSlider:SetDecimals( 1 ) -- Sets a decimal. Zero means it's a whole number
-		--DamageSlider:SetConVar( "sv_css_damage_scale" ) -- Set the convar
-		DamageSlider:OnValueChanged(CSSNetCommandSend("sv_css_damage_scale",DamageSlider:GetValue()))
+		DamageSlider:SetConVar( "sv_css_damage_scale" ) -- Set the convar
+		--DamageSlider:OnValueChanged(CSSNetCommandSend("sv_css_damage_scale",DamageSlider:GetValue()))
 		
 	local RecoilSliderTitle = vgui.Create("DLabel", Base1)
 		RecoilSliderTitle:SetPos(25,75)
@@ -280,7 +356,7 @@ function CSSServersideWeaponSettings()
 		WarningTitle:SetAutoStretchVertical(true)
 		WarningTitle:SetWrap(true)
 		
-
+	--]]
 end
 
 concommand.Add("cssadminsettings", CSSServersideWeaponSettings)

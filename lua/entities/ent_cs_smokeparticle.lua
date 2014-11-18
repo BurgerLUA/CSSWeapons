@@ -28,9 +28,10 @@ function ENT:Initialize()
 			phys:EnableDrag(true)
 		end
 		
-		SafeRemoveEntityDelayed(self,10)
+		SafeRemoveEntityDelayed(self,20)
+		
 	else
-		self.SpawnTime = CurTime()
+		
 	
 		--[[
 		if math.Rand(1,100) > 75 then 
@@ -41,11 +42,24 @@ function ENT:Initialize()
 		--]]
 	
 		self.EnableOtherRender = false
+		
 	end
+	
+		self.SpawnTime = CurTime()
 	
 end
 
-local mat1 = Material( "particle/particle_smokegrenade1" )
+--[[
+function ENT:Think()
+	if CLIENT then return end
+	if (CurTime() - self.SpawnTime)*0.5*25.5 > 255 then
+		print(CurTime() - self.SpawnTime)
+		self:Remove()
+	end
+end
+--]]
+
+local mat1 = Material( "particle/particle_smokegrenade" )
 local mat2 = Material( "particle/warp1_warp" )
 
 function ENT:Draw()
@@ -63,14 +77,15 @@ function ENT:DrawTranslucent()
 		local r = 255
 		local g = 255
 		local b = 255
-		local a = 255 - bonus*25.5
+		local a = 255 - (bonus)*0.5*25.5
+		
 		
 		
 		
 		cam.Start3D(EyePos(),EyeAngles()) -- Start the 3D function so we can draw onto the screen.
 		
 			render.SetMaterial( mat1 ) -- Tell render what material we want, in this case the flash from the gravgun
-			render.DrawSprite( self:GetPos(), 320 + bonus*10, 320 + bonus*10, Color(255,255,255,255 - bonus*25.5)) -- Draw the sprite in the middle of the map, at 16x16 in it's original colour with full alpha.
+			render.DrawSprite( self:GetPos(), 320 + bonus*10, 320 + bonus*10, Color(r,g,b,a)) -- Draw the sprite in the middle of the map, at 16x16 in it's original colour with full alpha.
 			
 			if self.EnableOtherRender == true then
 				render.SetMaterial( mat2 ) -- Tell render what material we want, in this case the flash from the gravgun

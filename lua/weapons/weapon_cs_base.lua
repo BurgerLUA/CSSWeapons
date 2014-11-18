@@ -308,8 +308,7 @@ function SWEP:Deploy()
 	self.Owner:GetHands():SetMaterial("")
 	self.Owner:DrawViewModel(true)
 	
-	
-	if not game.SinglePlayer then
+	--if not game.SinglePlayer then
 		if self.IsSilenced == 1 then
 			self:SendWeaponAnim(ACT_VM_DRAW_SILENCED)
 			self.WorldModel = self.WorldModel2
@@ -319,10 +318,10 @@ function SWEP:Deploy()
 				self.WorldModel = self.WorldModel1
 			end
 		end
-	end
+	--end
 	
 	
-	
+	--self:SendWeaponAnim(ACT_VM_DEPLOY)
 	
 	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())	
 	return true
@@ -858,12 +857,17 @@ function SWEP:Reload()
 	if self:Clip1() >= self.Primary.ClipSize then return end
 	if self.Owner:GetAmmoCount( self:GetPrimaryAmmoType()) == 0  then return end
 	
-	if self.HoldType ~= "revolver" then
+	
+	--if self.HoldType ~= "revolver" then
 		if self:GetNWBool("Ironsights",false) == true then
 			self:SetNWBool("Ironsights",false)
 			self.Owner:SetFOV(0,self.IronSightTime)
 		end
-	end
+	--end
+	
+	--self:SpecialReload()
+	
+	
 	
 	--if !self:CanPrimaryAttack() then return end
 	

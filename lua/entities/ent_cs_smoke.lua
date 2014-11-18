@@ -22,7 +22,7 @@ function ENT:Initialize()
 			phys:SetBuoyancyRatio(0)
 		end
 		
-		self.Delay = CurTime() + 4
+		self.Delay = CurTime() + 3
 		self.NextParticle = 0
 		self.First = true
 		self.IsDetonated = false
@@ -78,7 +78,7 @@ function ENT:Think()
 				
 				--ent:EnableCollisions(false)
 				
-				self.NextParticle = CurTime() + 0.01
+				self.NextParticle = CurTime() + 0.0025
 			end
 			
 			

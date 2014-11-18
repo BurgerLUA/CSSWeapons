@@ -37,6 +37,11 @@ function CSSServersideWeaponSettings()
 	local ItemTable = {}
 	local count = 1
 	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DLabel"
+	ItemTable[count]["font"] = "TitleFont"
+	ItemTable[count]["text"] = "Weapon Settings"
+	count = count + 1
 	
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "Slider"
@@ -65,9 +70,150 @@ function CSSServersideWeaponSettings()
 	ItemTable[count]["decimals"] = 1
 	count = count + 1
 	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Movement Spread Multiplier"
+	ItemTable[count]["command"] = "sv_css_velcone_scale"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 1
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DLabel"
+	ItemTable[count]["font"] = "TitleFont"
+	ItemTable[count]["text"] = "Bullet Penetration Settings"
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Damage loss per unit penetrated"
+	ItemTable[count]["command"] = "sv_css_penetration_scale"
+	ItemTable[count]["min"] = 0.25
+	ItemTable[count]["max"] = 5
+	ItemTable[count]["decimals"] = 2
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DLabel"
+	ItemTable[count]["font"] = "TitleFont"
+	ItemTable[count]["text"] = "Ammo Settings"
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Give loaded weapons"
+	ItemTable[count]["command"] = "sv_css_ammo_loaded"
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Give spare ammo"
+	ItemTable[count]["command"] = "sv_css_ammo_givespare"
+	count = count + 1
+	
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DLabel"
+	ItemTable[count]["font"] = "TitleFont"
+	ItemTable[count]["text"] = "C4 Settings"
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable Bullet Penetration"
+	ItemTable[count]["command"] = "sv_css_enable_penetration"
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "C4 Fuse Length (Seconds)"
+	ItemTable[count]["command"] = "sv_css_c4_time_explosion"
+	ItemTable[count]["min"] = 5
+	ItemTable[count]["max"] = 300
+	ItemTable[count]["decimals"] = 0
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "C4 Defuse Length (Seconds)"
+	ItemTable[count]["command"] = "sv_css_c4_time_defuse"
+	ItemTable[count]["min"] = 1
+	ItemTable[count]["max"] = 60
+	ItemTable[count]["decimals"] = 0
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Explosion Damage"
+	ItemTable[count]["command"] = "sv_css_c4_damage"
+	ItemTable[count]["min"] = 1
+	ItemTable[count]["max"] = 1000
+	ItemTable[count]["decimals"] = 0
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Explosion Radius (Source Units)"
+	ItemTable[count]["command"] = "sv_css_c4_radius"
+	ItemTable[count]["min"] = 100
+	ItemTable[count]["max"] = 10000
+	ItemTable[count]["decimals"] = 0
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable Non-Admin Pick-up"
+	ItemTable[count]["command"] = "sv_css_enable_c4nonadmin"
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable C4 Notifications"
+	ItemTable[count]["command"] = "sv_css_c4_notifyplayers"
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable Explosion Smoke"
+	ItemTable[count]["command"] = "sv_css_enable_c4smoke"
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DLabel"
+	ItemTable[count]["font"] = "TitleFont"
+	ItemTable[count]["text"] = "Weapon Drop Settings"
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Drop CSS Ammo/Weapons upon death"
+	ItemTable[count]["command"] = "sv_css_enable_drops"
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Automatic Weapon Clean-up Time"
+	ItemTable[count]["command"] = "sv_css_timed_drops"
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Clean-up Time (Seconds)"
+	ItemTable[count]["command"] = "sv_css_drop_timer"
+	ItemTable[count]["min"] = 5
+	ItemTable[count]["max"] = 300
+	ItemTable[count]["decimals"] = 0
+	count = count + 1
 	
 	
 	
+	
+	----
+	----
+	----
+	
+
 	local DermaTitle = {}
 	local DermaObj = {}
 	
@@ -76,21 +222,43 @@ function CSSServersideWeaponSettings()
 		local Num = k
 		local Table = v
 		
-		DermaTitle[k] = vgui.Create("DLabel",Base1)
-		DermaTitle[k]:SetPos(25, 35 * k - 20)
-		DermaTitle[k]:SetFont("SliderFont")
-		DermaTitle[k]:SetColor(Color(0,0,0,255))
-		DermaTitle[k]:SetText( Table["name"] )
-		DermaTitle[k]:SizeToContents()
-		
-		
 		DermaObj[k] = vgui.Create(Table["type"],Base1)
 		DermaObj[k]:SetPos(5, 40 * k - 20)
-		DermaObj[k]:SetWide( Base1:GetWide() - 10 - 20 )
-		DermaObj[k]:SetMin( Table["min"] ) -- Minimum number of the slider
-		DermaObj[k]:SetMax( Table["max"] ) -- Maximum number of the slider
-		DermaObj[k]:SetDecimals( Table["decimals"] ) -- Sets a decimal. Zero means it's a whole number
-		DermaObj[k]:SetConVar( Table["command"] ) -- Set the convar
+		
+		
+		if Table["type"] == "Slider" then
+			DermaTitle[k] = vgui.Create("DLabel",Base1)
+			DermaTitle[k]:SetPos(25, 40 * k - 20 - 5)
+			DermaTitle[k]:SetFont("SliderFont")
+			DermaTitle[k]:SetColor(Color(0,0,0,255))
+			DermaTitle[k]:SetText( Table["name"] )
+			DermaTitle[k]:SizeToContents()
+			
+			DermaObj[k]:SetWide( Base1:GetWide() - 10 - 20 )
+			DermaObj[k]:SetMin( Table["min"] ) -- Minimum number of the slider
+			DermaObj[k]:SetMax( Table["max"] ) -- Maximum number of the slider
+			DermaObj[k]:SetDecimals( Table["decimals"] ) -- Sets a decimal. Zero means it's a whole number
+			DermaObj[k]:SetConVar( Table["command"] ) -- Set the convar
+			
+		elseif Table["type"] == "DLabel" then
+		
+			DermaObj[k]:SetFont( Table["font"])
+			DermaObj[k]:SetColor(Color(0,0,0,255))
+			DermaObj[k]:SetText( Table["text"] )
+			DermaObj[k]:SizeToContents()
+			
+		elseif Table["type"] == "DCheckBoxLabel" then
+			
+			DermaObj[k]:SetText( Table["text"] )
+			DermaObj[k]:SetTextColor( Color(0, 0, 0, 255) )
+			DermaObj[k]:SetConVar( Table["command"] )
+			DermaObj[k]:SizeToContents()
+			DermaObj[k]:SetPos(15, 40 * k - 20)
+		
+		end
+		
+		
+		
 		
 		--DermaObj[k]:OnValueChanged(CSSNetCommandSend("sv_css_damage_scale",DamageSlider:GetValue()))
 		
@@ -101,13 +269,13 @@ function CSSServersideWeaponSettings()
 	
 	end
 	
-	
-	
-	
-	
-		
-		
 	--]]
+	
+	
+	
+		
+		
+	
 
 	
 	local Title1 = vgui.Create("DLabel", Base1)
@@ -356,7 +524,7 @@ function CSSServersideWeaponSettings()
 		WarningTitle:SetAutoStretchVertical(true)
 		WarningTitle:SetWrap(true)
 		
-	--]]
+	
 end
 
 concommand.Add("cssadminsettings", CSSServersideWeaponSettings)

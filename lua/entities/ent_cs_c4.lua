@@ -162,7 +162,7 @@ function ENT:Detonate(self,pos)
 
 		--util.BlastDamage(self, self:GetNWEntity("owner"), pos, c4radius,c4damage)
 	
-		if GetConVar("sv_css_c4smoke"):GetInt() == 1 then
+		if GetConVar("sv_css_enable_c4smoke"):GetInt() == 1 then
 			for i = 1, 50 do
 				local ent = ents.Create("ent_cs_smokeparticle")
 					ent:SetPos(self:GetPos())
@@ -207,7 +207,7 @@ function ENT:Detonate(self,pos)
 		
 		
 		
-				if GetConVar("sv_css_c4smoke"):GetInt() == 1 then
+				if GetConVar("sv_css_enable_c4smoke"):GetInt() == 1 then
 					local ent = ents.Create("ent_cs_smokeparticle")
 						ent:SetPos(v:GetPos())
 						ent:SetAngles(Angle(0,0,0))

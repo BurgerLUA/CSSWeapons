@@ -26,7 +26,7 @@ SWEP.Primary.Delay			= 1/(400/60)
 SWEP.Primary.Ammo			= "GaussEnergy"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul				= 0.5
+SWEP.RecoilMul				= 1
 SWEP.EnableScope 			= false
 SWEP.ZoomAmount 			= 1
 SWEP.EnableCrosshair 		= true

@@ -26,7 +26,7 @@ SWEP.Primary.Delay			= 1/(750/60)
 SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul 				= 0.5
+SWEP.RecoilMul 				= 1
 SWEP.EnableScope 			= false
 SWEP.ZoomAmount				= 0
 SWEP.EnableCrosshair 		= true

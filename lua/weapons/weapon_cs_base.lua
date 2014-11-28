@@ -1,6 +1,6 @@
 AddCSLuaFile()
 
-	if SERVER then
+	--if SERVER then
 		CreateConVar("sv_css_damage_scale", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value that all damage from CSS weapons is multiplied. Default is 1." )
 		CreateConVar("sv_css_recoil_scale", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value that all recoil from CSS weapons is multiplied. Default is 1." )
 		CreateConVar("sv_css_cone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
@@ -25,7 +25,7 @@ AddCSLuaFile()
 	
 		CreateConVar("sv_css_enable_penetration", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enable penetration through objects, 0 disables. Default is 1." )
 		CreateConVar("sv_css_penetration_scale", "0.5", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that all damage from CSS weapons is multiplied from penetration. Default is 0.5." )
-	end
+	--end
 	
 	
 	CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
@@ -59,8 +59,6 @@ if CLIENT then
 	SWEP.DrawCrosshair		= false
 	SWEP.ViewModelFlip		= false
 	SWEP.ViewModelFOV		= 47
-	SWEP.SwayScale			= 3
-	SWEP.BobScale 			= 2
 	SWEP.BounceWeaponIcon	= false
 	SWEP.DrawWeaponInfoBox	= false
 	SWEP.CSMuzzleFlashes 	= true
@@ -283,9 +281,48 @@ function SWEP:Initialize()
 	--self.WorldModel = self.WorldModel1
 	self:SetHoldType( self.HoldType )
 	util.PrecacheSound(self.Primary.Sound)
+	
+	if self.M9KTransfer then
+		self:M9KFix()
+	end
+	
 end
 
+function SWEP:M9KFix()
+
+	self.Primary.Delay = 1/(self.Primary.RPM/60)
+	
+	if self.BoltAction then 
+		self.HasBoltAction = true
+	end
+	
+	self.DrawCrosshair = false
+	
+	if self.Secondary.ScopeZoom then
+		self.ZoomAmount = self.Secondary.ScopeZoom
+		self.Primary.Cone = self.Primary.IronAccuracy
+		
+		self.EnableCrosshair = false
+		
+	else
+		--self.Primary.Cone = self.Primary.Spread	
+		self.Primary.Cone = self.Primary.IronAccuracy
+		self.EnableCrosshair = true
+	end
+
+	
+
+end
+
+
+
+
 function SWEP:Deploy()
+
+	if self.M9KTransfer then
+		self:M9KFix()
+	end
+
 
 	if SERVER then
 
@@ -686,7 +723,14 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 
 	if self.Owner:IsPlayer() then
 	
-		self.Owner:ViewPunch(Angle(self.ViewKick*3*bonusmul,self.ViewKick*math.Rand(-1,1)*sideways,0))
+		local uppunch = (self.ViewKick/2)*3*bonusmul
+		local sidepunch = (self.ViewKick/2)*math.Rand(-1,1)*sideways
+		
+		local punchangle = Angle(uppunch,sidepunch,0)
+	
+	
+	
+		self.Owner:ViewPunch(punchangle)
 		Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
 	
 		if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
@@ -717,6 +761,48 @@ function SWEP:EmitGunSound(GunSound)
 end
 
 function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
+
+
+	if self.PhysBullets then
+	
+		local physics = physenv.GetPerformanceSettings( )
+	
+		--PrintTable(physics)
+	
+	
+		local xspread = math.Rand(-Spread.x,Spread.x)
+		local yspread = math.Rand(-Spread.y,Spread.y)
+	
+		--print(xspread)
+	
+	
+		local EyeA = self.Owner:EyeAngles()
+	
+		local Final = Dir + EyeA:Right()*xspread + EyeA:Up()*yspread
+	
+	
+		local bullet = ents.Create("ent_cs_bullet")
+		bullet:SetPos(self.Owner:GetShootPos())
+		bullet:SetAngles(EyeA)
+		bullet:SetNWInt("Damage",Damage)
+		bullet:Spawn()
+		bullet:SetOwner(self.Owner)
+		bullet:GetPhysicsObject():SetVelocity( Final * physics.MaxVelocity)
+		
+		
+		
+
+
+	return end
+	
+	
+	
+	
+
+
+
+
+
 
 	local bullet = {}
 	bullet.Num		= Num
@@ -829,6 +915,7 @@ end
 
 function SWEP:BulletEffect(HitPos,StartPos,SurfaceProp)
 	
+	--[[
 	local effect = EffectData()
 		effect:SetOrigin(HitPos)
 		effect:SetStart(StartPos)
@@ -846,6 +933,8 @@ function SWEP:BulletEffect(HitPos,StartPos,SurfaceProp)
 	end
 	
 	util.Decal(impact, StartPos, HitPos)
+	
+	--]]
 	
 end
 
@@ -948,11 +1037,11 @@ function SWEP:GetViewModelPosition( pos, ang )
 		self.fIronTime = CurTime()
 		
 		if ( bIron ) then 
-			self.SwayScale 	= 0.3
-			self.BobScale 	= 0.1
+			self.SwayScale 	= 0.5
+			self.BobScale 	= 0.5
 		else 
-			self.SwayScale 	= 3
-			self.BobScale 	= 2
+			self.SwayScale 	= 1
+			self.BobScale 	= 1
 		end
 	
 	end
@@ -999,8 +1088,13 @@ end
 
 function SWEP:Think()
 
+	
 	if CLIENT then
-		self.ViewModelFOV = GetConVar("cl_css_viewmodel_fov"):GetFloat()
+		if self.M9KTransfer then
+			--self.ViewModelFOV = GetConVar("cl_css_viewmodel_fov"):GetFloat() + 25
+		else
+			self.ViewModelFOV = GetConVar("cl_css_viewmodel_fov"):GetFloat()
+		end
 	end
 
 	self:BotThink()
@@ -1138,16 +1232,19 @@ function SWEP:DrawHUD()
 	local width = GetConVarNumber("cl_css_crosshair_width")
 	local convar = GetConVarNumber("fov_desired")
 	
+	
 
 	local r = GetConVarNumber("cl_css_crosshair_color_r")
 	local g = GetConVarNumber("cl_css_crosshair_color_g")
 	local b = GetConVarNumber("cl_css_crosshair_color_b")
 	local a = GetConVarNumber("cl_css_crosshair_color_a")
 	
+	local csscrouchmul
+	
 	if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
-		crouchmul = 0.5
+		csscrouchmul = 0.5
 	else
-		crouchmul = 1
+		csscrouchmul = 1
 	end
 
 	self.ActualCone = self.Primary.Cone * GetConVar("sv_css_cone_scale"):GetFloat()
@@ -1159,7 +1256,7 @@ function SWEP:DrawHUD()
 	end
 
 	local heat = self:GetNWInt("weaponheat",0)
-	local extra = (self.ActualCone*1000*crouchmul + ( heat*10 + self.Owner:GetVelocity():Length()*0.1*GetConVar("sv_css_velcone_scale"):GetFloat() )) + add
+	local extra = (self.ActualCone*1000*csscrouchmul + ( heat*10 + self.Owner:GetVelocity():Length()*0.1*GetConVar("sv_css_velcone_scale"):GetFloat() )) + add
 	
 	if self.EnableCrosshair == true then
 		if self:GetNWInt("zoommode",0) == 0 and self:GetNWBool("IronSights",false) == false then

@@ -26,7 +26,7 @@ SWEP.Primary.Delay			= 1/(429/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 0.5
+SWEP.RecoilMul				= 1
 SWEP.EnableScope 			= true
 SWEP.ZoomAmount 			= 4
 SWEP.EnableCrosshair 		= true

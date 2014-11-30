@@ -14,7 +14,7 @@ function ENT:Initialize()
 
 		local size = 1
 		
-		self:PhysicsInitSphere( size, "metal_bouncy" )
+		self:PhysicsInitSphere( size, "metal" )
 		self:SetCollisionBounds( Vector( -size, -size, -size ), Vector( size, size, size ) )
 		
 		
@@ -33,7 +33,9 @@ function ENT:Initialize()
 		self.StartTime = CurTime()
 		self.Damage = self:GetNWInt("Damage",100)
 		
-		util.SpriteTrail( self, 0, Color(255,255,0,100) , true , 4 , 1 , 0.005*self.Damage, 64, "trails/smoke.vmt" )
+		util.SpriteTrail( self, 0, Color(255,255,0,255) , true , 0.25 , 0 , 0.0025*self.Damage, 2, "debug/modelstats.vmt" )
+		util.SpriteTrail( self, 0, Color(255,255,255,10) , true , 5 , 0 , 0.05*self.Damage, 64, "trails/smoke.vmt" )
+		--util.SpriteTrail( self, 0, Color(255,255,255,50) , true , 5 , 0 , 0.05*self.Damage, 64, "trails/tube.vmt" )
 		
 	end
 end
@@ -41,7 +43,11 @@ end
 function ENT:PhysicsCollide(data, physobj)
 	if SERVER then
 	
-		self:Remove()
+	
+	
+		SafeRemoveEntityDelayed(self,10)
+		
+		physobj:EnableMotion(false)
 		
 		local damageinfo = DamageInfo()
 		
@@ -66,6 +72,8 @@ function ENT:PhysicsCollide(data, physobj)
 	
 	util.Effect("Impact", e)
 	
+
+	
 	
 	
 	
@@ -84,9 +92,9 @@ function ENT:Think()
 		--print(damage)
 		
 		if damage < 10 then
-			phys:EnableGravity(true)
+			--phys:EnableGravity(true)
 			--print("FALL")
-			phys:ApplyForceCenter(Vector(0,0,80))
+			phys:ApplyForceCenter(Vector(0,0,-25))
 		end
 	
 	
@@ -99,7 +107,7 @@ local color = Color( 255, 255, 255, 255 ) --Define this sort of stuff outside of
 
 function ENT:Draw()
 	if CLIENT then
-		self:DrawModel()
+		--self:DrawModel()
 		--[[
 		cam.Start3D( EyePos(), EyeAngles() ) -- Start the 3D function so we can draw onto the screen.
 			render.SetMaterial( material ) -- Tell render what material we want, in this case the flash from the gravgun

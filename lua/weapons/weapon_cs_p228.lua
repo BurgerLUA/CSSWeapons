@@ -19,14 +19,14 @@ SWEP.WorldModel				= "models/weapons/w_pist_p228.mdl"
 SWEP.Primary.Damage			= 39
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/p228/p228-1.wav")
-SWEP.Primary.Cone			= .01
+SWEP.Primary.Cone			= .0075
 SWEP.Primary.ClipSize		= 13
-SWEP.Primary.SpareClip	= 52
+SWEP.Primary.SpareClip		= 52
 SWEP.Primary.Delay			= 1/(400/60)
 SWEP.Primary.Ammo			= "GaussEnergy"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 0.85
 SWEP.EnableScope 			= false
 SWEP.ZoomAmount 			= 1
 SWEP.EnableCrosshair 		= true

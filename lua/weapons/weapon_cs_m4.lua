@@ -30,7 +30,7 @@ SWEP.WorldModel1			= "models/weapons/w_rif_m4a1.mdl"
 SWEP.WorldModel2 			= "models/weapons/w_rif_m4a1_silencer.mdl"
 SWEP.Secondary.Sound		= Sound("weapons/m4a1/m4a1-1.wav")
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 0.75
 SWEP.EnableScope 			= false
 SWEP.ZoomAmount 			= 1
 SWEP.EnableCrosshair 		= true

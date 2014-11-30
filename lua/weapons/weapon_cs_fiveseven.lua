@@ -21,12 +21,12 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/fiveseven/fiveseven-1.wav")
 SWEP.Primary.Cone			= 0.01
 SWEP.Primary.ClipSize		= 20
-SWEP.Primary.SpareClip	= 100
+SWEP.Primary.SpareClip		= 100
 SWEP.Primary.Delay			= 1/(400/60)
 SWEP.Primary.Ammo			= "AlyxGun"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul 				= 1
+SWEP.RecoilMul 				= 0.8
 SWEP.EnableScope 			= false
 SWEP.ZoomAmount 			= 1
 SWEP.EnableCrosshair 		= true

@@ -115,10 +115,10 @@ SWEP.IronSightTime			= 1
 SWEP.IronSightsPos 		= Vector( 0, 0, 0 )
 SWEP.IronSightsAng 		= Vector( 0, 0, 0 )
 
+
 SWEP.BurgerBase				= true
 SWEP.CoolDown 				= 0
 SWEP.CoolTime 				= 0
-SWEP.CoolDown 				= 0
 SWEP.ShotgunReload 			= 0
 SWEP.NextShell 				= 0
 SWEP.IsReloading 			= 0
@@ -137,6 +137,10 @@ SWEP.ZoomCurTime			= 1
 SWEP.IronTime				= 0
 SWEP.AlreadyGiven			= false
 SWEP.BoltCurTime 			= 0
+
+
+SWEP.PhysBullets			= false
+
 
 local allammo = {}
 
@@ -403,6 +407,8 @@ function SWEP:PrimaryAttack()
 		
 		if self.HasBurstFire == true and self.Primary.Automatic == false and self:GetFireMode( ) == BURST then
 			self:SetNextPrimaryFire(CurTime() + 0.25)
+		elseif self.HasBurstFire == true and self.Primary.Automatic == true and self:GetFireMode( ) == BURST then
+			self:SetNextPrimaryFire(CurTime() + 0.4)
 		else
 			self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 		end
@@ -711,7 +717,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	self.ViewKick = -(Damage*Shots/20)/2*Recoil*self.RecoilMul*GetConVar("sv_css_recoil_scale"):GetFloat()
 	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001*GetConVar("sv_css_velcone_scale"):GetInt())
 	self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01),0,10)
-	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*self.RecoilMul
+	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)
 	
 	if self.CoolDown > 0.25 and self.HasSideRecoil == true then
 		bonusmul = math.Rand(-1,1)
@@ -765,31 +771,41 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 
 	if self.PhysBullets then
 	
-		local physics = physenv.GetPerformanceSettings( )
 	
-		--PrintTable(physics)
-	
-	
-		local xspread = math.Rand(-Spread.x,Spread.x)
-		local yspread = math.Rand(-Spread.y,Spread.y)
-	
-		--print(xspread)
-	
-	
-		local EyeA = self.Owner:EyeAngles()
-	
-		local Final = Dir + EyeA:Right()*xspread + EyeA:Up()*yspread
-	
-	
-		local bullet = ents.Create("ent_cs_bullet")
-		bullet:SetPos(self.Owner:GetShootPos())
-		bullet:SetAngles(EyeA)
-		bullet:SetNWInt("Damage",Damage)
-		bullet:Spawn()
-		bullet:SetOwner(self.Owner)
-		bullet:GetPhysicsObject():SetVelocity( Final * physics.MaxVelocity)
+		if SERVER then
+			local physics = physenv.GetPerformanceSettings( )
+		
+			--PrintTable(physics)
 		
 		
+			local xspread = math.Rand(-Spread.x,Spread.x)
+			local yspread = math.Rand(-Spread.y,Spread.y)
+			
+			
+			local muzzlepos = self.Owner:GetShootPos() + self.Owner:GetForward()*-10 + self.Owner:GetRight()*8 + self.Owner:GetUp()*-3
+	
+	--	PrintTable(muzzlepos)
+			
+			
+		
+			--print(xspread)
+	
+		
+	
+			local EyeA = self.Owner:EyeAngles()
+		
+			local Final = Dir + EyeA:Right()*xspread + EyeA:Up()*yspread
+		
+			
+			local bullet = ents.Create("ent_cs_bullet")
+			bullet:SetPos(muzzlepos)
+			bullet:SetAngles(EyeA)
+			bullet:SetNWInt("Damage",Damage)
+			bullet:Spawn()
+			bullet:SetOwner(self.Owner)
+			bullet:GetPhysicsObject():SetVelocity( Final * physics.MaxVelocity * 1000)
+		
+		end
 		
 
 

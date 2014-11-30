@@ -21,7 +21,7 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/glock/glock18-1.wav")
 SWEP.Primary.Cone			= 0.015
 SWEP.Primary.ClipSize		= 20
-SWEP.Primary.SpareClip	= 120
+SWEP.Primary.SpareClip		= 120
 SWEP.Primary.Delay			= 1/(400/60)
 SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic 		= false
@@ -33,7 +33,7 @@ SWEP.EnableCrosshair 		= true
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
-SWEP.HasBurstFire 			= false
+SWEP.HasBurstFire 			= true
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= false

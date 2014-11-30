@@ -19,14 +19,14 @@ SWEP.WorldModel				= "models/weapons/w_pist_deagle.mdl"
 SWEP.Primary.Damage			= 50
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/deagle/deagle-1.wav")
-SWEP.Primary.Cone			= 0.015
+SWEP.Primary.Cone			= 0.0075
 SWEP.Primary.ClipSize		= 7
 SWEP.Primary.SpareClip	= 35
 SWEP.Primary.Delay			= 1/(267/60)
 SWEP.Primary.Ammo			= "CombineCannon"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul 				= 1
+SWEP.RecoilMul 				= 0.75
 SWEP.EnableScope 			= false
 SWEP.ZoomAmount 			= 1
 SWEP.EnableCrosshair		= true

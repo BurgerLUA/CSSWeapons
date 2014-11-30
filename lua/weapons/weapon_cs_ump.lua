@@ -26,7 +26,7 @@ SWEP.Primary.Delay			= 1/(666/60)
 SWEP.Primary.Ammo			= "SniperPenetratedRound"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 0.85
 SWEP.EnableScope 			= false
 SWEP.ZoomAmount 			= 1
 SWEP.EnableCrosshair 		= true

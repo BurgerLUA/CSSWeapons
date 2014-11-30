@@ -1,0 +1,8 @@
+"UnlitGeneric"
+{
+	"$basetexture"	"vgui/achievements/collect_gifts"
+	"$translucent" "1"
+	"$ignorez" "1"
+	"$vertexcolor" "1"
+	"$vertexalpha" "1"
+}

@@ -62,6 +62,7 @@ if CLIENT then
 	SWEP.BounceWeaponIcon	= false
 	SWEP.DrawWeaponInfoBox	= false
 	SWEP.CSMuzzleFlashes 	= true
+	--SWEP.CSMuzzleX			= true
 	
 end
 
@@ -866,14 +867,14 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 					--newtrace2.filter = tr.Entity
 				local newtracedone2 = util.TraceLine(newtrace2)
 
-				--[[
-				if SERVER then	
 				
+				if SERVER then	
+					--[[
 					timer.Simple(1,function() 
 					
 						local debugmodel1 = ents.Create("prop_physics")
 							debugmodel1:SetPos(newtracedone.HitPos)
-							debugmodel1:SetModel("models/weapons/w_models/w_baseball.mdl")
+							debugmodel1:SetModel("models/hunter/blocks/cube025x025x025.mdl")
 							debugmodel1:SetColor(Color(0,255,0,255)) -- green
 							debugmodel1:Spawn()
 							debugmodel1:Activate()
@@ -883,8 +884,8 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 						SafeRemoveEntityDelayed(debugmodel1,5)
 							
 						local debugmodel2 = ents.Create("prop_physics")
-							debugmodel2:SetPos(tr.HitPos + Dir)
-							debugmodel2:SetModel("models/weapons/w_models/w_baseball.mdl")
+							debugmodel2:SetPos(tr.HitPos)
+							debugmodel2:SetModel("models/hunter/blocks/cube025x025x025.mdl")
 							debugmodel2:SetColor(Color(255,0,0,255)) -- red
 							debugmodel2:Spawn()
 							debugmodel2:Activate()
@@ -895,7 +896,7 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 						
 						local debugmodel3 = ents.Create("prop_physics")
 							debugmodel3:SetPos(newtracedone2.HitPos)
-							debugmodel3:SetModel("models/weapons/w_models/w_baseball.mdl")
+							debugmodel3:SetModel("models/hunter/blocks/cube025x025x025.mdl")
 							debugmodel3:SetColor(Color(0,0,255,255)) --blue
 							debugmodel3:Spawn()
 							debugmodel3:Activate()
@@ -905,18 +906,18 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 						SafeRemoveEntityDelayed(debugmodel3,5)
 
 					end)
-					
+					--]]
 				end
-				--]]
+				
 
 				local distance = (tr.HitPos + Dir):Distance(newtracedone2.HitPos)
 				local newdamage = Damage - ( GetConVar("sv_css_penetration_scale"):GetFloat() * distance * matmul )
 				
-				self:BulletEffect(newtracedone2.HitPos , newtracedone.HitPos, newtracedone.SurfaceProps)
-				self:BulletEffect(newtracedone.HitPos , newtracedone2.HitPos, newtracedone.SurfaceProps)
+				self:BulletEffect(newtracedone.HitPos , newtracedone2.HitPos, newtracedone.Entity, newtracedone.SurfaceProps) --VALID, CREATS ONE AT GREEN TOWARDS BLUE/RED
+				self:BulletEffect(tr.HitPos , newtracedone.HitPos, tr.Entity, tr.SurfaceProps)
 				
 				if newdamage > 0 and tr.HitSky == false then
-					self:LaunchBullet(1,newtracedone.HitPos, Dir, Vector(0,0,0), Force, newdamage )
+					--self:LaunchBullet(1,newtracedone.HitPos, Dir, Vector(0,0,0), Force, newdamage )
 				end
 
 			end
@@ -929,28 +930,21 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 	
 end
 
-function SWEP:BulletEffect(HitPos,StartPos,SurfaceProp)
+function SWEP:BulletEffect(HitPos,StartPos,HitEntity,SurfaceProp)
 	
-	--[[
 	local effect = EffectData()
 		effect:SetOrigin(HitPos)
 		effect:SetStart(StartPos)
 		effect:SetSurfaceProp(SurfaceProp)
 		effect:SetDamageType(DMG_BULLET)
-	util.Effect("Impact", effect)
-	
-	local hit = util.GetSurfacePropName(SurfaceProp)
-	local impact = "Impact.Concrete"
-
-	if hit == "flesh" then
-		impact = "Blood"
-	elseif hit == "concrete" or hit == "tile" then
-		impact = "Impact.Concrete"
+		
+	if CLIENT then
+		effect:SetEntity(HitEntity)
+	else
+		effect:SetEntIndex(HitEntity:EntIndex())
 	end
-	
-	util.Decal(impact, StartPos, HitPos)
-	
-	--]]
+		
+	util.Effect("Impact", effect)
 	
 end
 
@@ -1435,4 +1429,39 @@ function SWEP:SetupWeaponHoldTypeForAI(t)
 	end
 
 end
+
+function SWEP:PrintWeaponInfo( x, y, alpha )
+
+	local InfoColor = Color(255,255, 100, alpha)
+
+	--if ( self.DrawWeaponInfoBox == false ) then return end
+
+	if (self.InfoMarkup == nil ) then
+		local str
+		local title_color = "<color=0,0,0,255>"
+		local text_color = "<color=255,150,150,255>"
+		
+		str = "<font=HudSelectionText>"
+		str = str .. title_color .. "Base Damage:</color> "..text_color..self.Primary.Damage.."</color>\n" 
+		str = str .. title_color .. "Firerate:</color> "..text_color.. math.floor((self.Primary.Delay^-1)*60) .. " RPM" .."</color>\n"
+		str = str .. title_color .. "Damage Per Second:</color> "..text_color..math.floor((self.Primary.Delay^-1) * self.Primary.Damage ).. "DPS" .. "</color>\n"
+		str = str .. title_color .. "Recoil:</color> "..text_color.. math.floor((self.Primary.Damage * self.RecoilMul) * 2) .. "%" .."</color>\n" 
+		str = str .. title_color .. "Accuracy:</color> "..text_color.. 100 - (self.Primary.Cone*100) .. "%" .. "</color>\n"
+		str = str .. "</font>"
+		
+		self.InfoMarkup = markup.Parse( str, 250 )
+	end
+	
+	surface.SetDrawColor( InfoColor )
+	surface.SetTexture( self.SpeechBubbleLid )
+	
+
+	
+	surface.DrawTexturedRect( x, y - 64 - 5, 128, 64 ) 
+	draw.RoundedBox( 8, x - 5, y - 6, 260, self.InfoMarkup:GetHeight() + 18, InfoColor )
+	
+	self.InfoMarkup:Draw( x+5, y+5, nil, nil, alpha )
+	
+end
+
 

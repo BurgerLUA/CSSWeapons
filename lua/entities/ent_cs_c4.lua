@@ -191,9 +191,11 @@ function ENT:Detonate(self,pos)
 			for k,v in pairs(ents.FindInSphere(self:GetPos(),c4radius)) do
 		
 				local distance = v:GetPos():Distance( self:GetPos() )
+				
+				local calc =  1 - (distance/c4radius)
 		
 				local dmginfo = DamageInfo()
-					dmginfo:SetDamage( c4damage * (distance/c4radius) )
+					dmginfo:SetDamage( c4damage * calc  )
 					dmginfo:SetDamageType( DMG_BLAST )
 					dmginfo:SetAttacker( self:GetNWEntity("owner",self) )
 					
@@ -206,7 +208,7 @@ function ENT:Detonate(self,pos)
 		
 		
 		
-		
+				--[[
 				if GetConVar("sv_css_enable_c4smoke"):GetInt() == 1 then
 					local ent = ents.Create("ent_cs_smokeparticle")
 						ent:SetPos(v:GetPos())
@@ -215,7 +217,7 @@ function ENT:Detonate(self,pos)
 						ent:Activate()
 						ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-2500,2500),math.Rand(-2500,2500),math.Rand(0,25)))
 				end
-			
+				--]]
 		
 		
 				--if v:GetClass() == "prop_physics" then

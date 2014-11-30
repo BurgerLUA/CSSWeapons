@@ -6,7 +6,7 @@ ENT.Information 		= ""
 
 ENT.Spawnable 			= false
 ENT.AdminSpawnable		= false 
-ENT.Category			= "Counter Strike Source Ammo"
+ENT.Category			= "CS:S Ammo"
 
 AddCSLuaFile()
 
@@ -45,9 +45,8 @@ function ENT:Use(activator,caller,useType,value)
 	if ( activator:IsPlayer() ) then
 	
 		activator:GiveAmmo(self.AmmoAmount,self.AmmoType)
+		self:EmitSound("items/ammopickup.wav")
 		self:Remove()
-		
-	else
 	
 	end
 

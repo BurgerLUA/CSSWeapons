@@ -54,12 +54,8 @@ function ENT:Use(activator,caller,useType,value)
 					if SWEP.Primary.Ammo ~= "none" then
 						
 						activator:SetAmmo(9999,SWEP.Primary.Ammo)
-						
-						activator:ChatPrint("You've received 9999 ammo for each C:SS weapon you have on you")
-					
-					
+
 					end
-					
 					
 					
 				end
@@ -69,13 +65,12 @@ function ENT:Use(activator,caller,useType,value)
 			end
 		end
 	
+		activator:ChatPrint("You've received 9999 ammo for all of your CSS Weapons")
 	
 		self:EmitSound("items/gift_pickup.wav")
 		
 		self:Remove()
-		
-	else
-	
+
 	end
 
 end

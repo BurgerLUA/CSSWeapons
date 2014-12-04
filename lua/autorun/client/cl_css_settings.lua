@@ -14,7 +14,7 @@ local ItemTable = {}
 	
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "Slider"
-	ItemTable[count]["name"] = "Damage Multiplier"
+	ItemTable[count]["name"] = "Damage Multiplier (Higher means more damage)"
 	ItemTable[count]["command"] = "sv_css_damage_scale"
 	ItemTable[count]["min"] = 0
 	ItemTable[count]["max"] = 10
@@ -24,7 +24,7 @@ local ItemTable = {}
 	
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "Slider"
-	ItemTable[count]["name"] = "Recoil Multiplier"
+	ItemTable[count]["name"] = "Recoil Multiplier (Higher means weapons have a bigger kickback)"
 	ItemTable[count]["command"] = "sv_css_recoil_scale"
 	ItemTable[count]["min"] = 0
 	ItemTable[count]["max"] = 10
@@ -34,8 +34,38 @@ local ItemTable = {}
 	
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "Slider"
-	ItemTable[count]["name"] = "Spread Multiplier"
+	ItemTable[count]["name"] = "Base Spread Multiplier (Higher means weapons have larger cone)"
 	ItemTable[count]["command"] = "sv_css_cone_scale"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 1
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Heat Spread Multiplier (Higher means weapons are more inaccurate when firing too much)"
+	ItemTable[count]["command"] = "sv_css_heat_scale"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 1
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Heat Time Multiplier (Higher means the cooldown stage is longer) "
+	ItemTable[count]["command"] = "sv_css_cooltime_scale"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 1
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Cooldown Amount Multiplier (Higher means the weapons cools faster)"
+	ItemTable[count]["command"] = "sv_css_cooldown_scale"
 	ItemTable[count]["min"] = 0
 	ItemTable[count]["max"] = 10
 	ItemTable[count]["decimals"] = 1
@@ -45,7 +75,7 @@ local ItemTable = {}
 	
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "Slider"
-	ItemTable[count]["name"] = "Movement Spread Multiplier"
+	ItemTable[count]["name"] = "Movement Spread Multiplier (Higher means the cone is larger when moving)"
 	ItemTable[count]["command"] = "sv_css_velcone_scale"
 	ItemTable[count]["min"] = 0
 	ItemTable[count]["max"] = 10
@@ -197,6 +227,21 @@ local ItemTable = {}
 	ItemTable[count]["decimals"] = 0
 	ItemTable[count]["height"] = 40
 	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DLabel"
+	ItemTable[count]["font"] = "TitleFont"
+	ItemTable[count]["text"] = "Other Settings"
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "AUG and SG552 Aim Like Counter-Strike"
+	ItemTable[count]["command"] = "sv_css_enable_csszoom"
+	ItemTable[count]["height"] = 25
+	count = count + 1
+	
 
 function CSSServersideWeaponSettings()
 	

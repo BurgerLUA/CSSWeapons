@@ -1,11 +1,13 @@
 if CLIENT then
-	SWEP.PrintName			= "7.62MM AK47"
-	SWEP.Slot				= 3
-	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_ak47", "csd", "b", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/ak47")
 end
+
+
+SWEP.PrintName			= "7.62MM AK47"
+SWEP.Slot				= 3
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "ar2"
 SWEP.Base					= "weapon_cs_base"
@@ -41,6 +43,3 @@ SWEP.IronSightTime			= 0.25
 
 SWEP.IronSightsPos = Vector(-6.6, 0, 1.96)
 SWEP.IronSightsAng = Vector(2.5, 0, 0.5)
-
-
-SWEP.PhysBullets			= false

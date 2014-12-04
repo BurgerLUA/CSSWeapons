@@ -1,12 +1,13 @@
 
 if CLIENT then
-	SWEP.PrintName			= "5.56MM SIG552"
-	SWEP.Slot				= 3
-	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_sig552", "csd", "A", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/sg552")
 end
+
+SWEP.PrintName			= "5.56MM SIG552"
+SWEP.Slot				= 3
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "ar2"
 SWEP.Base					= "weapon_cs_base"
@@ -21,15 +22,16 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/sg552/sg552-1.wav")
 SWEP.Primary.Cone			= .01
 SWEP.Primary.ClipSize		= 30
-SWEP.Primary.SpareClip	= 90
+SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 1/(666/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1
 SWEP.EnableScope 			= true
-SWEP.ZoomAmount 			= 4
+SWEP.ZoomAmount 			= 2
 SWEP.EnableCrosshair 		= true
+SWEP.HasCSSZoom 			= true
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false

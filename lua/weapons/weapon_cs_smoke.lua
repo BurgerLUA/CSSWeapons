@@ -1,13 +1,14 @@
 
 if CLIENT then
-	SWEP.PrintName			= "SMOKE GRENADE"
-	SWEP.Slot				= 4
-	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_flash", "csd", "P", Color( 255, 80, 0, 255 ) )
 	killicon.AddFont( "ent_cs_flash", "csd", "P", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/smokegrenade")
 end
+
+SWEP.PrintName			= "SMOKE GRENADE"
+SWEP.Slot				= 4
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "melee"
 SWEP.Base					= "weapon_cs_base"

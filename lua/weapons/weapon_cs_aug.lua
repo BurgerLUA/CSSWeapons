@@ -1,12 +1,13 @@
 
 if CLIENT then
-	SWEP.PrintName			= "5.56MM AUG"
-	SWEP.Slot				= 3
-	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_aug", "csd", "e", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
 	SWEP.WepSelectIcon		= surface.GetTextureID("vgui/gfx/vgui/aug")
 end 
+
+SWEP.PrintName			= "5.56MM AUG"
+SWEP.Slot				= 3
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "ar2"
 SWEP.Base					= "weapon_cs_base"
@@ -28,8 +29,9 @@ SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul 				= 0.75
 SWEP.EnableScope 			= true
-SWEP.ZoomAmount				= 4
+SWEP.ZoomAmount				= 2
 SWEP.EnableCrosshair 		= true
+SWEP.HasCSSZoom 			= true
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false

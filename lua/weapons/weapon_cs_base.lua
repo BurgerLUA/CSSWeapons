@@ -5,7 +5,13 @@ AddCSLuaFile()
 		CreateConVar("sv_css_recoil_scale", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value that all recoil from CSS weapons is multiplied. Default is 1." )
 		CreateConVar("sv_css_cone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
 		CreateConVar("sv_css_velcone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
+		
+		CreateConVar("sv_css_heat_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
+		CreateConVar("sv_css_cooltime_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
+		CreateConVar("sv_css_cooldown_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
 	
+		CreateConVar("sv_css_enable_csszoom", "0", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
+		
 		CreateConVar("sv_css_ammo_loaded", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables giving weapons already loaded. Default is 1." )
 		CreateConVar("sv_css_ammo_givespare", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables giving spare ammo to players upon pickup. Default is 1." )
 	
@@ -98,11 +104,11 @@ SWEP.Secondary.ClipSize 	= -1
 SWEP.Secondary.DefaultClip 	= -1
 SWEP.Secondary.Automatic	= false
 
-
 SWEP.RecoilMul				= 1
 SWEP.EnableScope 			= false
 SWEP.ZoomAmount 			= 1
 SWEP.EnableCrosshair 		= true
+SWEP.HasCSSZoom 			= false
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
@@ -116,8 +122,8 @@ SWEP.IronSightTime			= 1
 SWEP.IronSightsPos 		= Vector( 0, 0, 0 )
 SWEP.IronSightsAng 		= Vector( 0, 0, 0 )
 
-
 SWEP.BurgerBase				= true
+
 SWEP.CoolDown 				= 0
 SWEP.CoolTime 				= 0
 SWEP.ShotgunReload 			= 0
@@ -170,6 +176,12 @@ allammo[21] =	"StriderMinigun"
 allammo[22] =	"HelicopterGun"
 
 hook.Add("DoPlayerDeath", "drop weapon after death", function(ply)
+	
+
+	ply:SetNWString("cssprimary",nil)
+	ply:SetNWString("csssecondary",nil)
+
+	
 	if GetConVar("sv_css_enable_drops"):GetInt() == 1 then
 		for k,v in pairs(ply:GetWeapons()) do
 			if v.BurgerBase ~= nil then
@@ -379,8 +391,18 @@ function SWEP:Holster()
 		return false
 	end
 	
+	
 	self:SetNWBool("IronSights",false)
 	self:SendWeaponAnim(ACT_VM_HOLSTER)
+	
+	if self.Slot > 1 then 
+		self.Owner:SetNWString("cssprimary",self:GetClass())
+	else
+		self.Owner:SetNWString("csssecondary",self:GetClass())
+	end
+	
+	
+	
 	
 	return true
 	
@@ -427,8 +449,12 @@ function SWEP:SecondaryAttack()
 		self:SwitchFireMode()
 
 	elseif self.EnableScope == true then
-		
-		self:ScopeZoom()
+	
+		if GetConVar("sv_css_enable_csszoom"):GetInt() == 1 and self.HasCSSZoom == true then
+			self:CSSZoom()
+		else
+			self:ScopeZoom()
+		end
 	
 	elseif self.HasIronSights == true then
 	
@@ -522,6 +548,32 @@ function SWEP:ScopeZoom()
 	self.ScopeDelay = delay + CurTime()
 end
 
+function SWEP:CSSZoom()
+
+	if self:CanBoltZoom() == false then return end
+	
+	local delay = 0.1
+
+	if self.ScopeDelay > CurTime() then return end
+
+	if SERVER then
+		if self:GetNWBool("csszoomed",false) == true then
+			self.Owner:SetFOV(0, 0.25 )
+			self:SetNWBool("csszoomed",false)
+		else
+			self.Owner:SetFOV( 90 / self.ZoomAmount , 0.25 )
+			self:SetNWBool("csszoomed",true)
+			--print(self.Owner:GetFOV())
+		end
+	end
+	
+	self.ScopeDelay = delay + CurTime()
+
+end
+
+
+
+
 function SWEP:CanBoltZoom()
 
 	local value
@@ -557,6 +609,7 @@ function SWEP:TranslateFOV(oldfov)
 		
 		return newfov
 	else
+	
 		local clamp = 1
 		self.Owner:DrawViewModel(true)
 		
@@ -716,10 +769,10 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	self:EmitGunSound(GunSound)
 
 	self.ViewKick = -(Damage*Shots/20)/2*Recoil*self.RecoilMul*GetConVar("sv_css_recoil_scale"):GetFloat()
-	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001*GetConVar("sv_css_velcone_scale"):GetInt())
-	self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01),0,10)
-	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)
-	
+	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001*GetConVar("sv_css_velcone_scale"):GetFloat())
+	self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01)*GetConVar("sv_css_heat_scale"):GetFloat(),0,20)
+	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*GetConVar("sv_css_cooltime_scale"):GetFloat()
+
 	if self.CoolDown > 0.25 and self.HasSideRecoil == true then
 		bonusmul = math.Rand(-1,1)
 		sideways = 3
@@ -732,8 +785,10 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	
 		local uppunch = (self.ViewKick/2)*3*bonusmul
 		local sidepunch = (self.ViewKick/2)*math.Rand(-1,1)*sideways
+		--local rollpunch = (self.ViewKick/1) * math.Rand(-1,1)
+		local rollpunch = 0
 		
-		local punchangle = Angle(uppunch,sidepunch,0)
+		local punchangle = Angle(uppunch,sidepunch,rollpunch)
 	
 	
 	
@@ -764,49 +819,55 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 end
 
 function SWEP:EmitGunSound(GunSound)
-	self.Weapon:EmitSound(GunSound, SNDLVL_GUNFIRE, 100, 1, CHAN_WEAPON )
+	self.Weapon:EmitSound(GunSound, SNDLVL_180dB , 100, 1, CHAN_WEAPON )
 end
 
 function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 
 
 	if self.PhysBullets then
-	
+		--self.Owner:LagCompensation( true )
 	
 		if SERVER then
+		
 			local physics = physenv.GetPerformanceSettings( )
-		
-			--PrintTable(physics)
-		
-		
-			local xspread = math.Rand(-Spread.x,Spread.x)
-			local yspread = math.Rand(-Spread.y,Spread.y)
+			
+			local EyeTrace = self.Owner:GetEyeTrace() 
+			
+			for i=1, Num do
+			
+				local XSpread = math.Rand(-Spread.x,Spread.x)
+				local YSpread = math.Rand(-Spread.y,Spread.y)
+				
+				local EyeA = self.Owner:EyeAngles()
+				local Offset = EyeA:Forward()*-20 + EyeA:Right()*8 + EyeA:Up()*-3
+				
+				local APSpread = EyeA:Right()*XSpread + EyeA:Up()*YSpread*500
+				local VelSpread = EyeA:Right()*XSpread + EyeA:Up()*YSpread
+				local Velocity = physics.MaxVelocity
 			
 			
-			local muzzlepos = self.Owner:GetShootPos() + self.Owner:GetForward()*-10 + self.Owner:GetRight()*8 + self.Owner:GetUp()*-3
-	
-	--	PrintTable(muzzlepos)
+				local ApplyForceCenterMethod = (EyeTrace.HitPos - self.Owner:GetShootPos() - Offset - VelSpread - self.Owner:GetPunchAngle():Up() ) * Velocity
+				local SetVelocityMethod = Velocity * (Dir + VelSpread)
+				--Dir is (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
 			
 			
-		
-			--print(xspread)
-	
-		
-	
-			local EyeA = self.Owner:EyeAngles()
-		
-			local Final = Dir + EyeA:Right()*xspread + EyeA:Up()*yspread
-		
 			
-			local bullet = ents.Create("ent_cs_bullet")
-			bullet:SetPos(muzzlepos)
-			bullet:SetAngles(EyeA)
-			bullet:SetNWInt("Damage",Damage)
-			bullet:Spawn()
-			bullet:SetOwner(self.Owner)
-			bullet:GetPhysicsObject():SetVelocity( Final * physics.MaxVelocity * 1000)
+				local bullet = ents.Create("ent_cs_bullet")
+					bullet:SetPos(self.Owner:GetShootPos() + Offset)
+					bullet:SetAngles(EyeA)
+					bullet:SetNWInt("Damage",Damage)
+					bullet:Spawn()
+					bullet:SetOwner(self.Owner)
+					--bullet:GetPhysicsObject():ApplyForceCenter( ApplyForceCenterMethod )
+					bullet:GetPhysicsObject():SetVelocity( SetVelocityMethod )
+			end
+			--print(tostring(distancemod2) .. " vs " .. tostring(Dir))
+			--print(tostring(Dir) .. " vs " .. tostring(abnormal))
 		
 		end
+		
+		--self.Owner:LagCompensation( false )
 		
 
 
@@ -962,6 +1023,13 @@ function SWEP:Reload()
 			self:SetNWBool("Ironsights",false)
 			self.Owner:SetFOV(0,self.IronSightTime)
 		end
+		
+		
+		if self:GetNWBool("csszoomed",false) == true then
+			self:SetNWBool("csszoomed",false)
+			self.Owner:SetFOV(0,self.IronSightTime)
+		end
+		
 	--end
 	
 	--self:SpecialReload()
@@ -983,6 +1051,9 @@ function SWEP:Reload()
 		self:SendWeaponAnim(ACT_VM_RELOAD)
 		
 	end
+	
+		--self:EmitSound("")
+	
 
 	if self.HasPumpAction == true then
 
@@ -1157,8 +1228,8 @@ function SWEP:Think()
 	end
 	
 	if self.CoolTime < CurTime() then
-		if self.CoolDown > 0.03 then
-			self.CoolDown = self.CoolDown - 0.06
+		if self.CoolDown ~= 0 then
+			self.CoolDown = math.max(0,self.CoolDown - (0.06 * GetConVar("sv_css_cooldown_scale"):GetFloat() ))
 		else
 			self.CoolDown = 0
 		end
@@ -1175,7 +1246,10 @@ function SWEP:AdjustMouseSensitivity()
 	if self:GetNWBool("IronSights",false) == true then
 		sen = 1 / self.ZoomAmount
 	elseif self.EnableScope == true then
-		if self:GetNWInt("zoommode",0) ~= 0 then
+	
+		if self:GetNWBool("csszoomed",false) == true and self.HasCSSZoom == true then
+			sen = 1 / self.ZoomAmount
+		elseif self:GetNWInt("zoommode",0) ~= 0 then
 			if self.HasDoubleZoom == true then
 				sen = 1 / (self.ZoomAmount*(self:GetNWInt("zoommode",0)/2))
 			else
@@ -1265,8 +1339,8 @@ function SWEP:DrawHUD()
 		add = 0.1
 	end
 
-	local heat = self:GetNWInt("weaponheat",0)
-	local extra = (self.ActualCone*1000*csscrouchmul + ( heat*10 + self.Owner:GetVelocity():Length()*0.1*GetConVar("sv_css_velcone_scale"):GetFloat() )) + add
+	local heat = self:GetNWInt("weaponheat",0)*15
+	local extra = (self.ActualCone*1000*csscrouchmul + ( heat + self.Owner:GetVelocity():Length()*0.1*GetConVar("sv_css_velcone_scale"):GetFloat() )) + add
 	
 	if self.EnableCrosshair == true then
 		if self:GetNWInt("zoommode",0) == 0 and self:GetNWBool("IronSights",false) == false then
@@ -1317,12 +1391,13 @@ function SWEP:DrawHUD()
 				surface.DrawCircle( x/2, y/2, math.Clamp(extra*fovbonus,3,x/2*0.33), Color(0,255,0) )
 			end
 			
+			
 			surface.SetDrawColor(Color(0,0,0))
 			surface.SetMaterial(Material("overlays/scope_lens"))
 			surface.DrawTexturedRectRotated(x/2,y/2,y,y,0)
 
 			
-			local space = 1
+			local space = 2
 			
 			surface.SetDrawColor(Color(0,0,0))
 			surface.SetMaterial(Material("sprites/scope_arc"))
@@ -1331,12 +1406,15 @@ function SWEP:DrawHUD()
 			surface.DrawTexturedRectRotated(x/2 + y/4,y/2 + y/4,y/2 + space,y/2 + space,180-180)
 			surface.DrawTexturedRectRotated(x/2 + y/4,y/2 - y/4,y/2 + space,y/2 + space,270-180)
 			
+			
 			surface.SetDrawColor(Color(0,0,0))
 			surface.SetMaterial(Material("vgui/gfx/vgui/solid_background"))
 			surface.DrawTexturedRectRotated(x/4 - y/4,y/2,x/2 - y/2,y,0)
 			surface.DrawTexturedRectRotated(x - x/4 + y/4,y/2,x/2 - y/2,y,0)
 			
+
 			surface.DrawCircle(x/2,y/2,y/2 - 100,Color(0,0,0))
+			
 			--[[
 			if fovbonus > 4 then
 				surface.SetDrawColor(Color(0,0,0))

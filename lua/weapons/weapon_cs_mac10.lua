@@ -1,12 +1,14 @@
 
 if CLIENT then
-	SWEP.PrintName			= ".45ACP MAC10"
-	SWEP.Slot				= 2
-	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_mac10", "csd", "l", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
+
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/mac10")
 end
+
+SWEP.PrintName			= ".45ACP MAC10"
+SWEP.Slot				= 2
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "smg"
 SWEP.Base					= "weapon_cs_base"

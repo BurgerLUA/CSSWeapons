@@ -1,13 +1,14 @@
 
 if CLIENT then
-	SWEP.PrintName			= "C4 EXPLOSIVE"
-	SWEP.Slot				= 4
-	SWEP.SlotPos			= 1
-	killicon.AddFont( "weapon_cs_he", "csd", "O", Color( 255, 80, 0, 255 ) )
-	killicon.AddFont( "ent_cs_he", "csd", "O", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
+	killicon.AddFont( "weapon_cs_c4", "csd", "O", Color( 255, 80, 0, 255 ) )
+	killicon.AddFont( "ent_cs_c4", "csd", "O", Color( 255, 80, 0, 255 ) )
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/last_match_performance")
 end
+
+SWEP.PrintName			= "C4 EXPLOSIVE"
+SWEP.Slot				= 4
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "slam"
 SWEP.Base					= "weapon_cs_base"

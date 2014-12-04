@@ -1,11 +1,11 @@
-
 if CLIENT then
-	SWEP.PrintName			= "Aimbot Gun for Bots"
-	SWEP.Slot				= 3
-	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_botgun", "csd", "bD", Color( 0, 80, 255, 255 ) )
-	SWEP.ViewModelFlip 		= false
 end
+
+SWEP.PrintName			= "Aimbot Gun for Bots"
+SWEP.Slot				= 3
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "ar2"
 SWEP.Base					= "weapon_cs_base"

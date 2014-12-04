@@ -12,11 +12,11 @@ function ENT:Initialize()
 	if SERVER then
 		self:SetModel("models/weapons/shell.mdl") 
 
-		local size = 1
+		local size = 0.1
 		
 		self:PhysicsInitSphere( size, "metal" )
 		self:SetCollisionBounds( Vector( -size, -size, -size ), Vector( size, size, size ) )
-		
+		self:SetCollisionGroup(COLLISION_GROUP_PROJECTILE)
 		
 		
 
@@ -40,51 +40,66 @@ function ENT:Initialize()
 	end
 end
 
-function ENT:PhysicsCollide(data, physobj)
-	if SERVER then
-	
-	
-	
-		SafeRemoveEntityDelayed(self,10)
-		
-		physobj:EnableMotion(false)
-		
-		local damageinfo = DamageInfo()
-		
-		damageinfo:SetDamage(self.Damage)
-		damageinfo:SetAttacker(self.Owner)
-		data.HitEntity:TakeDamageInfo(damageinfo)
-		
-		
-	end
+function ENT:PhysicsCollide( data, collider )
 
-	local e = EffectData()
-		e:SetOrigin(data.HitPos)
-		e:SetStart(data.HitPos - data.HitNormal)
-		--e:SetSurfaceProp(data.SurfaceProps)
-		e:SetDamageType(DMG_BULLET)
-		--e:SetHitBox(data.HitBox)
-	if CLIENT then
-		e:SetEntity(data.HitEntity)
-	else
-		e:SetEntIndex(data.HitEntity:EntIndex())
-	end
+	collider:EnableMotion(false)
 	
-	util.Effect("Impact", e)
+	--if data.Hit then
 	
+		if SERVER then
+		
+			SafeRemoveEntityDelayed(self,10)
+			
+			
+			local damageinfo = DamageInfo()
+			
+			damageinfo:SetDamage(self.Damage)
+			damageinfo:SetAttacker(self.Owner)
+			
+			if IsValid(self.Owner:GetActiveWeapon()) then
+				damageinfo:SetInflictor(self.Owner:GetActiveWeapon())
+			else
+				damageinfo:SetInflictor(self)
+			end
+			
+			data.HitEntity:TakeDamageInfo(damageinfo)
+			
+			
+		end
 
-	
-	
-	
-	
+		local e = EffectData()
+			e:SetOrigin(data.HitPos)
+			e:SetStart(data.HitPos - data.HitNormal)
+			e:SetSurfaceProp(1)
+			e:SetDamageType(DMG_BULLET)
+			--e:SetHitBox(data.HitBox)
+			
+		
+		if CLIENT then
+			e:SetEntity(data.HitEntity)
+		else
+			e:SetEntIndex(data.HitEntity:EntIndex())
+		end
+		
+		util.Effect("Impact", e)
+		
+	--end
 	
 end
+--[[
+function ENT:Touch( otherEntity )
+	if otherEntity:GetClass() ~= "trigger_soundscape" then
+		print(otherEntity)
+		local tr = self:GetTouchTrace()
+		local hitPos = tr.HitPos
+	end
+end
+--]]
 
 function ENT:Think()
+
+
 	if SERVER then
-	
-	
-	
 		local timepassed = CurTime() - self.StartTime
 		local damage = self.Damage - timepassed*30
 		local phys = self:GetPhysicsObject()
@@ -96,10 +111,13 @@ function ENT:Think()
 			--print("FALL")
 			phys:ApplyForceCenter(Vector(0,0,-25))
 		end
-	
-	
-	
+		
+		
 	end
+	
+
+	
+	
 end
 
 local material = Material( "sprites/splodesprite" )

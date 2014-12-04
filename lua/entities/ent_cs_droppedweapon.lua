@@ -60,8 +60,12 @@ function ENT:Use(activator,caller,useType,value)
 		
 		
 		local givenweapon = activator:Give(self:GetNWString("class"))
-		activator:SelectWeapon(self:GetNWString("class"))
+		givenweapon.AlreadyGiven = true
 		givenweapon:SetClip1(self:GetNWInt("clip"))
+		activator:SelectWeapon(self:GetNWString("class"))
+		self:EmitSound("items/itempickup.wav")
+		
+
 		self:Remove()
 	else
 	

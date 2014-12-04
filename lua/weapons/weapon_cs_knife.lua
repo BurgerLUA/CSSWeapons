@@ -1,12 +1,13 @@
 
 if CLIENT then
-	SWEP.PrintName			= "COMBAT KNIFE"
-	SWEP.Slot				= 0
-	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_knife", "csd", "j", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/achievements/pistol_round_knife_kill")
 end
+
+SWEP.PrintName			= "COMBAT KNIFE"
+SWEP.Slot				= 0
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "knife"
 SWEP.Base					= "weapon_cs_base"

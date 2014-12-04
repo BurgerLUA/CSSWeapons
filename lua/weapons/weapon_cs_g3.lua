@@ -1,12 +1,14 @@
 
 if CLIENT then
-	SWEP.PrintName			= "7.62MM G3SG1"
-	SWEP.Slot				= 4
-	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_g3", "csd", "i", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
+
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/g3sg1")
 end
+
+SWEP.PrintName			= "7.62MM G3SG1"
+SWEP.Slot				= 4
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "ar2"
 SWEP.Base					= "weapon_cs_base"

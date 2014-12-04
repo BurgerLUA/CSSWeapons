@@ -1,12 +1,13 @@
 
 if CLIENT then
-	SWEP.PrintName			= "5.7MM FIVESEVEN"
-	SWEP.Slot				= 1
-	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_fiveseven", "csd", "u", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/fiveseven")
 end
+
+SWEP.PrintName			= "5.7MM FIVESEVEN"
+SWEP.Slot				= 1
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "revolver"
 SWEP.Base					= "weapon_cs_base"

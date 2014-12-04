@@ -65,7 +65,7 @@ function ENT:Use(activator,caller,useType,value)
 			end
 		end
 	
-		activator:ChatPrint("You've received 9999 ammo for all of your CSS Weapons")
+		activator:ChatPrint("You have received max ammo for all of your CSS Weapons")
 	
 		self:EmitSound("items/gift_pickup.wav")
 		

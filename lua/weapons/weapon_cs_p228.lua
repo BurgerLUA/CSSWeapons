@@ -1,12 +1,13 @@
 
 if CLIENT then
-	SWEP.PrintName			= ".357SIG P228"
-	SWEP.Slot				= 1
-	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_p228", "csd", "y", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/p228")
 end
+
+SWEP.PrintName			= ".357SIG P228"
+SWEP.Slot				= 1
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "revolver"
 SWEP.Base					= "weapon_cs_base"

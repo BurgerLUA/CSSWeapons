@@ -1,12 +1,14 @@
 
 if CLIENT then
-	SWEP.PrintName			= "9MM DUAL BERTTA"
-	SWEP.Slot				= 1
-	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_dualbertta", "csd", "s", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
+
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/elites")
 end
+
+SWEP.PrintName			= "9MM DUAL BERTTA"
+SWEP.Slot				= 1
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "duel"
 SWEP.Base					= "weapon_cs_base"

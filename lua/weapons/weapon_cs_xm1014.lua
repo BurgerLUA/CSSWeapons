@@ -1,12 +1,13 @@
 
 if CLIENT then
-	SWEP.PrintName			= "12 GAUGE XM1014"
-	SWEP.Slot				= 2
-	SWEP.SlotPos			= 1
 	killicon.AddFont( "weapon_cs_xm1014", "csd", "B", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/xm1014")
 end
+
+SWEP.PrintName			= "12 GAUGE XM1014"
+SWEP.Slot				= 2
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "shotgun"
 SWEP.Base					= "weapon_cs_base"

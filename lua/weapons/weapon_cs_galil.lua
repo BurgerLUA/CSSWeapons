@@ -1,12 +1,13 @@
 
-if CLIENT then
-	SWEP.PrintName			= "5.56MM GALIL"
-	SWEP.Slot				= 3
-	SWEP.SlotPos			= 1
+if CLIENT then	
 	killicon.AddFont( "weapon_cs_galil", "csd", "v", Color( 255, 80, 0, 255 ) )
-	SWEP.ViewModelFlip 		= false
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/galil")
 end
+
+SWEP.PrintName			= "5.56MM GALIL"
+SWEP.Slot				= 3
+SWEP.SlotPos			= 1
+SWEP.ViewModelFlip 		= false
 
 SWEP.HoldType				= "ar2"
 SWEP.Base					= "weapon_cs_base"

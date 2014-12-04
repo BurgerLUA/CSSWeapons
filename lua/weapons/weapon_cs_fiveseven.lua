@@ -7,14 +7,14 @@ end
 SWEP.PrintName			= "5.7MM FIVESEVEN"
 SWEP.Slot				= 1
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "revolver"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Category				= "Counter-Strike"
 SWEP.Spawnable				= true
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_pist_fiveseven.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_pist_fiveseven.mdl"
 SWEP.WorldModel				= "models/weapons/w_pist_fiveseven.mdl"
 
 SWEP.Primary.Damage			= 24

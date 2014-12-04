@@ -6,14 +6,14 @@ end
 SWEP.PrintName			= "7.62MM SCOUT"
 SWEP.Slot				= 4
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "ar2"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_snip_scout.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_snip_scout.mdl"
 SWEP.WorldModel				= "models/weapons/w_snip_scout.mdl"
 
 SWEP.Primary.Damage			= 74

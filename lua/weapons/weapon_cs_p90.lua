@@ -7,14 +7,14 @@ end
 SWEP.PrintName			= "5.7MM P90"
 SWEP.Slot				= 2
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "smg"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_smg_p90.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_smg_p90.mdl"
 SWEP.WorldModel				= "models/weapons/w_smg_p90.mdl"
 
 SWEP.Primary.Damage			= 25

@@ -7,14 +7,14 @@ end
 SWEP.PrintName			= ".357SIG P228"
 SWEP.Slot				= 1
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "revolver"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_pist_p228.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_pist_p228.mdl"
 SWEP.WorldModel				= "models/weapons/w_pist_p228.mdl"
 
 SWEP.Primary.Damage			= 39

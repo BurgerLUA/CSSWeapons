@@ -7,14 +7,14 @@ end
 SWEP.PrintName			= "5.56MM SIG552"
 SWEP.Slot				= 3
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "ar2"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_rif_sg552.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_rif_sg552.mdl"
 SWEP.WorldModel				= "models/weapons/w_rif_sg552.mdl"
 
 SWEP.Primary.Damage			= 32

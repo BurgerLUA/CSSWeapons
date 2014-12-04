@@ -7,10 +7,10 @@ AddCSLuaFile()
 		CreateConVar("sv_css_velcone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
 		
 		CreateConVar("sv_css_heat_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
-		CreateConVar("sv_css_cooltime_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
-		CreateConVar("sv_css_cooldown_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
+		CreateConVar("sv_css_cooltime_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the cooldown time from CSS weapons is multiplied by. Default is 1." )
+		CreateConVar("sv_css_cooldown_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the cooldown amount from CSS weapons is multiplied by. Default is 1." )
 	
-		CreateConVar("sv_css_enable_csszoom", "0", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
+		CreateConVar("sv_css_enable_csszoom", "0", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables CSS-Like zooms for the AUG and SG552. Default is 0." )
 		
 		CreateConVar("sv_css_ammo_loaded", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables giving weapons already loaded. Default is 1." )
 		CreateConVar("sv_css_ammo_givespare", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables giving spare ammo to players upon pickup. Default is 1." )
@@ -35,6 +35,7 @@ AddCSLuaFile()
 	
 	
 	CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
+	CreateClientConVar("cl_css_viewmodel_cmodel", "1", true, true )
 	
 	CreateClientConVar("cl_css_crosshair_style", "1", true, true )
 	CreateClientConVar("cl_css_crosshair_length", "15", true, true )
@@ -63,8 +64,8 @@ if CLIENT then
 
 	SWEP.DrawAmmo			= true
 	SWEP.DrawCrosshair		= false
-	SWEP.ViewModelFlip		= false
-	SWEP.ViewModelFOV		= 47
+	SWEP.VModelFlip		= false
+	SWEP.VModelFOV		= 47
 	SWEP.BounceWeaponIcon	= false
 	SWEP.DrawWeaponInfoBox	= false
 	SWEP.CSMuzzleFlashes 	= true
@@ -327,8 +328,65 @@ function SWEP:M9KFix()
 		self.EnableCrosshair = true
 	end
 
-	
 
+end
+
+function SWEP:CalcViewModelView(vm,oldPos,oldAng,pos,ang)
+
+	local fraction = 0.25
+	
+	if LocalPlayer():GetVelocity():Length() > 0 and LocalPlayer():IsOnGround() then
+		offset = LerpVector(fraction*2,Vector(0,0,0),(oldAng:Forward() * math.sin(CurTime()*4)) + (oldAng:Up() * math.sin(CurTime()*4)*0.25))
+		pos = oldPos + offset
+	elseif offset ~= nil then
+		LengthyEroticRoleplay = LerpVector(fraction,offset,Vector(0,0,0))
+		pos = oldPos + LengthyEroticRoleplay
+	end
+	
+	ang = oldAng
+
+	return pos, ang
+
+
+end
+
+
+
+
+
+
+--function SWEP:ViewModelDrawn(vm)
+
+	--[[
+	print(self.CModel)
+	print(self.VModel)
+	
+	if self.CModel and not self.VModel then
+		vm:SetModel(self.CModel)
+		print("VModel doesn't exist... using CModel")
+	elseif not self.CModel and self.VModel then
+		vm:SetModel(self.VModel)
+		print("CModel doesn't exist... using VModel")
+	elseif GetConVar("cl_css_viewmodel_cmodel"):GetInt() == 1 then
+		vm:SetModel(self.CModel)
+		print("cl_css_viewmodel_cmodel set to 1 ... using CModel")
+	else
+		vm:SetModel(self.VModel)
+		print("cl_css_viewmodel_cmodel set to 0 ... using VModel")
+	end
+	--]]
+	
+--end
+
+function SWEP:PostDrawViewModel( vm, weapon, ply )
+	if CLIENT then
+		local hands = LocalPlayer():GetHands()
+		
+		if GetConVar("cl_css_viewmodel_cmodel"):GetInt() == 1 then
+			hands:SetModel("models/weapons/c_arms_cstrike.mdl")
+		end
+
+	end
 end
 
 
@@ -336,11 +394,12 @@ end
 
 function SWEP:Deploy()
 
+	--self.ViewModel = string.Replace(self.VModel,"models/weapons/v","models/weapons/cstrike/c_")
+
 	if self.M9KTransfer then
 		self:M9KFix()
 	end
-
-
+	
 	if SERVER then
 
 		if self.AlreadyGiven == false then
@@ -395,12 +454,13 @@ function SWEP:Holster()
 	self:SetNWBool("IronSights",false)
 	self:SendWeaponAnim(ACT_VM_HOLSTER)
 	
-	if self.Slot > 1 then 
-		self.Owner:SetNWString("cssprimary",self:GetClass())
-	else
-		self.Owner:SetNWString("csssecondary",self:GetClass())
+	if self.Slot then
+		if self.Slot > 1 then 
+			self.Owner:SetNWString("cssprimary",self:GetClass())
+		else
+			self.Owner:SetNWString("csssecondary",self:GetClass())
+		end
 	end
-	
 	
 	
 	
@@ -819,7 +879,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 end
 
 function SWEP:EmitGunSound(GunSound)
-	self.Weapon:EmitSound(GunSound, SNDLVL_180dB , 100, 1, CHAN_WEAPON )
+	self.Weapon:EmitSound(GunSound, 355 , 100, 1, CHAN_WEAPON )
 end
 
 function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
@@ -868,19 +928,8 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 		end
 		
 		--self.Owner:LagCompensation( false )
-		
-
-
+	
 	return end
-	
-	
-	
-	
-
-
-
-
-
 
 	local bullet = {}
 	bullet.Num		= Num
@@ -978,7 +1027,7 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 				self:BulletEffect(tr.HitPos , newtracedone.HitPos, tr.Entity, tr.SurfaceProps)
 				
 				if newdamage > 0 and tr.HitSky == false then
-					--self:LaunchBullet(1,newtracedone.HitPos, Dir, Vector(0,0,0), Force, newdamage )
+					self:LaunchBullet(1,newtracedone.HitPos, Dir, Vector(0,0,0), Force, newdamage )
 				end
 
 			end
@@ -1169,7 +1218,6 @@ end
 
 function SWEP:Think()
 
-	
 	if CLIENT then
 		if self.M9KTransfer then
 			--self.ViewModelFOV = GetConVar("cl_css_viewmodel_fov"):GetFloat() + 25

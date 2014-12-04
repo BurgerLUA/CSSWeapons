@@ -510,6 +510,14 @@ function CSSClientsideWeaponSettings()
 		WidthSlider:SetConVar( "cl_css_crosshair_width" ) -- Set the convar
 		
 		
+	local CModelCheckBox = vgui.Create("DCheckBoxLabel", Base1)
+		CModelCheckBox:SetText( "Use CModels?" )
+		CModelCheckBox:SetTextColor( Color(0, 0, 0, 255) )
+		CModelCheckBox:SizeToContents()
+		CModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40)
+		CModelCheckBox:SetConVar( "cl_css_viewmodel_cmodel" )
+		
+		
 	
 	
 	

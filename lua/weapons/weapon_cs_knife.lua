@@ -7,14 +7,14 @@ end
 SWEP.PrintName			= "COMBAT KNIFE"
 SWEP.Slot				= 0
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "knife"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_knife_t.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_knife_t.mdl"
 SWEP.WorldModel				= "models/weapons/w_knife_t.mdl"
 
 SWEP.Primary.Damage			= 0

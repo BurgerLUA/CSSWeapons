@@ -8,7 +8,7 @@ end
 SWEP.PrintName			= "C4 EXPLOSIVE"
 SWEP.Slot				= 4
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "slam"
 SWEP.Base					= "weapon_cs_base"
@@ -16,7 +16,7 @@ SWEP.Spawnable				= true
 SWEP.AdminOnly				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_c4.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_c4.mdl"
 SWEP.WorldModel				= "models/weapons/w_c4.mdl"
 
 SWEP.Primary.Damage			= 0

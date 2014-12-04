@@ -7,14 +7,14 @@ end
 SWEP.PrintName			= ".338 AWP"
 SWEP.Slot				= 4
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "ar2"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Category				= "Counter-Strike"
 SWEP.Spawnable				= true
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_snip_awp.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_snip_awp.mdl"
 SWEP.WorldModel				= "models/weapons/w_snip_awp.mdl"
 
 SWEP.Primary.Damage			= 114

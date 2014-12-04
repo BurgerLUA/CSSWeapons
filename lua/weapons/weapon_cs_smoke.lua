@@ -8,7 +8,7 @@ end
 SWEP.PrintName			= "SMOKE GRENADE"
 SWEP.Slot				= 4
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "melee"
 SWEP.Base					= "weapon_cs_base"
@@ -16,7 +16,7 @@ SWEP.Spawnable				= true
 SWEP.AdminOnly				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_eq_smokegrenade.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_eq_smokegrenade.mdl"
 SWEP.WorldModel				= "models/weapons/w_eq_smokegrenade.mdl"
 
 SWEP.Primary.Damage			= 0

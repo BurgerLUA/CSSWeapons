@@ -8,14 +8,14 @@ end
 SWEP.PrintName			= ".45ACP MAC10"
 SWEP.Slot				= 2
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "smg"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Category				= "Counter-Strike"
 SWEP.Spawnable				= true
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_smg_mac10.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_smg_mac10.mdl"
 SWEP.WorldModel				= "models/weapons/w_smg_mac10.mdl"
 
 SWEP.Primary.Damage			= 28

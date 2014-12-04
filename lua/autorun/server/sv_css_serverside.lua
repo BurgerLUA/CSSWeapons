@@ -31,8 +31,6 @@ end
 hook.Add( "PlayerSay", "ISaid", ISaid );
 
 
-
-
 function OnSpawn( ply )
 	
 
@@ -58,6 +56,25 @@ function OnSpawn( ply )
 end
 
 hook.Add( "PlayerInitialSpawn", "OnSpawn", OnSpawn )
+
+function DetectHeadshots(ply, hitgroup, dmginfo)
+
+		if hitgroup == HITGROUP_HEAD then
+			ply:EmitSound("player/headshot"..math.random(1,2)..".wav",SNDLVL_TALKING,100,1,CHAN_BODY)
+		end
+
+
+
+
+end
+
+hook.Add("ScalePlayerDamage","CSS Detect Headshots",DetectHeadshots)
+
+
+
+
+
+
 
 --[[
 
@@ -245,8 +262,6 @@ net.Receive("CSSAskForCommand", function(len,ply)
 	end
 	
 end)
-
-
 
 
 --]]

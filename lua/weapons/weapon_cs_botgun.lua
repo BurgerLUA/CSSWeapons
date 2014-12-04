@@ -5,7 +5,7 @@ end
 SWEP.PrintName			= "Aimbot Gun for Bots"
 SWEP.Slot				= 3
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "ar2"
 SWEP.Base					= "weapon_cs_base"
@@ -13,7 +13,7 @@ SWEP.Spawnable				= true
 SWEP.AdminOnly				= true
 SWEP.Category				= "EXPERIMENTAL"
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_rif_ak47.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_rif_ak47.mdl"
 SWEP.WorldModel				= "models/weapons/w_rif_ak47.mdl"
 
 SWEP.Primary.Damage			= 35

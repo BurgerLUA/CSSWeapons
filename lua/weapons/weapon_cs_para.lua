@@ -7,14 +7,14 @@ end
 SWEP.PrintName			= "5.56MM M249 PARA"
 SWEP.Slot				= 4
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "shotgun"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_mach_m249para.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_mach_m249para.mdl"
 SWEP.WorldModel				= "models/weapons/w_mach_m249para.mdl"
 
 SWEP.Primary.Damage			= 31

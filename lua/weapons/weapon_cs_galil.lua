@@ -7,14 +7,14 @@ end
 SWEP.PrintName			= "5.56MM GALIL"
 SWEP.Slot				= 3
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "ar2"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Category				= "Counter-Strike"
 SWEP.Spawnable				= true
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_rif_galil.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_rif_galil.mdl"
 SWEP.WorldModel				= "models/weapons/w_rif_galil.mdl"
 
 SWEP.Primary.Damage			= 29

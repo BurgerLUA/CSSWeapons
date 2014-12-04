@@ -7,14 +7,14 @@ end
 SWEP.PrintName			= "12 GAUGE XM1014"
 SWEP.Slot				= 2
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip 		= false
+SWEP.VModelFlip 		= false
 
 SWEP.HoldType				= "shotgun"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_shot_xm1014.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_shot_xm1014.mdl"
 SWEP.WorldModel				= "models/weapons/w_shot_xm1014.mdl"
 
 SWEP.Primary.Damage			= 105/6

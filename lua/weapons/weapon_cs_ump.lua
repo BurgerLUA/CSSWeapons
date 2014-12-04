@@ -6,14 +6,14 @@ end
 SWEP.PrintName			= ".45 UMP"
 SWEP.Slot				= 2
 SWEP.SlotPos			= 1
-SWEP.ViewModelFlip = false
+SWEP.VModelFlip = false
 
 SWEP.HoldType				= "smg"
 SWEP.Base					= "weapon_cs_base"
 SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
 
-SWEP.ViewModel				= "models/weapons/cstrike/c_smg_ump45.mdl"
+SWEP.ViewModel 				= "models/weapons/cstrike/c_smg_ump45.mdl"
 SWEP.WorldModel				= "models/weapons/w_smg_ump45.mdl"
 
 SWEP.Primary.Damage			= 29

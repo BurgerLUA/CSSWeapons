@@ -511,7 +511,7 @@ function CSSClientsideWeaponSettings()
 		
 		
 	local CModelCheckBox = vgui.Create("DCheckBoxLabel", Base1)
-		CModelCheckBox:SetText( "Use CModels?" )
+		CModelCheckBox:SetText( "Use Playermodel hands instead of CS:S hands. (Applies next spawn)" )
 		CModelCheckBox:SetTextColor( Color(0, 0, 0, 255) )
 		CModelCheckBox:SizeToContents()
 		CModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40)

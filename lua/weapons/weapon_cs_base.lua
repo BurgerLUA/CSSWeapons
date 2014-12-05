@@ -382,7 +382,7 @@ function SWEP:PostDrawViewModel( vm, weapon, ply )
 	if CLIENT then
 		local hands = LocalPlayer():GetHands()
 		
-		if GetConVar("cl_css_viewmodel_cmodel"):GetInt() == 1 then
+		if GetConVar("cl_css_viewmodel_cmodel"):GetInt() == 0 then
 			hands:SetModel("models/weapons/c_arms_cstrike.mdl")
 		end
 

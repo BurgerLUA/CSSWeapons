@@ -1309,7 +1309,7 @@ function SWEP:BotThink()
 	end
 	
 	if self:Clip1() <= 1 then
-		self:SetClip1(30)
+		self:SetClip1(self.Primary.ClipSize)
 	end
 	
 	

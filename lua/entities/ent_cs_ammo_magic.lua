@@ -1,3 +1,5 @@
+AddCSLuaFile()
+
 ENT.Type 				= "anim"
 ENT.Base 				= "base_entity"
 ENT.PrintName 			= "[CHEAT] Ammo Gift"
@@ -8,18 +10,19 @@ ENT.Spawnable 			= true
 ENT.AdminOnly			= true
 ENT.Category			= "CS:S Ammo"
 
-AddCSLuaFile()
+
 
 function ENT:Initialize()
 
 	if SERVER then
 	
-		self:SetModel("models/items/cs_gift.mdl")
+		self:SetModel("models/hunter/blocks/cube05x05x05.mdl")
+
 		
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
-		
+		self:DrawShadow(false)
 		self:SetCollisionGroup(COLLISION_GROUP_NONE)
 
 		
@@ -35,6 +38,21 @@ function ENT:Initialize()
 	
 	self:EmitSound("items/gift_drop.wav")
 	
+end
+
+function ENT:SpawnFunction( ply, tr, ClassName )
+
+	if ( !tr.Hit ) then return end
+
+	local SpawnPos = tr.HitPos + tr.HitNormal * 16
+
+	local ent = ents.Create( ClassName )
+	ent:SetPos( SpawnPos )
+	ent:Spawn()
+	ent:Activate()
+
+	return ent
+
 end
 
 function ENT:Use(activator,caller,useType,value)
@@ -76,7 +94,18 @@ function ENT:Use(activator,caller,useType,value)
 end
 
 function ENT:Draw()
-	if CLIENT then
-		self:DrawModel()
+
+	local settings = {}
+
+	if file.Exists("models/items/cs_gift.mdl","GAME") then
+		settings["model"] = "models/items/cs_gift.mdl"
+	else
+		settings["model"] = "models/maxofs2d/companion_doll.mdl"
 	end
+		
+	settings["pos"] = self:GetPos() - Vector(0,0,12)
+	settings["angle"] = Angle(0,CurTime()*500,0)
+
+	render.Model(settings)
+
 end

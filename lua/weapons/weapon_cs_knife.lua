@@ -1,21 +1,22 @@
-
 if CLIENT then
 	killicon.AddFont( "weapon_cs_knife", "csd", "j", Color( 255, 80, 0, 255 ) )
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/achievements/pistol_round_knife_kill")
 end
 
-SWEP.PrintName			= "COMBAT KNIFE"
-SWEP.Slot				= 0
-SWEP.SlotPos			= 1
-SWEP.VModelFlip 		= false
-
-SWEP.HoldType				= "knife"
+SWEP.PrintName				= "COMBAT KNIFE"
 SWEP.Base					= "weapon_cs_base"
-SWEP.Spawnable				= true
+SWEP.WeaponType				= "Free"
+
 SWEP.Category				= "Counter-Strike"
+SWEP.Spawnable				= true
+
+SWEP.Slot					= 0
+SWEP.SlotPos				= 1
 
 SWEP.ViewModel 				= "models/weapons/cstrike/c_knife_t.mdl"
 SWEP.WorldModel				= "models/weapons/w_knife_t.mdl"
+SWEP.VModelFlip 			= false
+SWEP.HoldType				= "knife"
 
 SWEP.Primary.Damage			= 0
 SWEP.Primary.NumShots		= 0
@@ -25,19 +26,20 @@ SWEP.Primary.ClipSize		= -1
 SWEP.Primary.SpareClip		= -1
 SWEP.Primary.Delay			= 0.75
 SWEP.Primary.Ammo			= "none"
-SWEP.Primary.Automatic 		= true
-SWEP.Secondary.Automatic 	= true
+SWEP.Primary.Automatic 		= true ; SWEP.Secondary.Automatic 	= true
 
 SWEP.RecoilMul				= 1
-SWEP.EnableScope 			= false
+SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
-SWEP.EnableCrosshair 		= false
+SWEP.HasCrosshair 			= false
+SWEP.HasCSSZoom 			= false
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
+SWEP.HasSideRecoil			= false
 
 function SWEP:PrimaryAttack()
 	

@@ -1,21 +1,23 @@
-
 if CLIENT then
 	killicon.AddFont( "weapon_cs_sig550", "csd", "o", Color( 255, 80, 0, 255 ) )
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/sg550")
 end
 
-SWEP.PrintName			= "5.56MM SIG550"
-SWEP.Slot				= 4
-SWEP.SlotPos			= 1
-SWEP.VModelFlip 		= false
-
-SWEP.HoldType				= "ar2"
-SWEP.Base					= "weapon_cs_base"
-SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
+SWEP.PrintName				= "5.56MM SIG550"
+SWEP.Base					= "weapon_cs_base"
+SWEP.WeaponType				= "Primary"
+
+SWEP.Spawnable				= true
+SWEP.AdminOnly				= false
+
+SWEP.Slot					= 4
+SWEP.SlotPos				= 1
 
 SWEP.ViewModel 				= "models/weapons/cstrike/c_snip_sg550.mdl"
 SWEP.WorldModel				= "models/weapons/w_snip_sg550.mdl"
+SWEP.VModelFlip 			= false
+SWEP.HoldType				= "ar2"
 
 SWEP.Primary.Damage			= 69
 SWEP.Primary.NumShots		= 1
@@ -28,9 +30,10 @@ SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 0.4
-SWEP.EnableScope 			= true
+SWEP.HasScope 				= true
 SWEP.ZoomAmount 			= 8
-SWEP.EnableCrosshair 		= false
+SWEP.HasCrosshair 			= false
+SWEP.HasCSSZoom 			= false
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
@@ -38,8 +41,3 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= false
-SWEP.HasIronSights 			= false
-SWEP.IronSightTime			= 1
-
-SWEP.IronSightsPos = Vector(0, 0, 0)
-SWEP.IronSightsAng = Vector(0, 0, 0)

@@ -1,23 +1,24 @@
-
 if CLIENT then
 	killicon.AddFont( "weapon_cs_flash", "csd", "P", Color( 255, 80, 0, 255 ) )
 	killicon.AddFont( "ent_cs_flash", "csd", "P", Color( 255, 80, 0, 255 ) )
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/smokegrenade")
 end
 
-SWEP.PrintName			= "SMOKE GRENADE"
-SWEP.Slot				= 4
-SWEP.SlotPos			= 1
-SWEP.VModelFlip 		= false
-
-SWEP.HoldType				= "melee"
+SWEP.Category				= "Counter-Strike"
+SWEP.PrintName				= "SMOKE GRENADE"
 SWEP.Base					= "weapon_cs_base"
+SWEP.WeaponType 			= "Free"
+
+SWEP.Slot					= 4
+SWEP.SlotPos				= 1
+
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= true
-SWEP.Category				= "Counter-Strike"
 
 SWEP.ViewModel 				= "models/weapons/cstrike/c_eq_smokegrenade.mdl"
 SWEP.WorldModel				= "models/weapons/w_eq_smokegrenade.mdl"
+SWEP.VModelFlip 			= false
+SWEP.HoldType				= "melee"
 
 SWEP.Primary.Damage			= 0
 SWEP.Primary.NumShots		= 0
@@ -30,9 +31,9 @@ SWEP.Primary.Ammo			= "none"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 1
-SWEP.EnableScope 			= false
+SWEP.HasScope 			= false
 SWEP.ZoomAmount 			= 1
-SWEP.EnableCrosshair 		= false
+SWEP.HasCrosshair 		= false
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
@@ -57,7 +58,7 @@ function SWEP:PrimaryAttack()
 	
 end
 
-function SWEP:Think()
+function SWEP:EquipThink()
 	if self.IsThrowing == true then
 	
 		if self.ThrowAnimation < CurTime() then
@@ -76,9 +77,42 @@ function SWEP:Think()
 		end
 		
 		if self.ThrowRemove < CurTime() then
+		
 			if CLIENT then return end
-			self.Owner:SelectWeapon(self.Owner:GetWeapons()[1]:GetClass() )
+			
+			local foundp = false
+			local founds = false
+			
+			for k,v in pairs(self.Owner:GetWeapons()) do
+				if v:IsScripted() then
+					if foundp == false then
+						if weapons.GetStored(v:GetClass()).WeaponType == "Primary" then
+							self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
+							foundp = true
+						end
+					end
+				end
+			end
+			
+			if foundp == false then
+				for k,v in pairs(self.Owner:GetWeapons()) do
+					if v:IsScripted() then
+						if founds == false then
+							if weapons.GetStored(v:GetClass()).WeaponType == "Secondary" then
+								self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
+								founds = true
+							end
+						end
+					end
+				end
+			end
+
+			if founds == false and foundp == false then
+				self.Owner:SelectWeapon(self.Owner:GetWeapons()[1]:GetClass() )
+			end
+			
 			self:Remove() 
+			
 		end
 		
 	end

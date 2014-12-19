@@ -3,22 +3,21 @@ if CLIENT then
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/ak47")
 end
 
-
-SWEP.PrintName			= "7.62MM AK47"
-SWEP.Slot				= 3
-SWEP.SlotPos			= 1
-SWEP.VModelFlip 		= false
-
-SWEP.HoldType				= "ar2"
-SWEP.Base					= "weapon_cs_base"
-SWEP.Spawnable				= true
 SWEP.Category				= "Counter-Strike"
+SWEP.PrintName				= "7.62MM AK47"
+SWEP.Base					= "weapon_cs_base"
+SWEP.WeaponType				= "Primary"
+
+SWEP.Spawnable				= true
+SWEP.AdminOnly				= false
+
+SWEP.Slot					= 3
+SWEP.SlotPos				= 1
 
 SWEP.ViewModel 				= "models/weapons/cstrike/c_rif_ak47.mdl"
---SWEP.OtherModel			= "models/weapons/cstrike/c_rif_ak47.mdl"
-
-
 SWEP.WorldModel				= "models/weapons/w_rif_ak47.mdl"
+SWEP.VModelFlip 			= false
+SWEP.HoldType				= "ar2"
 
 SWEP.Primary.Damage			= 35
 SWEP.Primary.NumShots		= 1
@@ -31,9 +30,10 @@ SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1
-SWEP.EnableScope 			= false
+SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1.5
-SWEP.EnableCrosshair 		= true
+SWEP.HasCrosshair 			= true
+SWEP.HasCSSZoom 			= false
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
@@ -41,8 +41,3 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= false
-SWEP.HasIronSights 			= false
-SWEP.IronSightTime			= 0.25
-
-SWEP.IronSightsPos = Vector(-6.6, 0, 1.96)
-SWEP.IronSightsAng = Vector(2.5, 0, 0.5)

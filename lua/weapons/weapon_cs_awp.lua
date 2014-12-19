@@ -1,21 +1,23 @@
-
 if CLIENT then
 	killicon.AddFont( "weapon_cs_awp", "csd", "r", Color( 255, 80, 0, 255 ) )
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/awp")
 end
 
-SWEP.PrintName			= ".338 AWP"
-SWEP.Slot				= 4
-SWEP.SlotPos			= 1
-SWEP.VModelFlip 		= false
-
-SWEP.HoldType				= "ar2"
-SWEP.Base					= "weapon_cs_base"
 SWEP.Category				= "Counter-Strike"
+SWEP.PrintName				= ".338 AWP"
+SWEP.Base					= "weapon_cs_base"
+SWEP.WeaponType				= "Primary"
+
 SWEP.Spawnable				= true
+SWEP.AdminOnly				= false
+
+SWEP.Slot					= 4
+SWEP.SlotPos				= 1
 
 SWEP.ViewModel 				= "models/weapons/cstrike/c_snip_awp.mdl"
 SWEP.WorldModel				= "models/weapons/w_snip_awp.mdl"
+SWEP.VModelFlip 			= false
+SWEP.HoldType				= "ar2"
 
 SWEP.Primary.Damage			= 114
 SWEP.Primary.NumShots		= 1
@@ -28,9 +30,10 @@ SWEP.Primary.Ammo			= "SniperRound"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 0.25
-SWEP.EnableScope 			= true
+SWEP.HasScope 				= true
 SWEP.ZoomAmount 			= 12
-SWEP.EnableCrosshair 		= false
+SWEP.HasCrosshair 			= false
+SWEP.HasCSSZoom 			= false
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= true
@@ -38,8 +41,3 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= true
 SWEP.HasSideRecoil			= false
-SWEP.HasIronSights 			= false
-SWEP.IronSightTime			= 1
-
-SWEP.IronSightsPos = Vector(0, 0, 0)
-SWEP.IronSightsAng = Vector(0, 0, 0)

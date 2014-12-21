@@ -270,7 +270,7 @@ function SWEP:Holster()
 	end
 
 	self:SetNWBool("IronSights",false)
-	self:SendWeaponAnim(ACT_VM_HOLSTER)
+	--self:SendWeaponAnim(ACT_VM_HOLSTER)
 	
 	if self.Slot then
 		if self.Slot > 1 then 
@@ -496,7 +496,9 @@ function SWEP:Shoot()
 	
 	if self.HasScope and !self.HasCrosshair then
 		if self:GetNWInt("zoommode",0) == 0 then
-			Cone = 0.1
+			if self.Owner:IsPlayer() then
+				Cone = 0.1
+			end
 		end
 	end
 	
@@ -520,6 +522,11 @@ function SWEP:Shoot()
 			else
 				self:SetNextPrimaryFire(CurTime() + 0.5)
 			end
+			
+
+			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+
+			
 		
 		else
 			
@@ -727,7 +734,7 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 	bullet.Force	= Force
 	bullet.Damage	= Damage
 	bullet.Callback = function( attacker, tr, dmginfo)
-		if attacker:IsPlayer() then
+		if attacker:IsPlayer() or attacker:IsBot() then
 			if GetConVar("sv_css_enable_penetration"):GetInt() == 1 then
 			
 				local matmul = 1
@@ -808,7 +815,7 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 				local distance = (tr.HitPos + Dir):Distance(newtracedone2.HitPos)
 				local newdamage = Damage - ( GetConVar("sv_css_penetration_scale"):GetFloat() * distance * matmul )
 				
-				self:BulletEffect(newtracedone.HitPos , newtracedone2.HitPos, newtracedone.Entity, newtracedone.SurfaceProps) --VALID, CREATS ONE AT GREEN TOWARDS BLUE/RED
+				self:BulletEffect(newtracedone.HitPos , newtracedone2.HitPos, newtracedone.Entity, newtracedone.SurfaceProps)
 				self:BulletEffect(tr.HitPos , newtracedone.HitPos, tr.Entity, tr.SurfaceProps)
 				
 				if newdamage > 0 and tr.HitSky == false then
@@ -816,6 +823,21 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 				end
 
 			end
+			
+			
+			
+			if SERVER then
+				if tr.Entity:GetClass() == "prop_vehicle_prisoner_pod" or tr.Entity:IsVehicle() then
+					if tr.Entity:GetDriver() ~= NULL then
+						tr.Entity:GetDriver():TakeDamageInfo(dmginfo)
+					end
+				end
+			end
+			
+			
+			
+			
+			
 			
 		end
 		
@@ -832,6 +854,8 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 end
 
 function SWEP:BulletEffect(HitPos,StartPos,HitEntity,SurfaceProp)
+	
+	if HitEntity:IsPlayer() then return end
 	
 	local effect = EffectData()
 		effect:SetOrigin(HitPos)
@@ -1268,10 +1292,8 @@ function SWEP:BotThink()
 			
 			if v ~= self.Owner and v:Alive() then 
 			
-				--if CLIENT then
-					RealDistance = v:GetPos():Distance(self.Owner:GetPos())
-				--end
-			
+
+				RealDistance = v:GetPos():Distance(self.Owner:GetPos())
 				Distance = v:GetPos():Distance(self.Owner:GetPos()) - 10000000
 				
 				Result[v] = math.abs(Distance)
@@ -1308,17 +1330,20 @@ function SWEP:BotThink()
 		
 	end
 	
-	if self:Clip1() <= 1 then
-		self:SetClip1(self.Primary.ClipSize)
+	if self:Clip1() == 0 then
+		--self:SetClip1(self.Primary.ClipSize)
+		self:Reload()
 	end
 	
 	
 	--if CLIENT then
 		if self.Owner:GetEyeTrace().Entity:Health() > 0 then
 			if self.Bot.ShootDelay <= CurTime() then
-				self:Shoot()
-				self.Weapon:EmitSound(self.Primary.Sound,100,100)
-				self.Bot.ShootDelay = CurTime() + self.Primary.Delay
+				if self:Clip1() > 0 then
+					self:Shoot()
+					--self.Weapon:EmitSound(self.Primary.Sound,100,100)
+					self.Bot.ShootDelay = CurTime() + self.Primary.Delay + self.Primary.Delay*math.Rand(0,5)
+				end
 			end
 		end
 	--end

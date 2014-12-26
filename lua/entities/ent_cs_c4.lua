@@ -178,15 +178,12 @@ function ENT:Detonate(self,pos)
 			end
 		else
 		
-		self:EmitSound("weapons/c4/c4_exp_deb2.wav",100,100)
+			self:EmitSound("weapons/c4/c4_exp_deb2.wav",100,100)
 		
 		end
-			
-		
 	
 		self:EmitSound("weapons/c4/c4_explode1.wav",100,100)
 		
-	
 		if table.Count(ents.FindInSphere(self:GetPos(),c4radius)) > 0 then
 			for k,v in pairs(ents.FindInSphere(self:GetPos(),c4radius)) do
 		
@@ -202,44 +199,7 @@ function ENT:Detonate(self,pos)
 					local DDD_Distance = (self:GetPos() - v:GetPos()):GetNormalized( )
 					local DDD_Radius = Vector(c4radius,c4radius,c4radius)
 					
-					--dmginfo:SetDamageForce( (DDD_Distance - DDD_Radius )*100   )
-					
 					v:TakeDamageInfo(dmginfo)
-		
-		
-		
-				--[[
-				if GetConVar("sv_css_enable_c4smoke"):GetInt() == 1 then
-					local ent = ents.Create("ent_cs_smokeparticle")
-						ent:SetPos(v:GetPos())
-						ent:SetAngles(Angle(0,0,0))
-						ent:Spawn()
-						ent:Activate()
-						ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-2500,2500),math.Rand(-2500,2500),math.Rand(0,25)))
-				end
-				--]]
-		
-		
-				--if v:GetClass() == "prop_physics" then
-					--[[
-					if math.Rand(0,100) >= 1 then
-						local ignitetime = (c4damage/10) * math.abs(distance - c4radius)/c4radius
-						print(v)
-						print(ignitetime)
-						v:Ignite(ignitetime,0)
-					end
-					--]]
-					
-					--[[
-					timer.Simple(0.05,function() 
-						if v:IsValid() == false then return end
-						constraint.RemoveAll(v)
-						v:GetPhysicsObject():EnableMotion(true)
-						v:GetPhysicsObject():Wake()
-					end)
-					--]]
-					
-				--end
 		
 			end
 

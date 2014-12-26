@@ -75,6 +75,7 @@ function ENT:Detonate(self,pos)
 		
 		self:EmitSound("weapons/hegrenade/explode"..math.random(3,5)..".wav",100,100)
 		
+		--[[
 		if table.Count(ents.FindInSphere(self:GetPos(),250)) > 0 then
 			for k,v in pairs(ents.FindInSphere(self:GetPos(),250)) do
 			
@@ -101,6 +102,7 @@ function ENT:Detonate(self,pos)
 			end
 
 		end
+		--]]
 		
 		
 		if IsValid(self.HitP) then

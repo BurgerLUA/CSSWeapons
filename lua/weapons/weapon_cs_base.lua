@@ -222,8 +222,8 @@ function SWEP:Deploy()
 							self.Owner:StripWeapon(v:GetClass())
 							
 							local dropped = ents.Create("ent_cs_droppedweapon")
-							dropped:SetPos(self.Owner:GetShootPos())
-							dropped:SetAngles(self.Owner:EyeAngles())
+							dropped:SetPos(self.Owner:GetShootPos() - Vector(0,0,20) )
+							dropped:SetAngles(self.Owner:EyeAngles() )
 							dropped:SetModel(weapons.GetStored(v:GetClass()).WorldModel)
 							dropped:Spawn()
 							dropped:Activate()
@@ -235,6 +235,26 @@ function SWEP:Deploy()
 				end
 			end
 		end
+		
+		
+		--models/weapons/w_smg_mp5.mdl
+		--models/weapons/unloaded/smg_mp5_mag.mdl
+		
+
+		
+		self.GetMagModel = string.Replace( self.WorldModel,"/w_" , "/unloaded/" )
+		self.GetMagModel = string.Replace( self.GetMagModel , ".mdl" , "_mag.mdl")
+		print(self.GetMagModel)
+		
+
+		
+		
+		
+		
+		
+		
+		
+		
 		
 	end
 
@@ -669,8 +689,9 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
 	local Spread = Vector(Cone*self.CrouchMul, Cone*self.CrouchMul, 0) + Vector(self.ExtraSpread,self.ExtraSpread,0)
 	local Force	= Damage/100
 	local Damage = Damage*GetConVar("sv_css_damage_scale"):GetFloat()
+	local LastHitPos = self.Owner:GetPos()
 
-	self:LaunchBullet(Number,Source,Direction,Spread,Force,Damage)
+	self:LaunchBullet(Number,Source,Direction,Spread,Force,Damage,LastHitPos)
 
 end
 
@@ -680,7 +701,32 @@ function SWEP:EmitGunSound(GunSound)
 	
 end
 
-function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
+
+function SWEP:ShootEffects()
+	if SERVER then
+		 net.Start( "ThirdPersonShellsNet" )
+			 net.WriteEntity(self.Owner)
+		 net.Broadcast()
+	end
+
+
+end
+
+if SERVER then
+	util.AddNetworkString( "ThirdPersonShellsNet" )
+end
+
+--[[
+function SWEP:ShootEffects()
+	
+end
+--]]
+
+function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage,LastHitPos)
+
+	--PrintTable(self:GetAttachments())
+
+	self:ShootEffects()
 
 	if self.PhysBullets then
 		--self.Owner:LagCompensation( true )
@@ -818,13 +864,16 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 				self:BulletEffect(newtracedone.HitPos , newtracedone2.HitPos, newtracedone.Entity, newtracedone.SurfaceProps)
 				self:BulletEffect(tr.HitPos , newtracedone.HitPos, tr.Entity, tr.SurfaceProps)
 				
-				if newdamage > 0 and tr.HitSky == false then
-					self:LaunchBullet(1,newtracedone.HitPos, Dir, Vector(0,0,0), Force, newdamage )
+				
+				
+				if LastHitPos ~= tr.HitPos then
+					if newdamage > 0 and tr.HitSky == false then
+						self:LaunchBullet(1,newtracedone.HitPos - newtracedone.HitNormal*1, Dir, Vector(0,0,0), Force, newdamage, tr.HitPos)
+					end
 				end
+				
 
 			end
-			
-			
 			
 			if SERVER then
 				if tr.Entity:GetClass() == "prop_vehicle_prisoner_pod" or tr.Entity:IsVehicle() then
@@ -833,12 +882,7 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage)
 					end
 				end
 			end
-			
-			
-			
-			
-			
-			
+
 		end
 		
 	end
@@ -926,6 +970,32 @@ function SWEP:Reload()
 		self:SetNWInt("zoommode",0)
 		self.NextZoomTime = CurTime() + self.Owner:GetViewModel():SequenceDuration()
 	end
+	
+	if SERVER then
+		timer.Simple(0.75, function()
+		
+			if self.GetMagModel then
+
+			
+			
+				if file.Exists(self.GetMagModel,"GAME") then
+
+					local mag = ents.Create("ent_cs_debris")
+					mag:SetPos(self.Owner:GetShootPos() + self.Owner:GetUp()*-12 + self.Owner:GetRight()*3)
+					mag:SetModel(self.GetMagModel)
+					mag:SetAngles(self.Owner:EyeAngles())
+					mag:Spawn()
+					mag:Activate()
+					
+					SafeRemoveEntityDelayed(mag,10)
+					
+				end
+			end
+		end)
+
+	end
+	
+	
 	
 	self.IsReloading = 1
 	
@@ -1336,17 +1406,37 @@ function SWEP:BotThink()
 	end
 	
 	
-	--if CLIENT then
-		if self.Owner:GetEyeTrace().Entity:Health() > 0 then
+	if SERVER then
+	
+		local Victim = self.Owner:GetEyeTrace().Entity
+		
+		if Victim:IsPlayer() then
+			
+			if Victim:Health() > 0 then
+				if self.Bot.ShootDelay <= CurTime() then
+					if self:Clip1() > 0 then
+						
+						local distance = self.Owner:GetPos():Distance(Victim:GetPos())
+						
+							
+						self:Shoot()
+						--self.Weapon:EmitSound(self.Primary.Sound,100,100)
+						self.Bot.ShootDelay = CurTime() + math.min(0, self.Primary.Delay + ( self.Primary.Delay * distance/2000 ) - ( self.Primary.Delay * self.Owner:GetVelocity():Length()/50 ))
+					end
+				end
+			end
+		
+		elseif Victim:GetNWFloat("propcurhealth",-1) ~= -1 then
 			if self.Bot.ShootDelay <= CurTime() then
 				if self:Clip1() > 0 then
 					self:Shoot()
-					--self.Weapon:EmitSound(self.Primary.Sound,100,100)
-					self.Bot.ShootDelay = CurTime() + self.Primary.Delay + self.Primary.Delay*math.Rand(0,5)
+					self.Bot.ShootDelay = CurTime() + self.Primary.Delay*3
 				end
-			end
+			end	
+	
 		end
-	--end
+		
+	end
 	
 	if not DebugTime then
 		DebugTime = 0
@@ -1359,7 +1449,5 @@ function SWEP:BotThink()
 		end
 	end
 end
-
-
 
 

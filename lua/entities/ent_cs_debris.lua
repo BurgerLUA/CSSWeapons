@@ -39,7 +39,7 @@ function ENT:Initialize()
 end
 
 function ENT:Draw()
-
-	self:DrawModel()
-	
+	if GetConVarNumber("cl_css_mags") == 1
+		self:DrawModel()
+	end
 end

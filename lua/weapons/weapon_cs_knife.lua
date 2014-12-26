@@ -43,13 +43,10 @@ SWEP.HasSideRecoil			= false
 
 function SWEP:PrimaryAttack()
 	
-	--self:SendWeaponAnim(ACT_VM_HITCENTER)
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
-	self:SetNWInt("damage",34)
-	self:Swing()
-
+	self:Swing(34)
 	
 end
 
@@ -58,10 +55,7 @@ function SWEP:SecondaryAttack()
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*1.5)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay*1.5)
-	self:SetNWInt("damage",55)
-	self:Swing()
-	
-	
+	self:Swing(55)
 	
 end
 
@@ -80,19 +74,19 @@ function SWEP:Deploy()
 end
 
 
-function SWEP:Swing()
+function SWEP:Swing(damage)
 
 	--if CLIENT then return end
 
-	local damage = self:GetNWInt("damage")
+	--local damage = self:GetNWInt("damage")
 
-	local heavy = ACT_VM_PRIMARYATTACK
+	local heavy = ACT_VM_MISSCENTER
 	local light = ACT_VM_PRIMARYATTACK
-	local miss = ACT_VM_MISSCENTER
+	local miss = ACT_VM_PRIMARYATTACK
 
 
 
-	local coneents = ents.FindInCone(self.Owner:GetShootPos(),self.Owner:GetAimVector(),40,5)
+	local coneents = ents.FindInCone(self.Owner:GetShootPos(),self.Owner:GetAimVector(),40,1)
 	
 	table.RemoveByValue( coneents, self.Owner )
 	
@@ -100,39 +94,42 @@ function SWEP:Swing()
 	local trace = self.Owner:GetEyeTrace()
 	
 	self.HitAThing = false
+	
 	for k,v in pairs(coneents) do
-		if v ~= self.Owner then
-			if v:IsPlayer() or v:IsNPC() then
-			
-				local angle = math.abs(v:GetAngles().y - self.Owner:GetAngles().y)
-				if damage == 55 then
-					if angle > 330 or angle < 30 then
-						damage = 195
+		if self.HitAThing == false then
+			if v ~= self.Owner then
+				if v:IsPlayer() or v:IsNPC() then
+				
+					local angle = math.abs(v:GetAngles().y - self.Owner:GetAngles().y)
+					
+					if damage == 55 then
+						if angle > 330 or angle < 30 then
+							damage = 195
+						end
 					end
+					
+					self.HitAThing = true
+					
+					self:StabDamage(damage,v)
+					
 				end
-				
-				self.HitAThing = true
-				
-				
-			else
-				damage = 10
+			end
+		end
+	end
+
+	if self.HitAThing == false then
+		if trace.StartPos:Distance(trace.HitPos) < 40 then
+			self:StabEffect(trace.StartPos,trace.HitPos,trace.SurfaceProps,trace.Entity)
+			
+			if trace.Entity:IsValid() then
+				self:StabDamage(damage,trace.Entity)
 			end
 			
-			self:StabDamage(damage,v)
-
-
 		end
 	end
-	--print(trace.StartPos:Distance(trace.HitPos))
-	if trace.StartPos:Distance(trace.HitPos) < 40 then
-		if trace.HitWorld then
-			self:StabEffect(trace.StartPos,trace.HitPos,trace.SurfaceProps)
-		end
-	end
-	
-	print(damage)
 
 	if self.HitAThing == true then
+	
 		if damage <= 50 then
 			self:SendWeaponAnim(light)
 			self.Weapon:EmitSound("weapons/knife/knife_hit"..math.random(1,4)..".wav",100,100)
@@ -149,6 +146,7 @@ function SWEP:Swing()
 		else
 			self:SendWeaponAnim(heavy)
 		end
+		
 	else
 		self.Weapon:EmitSound("weapons/knife/knife_slash1.wav",100,100)
 		self:SendWeaponAnim(miss)
@@ -168,15 +166,26 @@ function SWEP:StabDamage(damage, entity)
 	end
 end
 
-function SWEP:StabEffect(StartPos,HitPos,SurfaceProp)
+function SWEP:StabEffect(StartPos,HitPos,SurfaceProp,HitEntity)
+	if HitEntity:IsPlayer() then return end
+	
 	local effect = EffectData()
 		effect:SetOrigin(HitPos)
 		effect:SetStart(StartPos)
 		effect:SetSurfaceProp(SurfaceProp)
 		effect:SetDamageType(DMG_SLASH)
-		--print("EFFECT")
+		
+	if CLIENT then
+		effect:SetEntity(HitEntity)
+	else
+		effect:SetEntIndex(HitEntity:EntIndex())
+	end
+		
 	util.Effect("Impact", effect)
 end
+
+
+
 
 function GetActivities( ent )
   local k, v, t

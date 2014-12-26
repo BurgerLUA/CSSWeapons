@@ -1,47 +1,5 @@
 AddCSLuaFile()
 
-CreateConVar("sv_css_damage_scale", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value that all damage from CSS weapons is multiplied. Default is 1." )
-CreateConVar("sv_css_recoil_scale", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value that all recoil from CSS weapons is multiplied. Default is 1." )
-CreateConVar("sv_css_cone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
-CreateConVar("sv_css_velcone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
-CreateConVar("sv_css_heat_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
-CreateConVar("sv_css_cooltime_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the cooldown delay time from CSS weapons is multiplied by. Default is 1." )
-CreateConVar("sv_css_cooldown_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the cooldown amount from CSS weapons is multiplied by. Default is 1." )
-
-CreateConVar("sv_css_enable_csszoom", "0", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables CSS-Like zooms for the AUG and SG552. Default is 0." )
-
-CreateConVar("sv_css_ammo_loaded", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables giving weapons already loaded. Default is 1." )
-CreateConVar("sv_css_ammo_givespare", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables giving spare ammo to players upon pickup. Default is 1." )
-
-CreateConVar("sv_css_enable_drops", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables players to drop css weapons on death, all other values disables it. Default is 1." )
-CreateConVar("sv_css_timed_drops", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 creates a removal time limit for weapons that drop. 0 never removes weapon drops." )
-CreateConVar("sv_css_drop_timer", "60", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in seconds that determines how long the weapons are removed after they are dropped. Default is 60." )
-CreateConVar("sv_css_limit_equipped", "0", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 limits only one primary weapon and one secondary weapon. Equipment is unlimited. Default is 0." )
-
---CreateConVar("sv_css_enable_c4", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables non-admins to use c4, all other values disables it. Default is 1." )
-CreateConVar("sv_css_enable_c4nonadmin", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables non-admins to use c4, all other values disables it. Default is 1." )
-CreateConVar("sv_css_enable_c4smoke", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables smoke effects for the c4, all other values disables it. Default is 1." )
-CreateConVar("sv_css_c4_time_explosion", "45", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in seconds that the C4 detonates when planted. Default is 45." )
-CreateConVar("sv_css_c4_time_defuse", "10", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in seconds that the C4 is defused. Default is 10." )
-CreateConVar("sv_css_c4_damage", "500", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in points that determines maximum damage. Default is 500." )
-CreateConVar("sv_css_c4_radius", "1500", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in units that determines the maximum blast radius. Default is 1500." )
-CreateConVar("sv_css_c4_notifyplayers", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables players to receive cosmetic round winning notifications and sounds, all other values disables it. Default is 1." )
-
-CreateConVar("sv_css_enable_penetration", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enable penetration through objects, 0 disables. Default is 1." )
-CreateConVar("sv_css_penetration_scale", "0.5", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that all damage from CSS weapons is multiplied from penetration. Default is 0.5." )
-
-
-CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
-CreateClientConVar("cl_css_equipment", "1", true, true )
-CreateClientConVar("cl_css_viewmodel_cmodel", "1", true, true )
-CreateClientConVar("cl_css_crosshair_style", "1", true, true )
-CreateClientConVar("cl_css_crosshair_length", "15", true, true )
-CreateClientConVar("cl_css_crosshair_width", "1", true, true )
-CreateClientConVar("cl_css_crosshair_color_r", "50", true, true )
-CreateClientConVar("cl_css_crosshair_color_g", "255", true, true )
-CreateClientConVar("cl_css_crosshair_color_b", "50", true, true )
-CreateClientConVar("cl_css_crosshair_color_a", "200", true, true )
-	
 if CLIENT then
 	
 	language.Add("AlyxGun_ammo","5.7mm")
@@ -199,6 +157,7 @@ end
 function SWEP:Deploy()
 	
 	if SERVER then
+	
 		if self.AlreadyGiven == false then
 		
 			if GetConVar("sv_css_ammo_loaded"):GetInt() == 1 then
@@ -210,7 +169,6 @@ function SWEP:Deploy()
 			end
 
 			self.AlreadyGiven = true
-			
 			
 		end
 		
@@ -235,27 +193,11 @@ function SWEP:Deploy()
 				end
 			end
 		end
-		
-		
-		--models/weapons/w_smg_mp5.mdl
-		--models/weapons/unloaded/smg_mp5_mag.mdl
-		
 
-		
 		self.GetMagModel = string.Replace( self.WorldModel,"/w_" , "/unloaded/" )
 		self.GetMagModel = string.Replace( self.GetMagModel , ".mdl" , "_mag.mdl")
-		print(self.GetMagModel)
-		
+		--print(self.GetMagModel)
 
-		
-		
-		
-		
-		
-		
-		
-		
-		
 	end
 
 	self.Owner:GetHands():SetMaterial("")
@@ -285,11 +227,14 @@ function SWEP:Holster()
 		return false 
 	end
 	
-	if self.IsReloading == 1 then
+	if self:IsBusy() then
 		return false
 	end
+	
 
 	self:SetNWBool("IronSights",false)
+	self:SetNWBool("waszoomed",false)
+	
 	--self:SendWeaponAnim(ACT_VM_HOLSTER)
 	
 	if self.Slot then
@@ -308,27 +253,15 @@ end
 
 function SWEP:PrimaryAttack()
 
-	if self.IsReloading == 1 then return end
-
-	if self.HasSilencer == true then
-
-		if self.AttachDelay < CurTime() then
-			self:Shoot()
-			--self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-		end
-
-	else
+	if self:IsBusy() then return end
 	
-		self:Shoot()
-		
-	end
+	self:Shoot()
 
 end
 
 function SWEP:SecondaryAttack()
 
-	if self.IsReloading == 1 then return end
-
+	if self:IsBusy() then return end
 
 	if self.HasBurstFire == true then
 		self:SwitchFireMode()
@@ -368,20 +301,20 @@ end
 
 function SWEP:Silencer()
 
-	if self.AttachDelay < CurTime() then
+	--if self.AttachDelay < CurTime() then
+	
+	if self:IsBusy() then return end
 		
-		if self.IsSilenced then
-			self:SendWeaponAnim(ACT_VM_DETACH_SILENCER)
-			self.IsSilenced = false
-			self.WorldModel = self.WorldModel1
-			self.AttachDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
-		else
-			self:SendWeaponAnim(ACT_VM_ATTACH_SILENCER)
-			self.WorldModel = self.WorldModel2
-			self.AttachDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
-			self.IsSilenced = true
-		end
-			
+	if self.IsSilenced then
+		self:SendWeaponAnim(ACT_VM_DETACH_SILENCER)
+		self.IsSilenced = false
+		self.WorldModel = self.WorldModel1
+		self.AttachDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
+	else
+		self:SendWeaponAnim(ACT_VM_ATTACH_SILENCER)
+		self.WorldModel = self.WorldModel2
+		self.AttachDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
+		self.IsSilenced = true
 	end
 	
 end
@@ -400,11 +333,9 @@ end
 
 function SWEP:ScopeZoom()
 
-	if self:CanBoltZoom() == false then return end
-	if self.ScopeDelay > CurTime() then return end
-	if self.IsReloading == 1 then return end
+	if not self:CanBoltZoom() then return end
+	if self:IsBusy() then return false end
 
-	local delay = 0.1
 	local var = self:GetNWInt("zoommode",0)
 	
 	if SERVER then
@@ -413,12 +344,14 @@ function SWEP:ScopeZoom()
 				var = var + 1
 			else
 				var = 0
+				self:SetNWBool("waszoomed",false)
 			end
 		else
 			if var == 0 then
 				var = 1
 			else
 				var = 0
+				self:SetNWBool("waszoomed",false)
 			end
 		end
 		
@@ -430,17 +363,14 @@ function SWEP:ScopeZoom()
 		self:EmitSound("weapons/zoom.wav",100,100)
 	end
 	
-	self.ScopeDelay = delay + CurTime()
 	
+
 end
 
 function SWEP:CSSZoom()
 
-	if self:CanBoltZoom() == false then return end
-	if self.ScopeDelay > CurTime() then return end
-	if self.IsReloading == 1 then return end
-	
-	local delay = 0.1
+	if not self:CanBoltZoom() then return end
+	if self:IsBusy() then return end
 
 	if SERVER then
 		if self:GetNWBool("csszoomed",false) == true then
@@ -452,29 +382,23 @@ function SWEP:CSSZoom()
 			--print(self.Owner:GetFOV())
 		end
 	end
-	
-	self.ScopeDelay = delay + CurTime()
+
 
 end
 
-
-
-
 function SWEP:CanBoltZoom()
 
-	local value
-
-	if self.HasBoltAction == false then 
-		value = true
+	if not self.HasBoltAction then 
+		return true
 	else
 		if self.BoltCurTime <= CurTime() then
-			value = true
+			return true
 		else
-			value = false
+			return false
 		end
 	end
 
-	return value
+	return true
 	
 end
 
@@ -504,7 +428,8 @@ end
 
 function SWEP:Shoot()
 
-	if !self:CanPrimaryAttack() then return end
+	if not self:CanPrimaryAttack() then return end
+	if self:IsBusy() then return end
 
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	
@@ -516,7 +441,7 @@ function SWEP:Shoot()
 	
 	if self.HasScope and !self.HasCrosshair then
 		if self:GetNWInt("zoommode",0) == 0 then
-			if self.Owner:IsPlayer() then
+			if not self.Owner:IsBot() then
 				Cone = 0.1
 			end
 		end
@@ -595,12 +520,18 @@ function SWEP:Shoot()
 		
 	end
 
-	if self.HasScope == true then
+	if self.HasScope then
 	
 		if SERVER then
 			if self.HasBoltAction then
-				self.NextZoomTime = CurTime() + 1.5
-				self:SetNWInt("zoommode",0)
+				if self:GetNWInt("zoommode",0) >= 1 then
+					
+						self:SetNWInt("zoommode",0)
+						self:SetNWBool("waszoomed",true)
+
+				else
+					self:SetNWBool("waszoomed",false)
+				end
 			end
 		end
 		
@@ -701,26 +632,19 @@ function SWEP:EmitGunSound(GunSound)
 	
 end
 
-
 function SWEP:ShootEffects()
-	if SERVER then
-		 net.Start( "ThirdPersonShellsNet" )
-			 net.WriteEntity(self.Owner)
-		 net.Broadcast()
+
+	if SERVER and not game.SinglePlayer() then
+		net.Start( "ThirdPersonShellsNet" )
+			net.WriteEntity(self.Owner)
+		net.Broadcast()
 	end
-
-
-end
-
-if SERVER then
-	util.AddNetworkString( "ThirdPersonShellsNet" )
-end
-
---[[
-function SWEP:ShootEffects()
 	
 end
---]]
+
+if SERVER and not game.SinglePlayer() then
+	util.AddNetworkString( "ThirdPersonShellsNet" )
+end
 
 function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage,LastHitPos)
 
@@ -889,12 +813,6 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage,LastHitPos)
 	
 	self.Owner:FireBullets(bullet)
 	
-	--[[
-	if self.HasBoltAction then
-		self.Owner:SetEyeAngles(self.Owner:EyeAngles() + Angle(-0.25,0,0))
-	end
-	--]]
-	
 end
 
 function SWEP:BulletEffect(HitPos,StartPos,HitEntity,SurfaceProp)
@@ -917,12 +835,26 @@ function SWEP:BulletEffect(HitPos,StartPos,HitEntity,SurfaceProp)
 	
 end
 
+function SWEP:IsBusy()
+
+	if self.IsReloading == 1 then
+		return true
+	elseif self.HasSilencer then
+		if self.AttachDelay > CurTime() then
+			return true
+		end
+	end
+	
+	return false
+
+end
+
 function SWEP:Reload()
 
-	if self.IsReloading == 1 then return end
-	if self.ReloadDelay > CurTime() then return end
+	if self:IsBusy() then return end
 	if self:Clip1() >= self.Primary.ClipSize then return end
-	if self.Owner:GetAmmoCount( self:GetPrimaryAmmoType()) == 0  then return end
+	if self:GetNextPrimaryFire() > CurTime() then return false end
+	if self.Owner:GetAmmoCount(self:GetPrimaryAmmoType()) == 0  then return end
 
 	if self:GetNWBool("Ironsights",false) == true then
 		self:SetNWBool("Ironsights",false)
@@ -972,36 +904,26 @@ function SWEP:Reload()
 	end
 	
 	if SERVER then
-		timer.Simple(0.75, function()
-		
-			if self.GetMagModel then
-
-			
-			
-				if file.Exists(self.GetMagModel,"GAME") then
-
-					local mag = ents.Create("ent_cs_debris")
-					mag:SetPos(self.Owner:GetShootPos() + self.Owner:GetUp()*-12 + self.Owner:GetRight()*3)
-					mag:SetModel(self.GetMagModel)
-					mag:SetAngles(self.Owner:EyeAngles())
-					mag:Spawn()
-					mag:Activate()
-					
-					SafeRemoveEntityDelayed(mag,10)
-					
+		if GetConVarNumber("sv_css_enable_mags") == 1 then
+			timer.Simple(0.75, function()
+				if self.GetMagModel then
+					if file.Exists(self.GetMagModel,"GAME") then
+						local mag = ents.Create("ent_cs_debris")
+							mag:SetPos(self.Owner:GetShootPos() + self.Owner:GetUp()*-12 + self.Owner:GetRight()*3)
+							mag:SetModel(self.GetMagModel)
+							mag:SetAngles(self.Owner:EyeAngles())
+							mag:Spawn()
+							mag:Activate()
+						SafeRemoveEntityDelayed(mag,10)
+					end
 				end
-			end
-		end)
-
+			end)
+		end
 	end
-	
-	
-	
+
 	self.IsReloading = 1
 	
 end
-
---Disrespectfully taken from Garry's weapon_cs_base
 
 function SWEP:GetViewModelPosition( pos, ang )
 
@@ -1073,6 +995,20 @@ function SWEP:Think()
 	self:BotThink()
 	self:EquipThink()
 	
+	if SERVER then
+		if self.HasBoltAction then
+			if self.BoltCurTime <= CurTime() then
+				if self:GetNWBool("waszoomed",false) then
+					if self.IsReloading == 0 then
+						self:SetNWInt("zoommode",1)
+						self:SetNWBool("waszoomed",false)
+					end
+				end
+			end
+		end
+	end
+	
+	
 	
 	local ammotype = self:GetPrimaryAmmoType()
 	
@@ -1097,10 +1033,11 @@ function SWEP:Think()
 				self:SetClip1(self.Owner:GetAmmoCount(ammotype))
 				self.Owner:RemoveAmmo(self.Owner:GetAmmoCount(ammotype),ammotype)
 			end
-			
+
 			self.NormalReload = 0
 			self.IsReloading = 0
 			self.First = 0
+			
 		end
 		
 	elseif self.ShotgunReload == 1 then
@@ -1289,7 +1226,7 @@ function SWEP:DrawHUD()
 			surface.DrawTexturedRectRotated(x - x/4 + y/4,y/2,x/2 - y/2,y,0)
 			
 
-			surface.DrawCircle(x/2,y/2,y/2 - 100,Color(0,0,0))
+			--surface.DrawCircle(x/2,y/2,y/16,Color(0,0,0))
 			
 			--[[
 			if fovbonus > 4 then
@@ -1445,9 +1382,7 @@ function SWEP:BotThink()
 	if DebugTime <= CurTime() then
 		DebugTime = CurTime() + 5
 		if SERVER then
-			print(self.Owner:Nick() .. " is targeting " .. Winner:Nick())
+			--print(self.Owner:Nick() .. " is targeting " .. Winner:Nick())
 		end
 	end
 end
-
-

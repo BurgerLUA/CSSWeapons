@@ -28,4 +28,4 @@ CreateConVar("sv_css_c4_notifyplayers", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , 
 CreateConVar("sv_css_enable_penetration", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enable penetration through objects, 0 disables. Default is 1." )
 CreateConVar("sv_css_penetration_scale", "0.5", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that all damage from CSS weapons is multiplied from penetration. Default is 0.5." )
 
-CreateConVar("sv_css_enable_mags", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables cosmetic magazine drops. Requires seperate addon. Default is 0." )
+CreateConVar("sv_css_enable_mags", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables cosmetic magazine drops. Requires separate addon. Default is 0." )

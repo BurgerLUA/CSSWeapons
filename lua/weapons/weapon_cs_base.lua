@@ -174,23 +174,36 @@ function SWEP:Initialize()
 	
 end
 
+SWEP.PosMoveThing = 0
+--[[
 function SWEP:CalcViewModelView(vm,oldPos,oldAng,pos,ang)
 
 	local fraction = 0.25
 	
+	
+
+	
 	if LocalPlayer():GetVelocity():Length() > 0 and LocalPlayer():IsOnGround() then
-		offset = LerpVector(fraction*2,Vector(0,0,0),(oldAng:Forward() * math.sin(CurTime()*4)) + (oldAng:Up() * math.sin(CurTime()*4)*0.25))
-		pos = oldPos + offset
-	elseif offset ~= nil then
-		LengthyEroticRoleplay = LerpVector(fraction,offset,Vector(0,0,0))
-		pos = oldPos + LengthyEroticRoleplay
+		--if self.PosMoveThing < 45 then
+			self.PosMoveThing = self.PosMoveThing + 0.025
+		--else
+			--self.PosMoveThing = 0
+		--end	
+	--elseif self.offset ~= 0 then
+	--	self.PosMoveThing = self.PosMoveThing + 0.0075
 	end
+	
+	
+	
+	offset = (oldAng:Forward() * math.sin(self.PosMoveThing))*1 + ((oldAng:Up() * math.sin(self.PosMoveThing)*0.25))*1
+	pos = oldPos + offset
 	
 	ang = oldAng
 
 	return pos, ang
 
 end
+--]]
 
 function SWEP:PostDrawViewModel( vm, weapon, ply )
 
@@ -1179,7 +1192,7 @@ function SWEP:DrawHUD()
 	end
 
 	local heat = self:GetNWInt("weaponheat",0)*15
-	local extra = (self.ActualCone*1000*csscrouchmul + ( heat + self.Owner:GetVelocity():Length()*0.1*GetConVar("sv_css_velcone_scale"):GetFloat() )) + add
+	local extra = (self.ActualCone*1000*csscrouchmul + ( heat + self.Owner:GetVelocity():Length()*0.2*GetConVar("sv_css_velcone_scale"):GetFloat() ))*0.5 + add
 	
 	if self.HasCrosshair == true then
 		if self:GetNWInt("zoommode",0) == 0 and self:GetNWBool("IronSights",false) == false then
@@ -1400,13 +1413,11 @@ function SWEP:BotThink()
 			if Victim:Health() > 0 then
 				if self.Bot.ShootDelay <= CurTime() then
 					if self:Clip1() > 0 then
-						
 						local distance = self.Owner:GetPos():Distance(Victim:GetPos())
-						
-							
 						self:Shoot()
-						--self.Weapon:EmitSound(self.Primary.Sound,100,100)
 						self.Bot.ShootDelay = CurTime() + math.min(0, self.Primary.Delay + ( self.Primary.Delay * distance/2000 ) - ( self.Primary.Delay * self.Owner:GetVelocity():Length()/50 ))
+					elseif self.Owner:GetActiveWeapon():GetClass() == "weapon_cs_sun" then
+						self:PrimaryAttack()
 					end
 				end
 			end

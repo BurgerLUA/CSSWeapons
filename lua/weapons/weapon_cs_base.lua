@@ -151,6 +151,7 @@ SWEP.ZoomCurTime			= 1
 SWEP.IronTime				= 0
 SWEP.AlreadyGiven			= false
 SWEP.BoltCurTime 			= 0
+SWEP.NextCoolTick			= 0
 
 SWEP.PhysBullets			= false
 
@@ -635,9 +636,15 @@ end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 
+	
+	if CLIENT and not IsFirstTimePredicted() then return end
+	
 	self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01)*GetConVar("sv_css_heat_scale"):GetFloat(),0,20)
 	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*GetConVar("sv_css_cooltime_scale"):GetFloat()
 
+	
+	
+	
 	local bullet = {}
 	bullet.Damage	= Damage
 	bullet.Num		= Shots
@@ -939,8 +946,6 @@ function SWEP:Think()
 		end
 	end
 	
-	
-	
 	local ammotype = self:GetPrimaryAmmoType()
 	
 	if self.NormalReload == 1 then
@@ -991,7 +996,12 @@ function SWEP:Think()
 	
 	if self.CoolTime < CurTime() then
 		if self.CoolDown ~= 0 then
-			self.CoolDown = math.max(0,self.CoolDown - (0.06 * GetConVar("sv_css_cooldown_scale"):GetFloat() ))
+
+			if self.NextCoolTick < CurTime() then
+				self.CoolDown = math.max(0,self.CoolDown - (0.18 * GetConVar("sv_css_cooldown_scale"):GetFloat() ))
+				self.NextCoolTick = CurTime() + 0.025
+			end
+
 		else
 			self.CoolDown = 0
 		end

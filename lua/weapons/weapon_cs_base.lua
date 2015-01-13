@@ -1128,8 +1128,8 @@ function SWEP:DrawHUD()
 			
 			--DrawMaterialOverlay("gmod/scope-refract",-0.05)
 			
-			if extra > 0.1 then
-				surface.DrawCircle( x/2, y/2, math.Clamp(extra*fovbonus,3,x/2*0.33), Color(0,255,0) )
+			if Cone > 0.1 then
+				surface.DrawCircle( x/2, y/2, math.Clamp(Cone*fovbonus,3,x/2*0.33), Color(0,255,0) )
 			end
 			
 

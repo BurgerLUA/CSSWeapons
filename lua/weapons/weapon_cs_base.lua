@@ -46,8 +46,6 @@ CreateClientConVar("cl_css_crosshair_color_g", "255", true, true )
 CreateClientConVar("cl_css_crosshair_color_b", "50", true, true )
 CreateClientConVar("cl_css_crosshair_color_a", "200", true, true )
 
-
-
 if CLIENT then
 	
 	language.Add("AlyxGun_ammo","5.7mm")
@@ -62,6 +60,10 @@ if CLIENT then
 
 	surface.CreateFont( "csd",{font = "csd",size = 48,weight = 700})
 	
+end
+
+if SERVER and not game.SinglePlayer() then
+	util.AddNetworkString( "ThirdPersonShellsNet" )
 end
 
 SWEP.DrawAmmo				= true
@@ -174,37 +176,6 @@ function SWEP:Initialize()
 	
 end
 
-SWEP.PosMoveThing = 0
---[[
-function SWEP:CalcViewModelView(vm,oldPos,oldAng,pos,ang)
-
-	local fraction = 0.25
-	
-	
-
-	
-	if LocalPlayer():GetVelocity():Length() > 0 and LocalPlayer():IsOnGround() then
-		--if self.PosMoveThing < 45 then
-			self.PosMoveThing = self.PosMoveThing + 0.025
-		--else
-			--self.PosMoveThing = 0
-		--end	
-	--elseif self.offset ~= 0 then
-	--	self.PosMoveThing = self.PosMoveThing + 0.0075
-	end
-	
-	
-	
-	offset = (oldAng:Forward() * math.sin(self.PosMoveThing))*1 + ((oldAng:Up() * math.sin(self.PosMoveThing)*0.25))*1
-	pos = oldPos + offset
-	
-	ang = oldAng
-
-	return pos, ang
-
-end
---]]
-
 function SWEP:PostDrawViewModel( vm, weapon, ply )
 
 	if CLIENT then
@@ -314,10 +285,167 @@ end
 
 function SWEP:PrimaryAttack()
 
+	if not self:CanPrimaryAttack() then return end
 	if self:IsBusy() then return end
-	
-	self:Shoot()
 
+	self.Owner:SetAnimation(PLAYER_ATTACK1)
+
+	local Damage,Shots,Cone,Recoil = self:Modifiers(self.Primary.Damage,self.Primary.NumShots,self.Primary.Cone,self.RecoilMul)
+	
+	if self.HasScope then
+		if SERVER then
+			if self.HasBoltAction then
+				if self:GetNWInt("zoommode",0) >= 1 then
+					
+						self:SetNWInt("zoommode",0)
+						self:SetNWBool("waszoomed",true)
+
+				else
+					self:SetNWBool("waszoomed",false)
+				end
+			end
+		end
+	end
+	
+	local Source = self.Owner:GetShootPos()
+	local Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
+	
+	self:ShootBullet(Damage, Shots, Cone, Source, Direction,Source)
+	self:Recoil(Damage,Shots,Cone,Recoil)
+	self:ShootEffects()
+
+end
+
+function SWEP:Modifiers(Damage,Shots,Cone,Recoil)
+
+	local GunSound = self.Primary.Sound
+
+
+	if self.HasScope and !self.HasCrosshair then
+		if self:GetNWInt("zoommode",0) == 0 then
+			if not self.Owner:IsBot() then
+				Cone = 0.1
+			end
+		end
+	end
+	
+	if self.HasBoltAction == true then
+		self.BoltCurTime = CurTime() + self.Primary.Delay
+	end
+	
+	if self.HasBurstFire == true then
+
+		if self:GetFireMode( ) == BURST then
+
+			Recoil = Recoil * 0.75
+			Cone = Cone * 2
+			Shots = math.min(self.Weapon:Clip1(),3)
+			
+			self:TakePrimaryAmmo(Shots)
+			
+				
+			if self.Primary.Automatic == true then
+				self:SetNextPrimaryFire(CurTime() + 1)
+			else
+				self:SetNextPrimaryFire(CurTime() + 0.5)
+			end
+
+			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+			
+		else
+			
+			self:TakePrimaryAmmo(1)
+			
+			self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+
+		end
+		
+		if Shots > 1 then
+			for i=1, Shots-1 do
+				timer.Simple(0.01*i,function() 
+					if IsValid(self) == true then 
+						self:EmitGunSound(GunSound)
+						self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+					end
+				end)
+			end
+		else
+			self:EmitGunSound(GunSound)
+			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+		end
+		
+	elseif self.HasSilencer == true then
+	
+		if self.IsSilenced then
+			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK_SILENCED)
+			GunSound = self.Secondary.Sound
+			Damage = Damage*0.9
+			Recoil = Recoil*0.9
+			Cone = Cone*0.9
+		else
+			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+			GunSound = self.Primary.Sound
+		end
+		
+		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+		self:TakePrimaryAmmo(1)
+			
+	else
+	
+		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+		GunSound = self.Primary.Sound
+		
+		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+
+		self:TakePrimaryAmmo(1)
+		
+	end
+
+	if self.HasPumpAction then
+		self.ReloadDelay = CurTime() + 1
+	else
+		self.ReloadDelay = CurTime() + math.max(self.Primary.Delay,0.25)
+	end
+
+	if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
+		Cone = Cone * 0.5
+	else
+		Cone = Cone * 1
+	end
+	
+	local VelCone = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001*GetConVar("sv_css_velcone_scale"):GetFloat())
+	
+	Damage = Damage * GetConVar("sv_css_damage_scale"):GetFloat()
+	--Shots = Shots
+	Cone = VelCone + (Cone * GetConVar("sv_css_cone_scale"):GetFloat()) 
+	Recoil = Recoil * GetConVar("sv_css_recoil_scale"):GetFloat() * self.RecoilMul
+
+	self:EmitGunSound(GunSound)
+	
+	
+	return Damage,Shots,Cone,Recoil
+	
+end
+
+function SWEP:Recoil(Damage,Shots,Cone,Recoil)
+
+	local ViewKick = -(Damage*Shots/20)/2*Recoil
+
+	if self.CoolDown > 0.25 and self.HasSideRecoil == true then
+		bonusmul = math.Rand(-1,1)
+		sideways = 3
+	else
+		bonusmul = 1
+		sideways = 1
+	end
+
+	local uppunch = (ViewKick/2)*3*bonusmul
+	local sidepunch = (ViewKick/2)*math.Rand(-1,1)*sideways
+	local rollpunch = 0
+	local punchangle = Angle(uppunch,sidepunch,rollpunch)
+
+	self.Owner:ViewPunch(punchangle)
+	
 end
 
 function SWEP:SecondaryAttack()
@@ -487,129 +615,8 @@ function SWEP:TranslateFOV(oldfov)
 	
 end
 
-function SWEP:Shoot()
-
-	if not self:CanPrimaryAttack() then return end
-	if self:IsBusy() then return end
-
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
-	
-	local Damage = self.Primary.Damage
-	local Shots = self.Primary.NumShots
-	local Cone = self.Primary.Cone
-	local Recoil = self.RecoilMul
-	local GunSound = self.Primary.Sound
-	
-	if self.HasScope and !self.HasCrosshair then
-		if self:GetNWInt("zoommode",0) == 0 then
-			if not self.Owner:IsBot() then
-				Cone = 0.1
-			end
-		end
-	end
-	
-	if self.HasBoltAction == true then
-		self.BoltCurTime = CurTime() + self.Primary.Delay
-	end
-	
-	if self.HasBurstFire == true then
-
-		if self:GetFireMode( ) == BURST then
-
-			Recoil = Recoil * 0.75
-			Cone = Cone * 2
-			Shots = math.min(self.Weapon:Clip1(),3)
-			
-			self:TakePrimaryAmmo(Shots)
-				
-			if self.Primary.Automatic == true then
-				--self.FakeDelay = CurTime() + self.Primary.Delay*4
-				self:SetNextPrimaryFire(CurTime() + 1)
-			else
-				self:SetNextPrimaryFire(CurTime() + 0.5)
-			end
-			
-
-			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-
-			
-		
-		else
-			
-			self:TakePrimaryAmmo(1)
-			self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-
-		end
-		
-		if Shots > 1 then
-			for i=1, Shots-1 do
-				timer.Simple(0.01*i,function() 
-					if IsValid(self) == true then 
-						self:EmitGunSound(GunSound)
-						self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-					end
-				end)
-			end
-		else
-			self:EmitGunSound(GunSound)
-			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-		end
-		
-	elseif self.HasSilencer == true then
-	
-		if self.IsSilenced then
-			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK_SILENCED)
-			GunSound = self.Secondary.Sound
-			Damage = Damage*0.9
-			Recoil = Recoil*0.9
-			Cone = Cone*0.9
-		else
-			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-			GunSound = self.Primary.Sound
-		end
-		
-		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-		self:TakePrimaryAmmo(1)
-			
-	else
-	
-		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-		GunSound = self.Primary.Sound
-		
-		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-		self:TakePrimaryAmmo(1)
-		
-	end
-
-	if self.HasScope then
-	
-		if SERVER then
-			if self.HasBoltAction then
-				if self:GetNWInt("zoommode",0) >= 1 then
-					
-						self:SetNWInt("zoommode",0)
-						self:SetNWBool("waszoomed",true)
-
-				else
-					self:SetNWBool("waszoomed",false)
-				end
-			end
-		end
-		
-	end
-	
-	if self.HasPumpAction then
-		self.ReloadDelay = CurTime() + 1
-	else
-		self.ReloadDelay = CurTime() + math.max(self.Primary.Delay,0.25)
-	end
-	
-	self:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
-
-end
-
 function SWEP:CanPrimaryAttack()
-	--if not IsFirstTimePredicted( ) then return end
+
 	if self:GetNextPrimaryFire() > CurTime() then return false end
 
 	if self:Clip1() <= 0 then
@@ -626,146 +633,26 @@ function SWEP:CanPrimaryAttack()
 	
 end
 
-function SWEP:ShootBullet(Damage, Shots, Cone, Recoil, GunSound)
+function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 
-	--if not IsFirstTimePredicted( ) then return end
-
-	
-	local direction, bonusmul, sideways
-	
-	self:EmitGunSound(GunSound)
-
-	self.ViewKick = -(Damage*Shots/20)/2*Recoil*self.RecoilMul*GetConVar("sv_css_recoil_scale"):GetFloat()
-	self.ExtraSpread = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001*GetConVar("sv_css_velcone_scale"):GetFloat())
 	self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01)*GetConVar("sv_css_heat_scale"):GetFloat(),0,20)
 	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*GetConVar("sv_css_cooltime_scale"):GetFloat()
 
-	if self.CoolDown > 0.25 and self.HasSideRecoil == true then
-		bonusmul = math.Rand(-1,1)
-		sideways = 3
-	else
-		bonusmul = 1
-		sideways = 1
-	end
-
-	if self.Owner:IsPlayer() then
-	
-		local uppunch = (self.ViewKick/2)*3*bonusmul
-		--local uppunch = -self.CoolDown
-		local sidepunch = (self.ViewKick/2)*math.Rand(-1,1)*sideways
-		--local rollpunch = (self.ViewKick/1) * math.Rand(-1,1)
-		local rollpunch = 0
-		local punchangle = Angle(uppunch,sidepunch,rollpunch)
-
-		self.Owner:ViewPunch(punchangle)
-		--self.Owner:SetViewPunchAngles( punchangle )
-		
-		Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
-		--Direction = self.Owner:EyeAngles():Forward()
-	
-		if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
-			self.CrouchMul = 0.5 * GetConVar("sv_css_cone_scale"):GetFloat()
-		else
-			self.CrouchMul = 1 * GetConVar("sv_css_cone_scale"):GetFloat()
-		end
-		
-	else
-	
-		self.CrouchMul = 0.25
-		Direction = self.Owner:GetAimVector()
-		
-	end
-	
-	local Number = Shots
-	local Source = self.Owner:GetShootPos()
-	local Spread = Vector(Cone*self.CrouchMul, Cone*self.CrouchMul, 0) + Vector(self.ExtraSpread,self.ExtraSpread,0)
-	local Force	= Damage/100
-	local Damage = Damage*GetConVar("sv_css_damage_scale"):GetFloat()
-	local LastHitPos = self.Owner:GetPos()
-
-	self:LaunchBullet(Number,Source,Direction,Spread,Force,Damage,LastHitPos)
-
-end
-
-function SWEP:EmitGunSound(GunSound)
-
-	self.Weapon:EmitSound(GunSound, 355 , 100, 1, CHAN_WEAPON )
-	
-end
-
-function SWEP:ShootEffects()
-
-	if SERVER and not game.SinglePlayer() then
-		net.Start( "ThirdPersonShellsNet" )
-			net.WriteEntity(self.Owner)
-		net.Broadcast()
-	end
-	
-end
-
-if SERVER and not game.SinglePlayer() then
-	util.AddNetworkString( "ThirdPersonShellsNet" )
-end
-
-function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage,LastHitPos)
-
-	--PrintTable(self:GetAttachments())
-
-	self:ShootEffects()
-
-	if self.PhysBullets then
-		--self.Owner:LagCompensation( true )
-	
-		if SERVER then
-		
-			local physics = physenv.GetPerformanceSettings( )
-			local EyeTrace = self.Owner:GetEyeTrace() 
-			
-			for i=1, Num do
-			
-				local XSpread = math.Rand(-Spread.x,Spread.x)
-				local YSpread = math.Rand(-Spread.y,Spread.y)
-				
-				local EyeA = self.Owner:EyeAngles()
-				local Offset = EyeA:Forward()*-20 + EyeA:Right()*8 + EyeA:Up()*-3
-				
-				local APSpread = EyeA:Right()*XSpread + EyeA:Up()*YSpread*500
-				local VelSpread = EyeA:Right()*XSpread + EyeA:Up()*YSpread
-				local Velocity = physics.MaxVelocity
-			
-				local ApplyForceCenterMethod = (EyeTrace.HitPos - self.Owner:GetShootPos() - Offset - VelSpread - self.Owner:GetPunchAngle():Up() ) * Velocity
-				local SetVelocityMethod = Velocity * (Dir + VelSpread)
-				--Dir is (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
-
-				local bullet = ents.Create("ent_cs_bullet")
-					bullet:SetPos(self.Owner:GetShootPos() + Offset)
-					bullet:SetAngles(EyeA)
-					bullet:SetNWInt("Damage",Damage)
-					bullet:Spawn()
-					bullet:SetOwner(self.Owner)
-					--bullet:GetPhysicsObject():ApplyForceCenter( ApplyForceCenterMethod )
-					bullet:GetPhysicsObject():SetVelocity( SetVelocityMethod )
-			end
-			--print(tostring(distancemod2) .. " vs " .. tostring(Dir))
-			--print(tostring(Dir) .. " vs " .. tostring(abnormal))
-		
-		end
-		
-		--self.Owner:LagCompensation( false )
-	
-	return end
-
 	local bullet = {}
-	bullet.Num		= Num
-	bullet.Src		= Src
-	bullet.Dir		= Dir
-	bullet.Spread	= Spread
+	bullet.Damage	= Damage
+	bullet.Num		= Shots
+	bullet.Spread	= Vector(Cone, Cone, 0)
+	bullet.Src		= Source
+	bullet.Dir		= Direction
+	
 	bullet.Tracer	= 0
 	bullet.TracerName = "Tracer"
-	bullet.Force	= Force
-	bullet.Damage	= Damage
+	bullet.Force	= Damage/100
+	
 	bullet.Callback = function( attacker, tr, dmginfo)
+	
 		if attacker:IsPlayer() or attacker:IsBot() then
+		
 			if GetConVar("sv_css_enable_penetration"):GetInt() == 1 then
 			
 				local matmul = 1
@@ -775,8 +662,10 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage,LastHitPos)
 					matmul = 1/3
 				elseif mat == MAT_ANTLION or mat == MAT_ALIENFLESH or mat == MAT_FLESH then
 					matmul = 1/2
-				elseif mat == MAT_CONCRETE or mat == MAT_METAL then
+				elseif mat == MAT_CONCRETE then
 					matmul = 1/0.85
+				elseif mat == MAT_METAL then
+					matmul = 1/0.75
 				else
 					matmul = 1
 				end
@@ -789,71 +678,34 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage,LastHitPos)
 				
 				local newtrace = {}
 					newtrace.start = tr.HitPos + WorldOffset
-					newtrace.endpos = tr.HitPos + Dir*(8*10^10)
+					newtrace.endpos = tr.HitPos + Direction*(8*10^10)
 					--newtrace.mask = MASK_SHOT
 					newtrace.filter = tr.Entity
 				local newtracedone = util.TraceLine(newtrace)
 					
 				local newtrace2 = {}
 					newtrace2.start = newtracedone.HitPos
-					newtrace2.endpos = newtracedone.HitPos - Dir*(8*10^10)
+					newtrace2.endpos = newtracedone.HitPos - Direction*(8*10^10)
 					--newtrace.mask = MASK_SHOT
 					--newtrace2.filter = tr.Entity
 				local newtracedone2 = util.TraceLine(newtrace2)
 
 				
-				if SERVER then	
-					--[[
-					timer.Simple(1,function() 
-					
-						local debugmodel1 = ents.Create("prop_physics")
-							debugmodel1:SetPos(newtracedone.HitPos)
-							debugmodel1:SetModel("models/hunter/blocks/cube025x025x025.mdl")
-							debugmodel1:SetColor(Color(0,255,0,255)) -- green
-							debugmodel1:Spawn()
-							debugmodel1:Activate()
-							debugmodel1:GetPhysicsObject():EnableMotion(false)
-							debugmodel1:GetPhysicsObject():EnableCollisions(false)
-							
-						SafeRemoveEntityDelayed(debugmodel1,5)
-							
-						local debugmodel2 = ents.Create("prop_physics")
-							debugmodel2:SetPos(tr.HitPos)
-							debugmodel2:SetModel("models/hunter/blocks/cube025x025x025.mdl")
-							debugmodel2:SetColor(Color(255,0,0,255)) -- red
-							debugmodel2:Spawn()
-							debugmodel2:Activate()
-							debugmodel2:GetPhysicsObject():EnableMotion(false)
-							debugmodel2:GetPhysicsObject():EnableCollisions(false)
-							
-						SafeRemoveEntityDelayed(debugmodel2,5)
-						
-						local debugmodel3 = ents.Create("prop_physics")
-							debugmodel3:SetPos(newtracedone2.HitPos)
-							debugmodel3:SetModel("models/hunter/blocks/cube025x025x025.mdl")
-							debugmodel3:SetColor(Color(0,0,255,255)) --blue
-							debugmodel3:Spawn()
-							debugmodel3:Activate()
-							debugmodel3:GetPhysicsObject():EnableMotion(false)
-							debugmodel3:GetPhysicsObject():EnableCollisions(false)
-							
-						SafeRemoveEntityDelayed(debugmodel3,5)
-
-					end)
-					--]]
-				end
-		
-				local distance = (tr.HitPos + Dir):Distance(newtracedone2.HitPos)
-				local newdamage = Damage - ( GetConVar("sv_css_penetration_scale"):GetFloat() * distance * matmul )
+				local Distance = (tr.HitPos + Direction):Distance(newtracedone2.HitPos)
+				
+				local NewDamage = Damage - ( GetConVar("sv_css_penetration_scale"):GetFloat() * Distance * matmul )
+				local NewShots = 1
+				local NewCone = 0
+				local NewSource =  newtracedone.HitPos - newtracedone.HitNormal*1
+				local NewDirection = Direction
+				local NewLastHitPos = tr.HitPos
 				
 				self:BulletEffect(newtracedone.HitPos , newtracedone2.HitPos, newtracedone.Entity, newtracedone.SurfaceProps)
 				self:BulletEffect(tr.HitPos , newtracedone.HitPos, tr.Entity, tr.SurfaceProps)
 				
-				
-				
 				if LastHitPos ~= tr.HitPos then
-					if newdamage > 0 and tr.HitSky == false then
-						self:LaunchBullet(1,newtracedone.HitPos - newtracedone.HitNormal*1, Dir, Vector(0,0,0), Force, newdamage, tr.HitPos)
+					if NewDamage > 0 and tr.HitSky == false then
+						self:ShootBullet(NewDamage, NewShots, NewCone, NewSource, NewDirection, NewLastHitPos)
 					end
 				end
 				
@@ -873,6 +725,22 @@ function SWEP:LaunchBullet(Num,Src,Dir,Spread,Force,Damage,LastHitPos)
 	end
 	
 	self.Owner:FireBullets(bullet)
+	
+end
+
+function SWEP:EmitGunSound(GunSound)
+
+	self.Weapon:EmitSound(GunSound, 355 , 100, 1, CHAN_WEAPON )
+	
+end
+
+function SWEP:ShootEffects()
+
+	if SERVER and not game.SinglePlayer() then
+		net.Start( "ThirdPersonShellsNet" )
+			net.WriteEntity(self.Owner)
+		net.Broadcast()
+	end
 	
 end
 
@@ -912,6 +780,8 @@ end
 
 function SWEP:Reload()
 
+	if not IsFirstTimePredicted( ) then return false end
+	
 	if self:IsBusy() then return end
 	if self:Clip1() >= self.Primary.ClipSize then return end
 	if self:GetNextPrimaryFire() > CurTime() then return false end
@@ -1175,24 +1045,43 @@ function SWEP:DrawHUD()
 	local b = GetConVarNumber("cl_css_crosshair_color_b")
 	local a = GetConVarNumber("cl_css_crosshair_color_a")
 	
-	local csscrouchmul
+	local Cone = self.Primary.Cone
+	
+	if self.HasScope and !self.HasCrosshair then
+		if self:GetNWInt("zoommode",0) == 0 then
+			Cone = 0.1
+		end
+	elseif self.HasBurstFire == true then
+		if self:GetFireMode( ) == BURST then
+			Cone = Cone * 2
+		end
+	elseif self.HasSilencer == true then
+		if self.IsSilenced then
+			Cone = Cone*0.9
+		end
+	end
 	
 	if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
-		csscrouchmul = 0.5
+		Cone = Cone * 0.5
 	else
-		csscrouchmul = 1
+		Cone = Cone * 1
 	end
+	
+	local VelCone = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001*GetConVar("sv_css_velcone_scale"):GetFloat())
+	Cone = VelCone + (Cone * GetConVar("sv_css_cone_scale"):GetFloat()) 
 
-	self.ActualCone = self.Primary.Cone * GetConVar("sv_css_cone_scale"):GetFloat()
+	Cone = Cone*1000
 
-	local add = 2
+	--print(Cone)
+	
+	
 
-	if self:GetNWInt("zoommode",0) ~= 0 then
-		add = 0.1
-	end
-
-	local heat = self:GetNWInt("weaponheat",0)*15
-	local extra = (self.ActualCone*1000*csscrouchmul + ( heat + self.Owner:GetVelocity():Length()*0.2*GetConVar("sv_css_velcone_scale"):GetFloat() ))*0.5 + add
+	--local heat = self:GetNWInt("weaponheat",0)*15
+	--local extra = (self.ActualCone*1000*csscrouchmul + ( heat + self.Owner:GetVelocity():Length()*0.2*GetConVar("sv_css_velcone_scale"):GetFloat() ))*0.5 + add
+	
+	
+	
+	
 	
 	if self.HasCrosshair == true then
 		if self:GetNWInt("zoommode",0) == 0 and self:GetNWBool("IronSights",false) == false then
@@ -1203,27 +1092,27 @@ function SWEP:DrawHUD()
 					local fix = length/2
 				
 					surface.SetDrawColor(r,g,b,a)
-					surface.DrawRect( x/2 - width/2, y/2 - length/2 + extra + fix , width, length )
-					surface.DrawRect( x/2 - width/2, y/2 - length/2 - extra - fix, width, length )
-					surface.DrawRect( x/2 - length/2 + extra + fix, y/2 - width/2, length, width )
-					surface.DrawRect( x/2 - length/2 - extra - fix, y/2 - width/2, length, width )
+					surface.DrawRect( x/2 - width/2, y/2 - length/2 + Cone + fix , width, length )
+					surface.DrawRect( x/2 - width/2, y/2 - length/2 - Cone - fix, width, length )
+					surface.DrawRect( x/2 - length/2 + Cone + fix, y/2 - width/2, length, width )
+					surface.DrawRect( x/2 - length/2 - Cone - fix, y/2 - width/2, length, width )
 				else
 					surface.SetDrawColor(r,g,b,a)
-					surface.DrawLine( x/2+1+extra+length, y/2, x/2+0.5+extra, y/2 )
-					surface.DrawLine( x/2-1-extra-length, y/2, x/2-0.5-extra, y/2 )
-					surface.DrawLine( x/2, y/2+1+extra+length, x/2, y/2+0.5+extra )
-					surface.DrawLine( x/2, y/2-1-extra-length, x/2, y/2-0.5-extra )
+					surface.DrawLine( x/2+1+Cone+length, y/2, x/2+0.5+Cone, y/2 )
+					surface.DrawLine( x/2-1-Cone-length, y/2, x/2-0.5-Cone, y/2 )
+					surface.DrawLine( x/2, y/2+1+Cone+length, x/2, y/2+0.5+Cone )
+					surface.DrawLine( x/2, y/2-1-Cone-length, x/2, y/2-0.5-Cone )
 				end
 			
 			end
 		
 			if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
 				if GetConVarNumber("cl_css_crosshair_style") == 4 then
-					surface.DrawCircle(x/2,y/2, extra + length, Color(r,g,b,a))
+					surface.DrawCircle(x/2,y/2, Cone + length, Color(r,g,b,a))
 				elseif GetConVarNumber("cl_css_crosshair_style") == 3 then
-					surface.DrawCircle(x/2,y/2, extra + length/2, Color(r,g,b,a))
+					surface.DrawCircle(x/2,y/2, Cone + length/2, Color(r,g,b,a))
 				else
-					surface.DrawCircle(x/2,y/2, extra, Color(r,g,b,a))
+					surface.DrawCircle(x/2,y/2, Cone, Color(r,g,b,a))
 				end
 			end
 		
@@ -1297,10 +1186,10 @@ function SWEP:DrawHUD()
 				surface.DrawCircle(x/2,y/2,10,Color(255,0,0))
 			end
 			--]]
+			
 		end
 	end
 end
-
 
 function SWEP:HUDShouldDraw( element )
 	if self:GetNWInt("zoommode",0) ~= 0 and element == "CHudWeaponSelection" then return false end

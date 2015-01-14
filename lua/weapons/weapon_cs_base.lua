@@ -193,11 +193,11 @@ function SWEP:Deploy()
 	
 		if self.AlreadyGiven == false then
 		
-			if GetConVar("sv_css_ammo_loaded"):GetInt() == 1 then
+			if GetConVarNumber("sv_css_ammo_loaded") == 1 then
 				self:SetClip1(self.Primary.ClipSize)
 			end
 			
-			if GetConVar("sv_css_ammo_givespare"):GetInt() == 1 then
+			if GetConVarNumber("sv_css_ammo_givespare") == 1 then
 				self.Owner:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
 			end
 
@@ -205,7 +205,7 @@ function SWEP:Deploy()
 			
 		end
 		
-		if GetConVar("sv_css_limit_equipped"):GetInt() == 1 then
+		if GetConVarNumber("sv_css_limit_equipped") == 1 then
 			for k,v in pairs (self.Owner:GetWeapons()) do
 				if v.BurgerBase ~= nil then
 					if v ~= self then
@@ -266,7 +266,7 @@ function SWEP:Holster()
 	
 
 	self:SetNWBool("IronSights",false)
-	self:SetNWBool("waszoomed",false)
+	self:SetNWInt("waszoomed",0)
 	
 	--self:SendWeaponAnim(ACT_VM_HOLSTER)
 	
@@ -298,11 +298,15 @@ function SWEP:PrimaryAttack()
 			if self.HasBoltAction then
 				if self:GetNWInt("zoommode",0) >= 1 then
 					
+						local value = self:GetNWInt("zoommode",0)
+						--print(value)
+						
+						self:SetNWInt("waszoomed", value )
 						self:SetNWInt("zoommode",0)
-						self:SetNWBool("waszoomed",true)
+						
 
 				else
-					self:SetNWBool("waszoomed",false)
+					self:SetNWInt("waszoomed",0)
 				end
 			end
 		end
@@ -414,12 +418,21 @@ function SWEP:Modifiers(Damage,Shots,Cone,Recoil)
 		Cone = Cone * 1
 	end
 	
-	local VelCone = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001*GetConVar("sv_css_velcone_scale"):GetFloat())
+	local VelCone = self.Owner:GetVelocity():Length()*0.0001
 	
-	Damage = Damage * GetConVar("sv_css_damage_scale"):GetFloat()
-	--Shots = Shots
-	Cone = VelCone + (Cone * GetConVar("sv_css_cone_scale"):GetFloat()) 
-	Recoil = Recoil * GetConVar("sv_css_recoil_scale"):GetFloat() * self.RecoilMul
+	if SERVER then
+		Damage = Damage * GetConVarNumber("sv_css_damage_scale")
+		--Shots = Shots
+		Cone = ( VelCone * GetConVarNumber("sv_css_velcone_scale") ) + (Cone * GetConVarNumber("sv_css_cone_scale")) + (self.CoolDown/100)
+		Recoil = Recoil * GetConVarNumber("sv_css_recoil_scale") * self.RecoilMul
+	end
+	
+	if CLIENT then
+		Damage = Damage * self.Owner.css_damage_scale
+		--Shots = Shots
+		Cone = ( VelCone * self.Owner.css_velcone_scale ) + (Cone * self.Owner.css_cone_scale) + (self.CoolDown/100)
+		Recoil = Recoil * self.Owner.css_recoil_scale * self.RecoilMul
+	end
 
 	self:EmitGunSound(GunSound)
 	
@@ -450,13 +463,15 @@ function SWEP:Recoil(Damage,Shots,Cone,Recoil)
 end
 
 function SWEP:SecondaryAttack()
+	
+	
 
 	if self:IsBusy() then return end
 
 	if self.HasBurstFire == true then
 		self:SwitchFireMode()
 	elseif self.HasScope == true then
-		if GetConVar("sv_css_enable_csszoom"):GetInt() == 1 and self.HasCSSZoom == true then
+		if GetConVarNumber("sv_css_enable_csszoom") == 1 and self.HasCSSZoom == true then
 			self:CSSZoom()
 		else
 			self:ScopeZoom()
@@ -534,14 +549,14 @@ function SWEP:ScopeZoom()
 				var = var + 1
 			else
 				var = 0
-				self:SetNWBool("waszoomed",false)
+				self:SetNWInt("waszoomed",0)
 			end
 		else
 			if var == 0 then
 				var = 1
 			else
 				var = 0
-				self:SetNWBool("waszoomed",false)
+				self:SetNWInt("waszoomed",0)
 			end
 		end
 		
@@ -552,8 +567,6 @@ function SWEP:ScopeZoom()
 	if CLIENT or game.SinglePlayer() == true then
 		self:EmitSound("weapons/zoom.wav",100,100)
 	end
-	
-	
 
 end
 
@@ -639,8 +652,18 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	
 	if CLIENT and not IsFirstTimePredicted() then return end
 	
-	self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01)*GetConVar("sv_css_heat_scale"):GetFloat(),0,20)
-	self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*GetConVar("sv_css_cooltime_scale"):GetFloat()
+	if CLIENT then
+		self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01)*self.Owner.css_heat_scale,0,20)
+		self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*self.Owner.css_cooltime_scale
+		
+		
+		--print(self.CoolDown)
+	end
+	
+	if SERVER then 
+		self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01)*GetConVarNumber("sv_css_heat_scale"),0,20)
+		self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*GetConVarNumber("sv_css_cooltime_scale")
+	end
 
 	
 	
@@ -660,7 +683,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	
 		if attacker:IsPlayer() or attacker:IsBot() then
 		
-			if GetConVar("sv_css_enable_penetration"):GetInt() == 1 then
+			if GetConVarNumber("sv_css_enable_penetration") == 1 then
 			
 				local matmul = 1
 				local mat = tr.MatType
@@ -700,7 +723,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 				
 				local Distance = (tr.HitPos + Direction):Distance(newtracedone2.HitPos)
 				
-				local NewDamage = Damage - ( GetConVar("sv_css_penetration_scale"):GetFloat() * Distance * matmul )
+				local NewDamage = Damage - ( GetConVarNumber("sv_css_penetration_scale") * Distance * matmul )
 				local NewShots = 1
 				local NewCone = 0
 				local NewSource =  newtracedone.HitPos - newtracedone.HitNormal*1
@@ -927,7 +950,7 @@ end
 function SWEP:Think()
 
 	if CLIENT then
-		self.ViewModelFOV = GetConVar("cl_css_viewmodel_fov"):GetFloat()
+		self.ViewModelFOV = GetConVarNumber("cl_css_viewmodel_fov")
 	end
 
 	self:BotThink()
@@ -936,10 +959,10 @@ function SWEP:Think()
 	if SERVER then
 		if self.HasBoltAction then
 			if self.BoltCurTime <= CurTime() then
-				if self:GetNWBool("waszoomed",false) then
+				if self:GetNWInt("waszoomed",0) > 0 then
 					if self.IsReloading == 0 then
-						self:SetNWInt("zoommode",1)
-						self:SetNWBool("waszoomed",false)
+						self:SetNWInt("zoommode",self:GetNWInt("waszoomed",0))
+						self:SetNWInt("waszoomed",0)
 					end
 				end
 			end
@@ -998,8 +1021,18 @@ function SWEP:Think()
 		if self.CoolDown ~= 0 then
 
 			if self.NextCoolTick < CurTime() then
-				self.CoolDown = math.max(0,self.CoolDown - (0.18 * GetConVar("sv_css_cooldown_scale"):GetFloat() ))
+			
+				if CLIENT then
+					self.CoolDown = math.max(0,self.CoolDown - (0.18 * self.Owner.css_cooldown_scale ) )
+				end
+				
+				if SERVER then
+					self.CoolDown = math.max(0,self.CoolDown - (0.18 * GetConVarNumber("sv_css_cooldown_scale") ))
+				end
+				
 				self.NextCoolTick = CurTime() + 0.025
+				
+				
 			end
 
 		else
@@ -1043,6 +1076,8 @@ end
 
 function SWEP:DrawHUD()
 
+	if not LocalPlayer().css_cone_scale then return end
+	
 	local x = ScrW()
 	local y = ScrH()
 
@@ -1077,8 +1112,8 @@ function SWEP:DrawHUD()
 		Cone = Cone * 1
 	end
 	
-	local VelCone = ((self.CoolDown)/100 + self.Owner:GetVelocity():Length()*0.0001*GetConVar("sv_css_velcone_scale"):GetFloat())
-	Cone = VelCone + (Cone * GetConVar("sv_css_cone_scale"):GetFloat()) 
+	local VelCone = self.Owner:GetVelocity():Length()*0.0001
+	Cone = (VelCone * LocalPlayer().css_velcone_scale) + (Cone * LocalPlayer().css_cone_scale) + (self.CoolDown/100)
 
 	Cone = Cone*1000
 
@@ -1212,17 +1247,29 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 
 	--if ( self.DrawWeaponInfoBox == false ) then return end
 
+	
+	
+	
+	
+	
 	if (self.InfoMarkup == nil ) then
+	
+		local Damage = self.Primary.NumShots * self.Primary.Damage * LocalPlayer().css_damage_scale
+		local Cone = self.Primary.Cone * LocalPlayer().css_cone_scale
+		local Recoil = Damage * self.RecoilMul * LocalPlayer().css_recoil_scale
+	
+	
+	
 		local str
 		local title_color = "<color=0,0,0,255>"
 		local text_color = "<color=255,150,150,255>"
 		
 		str = "<font=HudSelectionText>"
-		str = str .. title_color .. "Base Damage:</color> "..text_color..self.Primary.Damage.."</color>\n" 
+		str = str .. title_color .. "Damage:</color> "..text_color..Damage.."</color>\n" 
 		str = str .. title_color .. "Firerate:</color> "..text_color.. math.floor((self.Primary.Delay^-1)*60) .. " RPM" .."</color>\n"
-		str = str .. title_color .. "Damage Per Second:</color> "..text_color..math.floor((self.Primary.Delay^-1) * self.Primary.Damage ).. "DPS" .. "</color>\n"
-		str = str .. title_color .. "Recoil:</color> "..text_color.. math.floor((self.Primary.Damage * self.RecoilMul) * 2) .. "%" .."</color>\n" 
-		str = str .. title_color .. "Accuracy:</color> "..text_color.. 100 - (self.Primary.Cone*100) .. "%" .. "</color>\n"
+		str = str .. title_color .. "Damage Per Second:</color> "..text_color..math.floor((self.Primary.Delay^-1) * Damage ).. "DPS" .. "</color>\n"
+		str = str .. title_color .. "Recoil:</color> "..text_color.. math.floor(Recoil * 2) .. "%" .."</color>\n" 
+		str = str .. title_color .. "Accuracy:</color> "..text_color.. 100 - (Cone*100) .. "%" .. "</color>\n"
 		str = str .. "</font>"
 		
 		self.InfoMarkup = markup.Parse( str, 250 )
@@ -1313,7 +1360,7 @@ function SWEP:BotThink()
 				if self.Bot.ShootDelay <= CurTime() then
 					if self:Clip1() > 0 then
 						local distance = self.Owner:GetPos():Distance(Victim:GetPos())
-						self:Shoot()
+						self:PrimaryAttack()
 						self.Bot.ShootDelay = CurTime() + math.min(0, self.Primary.Delay + ( self.Primary.Delay * distance/2000 ) - ( self.Primary.Delay * self.Owner:GetVelocity():Length()/50 ))
 					elseif self.Owner:GetActiveWeapon():GetClass() == "weapon_cs_sun" then
 						self:PrimaryAttack()
@@ -1324,7 +1371,7 @@ function SWEP:BotThink()
 		elseif Victim:GetNWFloat("propcurhealth",-1) ~= -1 then
 			if self.Bot.ShootDelay <= CurTime() then
 				if self:Clip1() > 0 then
-					self:Shoot()
+					self:PrimaryAttack()
 					self.Bot.ShootDelay = CurTime() + self.Primary.Delay*3
 				end
 			end	

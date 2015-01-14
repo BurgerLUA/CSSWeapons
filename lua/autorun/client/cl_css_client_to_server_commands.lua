@@ -50,3 +50,23 @@ function CSSAskForCommand(command,callback)
 	
 end
 --]]
+
+net.Receive( "SendConvars", function( len )	 
+
+	local pl = LocalPlayer()
+
+	pl.css_damage_scale = net.ReadFloat() -- GetConVarNumber(("sv_css_damage_scale")
+	pl.css_recoil_scale = net.ReadFloat() -- GetConVarNumber(("sv_css_recoil_scale")
+	pl.css_cone_scale = net.ReadFloat() -- GetConVarNumber(("sv_css_cone_scale")
+	pl.css_velcone_scale = net.ReadFloat() -- GetConVarNumber(("sv_css_velcone_scale")
+	pl.css_heat_scale = net.ReadFloat() -- GetConVarNumber(("sv_css_heat_scale")
+	pl.css_cooltime_scale = net.ReadFloat() -- GetConVarNumber(("sv_css_cooltime_scale")
+	pl.css_cooldown_scale = net.ReadFloat() -- GetConVarNumber(("sv_css_cooldown_scale")
+	 
+end ) 
+
+
+
+
+
+

@@ -19,6 +19,7 @@ function ENT:Initialize()
 		self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 		
 		
+		
 		local phys = self:GetPhysicsObject()
 		
 		if phys:IsValid() then
@@ -26,6 +27,7 @@ function ENT:Initialize()
 			phys:SetBuoyancyRatio(0)
 			phys:EnableGravity(false)
 			phys:EnableDrag(true)
+			phys:SetMass(50000)
 		end
 		
 		SafeRemoveEntityDelayed(self,20)

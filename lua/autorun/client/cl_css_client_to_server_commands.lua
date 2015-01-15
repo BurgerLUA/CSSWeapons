@@ -51,6 +51,8 @@ function CSSAskForCommand(command,callback)
 end
 --]]
 
+if game.SinglePlayer() then return end
+
 net.Receive( "SendConvars", function( len )	 
 
 	local pl = LocalPlayer()

@@ -652,19 +652,20 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	
 	if CLIENT and not IsFirstTimePredicted() then return end
 	
+	
 	if CLIENT then
 		self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01)*self.Owner.css_heat_scale,0,20)
 		self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*self.Owner.css_cooltime_scale
-		
-		
-		--print(self.CoolDown)
 	end
-	
-	if SERVER then 
+		
+	if SERVER  then 
 		self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01)*GetConVarNumber("sv_css_heat_scale"),0,20)
 		self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*GetConVarNumber("sv_css_cooltime_scale")
 	end
 
+	if game.SinglePlayer() then
+		self:SetNWFloat("SinglePlayerNetwork",self.CoolDown)
+	end
 	
 	
 	
@@ -1017,10 +1018,13 @@ function SWEP:Think()
 		end
 	end
 	
+
+	
 	if self.CoolTime < CurTime() then
 		if self.CoolDown ~= 0 then
 
 			if self.NextCoolTick < CurTime() then
+			
 			
 				if CLIENT then
 					self.CoolDown = math.max(0,self.CoolDown - (0.18 * self.Owner.css_cooldown_scale ) )
@@ -1039,10 +1043,18 @@ function SWEP:Think()
 			self.CoolDown = 0
 		end
 	end
+	
+	if SERVER then
+		if game.SinglePlayer() then
+			self:SetNWFloat("SinglePlayerNetwork",self.CoolDown)
+		end
+	end
 
+	--[[
 	if SERVER then
 		self:SetNWFloat("weaponheat", math.Clamp(self.CoolDown,0,10))
 	end
+	--]]
 	
 end
 
@@ -1076,7 +1088,7 @@ end
 
 function SWEP:DrawHUD()
 
-	if not LocalPlayer().css_cone_scale then return end
+	if not LocalPlayer().css_cone_scale and not game.SinglePlayer() then return end
 	
 	local x = ScrW()
 	local y = ScrH()
@@ -1113,21 +1125,22 @@ function SWEP:DrawHUD()
 	end
 	
 	local VelCone = self.Owner:GetVelocity():Length()*0.0001
-	Cone = (VelCone * LocalPlayer().css_velcone_scale) + (Cone * LocalPlayer().css_cone_scale) + (self.CoolDown/100)
+	
+	local CoolDown
+	
+	if game.SinglePlayer() then
+		CoolDown = self:GetNWFloat("SinglePlayerNetwork",0)
+		VelConeScale = GetConVarNumber("sv_css_velcone_scale")
+		ConeScale = GetConVarNumber("sv_css_cone_scale")
+	else
+		CoolDown = self.CoolDown
+		VelConeScale = LocalPlayer().css_velcone_scale
+		ConeScale = LocalPlayer().css_cone_scale
+	end
 
+	Cone = (VelCone * VelConeScale) + (Cone * ConeScale) + (CoolDown/100)
 	Cone = Cone*1000
 
-	--print(Cone)
-	
-	
-
-	--local heat = self:GetNWInt("weaponheat",0)*15
-	--local extra = (self.ActualCone*1000*csscrouchmul + ( heat + self.Owner:GetVelocity():Length()*0.2*GetConVar("sv_css_velcone_scale"):GetFloat() ))*0.5 + add
-	
-	
-	
-	
-	
 	if self.HasCrosshair == true then
 		if self:GetNWInt("zoommode",0) == 0 and self:GetNWBool("IronSights",false) == false then
 		

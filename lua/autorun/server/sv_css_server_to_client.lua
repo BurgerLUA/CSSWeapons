@@ -57,6 +57,9 @@ end)
 
 --]]
 
+
+if game.SinglePlayer() then return end
+
 local NextTick = 0
 
 

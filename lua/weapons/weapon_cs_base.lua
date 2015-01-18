@@ -286,8 +286,10 @@ end
 
 function SWEP:PrimaryAttack()
 
+	
 	if not self:CanPrimaryAttack() then return end
 	if self:IsBusy() then return end
+	if self:IsUsing() then return end
 
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 
@@ -465,8 +467,8 @@ end
 function SWEP:SecondaryAttack()
 	
 	
-
 	if self:IsBusy() then return end
+	if self:IsUsing() then return end
 
 	if self.HasBurstFire == true then
 		self:SwitchFireMode()
@@ -632,6 +634,8 @@ end
 function SWEP:CanPrimaryAttack()
 
 	if self:GetNextPrimaryFire() > CurTime() then return false end
+	
+
 
 	if self:Clip1() <= 0 then
 		--self:Reload()
@@ -808,6 +812,13 @@ function SWEP:IsBusy()
 	return false
 
 end
+
+function SWEP:IsUsing()
+
+	if self.Owner:KeyDown(IN_USE) then return true end
+	
+end
+
 
 function SWEP:Reload()
 
@@ -1061,6 +1072,15 @@ end
 function SWEP:EquipThink()
 
 end
+
+function SWEP:QuickThrow()
+
+end
+
+function SWEP:QuickKnife()
+
+end
+
 
 function SWEP:AdjustMouseSensitivity()
 

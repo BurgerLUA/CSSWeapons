@@ -44,11 +44,13 @@ SWEP.HasSideRecoil			= false
 SWEP.IsThrowing 			= false
 SWEP.HasAnimated			= false
 SWEP.HasThrown				= false
+SWEP.CanHolster				= true
 
 function SWEP:PrimaryAttack()
+	if self:IsUsing() then return end
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + 2)
+	self.CanHolster = false
 	self:SendWeaponAnim(ACT_VM_PULLPIN)
-	--self:TakePrimaryAmmo(1)
 	
 	self.IsThrowing = true
 	
@@ -87,6 +89,7 @@ function SWEP:EquipThink()
 				if v:IsScripted() then
 					if foundp == false then
 						if weapons.GetStored(v:GetClass()).WeaponType == "Primary" then
+							self.CanHolster = true
 							self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
 							foundp = true
 						end
@@ -99,6 +102,7 @@ function SWEP:EquipThink()
 					if v:IsScripted() then
 						if founds == false then
 							if weapons.GetStored(v:GetClass()).WeaponType == "Secondary" then
+								self.CanHolster = true
 								self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
 								founds = true
 							end
@@ -108,6 +112,7 @@ function SWEP:EquipThink()
 			end
 
 			if founds == false and foundp == false then
+				self.CanHolster = true
 				self.Owner:SelectWeapon(self.Owner:GetWeapons()[1]:GetClass() )
 			end
 			
@@ -118,8 +123,26 @@ function SWEP:EquipThink()
 	end
 end
 
+function SWEP:Holster()
+	return self.CanHolster
+end
+
 function SWEP:Reload()
 end
+
+function SWEP:QuickThrow()
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + 2)
+	self:SendWeaponAnim(ACT_VM_PULLPIN)
+	
+	self.IsThrowing = true
+	
+	self.ThrowAnimation = CurTime() + 0.85
+	self.Throw = CurTime() + 1
+	self.ThrowRemove = CurTime() + 2
+end
+
+
+
 
 function SWEP:ThrowHEGrenade(force)
 	if CLIENT then return end

@@ -52,7 +52,6 @@ function SWEP:Deploy()
 	self.DefaultRunSpeed = self.Owner:GetRunSpeed()
 end
 
-
 function SWEP:Holster()
 	return self.CanHolster
 end
@@ -62,6 +61,7 @@ function SWEP:Initialize()
 end
 
 function SWEP:PrimaryAttack()
+	if self:IsUsing() then return end
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + 2)
 	self.CanHolster = false
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
@@ -167,6 +167,8 @@ function SWEP:PlantC4()
 	--self.Owner:Freeze(false)
 	
 end
+
+
 
 
 function GetActivities( ent )

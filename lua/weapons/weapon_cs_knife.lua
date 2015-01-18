@@ -18,8 +18,8 @@ SWEP.WorldModel				= "models/weapons/w_knife_t.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "knife"
 
-SWEP.Primary.Damage			= 0
-SWEP.Primary.NumShots		= 0
+SWEP.Primary.Damage			= 34
+SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
 SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= -1
@@ -42,7 +42,7 @@ SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= false
 
 function SWEP:PrimaryAttack()
-	
+	if self:IsUsing() then return end
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
@@ -51,7 +51,7 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:SecondaryAttack()
-	
+	if self:IsUsing() then return end
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*1.5)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay*1.5)
@@ -185,6 +185,59 @@ function SWEP:StabEffect(StartPos,HitPos,SurfaceProp,HitEntity)
 end
 
 
+function SWEP:QuickKnife()
+
+	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*1.5)
+	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay*1.5)
+	self:Swing(55)
+
+	timer.Simple(1, function()
+	
+		if not IsValid(self) then return end
+		if not IsValid(self.Owner) then return end
+		
+		if not self.Owner:GetActiveWeapon():GetClass() == "weapon_cs_knife" then return end
+
+		local foundp = false
+		local founds = false
+		
+		for k,v in pairs(self.Owner:GetWeapons()) do
+			if v:IsScripted() then
+				if foundp == false then
+					if weapons.GetStored(v:GetClass()).WeaponType == "Primary" then
+						self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
+						foundp = true
+					end
+				end
+			end
+		end
+		
+		if foundp == false then
+			for k,v in pairs(self.Owner:GetWeapons()) do
+				if v:IsScripted() then
+					if founds == false then
+						if weapons.GetStored(v:GetClass()).WeaponType == "Secondary" then
+							self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
+							founds = true
+						end
+					end
+				end
+			end
+		end
+
+		if founds == false and foundp == false then
+			self.Owner:SelectWeapon(self.Owner:GetWeapons()[1]:GetClass() )
+		end
+	
+	end)
+
+end
+
+
+
+
+
 
 
 function GetActivities( ent )
@@ -198,5 +251,10 @@ function GetActivities( ent )
 
   return t
 end
+
+
+
+
+
 
 

@@ -1285,11 +1285,24 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 	
 	
 	
+	
+	
 	if (self.InfoMarkup == nil ) then
 	
-		local Damage = self.Primary.NumShots * self.Primary.Damage * LocalPlayer().css_damage_scale
-		local Cone = self.Primary.Cone * LocalPlayer().css_cone_scale
-		local Recoil = Damage * self.RecoilMul * LocalPlayer().css_recoil_scale
+		local Damage
+		local Cone
+		local Recoil
+		
+	
+		if game.SinglePlayer() then
+			Damage = self.Primary.NumShots * self.Primary.Damage * GetConVarNumber("sv_css_damage_scale")
+			Cone = self.Primary.Cone * GetConVarNumber("sv_css_cone_scale")
+			Recoil = Damage * self.RecoilMul * GetConVarNumber("sv_css_recoil_scale")
+		else
+			Damage = self.Primary.NumShots * self.Primary.Damage * LocalPlayer().css_damage_scale
+			Cone = self.Primary.Cone * LocalPlayer().css_cone_scale
+			Recoil = Damage * self.RecoilMul * LocalPlayer().css_recoil_scale
+		end
 	
 	
 	

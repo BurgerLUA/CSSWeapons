@@ -17,7 +17,7 @@ SWEP.SlotPos				= 1
 SWEP.ViewModel 				= "models/weapons/cstrike/c_mach_m249para.mdl"
 SWEP.WorldModel				= "models/weapons/w_mach_m249para.mdl"
 SWEP.VModelFlip 			= false
-SWEP.HoldType				= "shotgun"
+SWEP.HoldType				= "ar2"
 
 SWEP.Primary.Damage			= 31
 SWEP.Primary.NumShots		= 1

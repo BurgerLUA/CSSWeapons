@@ -17,7 +17,7 @@ SWEP.SlotPos				= 1
 SWEP.ViewModel 				= "models/weapons/cstrike/c_smg_mac10.mdl"
 SWEP.WorldModel				= "models/weapons/w_smg_mac10.mdl"
 SWEP.VModelFlip 			= false
-SWEP.HoldType				= "smg"
+SWEP.HoldType				= "pistol"
 
 SWEP.Primary.Damage			= 28
 SWEP.Primary.NumShots		= 1

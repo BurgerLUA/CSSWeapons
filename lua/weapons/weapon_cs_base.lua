@@ -706,22 +706,35 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 				end
 				
 				if tr.HitWorld == true then
-					WorldOffset = tr.Normal*32
+				
+					--[[
+					local data1 = {}
+						data1.start = tr.HitPos
+					
+					local worldtrace1
+					--]]
+					
+					WorldOffset = Direction * 8
+					
+
 				else
 					WorldOffset = Vector(0,0,0)
 				end
 				
+				
+				
+				
 				local newtrace = {}
 					newtrace.start = tr.HitPos + WorldOffset
 					newtrace.endpos = tr.HitPos + Direction*(8*10^10)
-					--newtrace.mask = MASK_SHOT
+					newtrace.mask = MASK_SHOT
 					newtrace.filter = tr.Entity
 				local newtracedone = util.TraceLine(newtrace)
 					
 				local newtrace2 = {}
 					newtrace2.start = newtracedone.HitPos
 					newtrace2.endpos = newtracedone.HitPos - Direction*(8*10^10)
-					--newtrace.mask = MASK_SHOT
+					newtrace.mask = MASK_SHOT
 					--newtrace2.filter = tr.Entity
 				local newtracedone2 = util.TraceLine(newtrace2)
 
@@ -762,6 +775,32 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	self.Owner:FireBullets(bullet)
 	
 end
+
+
+function SWEP:WorldBulletSolution(pos,direction,total)
+
+	local data = {}
+	data.start = pos + direction*2
+	data.endpos = pos + direction*3
+	
+	total = total + 3
+	
+	local trace = util.TraceLine(data)
+	
+	if trace.HitWorld and total < 5 then
+		self:WorldBulletSolution(pos + direction*3,direction,total)
+	elseif total > 5 then
+		return false
+	else
+		return true 
+	end
+	
+	
+
+	
+end
+
+
 
 function SWEP:EmitGunSound(GunSound)
 
@@ -965,7 +1004,7 @@ function SWEP:Think()
 		self.ViewModelFOV = GetConVarNumber("cl_css_viewmodel_fov")
 	end
 
-	self:BotThink()
+	--self:BotThink()
 	self:EquipThink()
 	
 	if SERVER then
@@ -1338,102 +1377,129 @@ SWEP.Bot.SearchDelay 		= 0
 SWEP.Bot.ShootDelay 		= 0
 SWEP.Bot.SwitchTime 		= 0
 
+
+SWEP.Bot.TargetEnt			= nil
+SWEP.Bot.TargetPos			= nil
+--[[
 function SWEP:BotThink()
 
-	if not self.Owner:IsBot() then return end
-
-	local FindPlayers = ents.FindByClass("player")
-	
-	if self.Bot.SearchDelay <= CurTime() then
-		
-		Result = {}
-		
-		for k,v in pairs(FindPlayers) do
-			
-			if v ~= self.Owner and v:Alive() then 
-			
-
-				RealDistance = v:GetPos():Distance(self.Owner:GetPos())
-				Distance = v:GetPos():Distance(self.Owner:GetPos()) - 10000000
-				
-				Result[v] = math.abs(Distance)
-			
-				if SERVER then
-					--PrintTable(Result)
-				end
-
-			end
-
-		end
-	
-		Winner = table.GetWinningKey( Result ) or Entity(1)
-		
-		self.Bot.SearchDelay = CurTime() + 0.75
-
-	end
-	
 	if SERVER then
+		if not self.Owner:IsBot() then return end
 		
-		local target = Winner:GetPos() + Vector(0,0,25)
+		if self.Bot.TargetEnt == nil then
 		
-		Main = (target - self.Owner:GetShootPos() ):Angle()
+			if self.Bot.SearchDelay < CurTime() then
+			
+				local Bump = self.Owner:GetEyeTrace().StartPos:Distance(self.Owner:GetEyeTrace().HitPos)
+			
+				if Bump > 300 then
+					self.Owner:SetEyeAngles(self.Owner:EyeAngles() + Angle(0,math.Rand(-45,45),0 ))
+				else
+					self.Owner:SetEyeAngles(self.Owner:EyeAngles() + Angle(0,180,0 ))
+				end
+			
+			
+				self.Bot.TargetEnt = self:BotFindTarget()
+				self.Bot.SearchDelay = CurTime() + 1
+			end
+			
+		else
 		
-		P = math.NormalizeAngle(Main.p)
-		Y = math.NormalizeAngle(Main.y)
-		R = 0
+			self.Bot.TargetPos = self.Bot.TargetEnt:GetPos() + self.Bot.TargetEnt:OBBCenter()
 		
-		Tots = Angle(P,Y,R)
+			local Main = (self.Bot.TargetPos - self.Owner:GetShootPos() ):Angle()
+			
+			P = math.NormalizeAngle(Main.p)
+			Y = math.NormalizeAngle(Main.y)
+			R = 0
+			
+			Tots = Angle(P,Y,R)
 		
-		--if RealDistance < 2000 then
 			self.Owner:SetEyeAngles(Tots)
-		--end
-		
-	end
-	
-	if self:Clip1() == 0 then
-		--self:SetClip1(self.Primary.ClipSize)
-		self:Reload()
-	end
-	
-	
-	if SERVER then
-	
-		local Victim = self.Owner:GetEyeTrace().Entity
-		
-		if Victim:IsPlayer() then
+
+			if self:Clip1() == 0 then
+				self:Reload()
+			end
 			
-			if Victim:Health() > 0 then
-				if self.Bot.ShootDelay <= CurTime() then
-					if self:Clip1() > 0 then
-						local distance = self.Owner:GetPos():Distance(Victim:GetPos())
-						self:PrimaryAttack()
-						self.Bot.ShootDelay = CurTime() + math.min(0, self.Primary.Delay + ( self.Primary.Delay * distance/2000 ) - ( self.Primary.Delay * self.Owner:GetVelocity():Length()/50 ))
-					elseif self.Owner:GetActiveWeapon():GetClass() == "weapon_cs_sun" then
-						self:PrimaryAttack()
+			if self:Ammo1() <= self:Clip1() then
+				self.Owner:SetAmmo(self:Clip1(), self.Primary.Ammo)
+			end
+			
+			if self.Bot.TargetEnt:Health() > 0 then
+				
+				if self.Owner:GetEyeTrace().Entity == self.Bot.TargetEnt then
+				
+					if self.Bot.ShootDelay <= CurTime() then
+					
+						if self:Clip1() > 0 then
+							local Distance = self.Owner:GetPos():Distance(self.Bot.TargetEnt:GetPos())
+							self:PrimaryAttack()
+							
+							if self.Primary.Automatic == true then
+								self.Bot.ShootDelay = CurTime() + self.Primary.Delay*math.Rand(1.5,3)
+							else
+								self.Bot.ShootDelay = CurTime() + math.max(self.Primary.Delay,(1/math.Rand(6,7)))
+							end
+							
+						elseif self.Owner:GetActiveWeapon():GetClass() == "weapon_cs_sun" then
+							self:PrimaryAttack()
+						end
+						
 					end
+
+				end
+				
+			else
+
+				print("BOT: You're dead " .. self.Bot.TargetEnt:Nick() .. "!")
+				self.Bot.TargetEnt = nil
+				
+			end
+
+		end
+		
+	end
+	
+end
+
+function SWEP:BotFindTarget()
+
+	local EnemyList = {}
+
+	local ConeEnts = ents.FindInCone(self.Owner:GetShootPos(),self.Owner:EyeAngles():Forward(),8000, 60)
+
+	if #ConeEnts == 0 then return nil end
+	
+	for k,v in pairs(ConeEnts) do
+		
+		if v:IsPlayer() and v ~= self.Owner then	
+			if v:Alive() == true then
+
+				local data = {}
+				data.start = self.Owner:EyePos()
+				data.endpos = v:GetPos() + v:OBBCenter()
+				data.filter = self.Owner
+				--data.mask = MASK_BLOCKLOS_AND_NPCS
+
+				local trace = util.TraceLine(data)
+			
+				if IsValid(trace.Entity) then
+				
+					if trace.Entity == v then 
+						print("BOT: You're going to die " .. v:Nick() .. "!")
+						EnemyList[v] = v:GetPos():Distance(self.Owner:EyePos())
+					end
+					
 				end
 			end
-		
-		elseif Victim:GetNWFloat("propcurhealth",-1) ~= -1 then
-			if self.Bot.ShootDelay <= CurTime() then
-				if self:Clip1() > 0 then
-					self:PrimaryAttack()
-					self.Bot.ShootDelay = CurTime() + self.Primary.Delay*3
-				end
-			end	
-	
 		end
-		
+
 	end
 	
-	if not DebugTime then
-		DebugTime = 0
-	end
+	EnemyList = table.SortByKey(EnemyList,true)
 	
-	if DebugTime <= CurTime() then
-		DebugTime = CurTime() + 5
-		if SERVER then
-			--print(self.Owner:Nick() .. " is targeting " .. Winner:Nick())
-		end
-	end
+	return EnemyList[1]
+	
 end
+
+--]]

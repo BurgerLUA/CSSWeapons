@@ -213,7 +213,7 @@ function SWEP:Deploy()
 							self.Owner:StripWeapon(v:GetClass())
 							
 							local dropped = ents.Create("ent_cs_droppedweapon")
-							dropped:SetPos(self.Owner:GetShootPos() - Vector(0,0,20) )
+							dropped:SetPos(self.Owner:GetPos() + self.Owner:OBBCenter() )
 							dropped:SetAngles(self.Owner:EyeAngles() )
 							dropped:SetModel(weapons.GetStored(v:GetClass()).WorldModel)
 							dropped:Spawn()
@@ -318,6 +318,7 @@ function SWEP:PrimaryAttack()
 	local Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
 	
 	self:ShootBullet(Damage, Shots, Cone, Source, Direction,Source)
+	self:AddHeat(Damage,Shots)
 	self:Recoil(Damage,Shots,Cone,Recoil)
 	self:ShootEffects()
 
@@ -651,11 +652,9 @@ function SWEP:CanPrimaryAttack()
 	
 end
 
-function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
+function SWEP:AddHeat(Damage,Shots)
 
-	
 	if CLIENT and not IsFirstTimePredicted() then return end
-	
 	
 	if CLIENT then
 		self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01)*self.Owner.css_heat_scale,0,20)
@@ -670,9 +669,13 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	if game.SinglePlayer() then
 		self:SetNWFloat("SinglePlayerNetwork",self.CoolDown)
 	end
-	
-	
-	
+
+end
+
+function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
+
+	if CLIENT and not IsFirstTimePredicted() then return end
+
 	local bullet = {}
 	bullet.Damage	= Damage
 	bullet.Num		= Shots
@@ -707,14 +710,10 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 				
 				if tr.HitWorld == true then
 				
-					--[[
-					local data1 = {}
-						data1.start = tr.HitPos
+					self:WorldBulletSolution(tr.HitPos,Direction,Damage)
 					
-					local worldtrace1
-					--]]
+					return
 					
-					WorldOffset = Direction * 8
 					
 
 				else
@@ -722,7 +721,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 				end
 				
 				
-				
+
 				
 				local newtrace = {}
 					newtrace.start = tr.HitPos + WorldOffset
@@ -755,6 +754,17 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 					if NewDamage > 0 and tr.HitSky == false then
 						self:ShootBullet(NewDamage, NewShots, NewCone, NewSource, NewDirection, NewLastHitPos)
 					end
+				else
+					--[[
+					if NewDamage > 0 and tr.HitSky == false then
+						if tr.Entity ~= nil then
+							if tr.Entity:GetClass() == "prop_physics" then
+								tr.Entity:GetPhysicsObject():EnableMotion(true)
+								constraint.RemoveAll(tr.Entity)
+							end
+						end
+					end
+					--]]
 				end
 				
 
@@ -777,27 +787,48 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 end
 
 
-function SWEP:WorldBulletSolution(pos,direction,total)
+function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 
-	local data = {}
-	data.start = pos + direction*2
-	data.endpos = pos + direction*3
 	
-	total = total + 3
+	local Amount = 3
+	
+	local data = {}
+	data.start = Pos + Direction
+	data.endpos = Pos + Direction*Amount
 	
 	local trace = util.TraceLine(data)
 	
-	if trace.HitWorld and total < 5 then
-		self:WorldBulletSolution(pos + direction*3,direction,total)
-	elseif total > 5 then
-		return false
-	else
-		return true 
-	end
+	local NewDamage = Damage - ( GetConVarNumber("sv_css_penetration_scale") * Amount )
 	
-	
+	--print("Running... Newdamage is " .. NewDamage )
 
+	--print(trace.HitWorld)
+	--print(NewDamage)
 	
+	
+	if trace.HitWorld and NewDamage > 1 then
+		self:WorldBulletSolution(Pos + Direction*Amount,Direction,NewDamage)
+	elseif NewDamage > 1 then
+	
+		local FinalPos = Pos + Direction*(Amount+0.5)
+	
+		self:ShootBullet(NewDamage, 1 , 0, FinalPos, Direction , FinalPos )
+		
+		--[[
+		local debugmodel1 = ents.Create("prop_physics")
+		debugmodel1:SetPos(FinalPos)
+		debugmodel1:SetModel("models/hunter/blocks/cube025x025x025.mdl")
+		debugmodel1:SetColor(Color(0,255,0,255)) -- green
+		debugmodel1:Spawn()
+		debugmodel1:Activate()
+		debugmodel1:GetPhysicsObject():EnableMotion(false)
+		debugmodel1:GetPhysicsObject():EnableCollisions(false)
+		
+		SafeRemoveEntityDelayed(debugmodel1,5)
+		--]]
+		
+	end
+
 end
 
 

@@ -36,7 +36,7 @@ function DropWeaponAmmo(ply)
 		for k,v in pairs(ply:GetWeapons()) do
 			if v.BurgerBase ~= nil and v:GetClass() ~= "weapon_cs_botgun" then
 				local dropped = ents.Create("ent_cs_droppedweapon")
-				dropped:SetPos(ply:GetShootPos())
+				dropped:SetPos(ply:GetPos() + ply:OBBCenter())
 				dropped:SetAngles(ply:EyeAngles())
 				dropped:SetModel(weapons.GetStored(v:GetClass()).WorldModel)
 				dropped:Spawn()
@@ -54,7 +54,7 @@ function DropWeaponAmmo(ply)
 						dropammo.AmmoType = allammo[i]
 						dropammo.AmmoAmount = ply:GetAmmoCount( i )
 						dropammo.AmmoModel = "models/weapons/w_defuser.mdl"
-						dropammo:SetPos(ply:GetShootPos())
+						dropammo:SetPos( ply:GetPos() + ply:OBBCenter() )
 						dropammo:SetAngles(ply:EyeAngles() + Angle( math.Rand(1,360),math.Rand(1,360),math.Rand(1,360)) )
 						dropammo:Spawn()
 						dropammo:Activate()
@@ -71,4 +71,4 @@ function DropWeaponAmmo(ply)
 	end
 end
 	
-hook.Add("DoPlayerDeath", "drop weapon after death", DropWeaponAmmo )
+hook.Add("DoPlayerDeath", "CSSSWEP: Drop Weapon On Death", DropWeaponAmmo )

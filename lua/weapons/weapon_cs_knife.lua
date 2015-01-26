@@ -91,7 +91,7 @@ function SWEP:Swing(damage)
 	table.RemoveByValue( coneents, self.Owner )
 	
 	local conecount = table.Count(coneents)
-	local trace = self.Owner:GetEyeTrace()
+	local trace = self.Owner:GetEyeTrace() 
 	
 	self.HitAThing = false
 	

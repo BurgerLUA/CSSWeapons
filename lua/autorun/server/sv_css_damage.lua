@@ -39,9 +39,56 @@ function CounterStrikeDamage(ply, hitgroup, dmginfo)
 		
 	end
 	
+	if GetConVarNumber("sv_css_enable_speedmod") == 1 then
+		ply.GetSlow = math.Clamp(ply.GetSlow + 80,0,99)
+	end
+	
+	
 end
 
 hook.Add("ScalePlayerDamage","CSS Damage",CounterStrikeDamage)
+
+
+local SlowNextThink = 0
+
+function CounterStrikeSpeedMod()
+
+	if GetConVarNumber("sv_css_enable_speedmod") == 1 then
+	
+		if SlowNextThink <= CurTime() then
+		
+			for k,v in pairs(player.GetAll()) do 
+			
+				if not v.GetSlow then
+					v.GetSlow = 0
+				end
+				
+				local WeaponSpeed = 270
+				
+				if IsValid(v:GetActiveWeapon()) then
+					if v:GetActiveWeapon():IsScripted() then
+						if v:GetActiveWeapon().Base == "weapon_cs_base" then
+							WeaponSpeed = v:GetActiveWeapon().MoveSpeed
+						end
+					end
+				end
+				
+				v:SetWalkSpeed( ( WeaponSpeed * (100 - v.GetSlow)/100 ) ) 
+				v:SetRunSpeed( ( WeaponSpeed * (100 - v.GetSlow)/100 ) * 2  )
+				v.GetSlow = math.Clamp(v.GetSlow - 3,0,99)
+
+			end
+
+			SlowNextThink = CurTime() + 0.05
+			
+		end
+		
+	end
+
+end
+
+hook.Add("Think","CSS Speed Mod",CounterStrikeSpeedMod)
+
 
 function CounterStrikeDeath( victim, inflictor, attacker )
 

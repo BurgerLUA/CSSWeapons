@@ -2,10 +2,14 @@ if CLIENT then
 	killicon.AddFont( "weapon_cs_famas", "csd", "t", Color( 255, 80, 0, 255 ) )
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/famas")
 end
+
 SWEP.Category				= "Counter-Strike"
 SWEP.PrintName				= "5.56MM FAMAS"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
+
+SWEP.Cost					= 2250
+SWEP.MoveSpeed				= 220
 
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
@@ -18,7 +22,7 @@ SWEP.WorldModel				= "models/weapons/w_rif_famas.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
 
-SWEP.Primary.Damage			= 29
+SWEP.Primary.Damage			= 30
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/famas/famas-1.wav")
 SWEP.Primary.Cone			= 0.01

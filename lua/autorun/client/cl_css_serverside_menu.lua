@@ -235,6 +235,33 @@ local ItemTable = {}
 	ItemTable[count]["height"] = 25
 	count = count + 1
 	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DLabel"
+	ItemTable[count]["font"] = "TitleFont"
+	ItemTable[count]["text"] = "Locational Damage Settings and Sounds"
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable Location Based Damage"
+	ItemTable[count]["command"] = "sv_css_enable_damagemod"
+	ItemTable[count]["height"] = 25
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable Location Based Sounds"
+	ItemTable[count]["command"] = "sv_css_enable_damagesounds"
+	ItemTable[count]["height"] = 25
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable CSS Death Sounds"
+	ItemTable[count]["command"] = "sv_css_enable_deathsounds"
+	ItemTable[count]["height"] = 25
+	count = count + 1
 	
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "DLabel"

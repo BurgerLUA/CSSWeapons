@@ -32,6 +32,10 @@ CreateConVar("sv_css_penetration_scale", "0.5", FCVAR_REPLICATED  + FCVAR_ARCHIV
 
 CreateConVar("sv_css_enable_mags", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables cosmetic magazine drops. Requires separate addon. Default is 0." )
 
+CreateConVar("sv_css_enable_damagemod", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables damage modifications, 0 disables. Default is 1." )
+CreateConVar("sv_css_enable_damagesounds", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables damage sounds, 0 disables. Default is 1." )
+CreateConVar("sv_css_enable_deathsounds", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables death sounds, 0 disables. Default is 1." )
+
 
 CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
 CreateClientConVar("cl_css_equipment", "1", true, true )
@@ -80,14 +84,17 @@ SWEP.AutoSwitchTo			= false
 SWEP.AutoSwitchFrom			= false
 
 SWEP.WeaponType				= "Primary"
-
+SWEP.Category				= "Counter-Strike"
 SWEP.Author					= "Burger"
 SWEP.Contact				= ""
 SWEP.Purpose				= ""
 SWEP.Instructions			= ""
-SWEP.Category				= "Counter-Strike"
+
 SWEP.Spawnable				= false
 SWEP.UseHands				= true
+
+SWEP.Cost					= 0
+SWEP.MoveSpeed				= 250
 
 SWEP.Primary.Damage			= 35
 SWEP.Primary.NumShots		= 1
@@ -422,16 +429,16 @@ function SWEP:Modifiers(Damage,Shots,Cone,Recoil)
 	end
 	
 	local VelCone = self.Owner:GetVelocity():Length()*0.0001
+
+	
 	
 	if SERVER then
-		Damage = Damage * GetConVarNumber("sv_css_damage_scale")
 		--Shots = Shots
 		Cone = ( VelCone * GetConVarNumber("sv_css_velcone_scale") ) + (Cone * GetConVarNumber("sv_css_cone_scale")) + (self.CoolDown/100)
 		Recoil = Recoil * GetConVarNumber("sv_css_recoil_scale") * self.RecoilMul
 	end
 	
 	if CLIENT then
-		Damage = Damage * self.Owner.css_damage_scale
 		--Shots = Shots
 		Cone = ( VelCone * self.Owner.css_velcone_scale ) + (Cone * self.Owner.css_cone_scale) + (self.CoolDown/100)
 		Recoil = Recoil * self.Owner.css_recoil_scale * self.RecoilMul

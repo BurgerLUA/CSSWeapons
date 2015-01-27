@@ -3,12 +3,16 @@ if CLIENT then
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/m4a1")
 end
 
+SWEP.Category				= "Counter-Strike"
 SWEP.PrintName				= "5.56MM M4A1"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
-SWEP.Category				= "Counter-Strike"
+SWEP.Cost					= 3100
+SWEP.MoveSpeed				= 230
+
 SWEP.Spawnable				= true
+SWEP.AdminOnly				= false
 
 SWEP.Slot					= 3
 SWEP.SlotPos				= 1

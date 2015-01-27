@@ -8,6 +8,9 @@ SWEP.PrintName				= "5.7MM P90"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
+SWEP.Cost					= 2350
+SWEP.MoveSpeed				= 245
+
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
 

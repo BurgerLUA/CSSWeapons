@@ -8,6 +8,9 @@ SWEP.PrintName				= "9MM GLOCK"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Secondary"
 
+SWEP.Cost					= 400
+SWEP.MoveSpeed				= 250
+
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
 
@@ -19,7 +22,7 @@ SWEP.WorldModel				= "models/weapons/w_pist_glock18.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "revolver"
 
-SWEP.Primary.Damage			= 28
+SWEP.Primary.Damage			= 24
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/glock/glock18-1.wav")
 SWEP.Primary.Cone			= 0.015

@@ -3,12 +3,16 @@ if CLIENT then
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/flashbang")
 end
 
+SWEP.Category				= "Counter-Strike"
 SWEP.PrintName				= "FLASH GRENADE"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Free"
 
-SWEP.Category				= "Counter-Strike"
+SWEP.Cost					= 200
+SWEP.MoveSpeed				= 250
+
 SWEP.Spawnable				= true
+SWEP.AdminOnly				= false
 
 SWEP.Slot					= 4
 SWEP.SlotPos				= 1

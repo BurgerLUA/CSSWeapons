@@ -8,6 +8,9 @@ SWEP.PrintName				= ".45 USP"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Secondary"
 
+SWEP.Cost					= 500
+SWEP.MoveSpeed				= 250
+
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
 

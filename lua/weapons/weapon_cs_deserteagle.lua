@@ -8,6 +8,9 @@ SWEP.PrintName				= ".50AE DESERT EAGLE"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Secondary"
 
+SWEP.Cost					= 650
+SWEP.MoveSpeed				= 250
+
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
 

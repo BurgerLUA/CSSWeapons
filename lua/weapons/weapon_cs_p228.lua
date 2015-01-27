@@ -8,6 +8,9 @@ SWEP.PrintName				= ".357SIG P228"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Secondary"
 
+SWEP.Cost					= 600
+SWEP.MoveSpeed				= 250
+
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
 

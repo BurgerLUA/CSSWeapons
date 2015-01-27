@@ -8,6 +8,9 @@ SWEP.PrintName				= "7.62MM G3SG1"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
+SWEP.Cost					= 5000
+SWEP.MoveSpeed				= 210
+
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
 

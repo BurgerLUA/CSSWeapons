@@ -8,6 +8,9 @@ SWEP.PrintName				= "5.56MM M249"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
+SWEP.Cost					= 5750
+SWEP.MoveSpeed				= 220
+
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
 
@@ -19,7 +22,7 @@ SWEP.WorldModel				= "models/weapons/w_mach_m249para.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
 
-SWEP.Primary.Damage			= 31
+SWEP.Primary.Damage			= 34
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/m249/m249-1.wav")
 SWEP.Primary.Cone			= .015

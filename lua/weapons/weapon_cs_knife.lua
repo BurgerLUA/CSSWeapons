@@ -3,12 +3,16 @@ if CLIENT then
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/achievements/pistol_round_knife_kill")
 end
 
+SWEP.Category				= "Counter-Strike"
 SWEP.PrintName				= "COMBAT KNIFE"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Free"
 
-SWEP.Category				= "Counter-Strike"
+SWEP.Cost					= 0
+SWEP.MoveSpeed				= 250
+
 SWEP.Spawnable				= true
+SWEP.AdminOnly				= false
 
 SWEP.Slot					= 0
 SWEP.SlotPos				= 1
@@ -18,15 +22,21 @@ SWEP.WorldModel				= "models/weapons/w_knife_t.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "knife"
 
-SWEP.Primary.Damage			= 34
+SWEP.Primary.Damage			= 20
 SWEP.Primary.NumShots		= 1
-SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
-SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= -1
 SWEP.Primary.SpareClip		= -1
-SWEP.Primary.Delay			= 0.75
+SWEP.Primary.Delay			= 0.4
 SWEP.Primary.Ammo			= "none"
-SWEP.Primary.Automatic 		= true ; SWEP.Secondary.Automatic 	= true
+SWEP.Primary.Automatic 		= true 
+
+SWEP.Secondary.Damage		= 65
+SWEP.Secondary.NumShots		= 1
+SWEP.Secondary.ClipSize		= -1
+SWEP.Secondary.SpareClip	= -1
+SWEP.Secondary.Delay		= 1
+SWEP.Secondary.Ammo			= "none"
+SWEP.Secondary.Automatic 	= true 
 
 SWEP.RecoilMul				= 1
 SWEP.HasScope 				= false
@@ -46,16 +56,16 @@ function SWEP:PrimaryAttack()
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
-	self:Swing(34)
+	self:Swing(self.Primary.Damage)
 	
 end
 
 function SWEP:SecondaryAttack()
 	if self:IsUsing() then return end
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*1.5)
-	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay*1.5)
-	self:Swing(55)
+	self:SetNextPrimaryFire(CurTime() + self.Secondary.Delay)
+	self:SetNextSecondaryFire(CurTime() + self.Secondary.Delay)
+	self:Swing(self.Secondary.Damage)
 	
 end
 

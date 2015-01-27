@@ -8,6 +8,9 @@ SWEP.PrintName				= "C4 EXPLOSIVE"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Free"
 
+SWEP.Cost					= 0
+SWEP.MoveSpeed				= 250
+
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= true
 

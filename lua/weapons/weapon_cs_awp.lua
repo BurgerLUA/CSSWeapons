@@ -8,6 +8,9 @@ SWEP.PrintName				= ".338 AWP"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
+SWEP.Cost					= 4750
+SWEP.MoveSpeed				= 210
+
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
 
@@ -24,7 +27,7 @@ SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/awp/awp1.wav")
 SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= 10
-SWEP.Primary.SpareClip		= 20
+SWEP.Primary.SpareClip		= 30
 SWEP.Primary.Delay			= 1/(41/60)
 SWEP.Primary.Ammo			= "SniperRound"
 SWEP.Primary.Automatic 		= false

@@ -8,6 +8,9 @@ SWEP.PrintName				= "9MM DUAL BERTTA"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Secondary"
 
+SWEP.Cost					= 800
+SWEP.MoveSpeed				= 250
+
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
 
@@ -19,7 +22,7 @@ SWEP.WorldModel				= "models/weapons/w_pist_elite.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "duel"
 
-SWEP.Primary.Damage			= 38
+SWEP.Primary.Damage			= 44
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/elite/elite-1.wav")
 SWEP.Primary.Cone			= 0.005

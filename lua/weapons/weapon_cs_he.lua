@@ -3,12 +3,16 @@ if CLIENT then
 	SWEP.WepSelectIcon 		= surface.GetTextureID("vgui/gfx/vgui/hegrenade")
 end
 
+SWEP.Category				= "Counter-Strike"
 SWEP.PrintName				= "HE GRENADE"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Free"
 
-SWEP.Category				= "Counter-Strike"
+SWEP.Cost					= 300
+SWEP.MoveSpeed				= 250
+
 SWEP.Spawnable				= true
+SWEP.AdminOnly				= false
 
 SWEP.Slot					= 4
 SWEP.SlotPos				= 1
@@ -18,8 +22,8 @@ SWEP.WorldModel				= "models/weapons/w_eq_fraggrenade.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "grenade"
 
-SWEP.Primary.Damage			= 0
-SWEP.Primary.NumShots		= 0
+SWEP.Primary.Damage			= 98
+SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
 SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= -1

@@ -8,6 +8,9 @@ SWEP.PrintName				= "12 GAUGE XM1014"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
+SWEP.Cost					= 3000
+SWEP.MoveSpeed				= 240
+
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
 

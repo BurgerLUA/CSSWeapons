@@ -35,14 +35,22 @@ function DropWeaponAmmo(ply)
 	
 		for k,v in pairs(ply:GetWeapons()) do
 			if v.BurgerBase ~= nil and v:GetClass() ~= "weapon_cs_botgun" then
-				local dropped = ents.Create("ent_cs_droppedweapon")
-				dropped:SetPos(ply:GetPos() + ply:OBBCenter())
-				dropped:SetAngles(ply:EyeAngles())
-				dropped:SetModel(weapons.GetStored(v:GetClass()).WorldModel)
-				dropped:Spawn()
-				dropped:Activate()
-				dropped:SetNWString("class",v:GetClass())
-				dropped:SetNWInt("clip",v:Clip1())
+			
+				local model = weapons.GetStored(v:GetClass()).WorldModel
+			
+				if model ~= "" then
+			
+					local dropped = ents.Create("ent_cs_droppedweapon")
+					dropped:SetPos(ply:GetPos() + ply:OBBCenter())
+					dropped:SetAngles(ply:EyeAngles())
+					dropped:SetModel(model)
+					dropped:Spawn()
+					dropped:Activate()
+					dropped:SetNWString("class",v:GetClass())
+					dropped:SetNWInt("clip",v:Clip1())
+					
+				end
+				
 			end
 		end
 		

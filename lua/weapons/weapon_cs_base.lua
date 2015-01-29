@@ -36,7 +36,7 @@ CreateConVar("sv_css_enable_damagemod", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE ,
 CreateConVar("sv_css_enable_damagesounds", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables damage sounds, 0 disables. Default is 1." )
 CreateConVar("sv_css_enable_deathsounds", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables death sounds, 0 disables. Default is 1." )
 
-CreateConVar("sv_css_enable_speedmod", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables speed mod, 0 disables. Default is 1." )
+CreateConVar("sv_css_enable_speedmod", "0", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables speed mod, 0 disables. Default is 1." )
 
 CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
 CreateClientConVar("cl_css_equipment", "1", true, true )

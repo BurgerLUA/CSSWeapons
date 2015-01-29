@@ -238,7 +238,7 @@ local ItemTable = {}
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "DLabel"
 	ItemTable[count]["font"] = "TitleFont"
-	ItemTable[count]["text"] = "Locational Damage Settings and Sounds"
+	ItemTable[count]["text"] = "Advanced Damage Settings and Sounds"
 	ItemTable[count]["height"] = 40
 	count = count + 1
 	
@@ -262,6 +262,14 @@ local ItemTable = {}
 	ItemTable[count]["command"] = "sv_css_enable_deathsounds"
 	ItemTable[count]["height"] = 25
 	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable CSS Speed Modifications"
+	ItemTable[count]["command"] = "sv_css_enable_speedmod"
+	ItemTable[count]["height"] = 25
+	count = count + 1
+	
 	
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "DLabel"

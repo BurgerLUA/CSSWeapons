@@ -42,8 +42,7 @@ function CounterStrikeDamage(ply, hitgroup, dmginfo)
 	if GetConVarNumber("sv_css_enable_speedmod") == 1 then
 		ply.GetSlow = math.Clamp(ply.GetSlow + 80,0,99)
 	end
-	
-	
+
 end
 
 hook.Add("ScalePlayerDamage","CSS Damage",CounterStrikeDamage)

@@ -1,8 +1,3 @@
-
-AddCSLuaFile()
-
-local SlowEnable
-
 function UpdateConvars()
 
 	local World = game.GetWorld( )
@@ -23,48 +18,50 @@ end
 
 hook.Add("Think","CSS Network Convars",UpdateConvars)
 
-
 function SlowDamage(ply,attacker)
 
-	if SlowEnable then
-		ply.GetSlow = math.Clamp(ply.GetSlow + 80,0,99)
+	if not ply:IsBot() then
+		if SlowEnable then
+			ply.GetSlow = math.Clamp(ply.GetSlow + 80,0,99)
+		end
 	end
 
 end
 
 hook.Add("PlayerShouldTakeDamage","CSS Slow Damage",SlowDamage)
 
-
 function CounterStrikeSpeedMod(ply,mv)
 
-	if SlowEnable then
+	if not ply:IsBot() then
+		if SlowEnable then
 
-		if not ply.GetSlow then
-			ply.GetSlow = 0
-		end
-		
-		local WeaponSpeed = 270
-		
-		if IsValid(ply:GetActiveWeapon()) then
-			if ply:GetActiveWeapon():IsScripted() then
-				if ply:GetActiveWeapon().Base == "weapon_cs_base" then
-					WeaponSpeed = ply:GetActiveWeapon().MoveSpeed
+			if not ply.GetSlow then
+				ply.GetSlow = 0
+			end
+			
+			local WeaponSpeed = 270
+			
+			if IsValid(ply:GetActiveWeapon()) then
+				if ply:GetActiveWeapon():IsScripted() then
+					if ply:GetActiveWeapon().Base == "weapon_cs_base" then
+						WeaponSpeed = ply:GetActiveWeapon().MoveSpeed
+					end
 				end
 			end
+			
+			local SpeedMod = ( WeaponSpeed * (100 - ply.GetSlow)/100 ) / 270
+
+			ply.GetSlow = math.Clamp(ply.GetSlow - 3,0,99)
+
+			local Max = ply:GetMaxSpeed() / 10000
+			
+			--print(mv:GetForwardSpeed() * Max)
+			
+			mv:SetForwardSpeed( mv:GetForwardSpeed() * SpeedMod * Max)
+			mv:SetSideSpeed( mv:GetSideSpeed() * SpeedMod * Max )
+			mv:SetUpSpeed( mv:GetUpSpeed() * SpeedMod * Max )
+
 		end
-		
-		local SpeedMod = ( WeaponSpeed * (100 - ply.GetSlow)/100 ) / 270
-
-		ply.GetSlow = math.Clamp(ply.GetSlow - 3,0,99)
-
-		local Max = ply:GetMaxSpeed() / 10000
-		
-		--print(mv:GetForwardSpeed() * Max)
-		
-		mv:SetForwardSpeed( mv:GetForwardSpeed() * SpeedMod * Max)
-		mv:SetSideSpeed( mv:GetSideSpeed() * SpeedMod * Max )
-		mv:SetUpSpeed( mv:GetUpSpeed() * SpeedMod * Max )
-
 	end
 
 end

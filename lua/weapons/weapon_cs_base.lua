@@ -38,6 +38,7 @@ CreateConVar("sv_css_enable_deathsounds", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE
 
 CreateConVar("sv_css_enable_speedmod", "0", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables speed mod, 0 disables. Default is 1." )
 
+CreateClientConVar("cl_css_customslots", "0", true, true )
 CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
 CreateClientConVar("cl_css_equipment", "1", true, true )
 CreateClientConVar("cl_css_shells", "1", true, true )
@@ -183,12 +184,24 @@ function SWEP:Initialize()
 	self:SetHoldType( self.HoldType )
 	util.PrecacheSound(self.Primary.Sound)
 	
+	if CLIENT then
+		if GetConVarNumber("cl_css_customslots") == 1 then
+		
+			if self.WeaponType == "Primary" then
+				self.Slot = 2
+			elseif self.WeaponType == "Secondary" then
+				self.Slot = 1
+			end
+		
+		end
+	end
+	
 end
 
 function SWEP:PostDrawViewModel( vm, weapon, ply )
 
 	if CLIENT then
-		if GetConVar("cl_css_viewmodel_cmodel"):GetInt() == 0 then
+		if GetConVarNumber("cl_css_viewmodel_cmodel") == 0 then
 			LocalPlayer():GetHands():SetModel("models/weapons/c_arms_cstrike.mdl")
 		end
 	end
@@ -196,7 +209,7 @@ function SWEP:PostDrawViewModel( vm, weapon, ply )
 end
 
 function SWEP:Deploy()
-	
+
 	if SERVER then
 	
 		if self.AlreadyGiven == false then

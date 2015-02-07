@@ -26,7 +26,7 @@ SWEP.Primary.Damage			= 20
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.ClipSize		= -1
 SWEP.Primary.SpareClip		= -1
-SWEP.Primary.Delay			= 0.4
+SWEP.Primary.Delay			= 0.75
 SWEP.Primary.Ammo			= "none"
 SWEP.Primary.Automatic 		= true 
 

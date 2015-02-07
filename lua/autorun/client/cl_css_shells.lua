@@ -27,18 +27,20 @@ function CustomShellEffects(ply)
 
 	
 	
-	if Ammo == "Buckshot" then
+if Ammo == "Buckshot" then
 		Shell = "EjectBrass_12Gauge"
-	elseif Ammo == "SniperPenetratedRound" or Ammo == "Battery" or Ammo == "GaussEnergy" or Ammo == "AlyxGun_ammo" then --.45ACP or 9mm or .357SIG or 5.7mm
+	elseif Ammo == "SniperPenetratedRound" or Ammo == "Battery" or Ammo == "GaussEnergy" then --.45ACP or 9mm or .357SIG
 		Shell = "EjectBrass_9mm"
+	elseif Ammo == "AlyxGun" then -- 5.7mm
+		Shell = "EjectBrass_57"
 	elseif Ammo == "AirboatGun" then -- 5.56mm
 		Shell = "EjectBrass_556"
 	elseif Ammo == "StriderMinigun" then -- 7.62mm
 		Shell = "EjectBrass_762Nato"
 	elseif Ammo == "SniperRound" then -- .338
-		Shell = "RifleShellEject"
+		Shell = "EjectBrass_338Mag"
 	elseif Ammo == "CombineCannon" then
-		Shell = "ShellEject"
+		Shell = "ShellEject" -- .50AE
 	else
 		Shell = "EjectBrass_9mm"
 	end

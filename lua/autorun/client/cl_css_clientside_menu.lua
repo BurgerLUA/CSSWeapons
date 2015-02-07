@@ -53,14 +53,6 @@ function CSSClientsideWeaponSettings()
 		ViewmodelSlider:SetMax( 90 ) -- Maximum number of the slider
 		ViewmodelSlider:SetDecimals( 1 ) -- Sets a decimal. Zero means it's a whole number
 		ViewmodelSlider:SetConVar( "cl_css_viewmodel_fov" ) -- Set the convar
-	--[[
-	local StaticViewmodelCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
-		StaticViewmodelCheckBox:SetPos( 10,80)
-		StaticViewmodelCheckBox:SetText( "Always use CSS hands" )
-		StaticViewmodelCheckBox:SetTextColor( Color(0, 0, 0, 255) )
-		StaticViewmodelCheckBox:SetConVar( "cl_css_csshands" ) -- ConCommand must be a 1 or 0 value
-		StaticViewmodelCheckBox:SizeToContents() -- Make its size to the contents. Duh?	
-	--]]
 	
 	local Title1 = vgui.Create("DLabel", Base1)
 		Title1:SetPos(5,120)
@@ -151,23 +143,34 @@ function CSSClientsideWeaponSettings()
 		CModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40)
 		CModelCheckBox:SetConVar( "cl_css_viewmodel_cmodel" )
 		
+	local CustomSlotsCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
+		CustomSlotsCheckBox:SetText( "Use Custom Slots" )
+		CustomSlotsCheckBox:SetTextColor( Color(0, 0, 0, 255) )
+		CustomSlotsCheckBox:SizeToContents()
+		CustomSlotsCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 40)
+		CustomSlotsCheckBox:SetConVar( "cl_css_customslots" ) 
+		
+	
+		
 	if not game.SinglePlayer then
 	
 		local WModelCheckBox = vgui.Create("DCheckBoxLabel", Base1)
 			WModelCheckBox:SetText( "Draw Thirdperson Brass Ejections" )
 			WModelCheckBox:SetTextColor( Color(0, 0, 0, 255) )
 			WModelCheckBox:SizeToContents()
-			WModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20)
+			WModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 40 + 20)
 			WModelCheckBox:SetConVar( "cl_css_shells" )
 		
 		local WModelCheckBox = vgui.Create("DCheckBoxLabel", Base1)
 			WModelCheckBox:SetText( "Draw Thirdperson/Firstperson Mag drops (Requires Additional Addon)" )
 			WModelCheckBox:SetTextColor( Color(0, 0, 0, 255) )
 			WModelCheckBox:SizeToContents()
-			WModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20 + 20)
+			WModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 40 + 20 + 20)
 			WModelCheckBox:SetConVar( "cl_css_shells" )	
 	
 	end
+	
+	
 	
 	
 	

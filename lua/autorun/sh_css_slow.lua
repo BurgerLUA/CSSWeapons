@@ -1,3 +1,5 @@
+AddCSLuaFile()
+
 function UpdateConvars()
 
 	local World = game.GetWorld( )
@@ -20,9 +22,17 @@ hook.Add("Think","CSS Network Convars",UpdateConvars)
 
 function SlowDamage(ply,attacker)
 
+
+	if not ply.GetSlow then
+		ply.GetSlow = 0
+	end
+
+
 	if not ply:IsBot() then
 		if SlowEnable then
-			ply.GetSlow = math.Clamp(ply.GetSlow + 80,0,99)
+			if ply.GetSlow then
+				ply.GetSlow = math.Clamp(ply.GetSlow + 80,0,99)
+			end
 		end
 	end
 

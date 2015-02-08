@@ -21,13 +21,18 @@ function CustomShellEffects(ply)
 
 	
 	local Weapon = ply:GetActiveWeapon()
+	
+	if not Weapon then return end
+	if not IsValid(Weapon) then return end
+	if not Weapon:IsScripted() then return end
+	
 	local Ammo = Weapon.Primary.Ammo
 	local Shell
 	
 
 	
 	
-if Ammo == "Buckshot" then
+	if Ammo == "Buckshot" then
 		Shell = "EjectBrass_12Gauge"
 	elseif Ammo == "SniperPenetratedRound" or Ammo == "Battery" or Ammo == "GaussEnergy" then --.45ACP or 9mm or .357SIG
 		Shell = "EjectBrass_9mm"

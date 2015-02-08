@@ -454,8 +454,15 @@ function SWEP:Modifiers(Damage,Shots,Cone,Recoil)
 	
 	if CLIENT then
 		--Shots = Shots
-		Cone = ( VelCone * self.Owner.css_velcone_scale ) + (Cone * self.Owner.css_cone_scale) + (self.CoolDown/100)
-		Recoil = Recoil * self.Owner.css_recoil_scale * self.RecoilMul
+		
+		if not self.Owner.css_velcone_scale then
+			Cone = ( VelCone * 1 ) + (Cone * 1) + (self.CoolDown/100)
+			Recoil = Recoil * 1 * self.RecoilMul
+		else
+			Cone = ( VelCone * self.Owner.css_velcone_scale ) + (Cone * self.Owner.css_cone_scale) + (self.CoolDown/100)
+			Recoil = Recoil * self.Owner.css_recoil_scale * self.RecoilMul
+		end
+		
 	end
 
 	self:EmitGunSound(GunSound)
@@ -709,7 +716,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	
 	bullet.Tracer	= 0
 	bullet.TracerName = "Tracer"
-	bullet.Force	= Damage/100
+	bullet.Force	= 0
 	
 	bullet.Callback = function( attacker, tr, dmginfo)
 	

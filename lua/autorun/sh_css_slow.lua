@@ -1,4 +1,8 @@
-AddCSLuaFile()
+local SlowEnable = false
+
+if SERVER then
+	CreateConVar("sv_css_enable_speedmod", "0", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables speed mod, 0 disables. Default is 1." )
+end
 
 function UpdateConvars()
 

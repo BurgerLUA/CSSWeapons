@@ -1,4 +1,4 @@
-function CounterStrikeDamage(ply, hitgroup, dmginfo)
+function CSSDamage(ply, hitgroup, dmginfo)
 	
 	local ReportedDamage
 
@@ -42,9 +42,9 @@ function CounterStrikeDamage(ply, hitgroup, dmginfo)
 
 end
 
-hook.Add("ScalePlayerDamage","CSS Damage",CounterStrikeDamage)
+hook.Add("ScalePlayerDamage","CSS: Damage Mod",CSSDamage)
 
-function CounterStrikeDeath( victim, inflictor, attacker )
+function CSSDeath( victim, inflictor, attacker )
 
 	if GetConVarNumber("sv_css_enable_deathsounds") == 1 then
 		victim:EmitSound("player/death"..math.random(1,6)..".wav",SNDLVL_TALKING,100,1,CHAN_VOICE)
@@ -52,7 +52,7 @@ function CounterStrikeDeath( victim, inflictor, attacker )
 	
 end
 
-hook.Add("PlayerDeath","CSS Death",CounterStrikeDeath)
+hook.Add("PlayerDeath","CSS: Death Sounds",CSSDeath)
 
 
 

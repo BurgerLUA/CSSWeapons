@@ -1,6 +1,6 @@
 net.Receive( "ThirdPersonShellsNet", function( len )
 
-	-- You won't recieve this unless it's multiplayer
+	-- You won't receive this unless it's multiplayer
 
 	local ply = net.ReadEntity()
 		
@@ -27,10 +27,8 @@ function CustomShellEffects(ply)
 	if not Weapon:IsScripted() then return end
 	
 	local Ammo = Weapon.Primary.Ammo
+	
 	local Shell
-	
-
-	
 	
 	if Ammo == "Buckshot" then
 		Shell = "EjectBrass_12Gauge"

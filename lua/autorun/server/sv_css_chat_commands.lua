@@ -1,6 +1,6 @@
 AddCSLuaFile()
 
-function ISaid( ply, text, public )
+function CSSChatCommands( ply, text, public )
 
     if string.sub(text, 1, 9) == "!cssadmin" then
 	
@@ -28,10 +28,10 @@ function ISaid( ply, text, public )
 
 end
 
-hook.Add( "PlayerSay", "ISaid", ISaid );
+hook.Add( "PlayerSay", "CSS: Chat Commands", CSSChatCommands );
 
 
-function OnSpawn( ply )
+function CSSPlayerJoinMessage( ply )
 	
 
 	ply:SendLua(
@@ -51,4 +51,4 @@ function OnSpawn( ply )
 
 end
 
-hook.Add( "PlayerInitialSpawn", "OnSpawn", OnSpawn )
+hook.Add( "PlayerInitialSpawn", "CSS: Player Join (Message)", CSSPlayerJoinMessage )

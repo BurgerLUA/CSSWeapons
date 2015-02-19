@@ -24,7 +24,7 @@ allammo[20] =	"AirboatGun"
 allammo[21] =	"StriderMinigun"
 allammo[22] =	"HelicopterGun"
 
-function DropWeaponAmmo(ply)
+function CSSDropWeaponAmmo(ply)
 
 	ply:SetNWString("cssprimary",nil)
 	ply:SetNWString("csssecondary",nil)
@@ -79,4 +79,4 @@ function DropWeaponAmmo(ply)
 	end
 end
 	
-hook.Add("DoPlayerDeath", "CSSSWEP: Drop Weapon On Death", DropWeaponAmmo )
+hook.Add("DoPlayerDeath", "CSS: Death Weapon Dropping", CSSDropWeaponAmmo )

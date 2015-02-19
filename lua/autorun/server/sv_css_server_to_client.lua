@@ -62,8 +62,6 @@ if game.SinglePlayer() then return end
 
 local NextTick = 0
 
-
-
 function CSSThinkDelay()
 	
 	if NextTick <= RealTime() then
@@ -76,31 +74,30 @@ function CSSThinkDelay()
 	
 end
 
-hook.Add("Think","CSS Network Convars",CSSThinkDelay)
+hook.Add("Think","CSS: Network Weapon ConVars",CSSThinkDelay)
 
-function CSSPlayerJoin(ply)
+function CSSPlayerJoinConVars(ply)
 
 	CSSNetworkConvars(ply)
 
 end
 
-hook.Add( "PlayerInitialSpawn", "CSS Player Initial Spawn", CSSPlayerJoin )
+hook.Add( "PlayerInitialSpawn", "CSS: Player Join (ConVars)", CSSPlayerJoinConVars )
 
 
 function CSSNetworkConvars(ply)
 
-		net.Start("SendConvars")
-		
-			net.WriteFloat(GetConVarNumber(("sv_css_damage_scale")))
-			net.WriteFloat(GetConVarNumber(("sv_css_recoil_scale")))
-			net.WriteFloat(GetConVarNumber(("sv_css_cone_scale")))
-			net.WriteFloat(GetConVarNumber(("sv_css_velcone_scale")))
-			net.WriteFloat(GetConVarNumber(("sv_css_heat_scale")))
-			net.WriteFloat(GetConVarNumber(("sv_css_cooltime_scale")))
-			net.WriteFloat(GetConVarNumber(("sv_css_cooldown_scale")))
+	net.Start("SendConvars")
+	
+		net.WriteFloat(GetConVarNumber(("sv_css_damage_scale")))
+		net.WriteFloat(GetConVarNumber(("sv_css_recoil_scale")))
+		net.WriteFloat(GetConVarNumber(("sv_css_cone_scale")))
+		net.WriteFloat(GetConVarNumber(("sv_css_velcone_scale")))
+		net.WriteFloat(GetConVarNumber(("sv_css_heat_scale")))
+		net.WriteFloat(GetConVarNumber(("sv_css_cooltime_scale")))
+		net.WriteFloat(GetConVarNumber(("sv_css_cooldown_scale")))
 
-		net.Broadcast()
-
+	net.Broadcast()
 
 end
 

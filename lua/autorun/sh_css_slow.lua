@@ -1,30 +1,80 @@
 local SlowEnable = false
 
+print("----------------")
+print("Setting SlowEnable to:")
+print(SlowEnable)
+
 if SERVER then
 	CreateConVar("sv_css_enable_speedmod", "0", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables speed mod, 0 disables. Default is 1." )
+	
+	print("----------------")
+	print("Creating Convar, setting to:")
+	print(GetConVarNumber("sv_css_enable_speedmod"))
+	
 end
+
+local Message = true
+local Message2 = true
 
 function UpdateConvars()
 
 	local World = game.GetWorld( )
+	
+	if Message2 == true then
+		print("I AM THINKING")
+		Message2 = false
+	end
 
 	if SERVER then
-		if GetConVarNumber("sv_css_enable_speedmod") == 1 then
+		if GetConVarNumber("sv_css_enable_speedmod") then
+		
 			SlowEnable = true
 			World:SetNWBool("SlowEnable",true)
+			
+			if Message == true then
+			
+				print("----------------")
+				print("Setting ClientSide SlowEnable to:")
+				print(SlowEnable)
+				
+				Message = false
+			end
+			
 		else
+		
 			SlowEnable = false
 			World:SetNWBool("SlowEnable",false)
+			
+			if Message == true then
+			
+				print("----------------")
+				print("Setting ClientSide SlowEnable to:")
+				print(SlowEnable)
+				
+				Message = false
+			end
+			
 		end
 	else
 		SlowEnable = World:GetNWBool("SlowEnable",false)
+		
+		if Message == true then
+			
+			print("----------------")
+			print("ClientSide SlowEnable is:")
+			print(SlowEnable)
+				
+			Message = false
+		end
+		
 	end
 	
 end
 
-hook.Add("Think","CSS Network Convars",UpdateConvars)
+hook.Add("Think","CSS: SpeedMod ConVars",UpdateConvars)
 
 function SlowDamage(ply,attacker)
+
 
 
 	if not ply.GetSlow then
@@ -36,13 +86,16 @@ function SlowDamage(ply,attacker)
 		if SlowEnable then
 			if ply.GetSlow then
 				ply.GetSlow = math.Clamp(ply.GetSlow + 80,0,99)
+				
+				print(ply:Nick() .. " slowed for " .. ply.GetSlow .. "%")
+				
 			end
 		end
 	end
 
 end
 
-hook.Add("PlayerShouldTakeDamage","CSS Slow Damage",SlowDamage)
+hook.Add("PlayerShouldTakeDamage","CSS: SpeedMod Damage",SlowDamage)
 
 function CounterStrikeSpeedMod(ply,mv)
 
@@ -80,4 +133,4 @@ function CounterStrikeSpeedMod(ply,mv)
 
 end
 
-hook.Add("PlayerTick","CSS Speed Mod",CounterStrikeSpeedMod)
+hook.Add("PlayerTick","CSS: SpeedMod Movement",CounterStrikeSpeedMod)

@@ -1,41 +1,47 @@
 local SlowEnable = false
 
-print("----------------")
-print("Setting SlowEnable to:")
-print(SlowEnable)
+--print("----------------")
+--print("Setting SlowEnable to: (This should be false) ")
+--print(SlowEnable)
 
 if SERVER then
 	CreateConVar("sv_css_enable_speedmod", "0", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables speed mod, 0 disables. Default is 1." )
 	
-	print("----------------")
-	print("Creating Convar, setting to:")
-	print(GetConVarNumber("sv_css_enable_speedmod"))
+	--print("----------------")
+	--print("Creating Convar, setting to: (this should be 1)")
+	--print(GetConVarNumber("sv_css_enable_speedmod"))
 	
 end
 
 local Message = true
 local Message2 = true
 
-function UpdateConvars()
+function CSSUpdateConvars()
 
 	local World = game.GetWorld( )
 	
 	if Message2 == true then
-		print("I AM THINKING")
+		--print("I AM THINKING")
 		Message2 = false
 	end
 
+	if not GetConVarNumber("sv_css_enable_speedmod") then
+		--print("WHERE THE FUCK IS THE CONVAR???")
+	return end
+	
+	
+	
 	if SERVER then
-		if GetConVarNumber("sv_css_enable_speedmod") then
+		if GetConVarNumber("sv_css_enable_speedmod") == 1 then
 		
 			SlowEnable = true
 			World:SetNWBool("SlowEnable",true)
 			
 			if Message == true then
 			
-				print("----------------")
-				print("Setting ClientSide SlowEnable to:")
-				print(SlowEnable)
+				--print("----------------")
+				--print("Setting ClientSide SlowEnable to: (This should be true)")
+				--print(SlowEnable)
 				
 				Message = false
 			end
@@ -47,9 +53,9 @@ function UpdateConvars()
 			
 			if Message == true then
 			
-				print("----------------")
-				print("Setting ClientSide SlowEnable to:")
-				print(SlowEnable)
+				--print("----------------")
+				--print("Setting ClientSide SlowEnable to: (This should be true)")
+				--print(SlowEnable)
 				
 				Message = false
 			end
@@ -60,9 +66,9 @@ function UpdateConvars()
 		
 		if Message == true then
 			
-			print("----------------")
-			print("ClientSide SlowEnable is:")
-			print(SlowEnable)
+			--print("----------------")
+			--print("ClientSide SlowEnable is: (This should be true)")
+			--print(SlowEnable)
 				
 			Message = false
 		end
@@ -71,33 +77,35 @@ function UpdateConvars()
 	
 end
 
-hook.Add("Think","CSS: SpeedMod ConVars",UpdateConvars)
+hook.Add("Think","CSS: SpeedMod ConVars",CSSUpdateConvars)
 
-function SlowDamage(ply,attacker)
+function CSSSlowDamage(ply,attacker)
 
-
+	--print("HIT")
 
 	if not ply.GetSlow then
 		ply.GetSlow = 0
 	end
-
 
 	if not ply:IsBot() then
 		if SlowEnable then
 			if ply.GetSlow then
 				ply.GetSlow = math.Clamp(ply.GetSlow + 80,0,99)
 				
-				print(ply:Nick() .. " slowed for " .. ply.GetSlow .. "%")
+				--print(ply:Nick() .. " slowed for " .. ply.GetSlow .. "%")
 				
 			end
 		end
 	end
+	
+	--print(ply.GetSlow)
+	--print(ply.SlowEnable)
 
 end
 
-hook.Add("PlayerShouldTakeDamage","CSS: SpeedMod Damage",SlowDamage)
+hook.Add("PlayerShouldTakeDamage","CSS: Slow Damage",CSSSlowDamage)
 
-function CounterStrikeSpeedMod(ply,mv)
+function CSSSpeedModMovement(ply,mv)
 
 	if not ply:IsBot() then
 		if SlowEnable then
@@ -133,4 +141,4 @@ function CounterStrikeSpeedMod(ply,mv)
 
 end
 
-hook.Add("PlayerTick","CSS: SpeedMod Movement",CounterStrikeSpeedMod)
+hook.Add("PlayerTick","CSS: SpeedMod Movement",CSSSpeedModMovement)

@@ -28,7 +28,7 @@ function CSSChatCommands( ply, text, public )
 
 end
 
-hook.Add( "PlayerSay", "CSS: Chat Commands", CSSChatCommands );
+hook.Add( "PlayerSay", "CSS: Chat Commands", CSSChatCommands )
 
 
 function CSSPlayerJoinMessage( ply )

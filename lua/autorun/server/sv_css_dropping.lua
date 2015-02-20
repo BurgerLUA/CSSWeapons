@@ -55,7 +55,7 @@ function CSSDropWeaponAmmo(ply)
 		end
 		
 		for i=1, 22 do
-			if i >= 11 then
+			if (i >= 11) or (i == 7) then
 				if ply:GetAmmoCount( i ) > 0 then
 				
 					local dropammo = ents.Create("ent_cs_ammo_base")

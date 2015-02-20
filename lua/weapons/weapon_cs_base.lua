@@ -307,8 +307,15 @@ end
 
 function SWEP:PrimaryAttack()
 
-	
 	if not self:CanPrimaryAttack() then return end
+	if self.ShotgunReload == 1 then
+	
+		self.ShotgunReload = 0
+		self.IsReloading = 0
+		self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
+		self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+		
+	return end
 	if self:IsBusy() then return end
 	if self:IsUsing() then return end
 
@@ -953,22 +960,17 @@ function SWEP:Reload()
 	if self.HasPumpAction == true then
 
 		self.WeaponShellTime = 0.5
-		self:SetNextPrimaryFire(CurTime() + self.WeaponShellTime + 0.1 + (self.Primary.ClipSize-self:Clip1())*self.WeaponShellTime)
-		
 		self.NextShell = self.WeaponShellTime
 		
-		if self.ShotgunReload == 0 then
-			self.ShotgunReload = 1
-		end
-		
+		self.ShotgunReload = 1
+
 	else
 	
 		self.Owner:SetAnimation(PLAYER_RELOAD)
 		self.ReloadFinish = CurTime() + self.Owner:GetViewModel():SequenceDuration()
-		
-		if self.NormalReload == 0 then
-			self.NormalReload = 1
-		end
+
+		self.NormalReload = 1
+
 
 	end
 	

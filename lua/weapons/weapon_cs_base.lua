@@ -1172,19 +1172,6 @@ function SWEP:Think()
 	
 end
 
-function SWEP:EquipThink()
-
-end
-
-function SWEP:QuickThrow()
-
-end
-
-function SWEP:QuickKnife()
-
-end
-
-
 function SWEP:AdjustMouseSensitivity()
 
 	if self:GetNWBool("IronSights",false) == true then
@@ -1307,17 +1294,12 @@ function SWEP:DrawHUD()
 			local fovbonus = convar/self.Owner:GetFOV()
 			local offset = 0
 			
-			--DrawMaterialOverlay("gmod/scope-refract",-0.05)
-			
 			if Cone > 0.1 then
 				surface.DrawCircle( x/2, y/2, math.Clamp(Cone*fovbonus,3,x/2*0.33), Color(0,255,0) )
 			end
-			
 
-			
 			local faggot = 1
-			
-			---if file.Exists( "materials/sprites/scope_arc", "GAME" ) then
+
 			if faggot == 0 then
 			
 				local space = 2
@@ -1346,27 +1328,11 @@ function SWEP:DrawHUD()
 				surface.DrawLine(x/2,0,x/2,y)
 				surface.DrawLine(0,y/2,x,y/2)
 			end
-			
-			
-			
-			
-			
+
 			surface.SetDrawColor(Color(0,0,0))
 			surface.SetMaterial(Material("vgui/gfx/vgui/solid_background"))
 			surface.DrawTexturedRectRotated(x/4 - y/4,y/2,x/2 - y/2,y,0)
 			surface.DrawTexturedRectRotated(x - x/4 + y/4,y/2,x/2 - y/2,y,0)
-			
-
-			--surface.DrawCircle(x/2,y/2,y/16,Color(0,0,0))
-			
-			--[[
-			if fovbonus > 4 then
-				surface.SetDrawColor(Color(0,0,0))
-
-			else
-				surface.DrawCircle(x/2,y/2,10,Color(255,0,0))
-			end
-			--]]
 			
 		end
 	end
@@ -1381,15 +1347,6 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 
 	local InfoColor = Color(255,255, 100, alpha)
 
-	--if ( self.DrawWeaponInfoBox == false ) then return end
-
-	
-	
-	
-	
-	
-	
-	
 	if (self.InfoMarkup == nil ) then
 	
 		local Damage
@@ -1406,8 +1363,6 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 			Cone = self.Primary.Cone * LocalPlayer().css_cone_scale
 			Recoil = Damage * self.RecoilMul * LocalPlayer().css_recoil_scale
 		end
-	
-	
 	
 		local str
 		local title_color = "<color=0,0,0,255>"
@@ -1426,9 +1381,7 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 	
 	surface.SetDrawColor( InfoColor )
 	surface.SetTexture( self.SpeechBubbleLid )
-	
 
-	
 	surface.DrawTexturedRect( x, y - 64 - 5, 128, 64 ) 
 	draw.RoundedBox( 8, x - 5, y - 6, 260, self.InfoMarkup:GetHeight() + 18, InfoColor )
 	
@@ -1436,134 +1389,14 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 	
 end
 
-SWEP.Bot = {}
-SWEP.Bot.SearchDelay 		= 0
-SWEP.Bot.ShootDelay 		= 0
-SWEP.Bot.SwitchTime 		= 0
+function SWEP:EquipThink()
 
-
-SWEP.Bot.TargetEnt			= nil
-SWEP.Bot.TargetPos			= nil
---[[
-function SWEP:BotThink()
-
-	if SERVER then
-		if not self.Owner:IsBot() then return end
-		
-		if self.Bot.TargetEnt == nil then
-		
-			if self.Bot.SearchDelay < CurTime() then
-			
-				local Bump = self.Owner:GetEyeTrace().StartPos:Distance(self.Owner:GetEyeTrace().HitPos)
-			
-				if Bump > 300 then
-					self.Owner:SetEyeAngles(self.Owner:EyeAngles() + Angle(0,math.Rand(-45,45),0 ))
-				else
-					self.Owner:SetEyeAngles(self.Owner:EyeAngles() + Angle(0,180,0 ))
-				end
-			
-			
-				self.Bot.TargetEnt = self:BotFindTarget()
-				self.Bot.SearchDelay = CurTime() + 1
-			end
-			
-		else
-		
-			self.Bot.TargetPos = self.Bot.TargetEnt:GetPos() + self.Bot.TargetEnt:OBBCenter()
-		
-			local Main = (self.Bot.TargetPos - self.Owner:GetShootPos() ):Angle()
-			
-			P = math.NormalizeAngle(Main.p)
-			Y = math.NormalizeAngle(Main.y)
-			R = 0
-			
-			Tots = Angle(P,Y,R)
-		
-			self.Owner:SetEyeAngles(Tots)
-
-			if self:Clip1() == 0 then
-				self:Reload()
-			end
-			
-			if self:Ammo1() <= self:Clip1() then
-				self.Owner:SetAmmo(self:Clip1(), self.Primary.Ammo)
-			end
-			
-			if self.Bot.TargetEnt:Health() > 0 then
-				
-				if self.Owner:GetEyeTrace().Entity == self.Bot.TargetEnt then
-				
-					if self.Bot.ShootDelay <= CurTime() then
-					
-						if self:Clip1() > 0 then
-							local Distance = self.Owner:GetPos():Distance(self.Bot.TargetEnt:GetPos())
-							self:PrimaryAttack()
-							
-							if self.Primary.Automatic == true then
-								self.Bot.ShootDelay = CurTime() + self.Primary.Delay*math.Rand(1.5,3)
-							else
-								self.Bot.ShootDelay = CurTime() + math.max(self.Primary.Delay,(1/math.Rand(6,7)))
-							end
-							
-						elseif self.Owner:GetActiveWeapon():GetClass() == "weapon_cs_sun" then
-							self:PrimaryAttack()
-						end
-						
-					end
-
-				end
-				
-			else
-
-				print("BOT: You're dead " .. self.Bot.TargetEnt:Nick() .. "!")
-				self.Bot.TargetEnt = nil
-				
-			end
-
-		end
-		
-	end
-	
 end
 
-function SWEP:BotFindTarget()
+function SWEP:QuickThrow()
 
-	local EnemyList = {}
-
-	local ConeEnts = ents.FindInCone(self.Owner:GetShootPos(),self.Owner:EyeAngles():Forward(),8000, 60)
-
-	if #ConeEnts == 0 then return nil end
-	
-	for k,v in pairs(ConeEnts) do
-		
-		if v:IsPlayer() and v ~= self.Owner then	
-			if v:Alive() == true then
-
-				local data = {}
-				data.start = self.Owner:EyePos()
-				data.endpos = v:GetPos() + v:OBBCenter()
-				data.filter = self.Owner
-				--data.mask = MASK_BLOCKLOS_AND_NPCS
-
-				local trace = util.TraceLine(data)
-			
-				if IsValid(trace.Entity) then
-				
-					if trace.Entity == v then 
-						print("BOT: You're going to die " .. v:Nick() .. "!")
-						EnemyList[v] = v:GetPos():Distance(self.Owner:EyePos())
-					end
-					
-				end
-			end
-		end
-
-	end
-	
-	EnemyList = table.SortByKey(EnemyList,true)
-	
-	return EnemyList[1]
-	
 end
 
---]]
+function SWEP:QuickKnife()
+
+end

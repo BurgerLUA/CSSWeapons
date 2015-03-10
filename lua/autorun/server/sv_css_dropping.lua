@@ -26,8 +26,8 @@ allammo[22] =	"HelicopterGun"
 
 function CSSDropWeaponAmmo(ply)
 
-	ply:SetNWString("cssprimary",nil)
-	ply:SetNWString("csssecondary",nil)
+	ply:SetNWString("cssprimary","")
+	ply:SetNWString("csssecondary","")
 
 	if GetConVar("sv_css_enable_drops"):GetInt() == 1 then
 	

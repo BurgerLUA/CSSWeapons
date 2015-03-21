@@ -198,16 +198,6 @@ function SWEP:Initialize()
 	
 end
 
-function SWEP:PostDrawViewModel( vm, weapon, ply )
-
-	if CLIENT then
-		if GetConVarNumber("cl_css_viewmodel_cmodel") == 0 then
-			LocalPlayer():GetHands():SetModel("models/weapons/c_arms_cstrike.mdl")
-		end
-	end
-	
-end
-
 function SWEP:Deploy()
 
 	if SERVER then

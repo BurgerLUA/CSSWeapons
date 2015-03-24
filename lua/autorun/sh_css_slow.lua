@@ -128,13 +128,39 @@ function CSSSpeedModMovement(ply,mv)
 
 			ply.GetSlow = math.Clamp(ply.GetSlow - 3,0,99)
 
-			local Max = ply:GetMaxSpeed() / 10000
+			local ForwardMove = mv:GetForwardSpeed()
+			local SideMove = mv:GetSideSpeed()
 			
-			--print(mv:GetForwardSpeed() * Max)
+			if ForwardMove == 10000 then
+				if mv:KeyDown(IN_SPEED) then
+					ForwardMove = ply:GetRunSpeed()
+				else
+					ForwardMove = ply:GetWalkSpeed()
+				end
+			elseif ForwardMove == -10000 then
+				if mv:KeyDown(IN_SPEED) then
+					ForwardMove = -ply:GetRunSpeed()
+				else
+					ForwardMove = -ply:GetWalkSpeed()
+				end
+			end
+
+			if SideMove == 10000 then
+				if mv:KeyDown(IN_SPEED) then
+					SideMove = ply:GetRunSpeed()
+				else
+					SideMove = ply:GetWalkSpeed()
+				end
+			elseif SideMove == -10000 then
+				if mv:KeyDown(IN_SPEED) then
+					SideMove = -ply:GetRunSpeed()
+				else
+					SideMove = -ply:GetWalkSpeed()
+				end
+			end
 			
-			mv:SetForwardSpeed( mv:GetForwardSpeed() * SpeedMod * Max)
-			mv:SetSideSpeed( mv:GetSideSpeed() * SpeedMod * Max )
-			mv:SetUpSpeed( mv:GetUpSpeed() * SpeedMod * Max )
+			mv:SetForwardSpeed( ForwardMove * SpeedMod)
+			mv:SetSideSpeed( SideMove * SpeedMod)
 
 		end
 	end

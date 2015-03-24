@@ -72,7 +72,6 @@ local ItemTable = {}
 	ItemTable[count]["height"] = 40
 	count = count + 1
 	
-	
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "Slider"
 	ItemTable[count]["name"] = "Movement Spread Multiplier (Higher means the cone is larger when moving)"
@@ -189,14 +188,6 @@ local ItemTable = {}
 	ItemTable[count]["height"] = 25
 	count = count + 1
 	
-	
-	ItemTable[count] = {}
-	ItemTable[count]["type"] = "DCheckBoxLabel"
-	ItemTable[count]["text"] = "Enable Explosion Smoke"
-	ItemTable[count]["command"] = "sv_css_enable_c4smoke"
-	ItemTable[count]["height"] = 25
-	count = count + 1
-	
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "DLabel"
 	ItemTable[count]["font"] = "TitleFont"
@@ -269,7 +260,6 @@ local ItemTable = {}
 	ItemTable[count]["command"] = "sv_css_enable_speedmod"
 	ItemTable[count]["height"] = 25
 	count = count + 1
-	
 	
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "DLabel"

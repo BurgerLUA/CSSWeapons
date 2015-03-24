@@ -20,7 +20,7 @@ CreateConVar("sv_css_limit_equipped", "0", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1
 
 --CreateConVar("sv_css_enable_c4", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables non-admins to use c4, all other values disables it. Default is 1." )
 CreateConVar("sv_css_enable_c4nonadmin", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables non-admins to use c4, all other values disables it. Default is 1." )
-CreateConVar("sv_css_enable_c4smoke", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables smoke effects for the c4, all other values disables it. Default is 1." )
+--CreateConVar("sv_css_enable_c4smoke", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables smoke effects for the c4, all other values disables it. Default is 1." )
 CreateConVar("sv_css_c4_time_explosion", "45", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in seconds that the C4 detonates when planted. Default is 45." )
 CreateConVar("sv_css_c4_time_defuse", "10", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in seconds that the C4 is defused. Default is 10." )
 CreateConVar("sv_css_c4_damage", "500", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in points that determines maximum damage. Default is 500." )
@@ -864,16 +864,6 @@ end
 function SWEP:EmitGunSound(GunSound)
 
 	self.Weapon:EmitSound(GunSound, 355 , 100, 1, CHAN_WEAPON )
-	
-end
-
-function SWEP:ShootEffects()
-
-	if SERVER and not game.SinglePlayer() then
-		net.Start( "ThirdPersonShellsNet" )
-			net.WriteEntity(self.Owner)
-		net.Broadcast()
-	end
 	
 end
 

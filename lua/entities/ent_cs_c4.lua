@@ -157,31 +157,7 @@ function ENT:Detonate(self,pos)
 			effectdata:SetScale( 100 )
 			effectdata:SetRadius( 5000 )
 		util.Effect( "HelicopterMegaBomb", effectdata )	
-		--util.Effect( "Explosion", effectdata)
-	
 
-		--util.BlastDamage(self, self:GetNWEntity("owner"), pos, c4radius,c4damage)
-	
-		if GetConVar("sv_css_enable_c4smoke"):GetInt() == 1 then
-			for i = 1, 50 do
-				local ent = ents.Create("ent_cs_smokeparticle")
-					ent:SetPos(self:GetPos())
-					ent:SetAngles(Angle(0,0,0))
-					ent:Spawn()
-					ent:Activate()
-					ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-2500,2500),math.Rand(-2500,2500),math.Rand(0,25)))
-				if i == 2 then
-					timer.Simple(1, function()
-						ent:EmitSound("weapons/c4/c4_exp_deb2.wav",100,100)
-					end)
-				end
-			end
-		else
-		
-			self:EmitSound("weapons/c4/c4_exp_deb2.wav",100,100)
-		
-		end
-	
 		self:EmitSound("weapons/c4/c4_explode1.wav",100,100)
 		
 		if table.Count(ents.FindInSphere(self:GetPos(),c4radius)) > 0 then

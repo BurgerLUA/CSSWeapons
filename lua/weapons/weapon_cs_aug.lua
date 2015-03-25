@@ -20,7 +20,7 @@ SWEP.SlotPos				= 1
 SWEP.ViewModel 				= "models/weapons/cstrike/c_rif_aug.mdl"
 SWEP.WorldModel				= "models/weapons/w_rif_aug.mdl"
 SWEP.VModelFlip 			= false
-SWEP.HoldType				= "ar2"
+SWEP.HoldType				= "smg"
 
 SWEP.Primary.Damage			= 31
 SWEP.Primary.NumShots		= 1

@@ -947,7 +947,11 @@ function SWEP:Reload()
 	else
 	
 		self.Owner:SetAnimation(PLAYER_RELOAD)
-		self.ReloadFinish = CurTime() + self.Owner:GetViewModel():SequenceDuration()
+		
+		print(self.Owner:GetViewModel():GetPlaybackRate())
+		
+		
+		self.ReloadFinish = CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate())
 
 		self.NormalReload = 1
 
@@ -956,7 +960,7 @@ function SWEP:Reload()
 	
 	if self.HasScope == true then
 		self:SetNWInt("zoommode",0)
-		self.NextZoomTime = CurTime() + self.Owner:GetViewModel():SequenceDuration()
+		self.NextZoomTime = CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate())
 	end
 	
 	if SERVER then

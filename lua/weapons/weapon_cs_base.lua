@@ -52,6 +52,11 @@ CreateClientConVar("cl_css_crosshair_color_g", "255", true, true )
 CreateClientConVar("cl_css_crosshair_color_b", "50", true, true )
 CreateClientConVar("cl_css_crosshair_color_a", "200", true, true )
 
+
+game.AddAmmoType({name = "hegrenade", })
+game.AddAmmoType({name = "flashgrenade", })
+game.AddAmmoType({name = "smokegrenade",})
+
 if CLIENT then
 	
 	language.Add("AlyxGun_ammo","5.7mm")
@@ -63,6 +68,13 @@ if CLIENT then
 	language.Add("StriderMinigun_ammo","7.62mm")
 	language.Add("SniperRound_ammo",".338")
 	language.Add("GaussEnergy_ammo",".357 SIG")
+	
+	language.Add("hegrenade_ammo","HE Grenade")
+	language.Add("flashgrenade_ammo","Flash Grenade")
+	language.Add("smokegrenade_ammo","Smoke Grenade")
+	
+	
+	
 
 	surface.CreateFont( "csd",{font = "csd",size = 48,weight = 700})
 	
@@ -161,8 +173,11 @@ SWEP.IronTime				= 0
 SWEP.AlreadyGiven			= false
 SWEP.BoltCurTime 			= 0
 SWEP.NextCoolTick			= 0
+SWEP.Object					= ""
+SWEP.SpecialThrow 			= false
 
 SWEP.PhysBullets			= false
+
 
 --Burst fire Code from Kogitsune
 local BURST, AUTO = 0, 1
@@ -198,6 +213,17 @@ function SWEP:Initialize()
 	
 end
 
+function SWEP:EquipAmmo(ply)
+
+	if GetConVarNumber("sv_css_ammo_givespare") == 1 then
+		ply:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
+	elseif self.WeaponType == "Equipment" then
+		ply:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
+	end
+
+end
+
+
 function SWEP:Deploy()
 
 	if SERVER then
@@ -220,23 +246,29 @@ function SWEP:Deploy()
 			for k,v in pairs (self.Owner:GetWeapons()) do
 				if v.BurgerBase ~= nil then
 					if v ~= self then
-						if self.WeaponType == v.WeaponType and v.WeaponType ~= "Free" then
+						if self.WeaponType == v.WeaponType and not (v.WeaponType == "Free" or v.WeaponType == "Throwable") then
 							self.Owner:StripWeapon(v:GetClass())
+							
+							local StoredWeapon =  weapons.GetStored(v:GetClass())
 							
 							local dropped = ents.Create("ent_cs_droppedweapon")
 							dropped:SetPos(self.Owner:GetPos() + self.Owner:OBBCenter() )
 							dropped:SetAngles(self.Owner:EyeAngles() )
-							dropped:SetModel(weapons.GetStored(v:GetClass()).WorldModel)
+							dropped:SetModel(StoredWeapon.WorldModel)
 							dropped:Spawn()
 							dropped:Activate()
 							dropped:SetNWString("class",v:GetClass())
 							dropped:SetNWInt("clip",v:Clip1())
-								
+							
+							--qqdropped:SetNWInt("spare", self.Owner:GetAmmoCount( v:GetPrimaryAmmoType() ) )
+							--self.Owner:SetAmmo(0, v:GetPrimaryAmmoType() )
+
 						end
 					end
 				end
 			end
 		end
+		
 
 		self.GetMagModel = string.Replace( self.WorldModel,"/w_" , "/unloaded/" )
 		self.GetMagModel = string.Replace( self.GetMagModel , ".mdl" , "_mag.mdl")
@@ -275,6 +307,7 @@ function SWEP:Holster()
 		return false
 	end
 	
+	
 
 	self:SetNWBool("IronSights",false)
 	self:SetNWInt("waszoomed",0)
@@ -308,6 +341,10 @@ function SWEP:PrimaryAttack()
 	return end
 	if self:IsBusy() then return end
 	if self:IsUsing() then return end
+	
+	if self.WeaponType == "Throwable" then
+		self:PreThrowObject()
+	return end
 
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 
@@ -889,7 +926,9 @@ end
 
 function SWEP:IsBusy()
 
-	if self.IsReloading == 1 then
+	if self.CanHolster == false then
+		return true
+	elseif self.IsReloading == 1 then
 		return true
 	elseif self.HasSilencer then
 		if self.AttachDelay > CurTime() then
@@ -916,6 +955,8 @@ function SWEP:Reload()
 	if self:Clip1() >= self.Primary.ClipSize then return end
 	if self:GetNextPrimaryFire() > CurTime() then return false end
 	if self.Owner:GetAmmoCount(self:GetPrimaryAmmoType()) == 0  then return end
+	
+	if self.WeaponType == "Throwable" then return end
 
 	if self:GetNWBool("Ironsights",false) == true then
 		self:SetNWBool("Ironsights",false)
@@ -948,7 +989,7 @@ function SWEP:Reload()
 	
 		self.Owner:SetAnimation(PLAYER_RELOAD)
 		
-		print(self.Owner:GetViewModel():GetPlaybackRate())
+		--print(self.Owner:GetViewModel():GetPlaybackRate())
 		
 		
 		self.ReloadFinish = CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate())
@@ -1375,10 +1416,155 @@ end
 
 function SWEP:EquipThink()
 
+	if self.WeaponType ~= "Throwable" then return end
+
+	if self.IsThrowing == true then
+	
+		if self.ThrowAnimation < CurTime() then
+			if self.HasAnimated == false then
+				self:SendWeaponAnim(ACT_VM_THROW)
+				self.Owner:SetAnimation(PLAYER_ATTACK1) 
+				self.HasAnimated = true
+			end
+		end
+		
+		if self.Throw < CurTime() then
+			if self.HasThrown == false then
+				self:ThrowObject(self.Object,1000)
+				self.HasThrown = true
+				
+				if self:Ammo1() > 0 then
+					self:TakePrimaryAmmo(1)
+				end
+				
+			end
+		end
+		
+		if self.ThrowRemove < CurTime() then
+		
+		
+			if self:Ammo1() ~= 0 then
+				self:SendWeaponAnim(ACT_VM_DRAW)
+				self:SetClip1(1)
+				self.Owner:SetAmmo(self:Ammo1() - 1, self.Primary.Ammo)
+				
+				self.IsThrowing = false
+				self.HasAnimated = false
+				self.HasThrown = false
+				self.CanHolster	= true
+				
+				if self.SpecialThrow == true then
+					self:SwitchToPrimary()
+				end
+				
+			else
+				if SERVER then
+					self:Remove() 
+					self:SwitchToPrimary()
+				end
+			end
+	
+			
+		end
+		
+	end
+	
+	if SERVER then
+		if self.Owner.WeaponType == "Throwable" and self.ThrowRemove < CurTime() then
+			if self:Ammo1() == 0 and self:Clip1() == 0 then
+				self:Remove() 
+				self:SwitchToPrimary()
+			end
+		end
+	end
+	
+	
+end
+
+function SWEP:SwitchToPrimary()
+
+
+			
+	local foundp = false
+	local founds = false
+	
+	for k,v in pairs(self.Owner:GetWeapons()) do
+		if v:IsScripted() then
+			if foundp == false then
+				if weapons.GetStored(v:GetClass()).WeaponType == "Primary" then
+					self.CanHolster = true
+					self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
+					foundp = true
+				end
+			end
+		end
+	end
+	
+	if foundp == false then
+		for k,v in pairs(self.Owner:GetWeapons()) do
+			if v:IsScripted() then
+				if founds == false then
+					if weapons.GetStored(v:GetClass()).WeaponType == "Secondary" then
+						self.CanHolster = true
+						self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
+						founds = true
+					end
+				end
+			end
+		end
+	end
+
+	if founds == false and foundp == false then
+		self.CanHolster = true
+		self.Owner:SelectWeapon(self.Owner:GetWeapons()[1]:GetClass() )
+	end
+
 end
 
 function SWEP:QuickThrow()
 
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + 2)
+	self.CanHolster = false
+	self:SendWeaponAnim(ACT_VM_PULLPIN)
+	
+	self.IsThrowing = true
+	
+	self.ThrowAnimation = CurTime() + 0.85
+	self.Throw = CurTime() + 1
+	self.ThrowRemove = CurTime() + 2
+	self.SpecialThrow = true
+	
+end
+
+function SWEP:PreThrowObject()
+	if self:IsUsing() then return end
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + 2)
+	self.CanHolster = false
+	self:SendWeaponAnim(ACT_VM_PULLPIN)
+	
+	self.IsThrowing = true
+	
+	self.ThrowAnimation = CurTime() + 0.85
+	self.Throw = CurTime() + 1
+	self.ThrowRemove = CurTime() + 2
+	self.SpecialThrow = false
+end
+
+function SWEP:ThrowObject(object,force)
+	if CLIENT then return end
+	local EA =  self.Owner:EyeAngles()
+	local pos = self.Owner:GetShootPos() + EA:Right() * 5 - EA:Up() * 4 + EA:Forward() * 8	
+
+	local ent = ents.Create(object)		
+		ent:SetPos(pos)
+		ent:SetAngles(EA)
+		ent:Spawn()
+		ent:Activate()
+		ent:SetOwner(self.Owner)
+		ent:GetPhysicsObject():SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force + EA:Up()*50)
+		ent:GetPhysicsObject():AddAngleVelocity(Vector(1000,1000,1000))
+		ent.Damage = 100
+		ent.Radius = 100
 end
 
 function SWEP:QuickKnife()

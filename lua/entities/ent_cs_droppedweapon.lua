@@ -48,6 +48,9 @@ function ENT:Use(activator,caller,useType,value)
 				if activator:GetActiveWeapon().IsReloading ==1 then return end
 			end
 		end
+		
+
+		
 	
 		if self:GetNWString("class") == "weapon_cs_c4" and GetConVar("sv_css_enable_c4nonadmin"):GetInt() ~= 1 and activator:IsAdmin() == false then
 			activator:ChatPrint("You are not allowed to pick up C4")
@@ -64,27 +67,40 @@ function ENT:Use(activator,caller,useType,value)
 			
 		if hasweapon == true then
 		
-			local clipcount = self:GetNWInt("clip")
+			if weapons.GetStored(self:GetNWString("class")).WeaponType == "Throwable" then
+			
+				activator:GiveAmmo(1, weapons.GetStored(self:GetNWString("class")).Primary.Ammo )
+				
+				self:Remove()
 		
-			if clipcount > 0 then
-				activator:GiveAmmo(clipcount, weapons.GetStored(self:GetNWString("class")).Primary.Ammo )
-				activator:ChatPrint("You took " .. clipcount .. " rounds from the weapon's clip.")
 			else
-				activator:ChatPrint("There are no rounds to take from the weapon's clip.")
+		
+		
+				local clipcount = self:GetNWInt("clip")
+			
+				if clipcount > 0 then
+					activator:GiveAmmo(clipcount, weapons.GetStored(self:GetNWString("class")).Primary.Ammo )
+					activator:ChatPrint("You took " .. clipcount .. " rounds from the weapon's clip.")
+				else
+					activator:ChatPrint("There are no rounds to take from the weapon's clip.")
+				end
+				
+				
+				
+			
+				self:SetNWInt("clip",0)
+			
+				hasweapon = false
+				
 			end
 			
-			
-			
-		
-			self:SetNWInt("clip",0)
-		
-			hasweapon = false
 		return end
 		
 		
 		local givenweapon = activator:Give(self:GetNWString("class"))
 		givenweapon.AlreadyGiven = true
 		givenweapon:SetClip1(self:GetNWInt("clip"))
+		--activator:GiveAmmo(self:GetNWString("spare"), weapons.GetStored(self:GetNWString("class")).Primary.Ammo )
 		activator:SelectWeapon(self:GetNWString("class"))
 		self:EmitSound("items/itempickup.wav")
 		

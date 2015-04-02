@@ -73,24 +73,41 @@ function ENT:Detonate(self,pos)
 			for k,v in pairs(ents.FindInSphere(self:GetPos(),maxdistance)) do
 				if v:GetClass() == "player" then
 				
-					local distancecount = maxdistance/100 - self:GetPos():Distance(v:GetPos())/100
-					--print(distancecount)
-					if distancecount > 0 and distancecount < 8 then 
-						v:TakeDamage(distancecount,self.Owner,self)
-						
-						for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),maxdistance,90)) do
-							if f == self.Entity then
-								self:BlindEffects(v,distancecount)
+					local td = {}
+					td.start = self:GetPos()
+					td.endpos = v:EyePos()
+					td.filter = self
+				
+					local Trace = util.TraceLine(td)
+					
+					if Trace.Entity == v then
+					
+						local distancecount = maxdistance/100 - self:GetPos():Distance(v:GetPos())/100
+						--print(distancecount)
+						if distancecount > 0 and distancecount < 8 then 
+							v:TakeDamage(distancecount,self.Owner,self)
+							
+							for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),maxdistance,90)) do
+								if f == self.Entity then
+									self:BlindEffects(v,distancecount)
+								end
 							end
+						elseif distancecount >= 8 then
+							self:BlindEffects(v,distancecount)
 						end
-					elseif distancecount >= 8 then
-						self:BlindEffects(v,distancecount)
+						
+					else
+					
+						v:SetDSP( 37, false )
+
 					end
+
 				end
 			end
 		end
 				
 		self:Remove()
+		
 	end
 end
 

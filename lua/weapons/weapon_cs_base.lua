@@ -523,7 +523,9 @@ function SWEP:Recoil(Damage,Shots,Cone,Recoil)
 	local rollpunch = 0
 	local punchangle = Angle(uppunch,sidepunch,rollpunch)
 
-	self.Owner:ViewPunch(punchangle)
+	if self.Owner then
+		self.Owner:ViewPunch(punchangle)
+	end
 	
 end
 

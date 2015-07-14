@@ -226,20 +226,21 @@ function SWEP:EquipAmmo(ply)
 end
 
 function SWEP:OwnerChanged()
-	if self.AlreadyGiven == false then
-	
-		if GetConVarNumber("sv_css_ammo_loaded") == 1 then
-			self:SetClip1(self.Primary.ClipSize)
-		end
+	if SERVER then
+		if self.AlreadyGiven == false then
 		
-		if GetConVarNumber("sv_css_ammo_givespare") == 1 then
-			self.Owner:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
-		end
+			if GetConVarNumber("sv_css_ammo_loaded") == 1 then
+				self:SetClip1(self.Primary.ClipSize)
+			end
+			
+			if GetConVarNumber("sv_css_ammo_givespare") == 1 then
+				self.Owner:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
+			end
 
-		self.AlreadyGiven = true
-		
+			self.AlreadyGiven = true
+			
+		end
 	end
-
 end
 
 

@@ -219,6 +219,25 @@ function SWEP:EquipAmmo(ply)
 		ply:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
 	elseif self.WeaponType == "Equipment" then
 		ply:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
+	elseif self.WeaponType == "Throwable" then
+		ply:GiveAmmo(1,self.Primary.Ammo,false)
+	end
+
+end
+
+function SWEP:OwnerChanged()
+	if self.AlreadyGiven == false then
+	
+		if GetConVarNumber("sv_css_ammo_loaded") == 1 then
+			self:SetClip1(self.Primary.ClipSize)
+		end
+		
+		if GetConVarNumber("sv_css_ammo_givespare") == 1 then
+			self.Owner:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
+		end
+
+		self.AlreadyGiven = true
+		
 	end
 
 end
@@ -228,19 +247,7 @@ function SWEP:Deploy()
 
 	if SERVER then
 	
-		if self.AlreadyGiven == false then
-		
-			if GetConVarNumber("sv_css_ammo_loaded") == 1 then
-				self:SetClip1(self.Primary.ClipSize)
-			end
-			
-			if GetConVarNumber("sv_css_ammo_givespare") == 1 then
-				self.Owner:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
-			end
 
-			self.AlreadyGiven = true
-			
-		end
 		
 		if GetConVarNumber("sv_css_limit_equipped") == 1 then
 			for k,v in pairs (self.Owner:GetWeapons()) do
@@ -331,6 +338,7 @@ end
 function SWEP:PrimaryAttack()
 
 	if not self:CanPrimaryAttack() then return end
+	
 	if self.ShotgunReload == 1 then
 	
 		self.ShotgunReload = 0
@@ -701,8 +709,16 @@ function SWEP:CanPrimaryAttack()
 	if self:GetNextPrimaryFire() > CurTime() then return false end
 	
 
+	if self:Clip1() == -1 then
 
-	if self:Clip1() <= 0 then
+		if self.Owner:GetAmmoCount(self.Primary.Ammo) < 1 then
+		
+			return false
+		
+		end
+	
+	
+	elseif self:Clip1() <= 0 then
 		--self:Reload()
 		if self.ClickSoundDelay <= CurTime() then
 			self.ClickSoundDelay = CurTime()+0.25
@@ -710,6 +726,7 @@ function SWEP:CanPrimaryAttack()
 		end
 
 		return false
+
 	end
 
 	return true
@@ -1447,8 +1464,8 @@ function SWEP:EquipThink()
 		
 			if self:Ammo1() ~= 0 then
 				self:SendWeaponAnim(ACT_VM_DRAW)
-				self:SetClip1(1)
-				self.Owner:SetAmmo(self:Ammo1() - 1, self.Primary.Ammo)
+				--self:SetClip1(1)
+				--self.Owner:SetAmmo(self:Ammo1() - 1, self.Primary.Ammo)
 				
 				self.IsThrowing = false
 				self.HasAnimated = false

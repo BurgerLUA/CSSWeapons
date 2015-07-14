@@ -6,7 +6,7 @@ end
 SWEP.Category				= "Counter-Strike"
 SWEP.PrintName				= "FLASH GRENADE"
 SWEP.Base					= "weapon_cs_base"
-SWEP.WeaponType				= "Throwable"
+SWEP.WeaponType				= "Throwable"	
 
 SWEP.Cost					= 200
 SWEP.MoveSpeed				= 250
@@ -26,8 +26,8 @@ SWEP.Primary.Damage			= 0
 SWEP.Primary.NumShots		= 0
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
 SWEP.Primary.Cone			= 0
-SWEP.Primary.ClipSize		= 1
-SWEP.Primary.SpareClip		= 0
+SWEP.Primary.ClipSize		= -1
+SWEP.Primary.SpareClip		= 1
 SWEP.Primary.Delay			= 1
 SWEP.Primary.Ammo			= "flashgrenade"
 SWEP.Primary.Automatic 		= false

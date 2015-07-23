@@ -1,87 +1,29 @@
 local SlowEnable = false
 
---print("----------------")
---print("Setting SlowEnable to: (This should be false) ")
---print(SlowEnable)
-
 if SERVER then
 	CreateConVar("sv_css_enable_speedmod", "0", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables speed mod, 0 disables. Default is 1." )
-	
-	--print("----------------")
-	--print("Creating Convar, setting to: (this should be 1)")
-	--print(GetConVarNumber("sv_css_enable_speedmod"))
-	
 end
 
-local Message = true
-local Message2 = true
+local NextThink = 0
 
 function CSSUpdateConvars()
 
-	local World = game.GetWorld( )
-	
-	if Message2 == true then
-		--print("I AM THINKING")
-		Message2 = false
-	end
-
-	if not GetConVarNumber("sv_css_enable_speedmod") then
-		--print("WHERE THE FUCK IS THE CONVAR???")
-	return end
-	
-	
-	
 	if SERVER then
-		if GetConVarNumber("sv_css_enable_speedmod") == 1 then
-		
-			SlowEnable = true
-			World:SetNWBool("SlowEnable",true)
-			
-			if Message == true then
-			
-				--print("----------------")
-				--print("Setting ClientSide SlowEnable to: (This should be true)")
-				--print(SlowEnable)
-				
-				Message = false
-			end
-			
-		else
-		
-			SlowEnable = false
-			World:SetNWBool("SlowEnable",false)
-			
-			if Message == true then
-			
-				--print("----------------")
-				--print("Setting ClientSide SlowEnable to: (This should be true)")
-				--print(SlowEnable)
-				
-				Message = false
-			end
-			
-		end
+
+		SlowEnable = (GetConVarNumber("sv_css_enable_speedmod") == 1)
+		SetGlobalBool( "SlowEnable", SlowEnable )	
+
 	else
-		SlowEnable = World:GetNWBool("SlowEnable",false)
-		
-		if Message == true then
-			
-			--print("----------------")
-			--print("ClientSide SlowEnable is: (This should be true)")
-			--print(SlowEnable)
-				
-			Message = false
-		end
-		
+		SlowEnable = GetGlobalBool( "SlowEnable", false )
 	end
+	
+	NextThink = CurTime() + 1
 	
 end
 
 hook.Add("Think","CSS: SpeedMod ConVars",CSSUpdateConvars)
 
 function CSSSlowDamage(ply,attacker)
-
-	--print("HIT")
 
 	if not ply.GetSlow then
 		ply.GetSlow = 0
@@ -91,15 +33,9 @@ function CSSSlowDamage(ply,attacker)
 		if SlowEnable then
 			if ply.GetSlow then
 				ply.GetSlow = math.Clamp(ply.GetSlow + 80,0,99)
-				
-				--print(ply:Nick() .. " slowed for " .. ply.GetSlow .. "%")
-				
 			end
 		end
 	end
-	
-	--print(ply.GetSlow)
-	--print(ply.SlowEnable)
 
 end
 

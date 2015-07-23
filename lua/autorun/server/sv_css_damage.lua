@@ -36,8 +36,12 @@ function CSSDamage(ply, hitgroup, dmginfo)
 			dmginfo:ScaleDamage(0)
 
 		else
-
-			dmginfo:ScaleDamage( GetConVarNumber("sv_css_damage_scale") )
+		
+			if IsValid(dmginfo:GetActiveWeapon()) then
+				if dmginfo:GetActiveWeapon().Base == "weapon_cs_base" then
+					dmginfo:ScaleDamage( GetConVarNumber("sv_css_damage_scale") )
+				end
+			end
 
 		end
 		

@@ -30,30 +30,27 @@ function ENT:Initialize()
 	
 		self.Delay = CurTime() + GetConVar("sv_css_c4_time_explosion"):GetInt()
 		self.DefuseTime = GetConVar("sv_css_c4_time_defuse"):GetInt()
-		
+		self:SetNWBool("stopboom",false)
 		self.First = true
 		self.NextBeep = 0
 		self.BeepLatch = 0
 		self.DebugDelay = 0
 		self.NextTick = 0
 		self.Progress = 0
-		self.StopEverytingOhGod = false
 		self.SendMessage = true
+		self.LastUse = 0
 
-		
-	
-	
 		if GetConVar("sv_css_c4_notifyplayers"):GetInt() == 1 then
 			for n,p in pairs(player.GetAll()) do
 				p:PrintMessage(HUD_PRINTCENTER,"Bomb has been planted")
 				p:SendLua("LocalPlayer():EmitSound(\"radio/bombpl.wav\")")
 			end
 		end
-		
-		
-		
+
+	else
+		self.Code = math.random(1,9) .. math.random(0,9) .. math.random(0,9) .. math.random(0,9) .. math.random(0,9) .. math.random(0,9)
 	end
-	
+
 end
 
 function ENT:PhysicsCollide(data, physobj)
@@ -64,27 +61,24 @@ end
 
 function ENT:Use(activator,caller,useType,value)
  
-	if self.Progress == 0 then
+	if self:GetNWBool("defusing",false) == false then
 		self:EmitSound("items/ammopickup.wav",100,100)
 		self:SetNWBool("defusing",true)
 	end
 	
-	
 	if ( activator:IsPlayer() ) then
 		if self.NextTick <= CurTime() then
+			self.LastUse = CurTime()
 			self.Progress = self.Progress + 0.05
 			self.NextTick = CurTime() + 0.05
+			self.Using = true
 		end
 
 	self:SetNWInt("defusecount",self.Progress)	
 		
-		
 	else
 		--print("WHAT ARE YOU")
 	end
- 
-
- 
  
 end
 
@@ -113,31 +107,40 @@ function ENT:Think()
 				end
 				self.SendMessage = false
 			end
+			
+			SafeRemoveEntityDelayed(self,5)
+			self:SetNWBool("stopboom",true)
+		else
 		
-		
-			self.StopEverytingOhGod = true
+			if self.LastUse + 0.1 <= CurTime() then
+				self.Progress = 0
+				self:SetNWInt("defusecount",self.Progress)
+				self:SetNWBool("defusing",false)				
+			end
+			
 		end
 		
-		if self.StopEverytingOhGod == true then
-			SafeRemoveEntityDelayed(self,5)
-		return end
+
 	
 		if CurTime() > self.Delay then 
-			self:Detonate(self,self:GetPos())
+			if self:GetNWBool("stopboom",false) == false then
+				self:Detonate(self,self:GetPos())
+			end
 		end
-	
 	
 		local BeepMod = self.Delay - CurTime()
 	
-		if self.NextBeep <= CurTime() then
-			self:EmitSound("weapons/c4/c4_beep1.wav")
-			self:SetNWBool("beep",true)
-			self.NextBeep = BeepMod/15 + CurTime()
-			self.BeepLatch = BeepMod/30 + CurTime()
-		end
-	
-		if self.BeepLatch <= CurTime() then
-			self:SetNWBool("beep",false)
+		if self:GetNWBool("stopboom",false) == false then
+			if self.NextBeep <= CurTime() then
+				self:EmitSound("weapons/c4/c4_beep1.wav")
+				self:SetNWBool("beep",true)
+				self.NextBeep = BeepMod/15 + CurTime()
+				self.BeepLatch = BeepMod/30 + CurTime()
+			end
+		
+			if self.BeepLatch <= CurTime() then
+				self:SetNWBool("beep",false)
+			end
 		end
 	end
 end
@@ -145,21 +148,24 @@ end
 function ENT:Detonate(self,pos)
 	if SERVER then
 	
-		local c4damage = GetConVar("sv_css_c4_damage"):GetInt()
-		local c4radius = GetConVar("sv_css_c4_radius"):GetInt()
+		local c4damage = GetConVar("sv_css_c4_damage"):GetInt() or 1
+		local c4radius = GetConVar("sv_css_c4_radius"):GetInt() or 1
 	
 	
 	
 		if not self:IsValid() then return end
 		local effectdata = EffectData()
 			effectdata:SetStart( pos + Vector(0,0,100)) // not sure if we need a start and origin (endpoint) for this effect, but whatever
-			effectdata:SetOrigin( pos)
-			effectdata:SetScale( 100 )
-			effectdata:SetRadius( 5000 )
+			effectdata:SetOrigin( pos )
+			effectdata:SetScale( c4radius/1000 )
+			effectdata:SetRadius( c4radius )
 		util.Effect( "HelicopterMegaBomb", effectdata )	
 
 		self:EmitSound("weapons/c4/c4_explode1.wav",100,100)
 		
+		util.BlastDamage(self,self,self:GetPos(),c4radius,c4damage)
+		
+		--[[
 		if table.Count(ents.FindInSphere(self:GetPos(),c4radius)) > 0 then
 			for k,v in pairs(ents.FindInSphere(self:GetPos(),c4radius)) do
 		
@@ -180,7 +186,7 @@ function ENT:Detonate(self,pos)
 			end
 
 		end
-		
+		--]]
 
 		if SERVER then
 			if GetConVar("sv_css_c4_notifyplayers"):GetInt() == 1 then
@@ -222,33 +228,37 @@ function ENT:Draw()
 			draw.RoundedBox( 0, -Size/2 + 1, -Size/20 + 1, Var, Size/10, Color(255,0,0) ) -- actual
 			]]--
 			
-			--800813
-			
 			rand1 = math.random(0,9)
 			rand2 = math.random(0,9)
 			rand3 = math.random(0,9)
 			rand4 = math.random(0,9)
 			rand5 = math.random(0,9)
 			rand6 = math.random(0,9)
+	
+			local CodeExplode = string.Explode("",self.Code)
 			
-			
+			Code1 = CodeExplode[1]
+			Code2 = CodeExplode[2]
+			Code3 = CodeExplode[3]
+			Code4 = CodeExplode[4]
+			Code5 = CodeExplode[5]
+			Code6 = CodeExplode[6]
 			
 			if Var >= (Size/6)*5 then
 				text = rand1 .. rand2.. rand3 .. rand4 .. rand5 .. rand6
 			elseif Var >= (Size/6)*4 then
-				text = "8" .. rand2.. rand3 .. rand4 .. rand5 .. rand6
+				text = Code1 .. rand2.. rand3 .. rand4 .. rand5 .. rand6
 			elseif Var >= (Size/6)*3 then
-				text = "8" .. "0" .. rand3 .. rand4 .. rand5 .. rand6
+				text = Code1 .. Code2 .. rand3 .. rand4 .. rand5 .. rand6
 			elseif Var >= (Size/6)*2 then
-				text = "8" .. "0" .. "0" .. rand4 .. rand5 .. rand6
+				text = Code1 .. Code2 .. Code3 .. rand4 .. rand5 .. rand6
 			elseif Var >= (Size/6)*1 then
-				text = "8" .. "0" .. "0" .. "8" .. rand5 .. rand6
+				text = Code1 .. Code2 .. Code3 .. Code4 .. rand5 .. rand6
 			elseif Var >= 0 then
-				text = "8" .. "0" .. "0" .. "8" .. "1" .. rand6
+				text = Code1 .. Code2 .. Code3 .. Code4 .. Code5 .. rand6
 			else
-				text = "8" .. "0" .. "0" .. "8" .. "1" .. "3"
+				text = Code1 .. Code2 .. Code3 .. Code4 .. Code5 .. Code6
 			end
-			
 			
 			if self:GetNWBool("defusing",false) == true then
 				draw.SimpleText( text, "DebugFixed", 0, 0, Color(255,0,0,255), 0, 0 )

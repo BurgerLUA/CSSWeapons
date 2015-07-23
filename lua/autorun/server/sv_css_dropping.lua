@@ -42,14 +42,14 @@ function CSSDropWeaponAmmo(ply)
 				
 					if StoredWeapon.WeaponType == "Throwable" and v:Clip1() ~= 0 then return end
 				
-					local dropped = ents.Create("ent_cs_droppedweapon")
-					dropped:SetPos(ply:GetPos() + ply:OBBCenter())
-					dropped:SetAngles(ply:EyeAngles())
-					dropped:SetModel(model)
-					dropped:Spawn()
-					dropped:Activate()
-					dropped:SetNWString("class",v:GetClass())
-					dropped:SetNWInt("clip",v:Clip1())
+					//local dropped = ents.Create("ent_cs_droppedweapon")
+					//dropped:SetPos(ply:GetPos() + ply:OBBCenter())
+					//dropped:SetAngles(ply:EyeAngles())
+					//dropped:SetModel(model)
+					//dropped:Spawn()
+					//dropped:Activate()
+					//dropped:SetNWString("class",v:GetClass())
+					//dropped:SetNWInt("clip",v:Clip1())
 					--dropped:SetNWInt("spare",v:Ammo1())
 					
 					--[[

@@ -135,39 +135,33 @@ function CSSClientsideWeaponSettings()
 		WidthSlider:SetDecimals( 0 ) -- Sets a decimal. Zero means it's a whole number
 		WidthSlider:SetConVar( "cl_css_crosshair_width" ) -- Set the convar
 		
-		
-	local CModelCheckBox = vgui.Create("DCheckBoxLabel", Base1)
-		CModelCheckBox:SetText( "Use Playermodel hands instead of CS:S hands. (Applies next spawn)" )
-		CModelCheckBox:SetTextColor( Color(0, 0, 0, 255) )
-		CModelCheckBox:SizeToContents()
-		CModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40)
-		CModelCheckBox:SetConVar( "cl_css_viewmodel_cmodel" )
-		
 	local CustomSlotsCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
 		CustomSlotsCheckBox:SetText( "Use Custom Slots" )
 		CustomSlotsCheckBox:SetTextColor( Color(0, 0, 0, 255) )
 		CustomSlotsCheckBox:SizeToContents()
-		CustomSlotsCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 40)
+		CustomSlotsCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40)
 		CustomSlotsCheckBox:SetConVar( "cl_css_customslots" ) 
 		
+
+	local QuickThrowCheckBox = vgui.Create("DCheckBoxLabel", Base1)
+		QuickThrowCheckBox:SetText( "Enable QuickKnife (RightClick + E) and QuickThrow (LeftClick + E)" )
+		QuickThrowCheckBox:SetTextColor( Color(0, 0, 0, 255) )
+		QuickThrowCheckBox:SizeToContents()
+		QuickThrowCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20)
+		QuickThrowCheckBox:SetConVar( "cl_css_quick" )
 	
 		
-	if not game.SinglePlayer then
 	
-		local WModelCheckBox = vgui.Create("DCheckBoxLabel", Base1)
-			WModelCheckBox:SetText( "Draw Thirdperson Brass Ejections" )
-			WModelCheckBox:SetTextColor( Color(0, 0, 0, 255) )
-			WModelCheckBox:SizeToContents()
-			WModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 40 + 20)
-			WModelCheckBox:SetConVar( "cl_css_shells" )
-		
+	
+	if not game.SinglePlayer() then
+
 		local WModelCheckBox = vgui.Create("DCheckBoxLabel", Base1)
 			WModelCheckBox:SetText( "Draw Thirdperson/Firstperson Mag drops (Requires Additional Addon)" )
 			WModelCheckBox:SetTextColor( Color(0, 0, 0, 255) )
 			WModelCheckBox:SizeToContents()
-			WModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 40 + 20 + 20)
-			WModelCheckBox:SetConVar( "cl_css_shells" )	
-	
+			WModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20 + 20)
+			WModelCheckBox:SetConVar( "cl_css_mags" )	
+
 	end
 	
 	

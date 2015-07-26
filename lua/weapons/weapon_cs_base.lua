@@ -53,7 +53,7 @@ CreateClientConVar("cl_css_crosshair_color_r", "50", true, true )
 CreateClientConVar("cl_css_crosshair_color_g", "255", true, true )
 CreateClientConVar("cl_css_crosshair_color_b", "50", true, true )
 CreateClientConVar("cl_css_crosshair_color_a", "200", true, true )
-
+CreateClientConVar("cl_css_quick", "1", true, true )
 
 game.AddAmmoType({name = "hegrenade", })
 game.AddAmmoType({name = "flashgrenade", })

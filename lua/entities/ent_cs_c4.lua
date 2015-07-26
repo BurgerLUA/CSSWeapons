@@ -1,6 +1,6 @@
 ENT.Type = "anim"
 ENT.Base = "base_entity"
-ENT.PrintName = "HE GRENADE"
+ENT.PrintName = "C4 EXPLOSIVE"
 ENT.Author = ""
 ENT.Information = ""
 ENT.Spawnable = false
@@ -163,7 +163,8 @@ function ENT:Detonate(self,pos)
 
 		self:EmitSound("weapons/c4/c4_explode1.wav",100,100)
 		
-		util.BlastDamage(self,self,self:GetPos(),c4radius,c4damage)
+			
+		util.BlastDamage(self,self:GetNWEntity("owner",self),self:GetPos(),c4radius,c4damage)
 		
 		--[[
 		if table.Count(ents.FindInSphere(self:GetPos(),c4radius)) > 0 then

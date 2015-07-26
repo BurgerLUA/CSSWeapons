@@ -61,16 +61,34 @@ end
 
 function SWEP:Initialize()
 	self:SetWeaponHoldType(self.HoldType)
+	
+	
+	if GetGlobalFloat("CSSC4NextFire",0) == 0 then
+		SetGlobalFloat("CSSC4NextFire", CurTime() - 1)
+	end
+	
 end
 
 function SWEP:PrimaryAttack()
 	if self:IsUsing() then return end
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + 2)
-	self.CanHolster = false
-	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+
+	
+
+	
+	
 	--self.Owner:Freeze(true)
 	--self:TakePrimaryAmmo(1)
 	
+	if SERVER then
+		if not self:AllowedToPlant() then
+			self.Owner:ChatPrint("You need to wait " .. string.NiceTime( GetGlobalFloat("CSSC4NextFire",0) - CurTime() ) .. " before using this weapon.")
+		return end
+	end
+	
+	
+	self.CanHolster = false
+	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 	
 	self.Owner:SetRunSpeed(0.01)
 	self.Owner:SetWalkSpeed(0.01)
@@ -170,6 +188,18 @@ function SWEP:PlantC4()
 	--self.Owner:Freeze(false)
 	
 end
+
+function SWEP:AllowedToPlant()
+
+	if GetGlobalFloat("CSSC4NextFire",0) <= CurTime() then
+		SetGlobalFloat("CSSC4NextFire",CurTime() + GetConVarNumber("sv_css_c4_timelimit")*60 )
+		return true
+	else
+		return false
+	end
+
+end
+
 
 
 

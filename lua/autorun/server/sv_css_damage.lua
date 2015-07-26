@@ -51,6 +51,7 @@ end
 
 hook.Add("ScalePlayerDamage","CSS: Damage Mod",CSSDamage)
 
+
 function CSSDeath( victim, inflictor, attacker )
 
 	if GetConVarNumber("sv_css_enable_deathsounds") == 1 then

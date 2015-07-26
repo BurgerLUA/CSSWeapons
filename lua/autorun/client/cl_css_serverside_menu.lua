@@ -175,6 +175,16 @@ local ItemTable = {}
 	count = count + 1
 	
 	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Delay between C4 plants (Minutes)"
+	ItemTable[count]["command"] = "sv_css_c4_timelimit"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 60
+	ItemTable[count]["decimals"] = 0
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
 	ItemTable[count]["type"] = "DCheckBoxLabel"
 	ItemTable[count]["text"] = "Enable Non-Admin Pick-up"
 	ItemTable[count]["command"] = "sv_css_enable_c4nonadmin"

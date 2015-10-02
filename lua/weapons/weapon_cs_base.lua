@@ -30,7 +30,7 @@ CreateConVar("sv_css_c4_timelimit", "0", FCVAR_REPLICATED + FCVAR_ARCHIVE , "Glo
 
 
 CreateConVar("sv_css_enable_penetration", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enable penetration through objects, 0 disables. Default is 1." )
-CreateConVar("sv_css_penetration_scale", "0.5", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that all damage from CSS weapons is multiplied from penetration. Default is 0.5." )
+CreateConVar("sv_css_penetration_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "Base damage lost per unit of penetration. Default is 1." )
 
 CreateConVar("sv_css_enable_mags", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables cosmetic magazine drops. Requires separate addon. Default is 0." )
 
@@ -386,7 +386,7 @@ function SWEP:PrimaryAttack()
 	self:ShootBullet(Damage, Shots, Cone, Source, Direction,Source)
 	self:AddHeat(Damage,Shots)
 	self:Recoil(Damage,Shots,Cone,Recoil)
-	self:ShootEffects()
+	--self:ShootEffects()
 
 end
 
@@ -482,7 +482,7 @@ function SWEP:Modifiers(Damage,Shots,Cone,Recoil)
 	end
 
 	if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
-		Cone = Cone * 0.5
+		Cone = Cone * 0.8
 	else
 		Cone = Cone * 1
 	end
@@ -784,13 +784,13 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 				local mat = tr.MatType
 			
 				if mat == MAT_GLASS or MAT_SAND or MAT_SNOW or MAT_DIRT then
-					matmul = 1/3
+					matmul = 0.75
 				elseif mat == MAT_ANTLION or mat == MAT_ALIENFLESH or mat == MAT_FLESH then
-					matmul = 1/2
+					matmul = 1
 				elseif mat == MAT_CONCRETE then
-					matmul = 1/0.85
+					matmul = 5
 				elseif mat == MAT_METAL then
-					matmul = 1/0.75
+					matmul = 10
 				else
 					matmul = 1
 				end
@@ -922,7 +922,8 @@ end
 
 function SWEP:EmitGunSound(GunSound)
 
-	self.Weapon:EmitSound(GunSound, 355 , 100, 1, CHAN_WEAPON )
+	self.Weapon:EmitSound(GunSound, SNDLVL_GUNFIRE , 100, 1, CHAN_WEAPON )
+	
 	
 end
 
@@ -1276,7 +1277,7 @@ function SWEP:DrawHUD()
 	end
 	
 	if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
-		Cone = Cone * 0.5
+		Cone = Cone * 0.8
 	else
 		Cone = Cone * 1
 	end

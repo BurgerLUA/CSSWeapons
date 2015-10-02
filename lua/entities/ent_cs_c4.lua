@@ -163,7 +163,7 @@ function ENT:Detonate(self,pos)
 
 		self:EmitSound("weapons/c4/c4_explode1.wav",100,100)
 		
-			
+		
 		util.BlastDamage(self,self:GetNWEntity("owner",self),self:GetPos(),c4radius,c4damage)
 		
 		--[[

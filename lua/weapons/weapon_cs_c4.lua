@@ -51,8 +51,7 @@ SWEP.HasThrown				= false
 SWEP.CanHolster				= true
 
 function SWEP:Deploy()
-	self.DefaultWalkSpeed = self.Owner:GetWalkSpeed()
-	self.DefaultRunSpeed = self.Owner:GetRunSpeed()
+
 end
 
 function SWEP:Holster()
@@ -73,7 +72,8 @@ function SWEP:PrimaryAttack()
 	if self:IsUsing() then return end
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + 2)
 
-	
+	self.HasThrown = false
+	self.HasAnimated = false
 
 	
 	
@@ -81,14 +81,18 @@ function SWEP:PrimaryAttack()
 	--self:TakePrimaryAmmo(1)
 	
 	if SERVER then
-		if not self:AllowedToPlant() then
+		if not self:AllowedToPlant(true) then
 			self.Owner:ChatPrint("You need to wait " .. string.NiceTime( GetGlobalFloat("CSSC4NextFire",0) - CurTime() ) .. " before using this weapon.")
-		return end
+			return
+		end
 	end
 	
 	
 	self.CanHolster = false
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+	
+	self.DefaultWalkSpeed = self.Owner:GetWalkSpeed()
+	self.DefaultRunSpeed = self.Owner:GetRunSpeed()
 	
 	self.Owner:SetRunSpeed(0.01)
 	self.Owner:SetWalkSpeed(0.01)
@@ -97,9 +101,24 @@ function SWEP:PrimaryAttack()
 	
 	self.ThrowAnimation = CurTime() + 3
 	self.Throw = CurTime() + 3.1
-	self.ThrowRemove = CurTime() + 3.5
+	--self.ThrowRemove = CurTime() + 3.5
 	
 end
+
+function SWEP:SecondaryAttack()
+
+	if SERVER then
+		if not self:AllowedToPlant(false) then
+			self.Owner:ChatPrint("You need to wait " .. string.NiceTime( GetGlobalFloat("CSSC4NextFire",0) - CurTime() ) .. " before using this weapon.")
+		else
+			self.Owner:ChatPrint("You're allowed to plant this bomb.")
+		end
+	end
+	
+	self:SetNextSecondaryFire(CurTime() + 1)
+
+end
+
 
 function SWEP:EquipThink()
 	if self.IsThrowing == true then
@@ -116,48 +135,47 @@ function SWEP:EquipThink()
 			if self.HasThrown == false then
 				self:PlantC4()
 				self.HasThrown = true
-			end
-		end
-		
-		if self.ThrowRemove < CurTime() then
-		
-			if CLIENT then return end
+				
+				self.IsThrowing = false
+				self.HasAnimated = false
+				self.CanHolster	= true
+				
+				if CLIENT then return end
 			
-			local foundp = false
-			local founds = false
-			
-			for k,v in pairs(self.Owner:GetWeapons()) do
-				if v:IsScripted() then
-					if foundp == false then
-						if weapons.GetStored(v:GetClass()).WeaponType == "Primary" then
-							self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
-							foundp = true
-						end
-					end
-				end
-			end
-			
-			if foundp == false then
+				local foundp = false
+				local founds = false
+				
 				for k,v in pairs(self.Owner:GetWeapons()) do
 					if v:IsScripted() then
-						if founds == false then
-							if weapons.GetStored(v:GetClass()).WeaponType == "Secondary" then
+						if foundp == false then
+							if weapons.GetStored(v:GetClass()).WeaponType == "Primary" then
 								self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
-								founds = true
+								foundp = true
 							end
 						end
 					end
 				end
-			end
+				
+				if foundp == false then
+					for k,v in pairs(self.Owner:GetWeapons()) do
+						if v:IsScripted() then
+							if founds == false then
+								if weapons.GetStored(v:GetClass()).WeaponType == "Secondary" then
+									self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
+									founds = true
+								end
+							end
+						end
+					end
+				end
 
-			if founds == false and foundp == false then
-				self.Owner:SelectWeapon(self.Owner:GetWeapons()[1]:GetClass() )
+				if founds == false and foundp == false then
+					self.Owner:SelectWeapon(self.Owner:GetWeapons()[1]:GetClass() )
+				end
+
 			end
-			
-			self:Remove() 
-			
 		end
-		
+	
 	end
 end
 
@@ -172,7 +190,7 @@ function SWEP:PlantC4()
 
 	self.Owner:SetRunSpeed(self.DefaultRunSpeed)
 	self.Owner:SetWalkSpeed(self.DefaultWalkSpeed)
-	self.CanHolster = true
+	
 	
 	
 	local ent = ents.Create("ent_cs_c4")		
@@ -187,31 +205,21 @@ function SWEP:PlantC4()
 	
 	--self.Owner:Freeze(false)
 	
+
+	
 end
 
-function SWEP:AllowedToPlant()
+function SWEP:AllowedToPlant(reset)
 
 	if GetGlobalFloat("CSSC4NextFire",0) <= CurTime() then
-		SetGlobalFloat("CSSC4NextFire",CurTime() + GetConVarNumber("sv_css_c4_timelimit")*60 )
+	
+		if reset == true then
+			SetGlobalFloat("CSSC4NextFire",CurTime() + GetConVarNumber("sv_css_c4_timelimit")*60 )
+		end
+		
 		return true
 	else
 		return false
 	end
 
-end
-
-
-
-
-
-function GetActivities( ent )
-  local k, v, t
-
-  t = { }
-
-  for k, v in ipairs( ent:GetSequenceList( ) ) do
-    table.insert( t, { id = k, act = ent:GetSequenceActivity( k ), actname = ent:GetSequenceActivityName( k ) } )
-  end
-
-  return t
 end

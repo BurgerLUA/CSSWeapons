@@ -36,7 +36,7 @@ SWEP.Primary.Automatic 		= false
 --SWEP.WorldModel2 			= "models/weapons/w_pist_usp_silencer.mdl"
 --SWEP.Secondary.Sound 		= Sound("weapons/usp/usp1.wav")
 
-SWEP.RecoilMul				= 0.75
+SWEP.RecoilMul				= 1
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
 SWEP.HasCrosshair 			= true

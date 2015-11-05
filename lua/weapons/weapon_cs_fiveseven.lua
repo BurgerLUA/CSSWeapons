@@ -32,7 +32,7 @@ SWEP.Primary.Delay			= 1/(400/60)
 SWEP.Primary.Ammo			= "AlyxGun"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul 				= 0.8
+SWEP.RecoilMul 				= 1
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
 SWEP.HasCrosshair 			= true

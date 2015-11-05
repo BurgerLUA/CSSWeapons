@@ -34,7 +34,7 @@ SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1
 SWEP.HasScope 				= true
-SWEP.ZoomAmount 			= 2
+SWEP.ZoomAmount 			= 4
 SWEP.HasCrosshair 			= true
 SWEP.HasCSSZoom 			= true
 

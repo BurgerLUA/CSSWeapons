@@ -32,7 +32,9 @@ SWEP.Primary.Delay			= 1/(41/60)
 SWEP.Primary.Ammo			= "SniperRound"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul				= 0.25
+SWEP.RecoilMul				= 1
+SWEP.VelConeMul				= 2
+
 SWEP.HasScope 				= true
 SWEP.ZoomAmount 			= 12
 SWEP.HasCrosshair 			= false
@@ -42,5 +44,5 @@ SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= true
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
-SWEP.HasDoubleZoom			= true
-SWEP.HasSideRecoil			= false
+SWEP.HasDoubleZoom			= false
+SWEP.HasSideRecoil			= true

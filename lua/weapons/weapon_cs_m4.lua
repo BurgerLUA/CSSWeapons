@@ -36,7 +36,7 @@ SWEP.Primary.Automatic 		= true
 --SWEP.WorldModel2 			= "models/weapons/w_rif_m4a1_silencer.mdl"
 --SWEP.Secondary.Sound		= Sound("weapons/m4a1/m4a1-1.wav")
 
-SWEP.RecoilMul				= 0.75
+SWEP.RecoilMul				= 1
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
 SWEP.HasCrosshair 			= true
@@ -47,4 +47,4 @@ SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
-SWEP.HasSideRecoil			= false
+SWEP.HasSideRecoil			= true

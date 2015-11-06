@@ -32,9 +32,9 @@ SWEP.Primary.Delay			= 1/(400/60)
 SWEP.Primary.Ammo			= "SniperPenetratedRound"
 SWEP.Primary.Automatic 		= false
 
---SWEP.WorldModel1			= "models/weapons/w_pist_usp.mdl"
---SWEP.WorldModel2 			= "models/weapons/w_pist_usp_silencer.mdl"
---SWEP.Secondary.Sound 		= Sound("weapons/usp/usp1.wav")
+SWEP.WorldModel1			= "models/weapons/w_pist_usp.mdl"
+SWEP.WorldModel2 			= "models/weapons/w_pist_usp_silencer.mdl"
+SWEP.Secondary.Sound 		= Sound("weapons/usp/usp1.wav")
 
 SWEP.RecoilMul				= 1
 SWEP.HasScope 				= false
@@ -45,6 +45,6 @@ SWEP.HasCSSZoom 			= false
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
-SWEP.HasSilencer 			= false
+SWEP.HasSilencer 			= true
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= false

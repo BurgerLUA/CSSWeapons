@@ -32,9 +32,9 @@ SWEP.Primary.Delay			= 1/(666/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
---SWEP.WorldModel1			= "models/weapons/w_rif_m4a1.mdl"
---SWEP.WorldModel2 			= "models/weapons/w_rif_m4a1_silencer.mdl"
---SWEP.Secondary.Sound		= Sound("weapons/m4a1/m4a1-1.wav")
+SWEP.WorldModel1			= "models/weapons/w_rif_m4a1.mdl"
+SWEP.WorldModel2 			= "models/weapons/w_rif_m4a1_silencer.mdl"
+SWEP.Secondary.Sound		= Sound("weapons/m4a1/m4a1-1.wav")
 
 SWEP.RecoilMul				= 1
 SWEP.HasScope 				= false
@@ -45,6 +45,6 @@ SWEP.HasCSSZoom 			= false
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
-SWEP.HasSilencer 			= false
+SWEP.HasSilencer 			= true
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true

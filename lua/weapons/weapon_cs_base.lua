@@ -382,7 +382,7 @@ function SWEP:PrimaryAttack()
 	self:ShootBullet(Damage, Shots, Cone, Source, Direction,Source)
 	self:AddHeat(Damage,Shots)
 	self:Recoil(Damage,Shots,Cone,Recoil)
-	self:ShootEffects()
+	--self:ShootEffects()
 
 end
 

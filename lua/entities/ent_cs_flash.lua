@@ -9,6 +9,7 @@ ENT.AdminSpawnable = false
 AddCSLuaFile()
 
 function ENT:Initialize()
+
 	if SERVER then
 		self:SetModel("models/weapons/w_eq_flashbang.mdl") 
 		self:PhysicsInit(SOLID_VPHYSICS)
@@ -21,9 +22,11 @@ function ENT:Initialize()
 			phys:SetBuoyancyRatio(0)
 		end
 
-		self.Delay = CurTime() + 3
-		self.First = true
 	end
+	
+	self.Delay = CurTime() + 3
+	self.First = true
+	
 end
 
 function ENT:PhysicsCollide(data, physobj)
@@ -40,25 +43,35 @@ end
 
 
 function ENT:Think()
-	if SERVER then
-		if self.First == true then
-			--ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
-			--ParticleEffectAttach("rockettrail", PATTACH_ABSORIGIN_FOLLOW, self, 0)
-			self.First = false
-		end
 
-		if CurTime() > self.Delay then 
-			self:Detonate(self,self:GetPos())
-		end
+	if self.First == true then
+		self.First = false
 	end
+
+	if CurTime() > self.Delay then 
+		self:Detonate(self,self:GetPos())
+	end
+	
+	if SERVER then
+		self:NextThink( CurTime() + 1 )
+	end
+	
+	if CLIENT then
+		self:SetNextClientThink( CurTime() + 1 )
+	end
+
 end
 
 function ENT:Detonate(self,pos)
 
 	local maxdistance = 1000
 
-	if SERVER then
-		if not self:IsValid() then return end
+	if not self:IsValid() then return end
+
+	if CLIENT then
+	
+		self:EmitSound("weapons/flashbang/flashbang_explode2.wav",100,100)
+	
 		local effectdata = EffectData()
 			effectdata:SetStart( pos + Vector(0,0,100)) // not sure if we need a start and origin (endpoint) for this effect, but whatever
 			effectdata:SetOrigin( pos)
@@ -66,71 +79,80 @@ function ENT:Detonate(self,pos)
 			effectdata:SetRadius( 5000 )
 		util.Effect( "HelicopterMegaBomb", effectdata )	
 	
-		self:EmitSound("weapons/flashbang/flashbang_explode2.wav",100,100)
-		
 		if table.Count(ents.FindInSphere(self:GetPos(),maxdistance)) > 0 then
 		
+			print("Did not find any entities")
+		
 			for k,v in pairs(ents.FindInSphere(self:GetPos(),maxdistance)) do
-				if v:GetClass() == "player" then
+			
+				--print(v)
+			
+				if v:IsPlayer() then
 				
+					--[[
 					local td = {}
-					td.start = self:GetPos()
-					td.endpos = v:EyePos()
+					td.start = v:EyePos() + LerpVector(0.1,self:GetPos(),v:EyePos())
+					td.endpos = self:GetPos() + self:OBBCenter()
 					td.filter = self
-				
+					
 					local Trace = util.TraceLine(td)
 					
-					if Trace.Entity == v then
+					print(Trace.Entity)
+					--]]
+					
+					--if Trace.Entity == v then
 					
 						local distancecount = maxdistance/100 - self:GetPos():Distance(v:GetPos())/100
-						--print(distancecount)
+						
+						print(distancecount)
+
 						if distancecount > 0 and distancecount < 8 then 
-							v:TakeDamage(distancecount,self.Owner,self)
 							
-							for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),maxdistance,90)) do
+							for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),maxdistance,120)) do
 								if f == self.Entity then
 									self:BlindEffects(v,distancecount)
 								end
 							end
+							
 						elseif distancecount >= 8 then
+						
 							self:BlindEffects(v,distancecount)
+							
 						end
 						
-					else
+					--else
 					
-						v:SetDSP( 37, false )
+						--v:SetDSP( 37, false )
 
-					end
+					--end
 
 				end
 			end
 		end
-				
-		self:Remove()
 		
 	end
+		
+
+	if SERVER then
+	SafeRemoveEntity(self)
+	end
+		
+	
+	
 end
 
 
 function ENT:BlindEffects(v,distancecount)
-	if SERVER then
-		if distancecount > 1 then
-			v:SetDSP( 37, false )
-		end
-					
-		v:ConCommand("pp_motionblur 1")
-		v:ConCommand("pp_motionblur_drawalpha 0.99")
-		v:ConCommand("pp_motionblur_addalpha 0.2")
-		v:ConCommand("pp_texturize effects/flashbang_white")
-				
-		timer.Create(v:EntIndex().."flashblind1",distancecount*0.25, 1, function()
-			v:ConCommand("pp_texturize \"\"")
-		end)
-				
-		timer.Create(v:EntIndex().."flashblind2",distancecount, 1, function()
-			v:ConCommand("pp_motionblur 0")
-		end)
+
+	print("BLINDED BY THE LIGHT")
+
+	if distancecount > 1 then
+		v:SetDSP( 37, false )
 	end
+	
+	v.BlindAmount = distancecount
+	v.IsBlinded = true
+	
 end
 
 function ENT:Draw()

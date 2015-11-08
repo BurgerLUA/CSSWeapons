@@ -185,7 +185,7 @@ SWEP.PhysBullets			= false
 
 SWEP.IsPrivate 				= false
 
-SWEP.DrawWeaponCountdown = 0
+--SWEP.DrawWeaponCountdown = 0
 
 
 
@@ -1329,6 +1329,8 @@ function SWEP:DrawHUD()
 	local b = GetConVarNumber("cl_css_crosshair_color_b")
 	local a = GetConVarNumber("cl_css_crosshair_color_a")
 	
+	
+	--[[
 	if self.DrawWeaponCountdown > 0 then
 	
 	
@@ -1339,7 +1341,7 @@ function SWEP:DrawHUD()
 		self.DrawWeaponCountdown = self.DrawWeaponCountdown - FrameTime()
 	
 	end
-	
+	--]]
 	
 	
 	

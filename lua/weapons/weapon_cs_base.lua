@@ -185,6 +185,9 @@ SWEP.PhysBullets			= false
 
 SWEP.IsPrivate 				= false
 
+SWEP.DrawWeaponCountdown = 0
+
+
 
 --Burst fire Code from Kogitsune
 local BURST, AUTO = 0, 1
@@ -253,6 +256,12 @@ end
 
 function SWEP:Deploy()
 
+	if CLIENT then
+		self.DrawWeaponCountdown = 5
+	end
+
+
+
 	if SERVER then
 	
 		if GetConVarNumber("sv_css_limit_equipped") == 1 then
@@ -289,6 +298,8 @@ function SWEP:Deploy()
 
 	self.Owner:GetHands():SetMaterial("")
 	self.Owner:DrawViewModel(true)
+	
+	
 	
 	if self.HasSilencer then
 		if self.IsSilenced then
@@ -481,7 +492,7 @@ function SWEP:HandleCone(Cone)
 
 	if self.HasBurstFire == true then
 		if self:GetFireMode( ) == BURST then
-			Cone = Cone * 2
+			Cone = Cone * 0.66
 		end
 	elseif self.HasSilencer == true then
 		if self.IsSilenced then
@@ -535,31 +546,26 @@ function SWEP:HandleCrouching(value)
 	
 end
 --]]
+
 SWEP.PunchAngleUp = Angle(0,0,0)
 SWEP.PunchAngleDown = Angle(0,0,0)
 
 function SWEP:Recoil(Damage,Shots,Cone,Recoil)
 
-	local ViewKick = -(Damage*Shots/20)/2*Recoil
+	local ViewKick = -(Damage*Shots/20)*Recoil
 
 	if self.HasSideRecoil == true then
-		bonusmul = 1
-		sideways = 1 * self.CoolDown
+		sideways = self.CoolDown * 0.5
 	else
-		bonusmul = 1
-		sideways = 1
+		sideways = 0
 	end
 
-	local uppunch = (ViewKick/2)*3*bonusmul
+	local uppunch = (ViewKick/2)*3
 	local sidepunch = (ViewKick/2)*math.Rand(-1,1)*sideways
 	local rollpunch = 0
 	
 	self.PunchAngleUp = Angle(uppunch,sidepunch,rollpunch)
-	self.PunchAngleDown = Angle(uppunch,sidepunch,rollpunch)
-
-	if self.Owner then
-		
-	end
+	self.PunchAngleDown = self.PunchAngleUp
 	
 end
 
@@ -1188,9 +1194,7 @@ function SWEP:Think()
 
 		end
 	end
-	
 
-	
 	if self.CoolTime < CurTime() then
 		if self.CoolDown ~= 0 then
 
@@ -1206,7 +1210,6 @@ function SWEP:Think()
 				end
 				
 				self.NextCoolTick = CurTime() + 0.025
-				
 				
 			end
 
@@ -1229,6 +1232,7 @@ function SWEP:Think()
 	
 end
 
+--SWEP.PunchDelay = 0
 
 function SWEP:HandleRecoilThink()
 
@@ -1242,7 +1246,7 @@ function SWEP:HandleRecoilThink()
 
 	local FrameMul = FrameTime() * 10
 	local UpMul = 1 * FrameMul
-	local DownMul = 0.5 * FrameMul
+	local DownMul = 0.75 * FrameMul
 
 	local ModAngle = Angle(0,0,0)
 	
@@ -1252,18 +1256,17 @@ function SWEP:HandleRecoilThink()
 		self.PunchAngleUp = self.PunchAngleUp - CurrentMod
 	end
 	
-	if self.PunchAngleDown ~= Angle(0,0,0) and ( (yUp < 1) and (yUp > -1) ) then
+	if self.PunchAngleDown ~= Angle(0,0,0)  then
 		local CurrentMod = Angle( (pDown*DownMul),(yDown*DownMul),(rDown*DownMul))
 		ModAngle = ModAngle - CurrentMod
 		self.PunchAngleDown = self.PunchAngleDown - CurrentMod
-		--print("Working?")
 	end
 	
 	if ModAngle ~= Angle(0,0,0) then
 		self.Owner:SetEyeAngles(self.Owner:EyeAngles() + ModAngle)
 	end
 	
-	local Limit = 0.01
+
 
 end
 
@@ -1325,6 +1328,21 @@ function SWEP:DrawHUD()
 	local g = GetConVarNumber("cl_css_crosshair_color_g")
 	local b = GetConVarNumber("cl_css_crosshair_color_b")
 	local a = GetConVarNumber("cl_css_crosshair_color_a")
+	
+	if self.DrawWeaponCountdown > 0 then
+	
+	
+		self:PrintWeaponInfo( x - 300, y - 250, math.min(255, self.DrawWeaponCountdown * 255 ))
+		
+	
+	
+		self.DrawWeaponCountdown = self.DrawWeaponCountdown - FrameTime()
+	
+	end
+	
+	
+	
+	
 	
 	--[[
 	local Cone = self.Primary.Cone
@@ -1477,6 +1495,17 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 			Cone = self.Primary.Cone * LocalPlayer().css_cone_scale
 			Recoil = Damage * self.RecoilMul * LocalPlayer().css_recoil_scale
 		end
+		
+		
+
+		
+		--local WeaponRating = math.floor((self.Primary.Delay^-1) * (Damage/100) * ((Cone + 0.001)^-1) * ((Recoil + 0.001)^-1.5) * 200)
+		
+		--if (Damage >= 100) then
+		--	WeaponRating = WeaponRating * 2
+		--end
+	
+	
 	
 		local str
 		local title_color = "<color=0,0,0,255>"
@@ -1486,8 +1515,9 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 		str = str .. title_color .. "Damage:</color> "..text_color..Damage.."</color>\n" 
 		str = str .. title_color .. "Firerate:</color> "..text_color.. math.floor((self.Primary.Delay^-1)*60) .. " RPM" .."</color>\n"
 		str = str .. title_color .. "Damage Per Second:</color> "..text_color..math.floor((self.Primary.Delay^-1) * Damage ).. "DPS" .. "</color>\n"
-		str = str .. title_color .. "Recoil:</color> "..text_color.. math.floor(Recoil * 2) .. "%" .."</color>\n" 
+		str = str .. title_color .. "Recoil:</color> "..text_color.. math.floor(Recoil / 2) .. "%" .."</color>\n" 
 		str = str .. title_color .. "Accuracy:</color> "..text_color.. 100 - (Cone*100) .. "%" .. "</color>\n"
+		--str = str .. title_color .. "Weapon Rating:</color> "..text_color.. WeaponRating .. "</color>\n"
 		str = str .. "</font>"
 		
 		self.InfoMarkup = markup.Parse( str, 250 )

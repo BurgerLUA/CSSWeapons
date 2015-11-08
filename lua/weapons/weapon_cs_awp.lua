@@ -33,7 +33,7 @@ SWEP.Primary.Ammo			= "SniperRound"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 1
-SWEP.VelConeMul				= 2
+SWEP.VelConeMul				= 3
 
 SWEP.HasScope 				= true
 SWEP.ZoomAmount 			= 12

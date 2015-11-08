@@ -33,6 +33,8 @@ SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1
+SWEP.VelConeMul				= 2
+
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1.5
 SWEP.HasCrosshair 			= true

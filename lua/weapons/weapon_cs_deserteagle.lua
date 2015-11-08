@@ -33,6 +33,8 @@ SWEP.Primary.Ammo			= "CombineCannon"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul 				= 1
+SWEP.VelConeMul				= 0.5
+
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
 SWEP.HasCrosshair			= true

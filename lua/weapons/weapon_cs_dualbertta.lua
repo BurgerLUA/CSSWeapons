@@ -33,6 +33,8 @@ SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul 				= 1
+SWEP.VelConeMul				= 1.25
+
 SWEP.HasScope 				= false
 SWEP.ZoomAmount				= 0
 SWEP.HasCrosshair 			= true

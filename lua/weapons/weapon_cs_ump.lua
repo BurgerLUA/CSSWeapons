@@ -25,7 +25,7 @@ SWEP.HoldType				= "smg"
 SWEP.Primary.Damage			= 29
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ump45/ump45-1.wav")
-SWEP.Primary.Cone			= .03
+SWEP.Primary.Cone			= .015
 SWEP.Primary.ClipSize		= 25
 SWEP.Primary.SpareClip		= 100
 SWEP.Primary.Delay			= 1/(666/60)
@@ -33,6 +33,8 @@ SWEP.Primary.Ammo			= "SniperPenetratedRound"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1
+SWEP.VelConeMul				= 0.75
+
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
 SWEP.HasCrosshair 			= true

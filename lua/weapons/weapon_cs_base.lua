@@ -131,6 +131,7 @@ SWEP.Secondary.Automatic	= false
 
 SWEP.RecoilMul				= 1
 SWEP.VelConeMul				= 1
+SWEP.CoolDownMul			= 1
 
 SWEP.HasCrosshair 			= true
 
@@ -503,7 +504,7 @@ function SWEP:HandleCone(Cone)
 	if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
 	
 		if self.WeaponType == "Secondary" and self.HoldType == "revolver" then
-			Cone = Cone * 0.1
+			Cone = Cone * 0.5
 		else
 			Cone = Cone * 0.8
 		end
@@ -527,25 +528,6 @@ function SWEP:HandleCone(Cone)
 	return Cone
 
 end
---[[
-function SWEP:HandleCrouching(value)
-
-	if self.Owner:Crouching() == true and self.Owner:IsOnGround() == true then
-	
-		if self.WeaponType == "Secondary" and self.HoldType == "revolver" then
-			value = value * 0.1
-		else
-			value = value * 0.8
-		end
-
-	else
-		value = value * 1
-	end
-
-	return value
-	
-end
---]]
 
 SWEP.PunchAngleUp = Angle(0,0,0)
 SWEP.PunchAngleDown = Angle(0,0,0)
@@ -564,8 +546,8 @@ function SWEP:Recoil(Damage,Shots,Cone,Recoil)
 	local sidepunch = (ViewKick/2)*math.Rand(-1,1)*sideways
 	local rollpunch = 0
 	
-	self.PunchAngleUp = Angle(uppunch,sidepunch,rollpunch)
-	self.PunchAngleDown = self.PunchAngleUp
+	self.PunchAngleUp = self.PunchAngleUp + Angle(uppunch,sidepunch,rollpunch)
+	self.PunchAngleDown = self.PunchAngleDown + Angle(uppunch,sidepunch,rollpunch)
 	
 end
 
@@ -739,7 +721,6 @@ end
 function SWEP:CanPrimaryAttack()
 
 	if self:GetNextPrimaryFire() > CurTime() then return false end
-	
 
 	if self:Clip1() == -1 then
 
@@ -748,8 +729,7 @@ function SWEP:CanPrimaryAttack()
 			return false
 		
 		end
-	
-	
+
 	elseif self:Clip1() <= 0 then
 		--self:Reload()
 		if self.ClickSoundDelay <= CurTime() then
@@ -767,11 +747,11 @@ end
 
 function SWEP:AddHeat(Damage,Shots)
 
-	if CLIENT and not IsFirstTimePredicted() then return end
+	if not IsFirstTimePredicted() then return end
 	
 	if CLIENT then
-		self.CoolDown = math.Clamp(self.CoolDown+(Damage*Shots*0.01)*self.Owner.css_heat_scale,0,20)
-		self.CoolTime = CurTime() + ((Damage*Shots*0.01) - 0.1)*self.Owner.css_cooltime_scale
+		self.CoolDown = math.Clamp(self.CoolDown + (Damage*Shots*0.01)*self.Owner.css_heat_scale*self.CoolDownMul,0,30)
+		self.CoolTime = CurTime() + (((Damage*Shots*0.01) - 0.1)*self.Owner.css_cooltime_scale * self.CoolDownMul)
 	end
 		
 	if SERVER  then 
@@ -913,12 +893,6 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 	local trace = util.TraceLine(data)
 	
 	local NewDamage = Damage - ( GetConVarNumber("sv_css_penetration_scale") * Amount )
-	
-	--print("Running... Newdamage is " .. NewDamage )
-
-	--print(trace.HitWorld)
-	--print(NewDamage)
-	
 	
 	if trace.HitWorld and NewDamage > 1 then
 		self:WorldBulletSolution(Pos + Direction*Amount,Direction,NewDamage)

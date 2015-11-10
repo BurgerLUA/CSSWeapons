@@ -32,8 +32,9 @@ SWEP.Primary.Delay			= 1/(600/60)
 SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 1.5
 SWEP.VelConeMul				= 2
+SWEP.CoolDownMul			= 2
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1.5

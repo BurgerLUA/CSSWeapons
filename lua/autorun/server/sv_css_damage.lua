@@ -1,6 +1,8 @@
 function CSSDamage(ply, hitgroup, dmginfo)
 	
 	local ReportedDamage
+	
+	local Weapon = dmginfo:GetInflictor()
 
 	if not ply:HasGodMode() and GetConVarNumber("sbox_godmode") == 0 then
 	
@@ -16,7 +18,15 @@ function CSSDamage(ply, hitgroup, dmginfo)
 
 			ReportedDamage = dmginfo
 			
-			ReportedDamage:ScaleDamage( GetConVarNumber("sv_css_damage_scale") )
+			if IsValid(Weapon) then
+				if (Weapon:IsWeapon()) then
+					if Weapon:IsScripted()
+						if Weapon.Base == "weapon_cs_base" then
+							dmginfo:ScaleDamage( GetConVarNumber("sv_css_damage_scale") )
+						end
+					end
+				end
+			end
 
 			if hitgroup == HITGROUP_HEAD then
 				ReportedDamage:ScaleDamage(4)
@@ -34,15 +44,19 @@ function CSSDamage(ply, hitgroup, dmginfo)
 			
 			ply:TakeDamageInfo(ReportedDamage)
 			dmginfo:ScaleDamage(0)
+			
+			--return
 
 		else
-		
-			if IsValid(dmginfo:GetActiveWeapon()) then
-				if dmginfo:GetActiveWeapon().Base == "weapon_cs_base" then
-					dmginfo:ScaleDamage( GetConVarNumber("sv_css_damage_scale") )
+			if IsValid(Weapon) then
+				if (Weapon:IsWeapon()) then
+					if Weapon:IsScripted()
+						if Weapon.Base == "weapon_cs_base" then
+							dmginfo:ScaleDamage( GetConVarNumber("sv_css_damage_scale") )
+						end
+					end
 				end
 			end
-
 		end
 		
 	end

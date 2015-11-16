@@ -20,7 +20,7 @@ function CSSDamage(ply, hitgroup, dmginfo)
 			
 			if IsValid(Weapon) then
 				if (Weapon:IsWeapon()) then
-					if Weapon:IsScripted()
+					if Weapon:IsScripted() then
 						if Weapon.Base == "weapon_cs_base" then
 							dmginfo:ScaleDamage( GetConVarNumber("sv_css_damage_scale") )
 						end
@@ -50,7 +50,7 @@ function CSSDamage(ply, hitgroup, dmginfo)
 		else
 			if IsValid(Weapon) then
 				if (Weapon:IsWeapon()) then
-					if Weapon:IsScripted()
+					if Weapon:IsScripted() then
 						if Weapon.Base == "weapon_cs_base" then
 							dmginfo:ScaleDamage( GetConVarNumber("sv_css_damage_scale") )
 						end

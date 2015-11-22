@@ -33,7 +33,7 @@ SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1
-SWEP.VelConeMul				= 0.75
+SWEP.VelConeMul				= 2
 
 SWEP.HasScope 				= true
 SWEP.ZoomAmount 			= 4

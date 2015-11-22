@@ -10,7 +10,6 @@ SWEP.WeaponType				= "Primary"
 
 SWEP.Cost					= 5750
 SWEP.MoveSpeed				= 220
---SWEP.MoveSpeed				= 50
 
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false

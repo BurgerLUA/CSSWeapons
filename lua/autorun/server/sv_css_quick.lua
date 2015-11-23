@@ -25,10 +25,6 @@ net.Receive( "ThrowQuickGrenade", function( len, ply )
 		ply:GetActiveWeapon():QuickKnife()
 
 	end
-	
-	
-	
-	
 
 end )
 

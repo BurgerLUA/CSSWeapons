@@ -9,7 +9,6 @@ ENT.AdminSpawnable = false
 AddCSLuaFile()
 
 function ENT:Initialize()
-
 	if SERVER then
 	
 		self:PhysicsInit(SOLID_VPHYSICS)
@@ -34,9 +33,6 @@ function ENT:Initialize()
 		end
 		
 	end
-
-	
-	
 end
 
 function ENT:Use(activator,caller,useType,value)
@@ -48,14 +44,10 @@ function ENT:Use(activator,caller,useType,value)
 				if activator:GetActiveWeapon().IsReloading ==1 then return end
 			end
 		end
-		
 
-		
-	
 		if self:GetNWString("class") == "weapon_cs_c4" and GetConVar("sv_css_enable_c4nonadmin"):GetInt() ~= 1 and activator:IsAdmin() == false then
 			activator:ChatPrint("You are not allowed to pick up C4")
 		return end
-		
 		
 		local hasweapon = false
 		
@@ -75,7 +67,6 @@ function ENT:Use(activator,caller,useType,value)
 		
 			else
 		
-		
 				local clipcount = self:GetNWInt("clip")
 			
 				if clipcount > 0 then
@@ -84,10 +75,7 @@ function ENT:Use(activator,caller,useType,value)
 				else
 					activator:ChatPrint("There are no rounds to take from the weapon's clip.")
 				end
-				
-				
-				
-			
+
 				self:SetNWInt("clip",0)
 			
 				hasweapon = false
@@ -95,15 +83,12 @@ function ENT:Use(activator,caller,useType,value)
 			end
 			
 		return end
-		
-		
+
 		local givenweapon = activator:Give(self:GetNWString("class"))
 		givenweapon.AlreadyGiven = true
 		givenweapon:SetClip1(self:GetNWInt("clip"))
-		--activator:GiveAmmo(self:GetNWString("spare"), weapons.GetStored(self:GetNWString("class")).Primary.Ammo )
 		activator:SelectWeapon(self:GetNWString("class"))
 		self:EmitSound("items/itempickup.wav")
-		
 
 		self:Remove()
 	else

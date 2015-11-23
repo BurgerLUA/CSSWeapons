@@ -36,6 +36,11 @@ function ENT:Initialize()
 	
 end
 
+local Throwables = {}
+Throwables["hegrenade"] = "weapon_cs_he"
+Throwables["flashgrenade"] = "weapon_cs_flash"
+Throwables["smokegrenade"] = "weapon_cs_smoke"
+
 function ENT:Use(activator,caller,useType,value)
 	
 	if ( activator:IsPlayer() ) then
@@ -43,9 +48,17 @@ function ENT:Use(activator,caller,useType,value)
 		for k,v in pairs(self.AmmoTable) do
 			if v > 0 then
 				activator:GiveAmmo(v,k,false)
-				--print(k,v)
+
+				
+				if Throwables[game.GetAmmoName(k)] then
+					activator:Give(Throwables[game.GetAmmoName(k)])
+				end
+				
+				
 			end
 		end
+		
+		
 		
 		
 		self:EmitSound("items/ammopickup.wav")

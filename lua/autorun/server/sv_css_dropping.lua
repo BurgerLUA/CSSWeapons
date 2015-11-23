@@ -37,7 +37,7 @@ function CSSDropWeaponAmmo(ply)
 			AllAmmoTable[i] = ply:GetAmmoCount( i )
 		end
 		
-		if (AllAmmoTable[1] then
+		if AllAmmoTable[1] then
 		
 			local dropammo = ents.Create("ent_cs_ammo_table")
 			dropammo.AmmoTable = AllAmmoTable

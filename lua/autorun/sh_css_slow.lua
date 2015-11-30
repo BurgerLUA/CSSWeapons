@@ -41,9 +41,14 @@ end
 
 hook.Add("PlayerShouldTakeDamage","CSS: Slow Damage",CSSSlowDamage)
 
+local ForwardMove = 0
+local SideMove = 0
+
 function CSSSpeedModMovement(ply,mv)
 
 	if not ply:IsBot() then
+	
+	
 		if SlowEnable then
 
 			if not ply.GetSlow then
@@ -71,38 +76,53 @@ function CSSSpeedModMovement(ply,mv)
 			
 			local SpeedMod = ( WeaponSpeed * (100 - ply.GetSlow)/100 ) / 270
 
-			ply.GetSlow = math.Clamp(ply.GetSlow - 3,0,99)
+			ply.GetSlow = math.Clamp(ply.GetSlow - 1000*engine.TickInterval(),0,99)
 
-			local ForwardMove = mv:GetForwardSpeed()
-			local SideMove = mv:GetSideSpeed()
+			--if SlowEnable == false then
 			
-			if ForwardMove == 10000 then
+				ForwardMove = mv:GetForwardSpeed()
+				SideMove = mv:GetSideSpeed()
+				
+			--else
+				--[[
+				local SprintMod = ply:GetRunSpeed()/270
+				
 				if mv:KeyDown(IN_SPEED) then
-					ForwardMove = ply:GetRunSpeed()
-				else
-					ForwardMove = ply:GetWalkSpeed()
+					SprintMod = ply:GetRunSpeed()/ply:GetWalkSpeed()
 				end
-			elseif ForwardMove == -10000 then
-				if mv:KeyDown(IN_SPEED) then
-					ForwardMove = -ply:GetRunSpeed()
-				else
-					ForwardMove = -ply:GetWalkSpeed()
-				end
-			end
+				
+				local Max = 10000 * engine.TickInterval() * SprintMod
+				local Acc = 1000 * engine.TickInterval() * 0.4
+				local Dec = 1000 * engine.TickInterval() * 0.4
 
-			if SideMove == 10000 then
-				if mv:KeyDown(IN_SPEED) then
-					SideMove = ply:GetRunSpeed()
-				else
-					SideMove = ply:GetWalkSpeed()
+				ForwardMove = math.Clamp(ForwardMove + math.Clamp(mv:GetForwardSpeed(),-Acc,Acc),-Max,Max)
+				SideMove = math.Clamp(SideMove + math.Clamp(mv:GetSideSpeed(),-Acc,Acc),-Max,Max)
+
+				if mv:GetForwardSpeed() == 0 then
+					if ForwardMove < 0 then
+						ForwardMove = ForwardMove + Dec*SprintMod*(ply:GetWalkSpeed()/270)
+					elseif ForwardMove > 0 then
+						ForwardMove = ForwardMove - Dec*SprintMod*(ply:GetWalkSpeed()/270)
+					end
 				end
-			elseif SideMove == -10000 then
-				if mv:KeyDown(IN_SPEED) then
-					SideMove = -ply:GetRunSpeed()
-				else
-					SideMove = -ply:GetWalkSpeed()
+
+				if mv:GetSideSpeed() == 0 then
+					if SideMove < 0 then
+						if SideMove > -Dec then
+							SideMove = 0
+						else
+							SideMove = SideMove + Dec*SprintMod*(ply:GetWalkSpeed()/270)
+						end
+					elseif SideMove > 0 then
+						if SideMove < Dec then
+							SideMove = 0
+						else
+							SideMove = SideMove - Dec*SprintMod*(ply:GetWalkSpeed()/270)
+						end
+					end
 				end
-			end
+				--]]
+			--end
 			
 			mv:SetForwardSpeed( ForwardMove * SpeedMod)
 			mv:SetSideSpeed( SideMove * SpeedMod)

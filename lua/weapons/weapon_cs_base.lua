@@ -1005,10 +1005,6 @@ function SWEP:GetViewModelPosition( pos, ang )
 
 	local bIron = self.Weapon:GetNetworkedBool( "Ironsights" )
 	
-
-	
-	
-	
 	if ( bIron != self.bLastIron ) then
 	
 		self.bLastIron = bIron 
@@ -1178,12 +1174,6 @@ function SWEP:Think()
 		end
 	end
 
-	--[[
-	if SERVER then
-		self:SetNWFloat("weaponheat", math.Clamp(self.CoolDown,0,10))
-	end
-	--]]
-	
 end
 
 --SWEP.PunchDelay = 0

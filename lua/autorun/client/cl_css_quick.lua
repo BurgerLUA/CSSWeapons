@@ -17,9 +17,6 @@ function NadeKeyPress(ply,key)
 			if not ply:HasWeapon("weapon_cs_he") then return end
 			if ply:GetActiveWeapon():GetClass() == "weapon_cs_he" then return end	
 			if ply:InVehicle() then return end
-		
-			
-			--ply:GetActiveWeapon():QuickThrow()
 			
 			net.Start("ThrowQuickGrenade")
 				net.WriteFloat(1)
@@ -30,8 +27,6 @@ function NadeKeyPress(ply,key)
 			if not ply:HasWeapon("weapon_cs_knife") then return end
 			if ply:GetActiveWeapon():GetClass() == "weapon_cs_knife" then return end	
 			if ply:InVehicle() then return end
-			
-			--ply:GetActiveWeapon():QuickKnife()
 			
 			net.Start("ThrowQuickGrenade")
 				net.WriteFloat(2)

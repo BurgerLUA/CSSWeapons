@@ -112,10 +112,8 @@ function SWEP:Swing(damage)
 				
 					local angle = math.abs(v:GetAngles().y - self.Owner:GetAngles().y)
 					
-					if damage == 55 then
-						if angle > 330 or angle < 30 then
-							damage = 195
-						end
+					if angle > 330 or angle < 30 then
+						damage = damage * 3
 					end
 					
 					self.HitAThing = true

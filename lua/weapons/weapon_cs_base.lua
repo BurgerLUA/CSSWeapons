@@ -1,44 +1,44 @@
 AddCSLuaFile()
 
-CreateConVar("sv_css_damage_scale", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value that all damage from CSS weapons is multiplied. Default is 1." )
-CreateConVar("sv_css_recoil_scale", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value that all recoil from CSS weapons is multiplied. Default is 1." )
-CreateConVar("sv_css_cone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
-CreateConVar("sv_css_velcone_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
-CreateConVar("sv_css_heat_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
-CreateConVar("sv_css_cooltime_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the cooldown delay time from CSS weapons is multiplied by. Default is 1." )
-CreateConVar("sv_css_cooldown_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "This is the value that the cooldown amount from CSS weapons is multiplied by. Default is 1." )
+local AllFCVar = FCVAR_REPLICATED + FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_SERVER_CAN_EXECUTE
 
-CreateConVar("sv_css_enable_csszoom", "0", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables CSS-Like zooms for the AUG and SG552. Default is 0." )
+CreateConVar("sv_css_damage_scale", "1", AllFCVar , "This is the value that all damage from CSS weapons is multiplied. Default is 1." )
+CreateConVar("sv_css_recoil_scale", "1", AllFCVar , "This is the value that all recoil from CSS weapons is multiplied. Default is 1." )
+CreateConVar("sv_css_cone_scale", "1", AllFCVar , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
+CreateConVar("sv_css_velcone_scale", "1", AllFCVar , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
+CreateConVar("sv_css_heat_scale", "1", AllFCVar , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
+CreateConVar("sv_css_cooltime_scale", "1", AllFCVar , "This is the value that the cooldown delay time from CSS weapons is multiplied by. Default is 1." )
+CreateConVar("sv_css_cooldown_scale", "1", AllFCVar , "This is the value that the cooldown amount from CSS weapons is multiplied by. Default is 1." )
 
-CreateConVar("sv_css_ammo_loaded", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables giving weapons already loaded. Default is 1." )
-CreateConVar("sv_css_ammo_givespare", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables giving spare ammo to players upon pickup. Default is 1." )
+CreateConVar("sv_css_enable_csszoom", "0", AllFCVar , "1 enables CSS-Like zooms for the AUG and SG552. Default is 0." )
 
-CreateConVar("sv_css_enable_drops", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables players to drop css weapons on death, all other values disables it. Default is 1." )
-CreateConVar("sv_css_timed_drops", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 creates a removal time limit for weapons that drop. 0 never removes weapon drops." )
-CreateConVar("sv_css_drop_timer", "60", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in seconds that determines how long the weapons are removed after they are dropped. Default is 60." )
-CreateConVar("sv_css_limit_equipped", "0", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 limits only one primary weapon and one secondary weapon. Equipment is unlimited. Default is 0." )
+CreateConVar("sv_css_ammo_loaded", "1", AllFCVar , "1 enables giving weapons already loaded. Default is 1." )
+CreateConVar("sv_css_ammo_givespare", "1", AllFCVar , "1 enables giving spare ammo to players upon pickup. Default is 1." )
 
---CreateConVar("sv_css_enable_c4", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables non-admins to use c4, all other values disables it. Default is 1." )
-CreateConVar("sv_css_enable_c4nonadmin", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables non-admins to use c4, all other values disables it. Default is 1." )
---CreateConVar("sv_css_enable_c4smoke", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables smoke effects for the c4, all other values disables it. Default is 1." )
-CreateConVar("sv_css_c4_time_explosion", "45", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in seconds that the C4 detonates when planted. Default is 45." )
-CreateConVar("sv_css_c4_time_defuse", "10", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in seconds that the C4 is defused. Default is 10." )
-CreateConVar("sv_css_c4_damage", "500", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in points that determines maximum damage. Default is 500." )
-CreateConVar("sv_css_c4_radius", "1500", FCVAR_REPLICATED + FCVAR_ARCHIVE , "This is the value in units that determines the maximum blast radius. Default is 1500." )
-CreateConVar("sv_css_c4_notifyplayers", "1", FCVAR_REPLICATED + FCVAR_ARCHIVE , "1 enables players to receive cosmetic round winning notifications and sounds, all other values disables it. Default is 1." )
-CreateConVar("sv_css_c4_timelimit", "0", FCVAR_REPLICATED + FCVAR_ARCHIVE , "Global delay in minutes in which you can plant C4. Default is 0." )
+CreateConVar("sv_css_enable_drops", "1", AllFCVar , "1 enables players to drop css weapons on death, all other values disables it. Default is 1." )
+CreateConVar("sv_css_timed_drops", "1", AllFCVar , "1 creates a removal time limit for weapons that drop. 0 never removes weapon drops." )
+CreateConVar("sv_css_drop_timer", "60", AllFCVar , "This is the value in seconds that determines how long the weapons are removed after they are dropped. Default is 60." )
+CreateConVar("sv_css_limit_equipped", "0", AllFCVar , "1 limits only one primary weapon and one secondary weapon. Equipment is unlimited. Default is 0." )
+
+CreateConVar("sv_css_enable_c4nonadmin", "1", AllFCVar , "1 enables non-admins to use c4, all other values disables it. Default is 1." )
+CreateConVar("sv_css_c4_time_explosion", "45", AllFCVar , "This is the value in seconds that the C4 detonates when planted. Default is 45." )
+CreateConVar("sv_css_c4_time_defuse", "10", AllFCVar , "This is the value in seconds that the C4 is defused. Default is 10." )
+CreateConVar("sv_css_c4_damage", "500", AllFCVar , "This is the value in points that determines maximum damage. Default is 500." )
+CreateConVar("sv_css_c4_radius", "1500", AllFCVar , "This is the value in units that determines the maximum blast radius. Default is 1500." )
+CreateConVar("sv_css_c4_notifyplayers", "1", AllFCVar , "1 enables players to receive cosmetic round winning notifications and sounds, all other values disables it. Default is 1." )
+CreateConVar("sv_css_c4_timelimit", "0", AllFCVar , "Global delay in minutes in which you can plant C4. Default is 0." )
 
 
-CreateConVar("sv_css_enable_penetration", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enable penetration through objects, 0 disables. Default is 1." )
-CreateConVar("sv_css_penetration_scale", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "Base damage lost per unit of penetration. Default is 1." )
+CreateConVar("sv_css_enable_penetration", "1", AllFCVar , "1 enable penetration through objects, 0 disables. Default is 1." )
+CreateConVar("sv_css_penetration_scale", "1", AllFCVar , "Base damage lost per unit of penetration. Default is 1." )
 
-CreateConVar("sv_css_enable_mags", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables cosmetic magazine drops. Requires separate addon. Default is 0." )
+CreateConVar("sv_css_enable_mags", "1", AllFCVar , "1 enables cosmetic magazine drops. Requires separate addon. Default is 0." )
 
-CreateConVar("sv_css_enable_damagemod", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables damage modifications, 0 disables. Default is 1." )
-CreateConVar("sv_css_enable_damagesounds", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables damage sounds, 0 disables. Default is 1." )
-CreateConVar("sv_css_enable_deathsounds", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables death sounds, 0 disables. Default is 1." )
+CreateConVar("sv_css_enable_damagemod", "1", AllFCVar , "1 enables damage modifications, 0 disables. Default is 1." )
+CreateConVar("sv_css_enable_damagesounds", "1", AllFCVar , "1 enables damage sounds, 0 disables. Default is 1." )
+CreateConVar("sv_css_enable_deathsounds", "1", AllFCVar , "1 enables death sounds, 0 disables. Default is 1." )
 
---CreateConVar("sv_css_enable_speedmod", "0", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables speed mod, 0 disables. Default is 1." )
+--CreateConVar("sv_css_enable_speedmod", "0", AllFCVar , "1 enables speed mod, 0 disables. Default is 1." )
 
 CreateClientConVar("cl_css_customslots", "0", true, true )
 CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
@@ -344,10 +344,11 @@ end
 
 function SWEP:PrimaryAttack()
 
-	if not IsFirstTimePredicted() then return end
 	if not self:CanPrimaryAttack() then return end
 	if self:IsBusy() then return end
 	if self:IsUsing() then return end
+	
+	print("Shoot")
 	
 	if self.WeaponType == "Throwable" then
 		self:PreThrowObject()
@@ -362,8 +363,6 @@ function SWEP:PrimaryAttack()
 		return 
 	end
 
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
-
 	if SERVER then
 		if self.HasScope then
 			if self.HasBoltAction then
@@ -377,12 +376,14 @@ function SWEP:PrimaryAttack()
 		end
 	end
 	
-	local Damage,Shots,Cone,Recoil = self:Modifiers(self.Primary.Damage,self.Primary.NumShots,self.Primary.Cone,self.RecoilMul)
+	self:WeaponEffects()
 	
+	if not IsFirstTimePredicted() then return end
+	local Damage,Shots,Cone,Recoil = self:Modifiers(self.Primary.Damage,self.Primary.NumShots,self.Primary.Cone,self.RecoilMul)
 	local Source = self.Owner:GetShootPos()
 	local Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
-
 	self:ShootBullet(Damage,Shots,Cone,Source,Direction,Source)
+	self:TakePrimaryAmmo(1)
 	self:AddHeat(Damage,Shots)
 	
 	if CLIENT then
@@ -399,70 +400,16 @@ function SWEP:Modifiers(Damage,Shots,Cone,Recoil)
 		self:SetBoltDelay(CurTime() + self.Primary.Delay)
 	end
 	
-	if self.HasBurstFire == true then
-	
-		if self:GetIsBurst() then
-	
-			--[[
-			if self.Primary.Automatic == true then
-				self:SetNextPrimaryFire(CurTime() + 1)
-			else
-				self:SetNextPrimaryFire(CurTime() + 0.5)
-			end
-			--]]
-			
-			self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*3)
-		
-			Recoil = Recoil * 0.75
-			Shots = math.min(self.Weapon:Clip1(),Shots*3)
-
-		else
-			self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-		end
-		
-		self:TakePrimaryAmmo(Shots)
-		
-		if Shots > 1 then
-			for i=1, Shots-1 do
-				timer.Simple(0.01*i,function() 
-					if IsValid(self) == true then 
-						self:EmitGunSound(GunSound)
-						self:SendPrimaryAnimation()
-					end
-				end)
-			end
-		else
-			self:EmitGunSound(GunSound)
-			self:SendPrimaryAnimation()
-		end
-		
-	elseif self.HasSilencer == true then
-	
+	if self.HasSilencer == true then
 		if self:GetIsSilenced() then
-			GunSound = self.Secondary.Sound
 			Damage = Damage*0.9
 			Recoil = Recoil*0.9
-		else
-			GunSound = self.Primary.Sound
 		end
-		
-		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-		self:TakePrimaryAmmo(1)
-			
-	else
-		GunSound = self.Primary.Sound
-		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-		self:TakePrimaryAmmo(1)
 	end
+	
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	
 	--[[
-	if self.HasPumpAction then
-		self.ReloadDelay = CurTime() + 1
-	else
-		self.ReloadDelay = CurTime() + math.max(self.Primary.Delay,0.25)
-	end
-	--]]
-	
 	if CLIENT then
 		if not self.Owner.css_recoil_scale then
 			Recoil = Recoil * 1 * self.RecoilMul
@@ -470,14 +417,28 @@ function SWEP:Modifiers(Damage,Shots,Cone,Recoil)
 			Recoil = Recoil * self.Owner.css_recoil_scale * self.RecoilMul
 		end
 	end
-
-	self:EmitGunSound(GunSound)
-	self:SendPrimaryAnimation()
+	--]]
 	
 	Cone = self:HandleCone(Cone)
 	
 	return Damage,Shots,Cone,Recoil
 	
+end
+
+
+function SWEP:WeaponEffects()
+
+	local GunSound = self.Primary.Sound
+	
+	if self.HasSilencer == true then
+		if self:GetIsSilenced() then
+			GunSound = self.Secondary.Sound
+		end
+	end
+	
+	self:EmitGunSound(GunSound)
+	self:SendPrimaryAnimation()
+
 end
 
 function SWEP:SendPrimaryAnimation()
@@ -516,10 +477,11 @@ function SWEP:HandleCone(Cone)
 		end
 	end
 
-	if SERVER then
+	--if SERVER then
 		Cone = ( VelCone * GetConVarNumber("sv_css_velcone_scale") ) + (Cone * GetConVarNumber("sv_css_cone_scale")) + (self:GetCoolDown()/100)
-	end
+	--end
 
+	--[[
 	if CLIENT then
 		if not self.Owner.css_velcone_scale then
 			Cone = ( VelCone * 1 ) + (Cone * 1) + (self:GetCoolDown()/100)
@@ -527,6 +489,7 @@ function SWEP:HandleCone(Cone)
 			Cone = ( VelCone * self.Owner.css_velcone_scale ) + (Cone * self.Owner.css_cone_scale) + (self:GetCoolDown()/100)
 		end
 	end
+	--]]
 	
 	return Cone
 
@@ -575,6 +538,8 @@ end
 
 function SWEP:SwitchFireMode()
 
+	if not IsFirstTimePredicted() then return end
+	
 	local Message = "Semi-Automatic"
 
 	if self.Primary.Automatic == true then
@@ -600,10 +565,12 @@ function SWEP:Silencer()
 		
 	if self:GetIsSilenced() then
 		self:SendWeaponAnim(ACT_VM_DETACH_SILENCER)
+		if not IsFirstTimePredicted() then return end
 		self.WorldModel = self.WorldModel1
 		self:SetIsSilenced(false)
 	else
 		self:SendWeaponAnim(ACT_VM_ATTACH_SILENCER)
+		if not IsFirstTimePredicted() then return end
 		self.WorldModel = self.WorldModel2
 		self:SetIsSilenced(true)
 	end
@@ -613,6 +580,7 @@ function SWEP:Silencer()
 end
 
 function SWEP:IronSights()
+	if not IsFirstTimePredicted() then return end
 	if self:GetNWBool("IronSights",false) == true then
 		self.Owner:SetFOV(0,self.IronSightTime)
 		self:SetNWBool("IronSights",false)
@@ -624,12 +592,14 @@ end
 
 function SWEP:ScopeZoom()
 
+	if not IsFirstTimePredicted() then return end
 	if not self:CanBoltZoom() then return end
 	if self:IsBusy() then return false end
 
 	local var = self:GetNWInt("zoommode",0)
 	
 	if SERVER then
+	
 		if self.HasDoubleZoom then
 			if var < 2 then
 				var = var + 1
@@ -658,6 +628,7 @@ end
 
 function SWEP:CSSZoom()
 
+	if not IsFirstTimePredicted() then return end
 	if not self:CanBoltZoom() then return end
 	if self:IsBusy() then return end
 
@@ -714,16 +685,13 @@ function SWEP:CanPrimaryAttack()
 	if self:GetNextPrimaryFire() > CurTime() then return false end
 
 	if self:Clip1() == -1 then
-		if self.Owner:GetAmmoCount(self.Primary.Ammo) < 1 then return false end
+		if self.Owner:GetAmmoCount(self.Primary.Ammo) < 1 then 
+			return false 
+		end
 	elseif self:Clip1() <= 0 then
-
 		self:EmitSound("weapons/clipempty_pistol.wav",100,100)
 		self:SetNextPrimaryFire(CurTime() + 0.25)
-
-		--self:Reload()
-		
 		return false
-
 	end
 
 	return true
@@ -732,27 +700,30 @@ end
 
 function SWEP:AddHeat(Damage,Shots)
 
-	if not IsFirstTimePredicted() then return end
+	--if not IsFirstTimePredicted() then return end
 	
+	--[[
 	if CLIENT then
 		self:SetCoolDown(math.Clamp(self:GetCoolDown() + (Damage*Shots*0.01)*self.Owner.css_heat_scale*self.CoolDownMul,0,30))
 		self:SetCoolTime(CurTime() + (((Damage*Shots*0.01) - 0.1)*self.Owner.css_cooltime_scale * self.CoolDownMul))
 	end
-		
-	if SERVER  then 
+	--]]
+	--if SERVER  then 
 		self:SetCoolDown(math.Clamp(self:GetCoolDown()+(Damage*Shots*0.01)*GetConVarNumber("sv_css_heat_scale"),0,20))
 		self:SetCoolTime(CurTime() + ((Damage*Shots*0.01) - 0.1)*GetConVarNumber("sv_css_cooltime_scale"))
-	end
+	--end
 
+	--[[
 	if game.SinglePlayer() then
 		self:SetNWFloat("SinglePlayerNetwork",self.CoolDown)
 	end
-
+	--]]
+	
 end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	
-	if not IsFirstTimePredicted() then return end
+	print("Bullet")
 	
 	local bullet = {}
 	bullet.Damage	= Damage
@@ -760,8 +731,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	bullet.Spread	= Vector(Cone, Cone, 0)
 	bullet.Src		= Source
 	bullet.Dir		= Direction
-	
-	bullet.Tracer	= 0
+	bullet.Tracer	= 1
 	bullet.TracerName = "Tracer"
 	
 	--bullet.Force	= 0
@@ -814,14 +784,10 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 	data.endpos = Pos + Direction*Amount
 	
 	local trace = util.TraceLine(data)
-	
 	local NewDamage = Damage - ( GetConVarNumber("sv_css_penetration_scale") * Amount )
 	
 	if trace.HitWorld and NewDamage > 1 then
 		self:WorldBulletSolution(Pos + Direction*Amount,Direction,NewDamage)
-	elseif NewDamage > 1 then
-		local FinalPos = Pos + Direction*(Amount+0.5)
-		self:ShootBullet(NewDamage, 1 , 0, FinalPos, Direction , FinalPos )
 	end
 
 end
@@ -871,8 +837,7 @@ function SWEP:IsUsing()
 end
 
 function SWEP:Reload()
-
-	if not IsFirstTimePredicted( ) then return end
+	
 	if self:IsBusy() then return end
 	if self:Clip1() >= self.Primary.ClipSize then return end
 	if self:GetNextPrimaryFire() > CurTime() then return end
@@ -898,6 +863,8 @@ function SWEP:Reload()
 	else
 		self:SendWeaponAnim(ACT_VM_RELOAD)
 	end
+	
+	if not IsFirstTimePredicted() then return end
 	
 	if CLIENT then
 		if self.ReloadSound != nil then
@@ -1006,7 +973,6 @@ function SWEP:GetViewModelPosition( pos, ang )
 
 	end
 	
-
 	local Right 	= ang:Right()
 	local Up 		= ang:Up()
 	local Forward 	= ang:Forward()
@@ -1020,6 +986,8 @@ function SWEP:GetViewModelPosition( pos, ang )
 end
 
 function SWEP:Think()
+
+	if not IsFirstTimePredicted( ) then return end
 
 	if CLIENT then
 		self.ViewModelFOV = GetConVarNumber("cl_css_viewmodel_fov")

@@ -377,6 +377,7 @@ function SWEP:PrimaryAttack()
 	end
 	
 	self:WeaponEffects()
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	
 	if not IsFirstTimePredicted() then return end
 	local Damage,Shots,Cone,Recoil = self:Modifiers(self.Primary.Damage,self.Primary.NumShots,self.Primary.Cone,self.RecoilMul)
@@ -406,8 +407,6 @@ function SWEP:Modifiers(Damage,Shots,Cone,Recoil)
 			Recoil = Recoil*0.9
 		end
 	end
-	
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	
 	--[[
 	if CLIENT then

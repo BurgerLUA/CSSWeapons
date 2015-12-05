@@ -723,6 +723,7 @@ end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	
+	if not IsFirstTimePredicted( ) then return end
 	print("Bullet")
 	
 	local bullet = {}

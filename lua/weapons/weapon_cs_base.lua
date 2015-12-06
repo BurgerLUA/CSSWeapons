@@ -195,15 +195,11 @@ function SWEP:SetupDataTables( )
 	self:SetReloadFinish(0)
 	self:NetworkVar("Float",4,"NextZoomTime")
 	self:SetNextZoomTime(0)
-	--[[
-	self:NetworkVar("Float",5,"ReloadDelay")
-	self:SetReloadDelay(0)	
-	--]]
-	self:NetworkVar("Float",6,"AttachDelay")
+	self:NetworkVar("Float",5,"AttachDelay")
 	self:SetAttachDelay(0)
-	self:NetworkVar("Float",7,"BoltDelay")
+	self:NetworkVar("Float",6,"BoltDelay")
 	self:SetBoltDelay(0)
-	self:NetworkVar("Float",8,"CoolDelay")
+	self:NetworkVar("Float",7,"CoolDelay")
 	self:SetCoolDelay(0)
 	
 	self:NetworkVar("Bool",0,"IsReloading")
@@ -317,6 +313,7 @@ function SWEP:Deploy()
 	
 end
 
+
 function SWEP:Holster()
 	
 	if self:GetNWInt("zoommode",0) ~= 0 then
@@ -347,8 +344,6 @@ function SWEP:PrimaryAttack()
 	if not self:CanPrimaryAttack() then return end
 	if self:IsBusy() then return end
 	if self:IsUsing() then return end
-	
-	print("Shoot")
 	
 	if self.WeaponType == "Throwable" then
 		self:PreThrowObject()
@@ -397,26 +392,16 @@ function SWEP:Modifiers(Damage,Shots,Cone,Recoil)
 
 	local GunSound = self.Primary.Sound
 	
-	if self.HasBoltAction == true then
+	if self.HasBoltAction then
 		self:SetBoltDelay(CurTime() + self.Primary.Delay)
 	end
 	
-	if self.HasSilencer == true then
+	if self.HasSilencer then
 		if self:GetIsSilenced() then
 			Damage = Damage*0.9
 			Recoil = Recoil*0.9
 		end
 	end
-	
-	--[[
-	if CLIENT then
-		if not self.Owner.css_recoil_scale then
-			Recoil = Recoil * 1 * self.RecoilMul
-		else
-			Recoil = Recoil * self.Owner.css_recoil_scale * self.RecoilMul
-		end
-	end
-	--]]
 	
 	Cone = self:HandleCone(Cone)
 	
@@ -429,7 +414,7 @@ function SWEP:WeaponEffects()
 
 	local GunSound = self.Primary.Sound
 	
-	if self.HasSilencer == true then
+	if self.HasSilencer then
 		if self:GetIsSilenced() then
 			GunSound = self.Secondary.Sound
 		end
@@ -458,11 +443,11 @@ function SWEP:HandleCone(Cone)
 
 	local VelCone = self.Owner:GetVelocity():Length()*0.0001 * self.VelConeMul
 
-	if self.HasBurstFire == true then
+	if self.HasBurstFire then
 		if self:GetIsBurst() then
 			Cone = Cone * 0.66
 		end
-	elseif self.HasSilencer == true then
+	elseif self.HasSilencer then
 		if self:GetIsSilenced() then
 			Cone = Cone*0.9
 		end
@@ -476,20 +461,8 @@ function SWEP:HandleCone(Cone)
 		end
 	end
 
-	--if SERVER then
-		Cone = ( VelCone * GetConVarNumber("sv_css_velcone_scale") ) + (Cone * GetConVarNumber("sv_css_cone_scale")) + (self:GetCoolDown()/100)
-	--end
+	Cone = ( VelCone * GetConVarNumber("sv_css_velcone_scale") ) + (Cone * GetConVarNumber("sv_css_cone_scale")) + (self:GetCoolDown()/100)
 
-	--[[
-	if CLIENT then
-		if not self.Owner.css_velcone_scale then
-			Cone = ( VelCone * 1 ) + (Cone * 1) + (self:GetCoolDown()/100)
-		else
-			Cone = ( VelCone * self.Owner.css_velcone_scale ) + (Cone * self.Owner.css_cone_scale) + (self:GetCoolDown()/100)
-		end
-	end
-	--]]
-	
 	return Cone
 
 end
@@ -497,19 +470,15 @@ end
 function SWEP:Recoil(Damage,Shots,Cone,Recoil)
 
 	local ViewKick = -(Damage*Shots/20)*Recoil
+	local UpPunch = (ViewKick/2)*3
+	local SidePunch = 0
 
-	if self.HasSideRecoil == true then
-		sideways = self:GetCoolDown() * 0.5
-	else
-		sideways = 0
+	if self.HasSideRecoil then
+		SidePunch =	(ViewKick/2)*math.Rand(-1,1)*self:GetCoolDown()*0.5
 	end
-
-	local uppunch = (ViewKick/2)*3
-	local sidepunch = (ViewKick/2)*math.Rand(-1,1)*sideways
-	local rollpunch = 0
 	
-	self.PunchAngleUp = self.PunchAngleUp + Angle(uppunch,sidepunch,rollpunch)
-	self.PunchAngleDown = self.PunchAngleDown + Angle(uppunch,sidepunch,rollpunch)
+	self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0)
+	self.PunchAngleDown = self.PunchAngleDown + Angle(UpPunch,SidePunch,0)
 	
 end
 
@@ -518,14 +487,14 @@ function SWEP:SecondaryAttack()
 	if self:IsBusy() then return end
 	if self:IsUsing() then return end
 	
-	if self.HasBurstFire == true then
+	if self.HasBurstFire then
 		self:SwitchFireMode()
-	elseif self.HasIronSights == true then
+	elseif self.HasIronSights then
 		self:IronSights()
-	elseif self.HasSilencer == true then
+	elseif self.HasSilencer then
 		self:Silencer()
-	elseif self.HasScope == true then
-		if GetConVarNumber("sv_css_enable_csszoom") == 1 and self.HasCSSZoom == true then
+	elseif self.HasScope then
+		if GetConVarNumber("sv_css_enable_csszoom") == 1 and self.HasCSSZoom then
 			self:CSSZoom()
 		else
 			self:ScopeZoom()
@@ -541,7 +510,7 @@ function SWEP:SwitchFireMode()
 	
 	local Message = "Semi-Automatic"
 
-	if self.Primary.Automatic == true then
+	if self.Primary.Automatic then
 		Message = "Automatic"
 	end
 
@@ -580,7 +549,7 @@ end
 
 function SWEP:IronSights()
 	if not IsFirstTimePredicted() then return end
-	if self:GetNWBool("IronSights",false) == true then
+	if self:GetNWBool("IronSights",false) then
 		self.Owner:SetFOV(0,self.IronSightTime)
 		self:SetNWBool("IronSights",false)
 	else
@@ -619,7 +588,7 @@ function SWEP:ScopeZoom()
 		
 	end
 	
-	if CLIENT or game.SinglePlayer() == true then
+	if CLIENT or game.SinglePlayer() then
 		self:EmitSound("weapons/zoom.wav",100,100)
 	end
 
@@ -632,7 +601,7 @@ function SWEP:CSSZoom()
 	if self:IsBusy() then return end
 
 	if SERVER then
-		if self:GetNWBool("csszoomed",false) == true then
+		if self:GetNWBool("csszoomed",false) then
 			self.Owner:SetFOV(0, 0.25 )
 			self:SetNWBool("csszoomed",false)
 		else
@@ -663,7 +632,7 @@ function SWEP:TranslateFOV(oldfov)
 
 	if self:GetNWInt("zoommode",0) > 0 then
 		
-		if self.HasDoubleZoom == true then
+		if self.HasDoubleZoom then
 			newfov = 90 / (self.ZoomAmount*(self:GetNWInt("zoommode",0)/2))
 		else
 			newfov = 90 / self.ZoomAmount
@@ -723,7 +692,6 @@ end
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	
 	if not IsFirstTimePredicted( ) then return end
-	print("Bullet")
 	
 	local bullet = {}
 	bullet.Damage	= Damage
@@ -818,7 +786,7 @@ end
 
 function SWEP:IsBusy()
 
-	if self.CanHolster == false then
+	if not self.CanHolster then
 		return true
 	elseif self:GetIsReloading() then
 		return true
@@ -844,17 +812,17 @@ function SWEP:Reload()
 	if self.Owner:GetAmmoCount(self:GetPrimaryAmmoType()) == 0  then return end
 	if self.WeaponType == "Throwable" then return end
 
-	if self:GetNWBool("Ironsights",false) == true then
+	if self:GetNWBool("Ironsights",false) then
 		self:SetNWBool("Ironsights",false)
 		self.Owner:SetFOV(0,self.IronSightTime)
 	end
 		
-	if self:GetNWBool("csszoomed",false) == true then
+	if self:GetNWBool("csszoomed",false) then
 		self:SetNWBool("csszoomed",false)
 		self.Owner:SetFOV(0,self.IronSightTime)
 	end
 	
-	if self.HasSilencer == true then
+	if self.HasSilencer then
 		if self:GetIsSilenced() then
 			self:SendWeaponAnim(ACT_VM_RELOAD_SILENCED)
 		else
@@ -867,12 +835,12 @@ function SWEP:Reload()
 	if not IsFirstTimePredicted() then return end
 	
 	if CLIENT then
-		if self.ReloadSound != nil then
+		if self.ReloadSound then
 			self:EmitGunSound(self.ReloadSound)
 		end
 	end
 	
-	if self.HasPumpAction == true then
+	if self.HasPumpAction then
 		self.NextShell = 0.5
 		self:SetIsShotgunReload(true)
 	else
@@ -882,7 +850,7 @@ function SWEP:Reload()
 	
 	self.Owner:SetAnimation(PLAYER_RELOAD)
 	
-	if self.HasScope == true then
+	if self.HasScope then
 		self:SetNWInt("zoommode",0)
 		self:SetNextZoomTime(CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate()))
 	end
@@ -1034,7 +1002,6 @@ function SWEP:Think()
 
 			self:SetIsNormalReload(false)
 			self:SetIsReloading(false)
-			
 			self.HasGiven = 0
 			
 		end
@@ -1090,6 +1057,7 @@ end
 --SWEP.PunchDelay = 0
 
 function SWEP:HandleRecoilThink()
+
 	local pUp = self:HandleLimits(self.PunchAngleUp.p)
 	local yUp = self:HandleLimits(self.PunchAngleUp.y)
 	local rUp = self:HandleLimits(self.PunchAngleUp.r)
@@ -1101,7 +1069,7 @@ function SWEP:HandleRecoilThink()
 	local FrameMul = FrameTime() * 10
 	local UpMul = 1 * FrameMul
 	local DownMul = 0.75 * FrameMul
-
+	
 	local ModAngle = Angle(0,0,0)
 	
 	if self.PunchAngleUp ~= Angle(0,0,0) then
@@ -1119,6 +1087,7 @@ function SWEP:HandleRecoilThink()
 	if ModAngle ~= Angle(0,0,0) then
 		self.Owner:SetEyeAngles(self.Owner:EyeAngles() + ModAngle)
 	end
+	
 end
 
 function SWEP:HandleLimits(value)
@@ -1135,14 +1104,14 @@ end
 
 function SWEP:AdjustMouseSensitivity()
 
-	if self:GetNWBool("IronSights",false) == true then
+	if self:GetNWBool("IronSights",false) then
 		sen = 1 / self.ZoomAmount
-	elseif self.HasScope == true then
+	elseif self.HasScope then
 	
-		if self:GetNWBool("csszoomed",false) == true and self.HasCSSZoom == true then
+		if self:GetNWBool("csszoomed",false) and self.HasCSSZoom then
 			sen = 1 / self.ZoomAmount
 		elseif self:GetNWInt("zoommode",0) ~= 0 then
-			if self.HasDoubleZoom == true then
+			if self.HasDoubleZoom then
 				sen = 1 / (self.ZoomAmount*(self:GetNWInt("zoommode",0)/2))
 			else
 				sen = 1 / self.ZoomAmount
@@ -1159,7 +1128,7 @@ end
 
 function SWEP:DrawHUD()
 
-	if not LocalPlayer().css_cone_scale and not game.SinglePlayer() then return end
+	--if not LocalPlayer().css_cone_scale and not game.SinglePlayer() then return end
 	
 	local x = ScrW()
 	local y = ScrH()
@@ -1177,7 +1146,7 @@ function SWEP:DrawHUD()
 	
 	Cone = self:HandleCone(self.Primary.Cone) * 900
 
-	if self.HasCrosshair == true then
+	if self.HasCrosshair then
 		if self:GetNWInt("zoommode",0) == 0 and self:GetNWBool("IronSights",false) == false then
 
 			if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
@@ -1211,7 +1180,7 @@ function SWEP:DrawHUD()
 		end
 	end
 
-	if self.HasScope == true then
+	if self.HasScope then
 		if self:GetNWInt("zoommode",0) ~= 0 then
 
 			local fovbonus = convar/self.Owner:GetFOV()
@@ -1306,7 +1275,7 @@ function SWEP:EquipThink()
 
 	if self.WeaponType ~= "Throwable" then return end
 
-	if self.IsThrowing == true then
+	if self.IsThrowing then
 	
 		if self.ThrowAnimation < CurTime() then
 			if self.HasAnimated == false then
@@ -1340,7 +1309,7 @@ function SWEP:EquipThink()
 				self.CanHolster	= true
 				
 				if SERVER then
-					if self.SpecialThrow == true then
+					if self.SpecialThrow then
 						self:SwitchToPrimary()
 					end
 				end

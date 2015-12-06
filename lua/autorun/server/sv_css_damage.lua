@@ -42,7 +42,10 @@ function CSSDamage(ply, hitgroup, dmginfo)
 				ReportedDamage:ScaleDamage(1)
 			end
 			
-			ply:TakeDamageInfo(ReportedDamage)
+			ReportedDamage:SetDamageForce(Vector(0,0,0))
+			ply:TakeDamageInfo(ReportedDamage) --???
+			
+			dmginfo:SetDamageForce(Vector(0,0,0))
 			dmginfo:ScaleDamage(0)
 			
 			--return

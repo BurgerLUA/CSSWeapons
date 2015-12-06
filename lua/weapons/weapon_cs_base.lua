@@ -484,6 +484,14 @@ end
 
 function SWEP:SecondaryAttack()
 
+	if self.HasScope then
+		if self:GetNWInt("waszoomed",0) ~= 0 then
+			self:SetNWInt("waszoomed",0)
+		else
+			self:SetNWInt("waszoomed",1)
+		end
+	end
+
 	if self:IsBusy() then return end
 	if self:IsUsing() then return end
 	
@@ -702,7 +710,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	bullet.Tracer	= 1
 	bullet.TracerName = "Tracer"
 	
-	--bullet.Force	= 0
+	bullet.Force	= Vector(0,0,0)
 	
 	bullet.Callback = function( attacker, tr, dmginfo)
 		if attacker:IsPlayer() or attacker:IsBot() then
@@ -966,9 +974,9 @@ function SWEP:Think()
 	
 	if SERVER then
 		if self.HasBoltAction then
-			if self:GetBoltDelay() <= CurTime() then
+			if self:CanBoltZoom() then
 				if self:GetNWInt("waszoomed",0) > 0 then
-					if self:GetIsReloading() == 0 then
+					if not self:GetIsReloading() then
 						self:SetNWInt("zoommode",self:GetNWInt("waszoomed",0))
 						self:SetNWInt("waszoomed",0)
 					end
@@ -1030,15 +1038,15 @@ function SWEP:Think()
 		if self:GetCoolDown() ~= 0 then
 			if self:GetCoolDelay() <= CurTime() then
 				
-				
+				--[[
 				if CLIENT then
 					self:SetCoolDown(math.max(0,self:GetCoolDown() - (0.18 * self.Owner.css_cooldown_scale ) ))
 				end
+				--]]
 				
-				
-				if SERVER then
+				--if SERVER then
 					self:SetCoolDown(math.max(0,self:GetCoolDown() - (0.18 * GetConVarNumber("sv_css_cooldown_scale"))))
-				end
+				--end
 				
 				self:SetCoolDelay(CurTime() + 0.025)
 				
@@ -1046,12 +1054,14 @@ function SWEP:Think()
 		end
 	end
 	
+	--[[
 	if SERVER then
 		if game.SinglePlayer() then
 			self:SetNWFloat("SinglePlayerNetwork",self:GetCoolDown())
 		end
 	end
-
+	--]]
+	
 end
 
 --SWEP.PunchDelay = 0

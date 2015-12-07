@@ -123,6 +123,7 @@ SWEP.Secondary.DefaultClip 	= -1
 SWEP.Secondary.Automatic	= false
 
 SWEP.ReloadSound 			= nil
+SWEP.BurstSound				= nil
 
 SWEP.RecoilMul				= 1
 SWEP.VelConeMul				= 1
@@ -171,6 +172,8 @@ SWEP.IsPrivate 				= false
 --SWEP.BoltCurTime 			= 0
 --SWEP.NextCoolTick			= 0
 
+SWEP.HasPreThrow			= true
+
 
 
 --Burst fire Code from Kogitsune
@@ -201,7 +204,12 @@ function SWEP:SetupDataTables( )
 	self:SetBoltDelay(0)
 	self:NetworkVar("Float",7,"CoolDelay")
 	self:SetCoolDelay(0)
+	self:NetworkVar("Float",8,"NextBulletDelay")
+	self:SetNextBulletDelay(0)
 	
+	self:NetworkVar("Int",0,"BulletQueue")
+	self:SetBulletQueue(0)
+
 	self:NetworkVar("Bool",0,"IsReloading")
 	self:SetIsReloading( false )
 	self:NetworkVar( "Bool",1,"IsBurst" )
@@ -371,13 +379,39 @@ function SWEP:PrimaryAttack()
 		end
 	end
 	
-	self:WeaponEffects()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	
+	
+	if self.HasBurstFire and self:GetIsBurst() then
+		if self.HoldType == "shotgun" then
+			self:SetBulletQueue(1)
+			self:SetNextBulletDelay(CurTime() + (self.Primary.Delay / 32) )
+		else
+			self:SetBulletQueue(2)
+			self:SetNextBulletDelay(CurTime() + (self.Primary.Delay / 3) )
+		end
+		
+		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*3)
+		
+
+	else
+		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+	end
+	
+	self:PreShootBullet()
+
+end
+
+function SWEP:PreShootBullet()
+
+	self:WeaponEffects()
+	
 	if not IsFirstTimePredicted() then return end
+	
 	local Damage,Shots,Cone,Recoil = self:Modifiers(self.Primary.Damage,self.Primary.NumShots,self.Primary.Cone,self.RecoilMul)
 	local Source = self.Owner:GetShootPos()
 	local Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
+	
 	self:ShootBullet(Damage,Shots,Cone,Source,Direction,Source)
 	self:TakePrimaryAmmo(1)
 	self:AddHeat(Damage,Shots)
@@ -385,8 +419,10 @@ function SWEP:PrimaryAttack()
 	if CLIENT then
 		self:Recoil(Damage,Shots,Cone,Recoil)
 	end
-
+	
 end
+
+
 
 function SWEP:Modifiers(Damage,Shots,Cone,Recoil)
 
@@ -420,7 +456,22 @@ function SWEP:WeaponEffects()
 		end
 	end
 	
-	self:EmitGunSound(GunSound)
+	if self.HasBurstFire then
+		if self.BurstSound != nil then
+			if self:GetIsBurst() then
+				if self:GetBulletQueue() == 0 then
+					GunSound = self.BurstSound
+				else
+					GunSound = nil
+				end
+			end
+		end
+	end
+	
+	if GunSound ~= nil then
+		self:EmitGunSound(GunSound)
+	end
+	
 	self:SendPrimaryAnimation()
 
 end
@@ -675,26 +726,8 @@ function SWEP:CanPrimaryAttack()
 end
 
 function SWEP:AddHeat(Damage,Shots)
-
-	--if not IsFirstTimePredicted() then return end
-	
-	--[[
-	if CLIENT then
-		self:SetCoolDown(math.Clamp(self:GetCoolDown() + (Damage*Shots*0.01)*self.Owner.css_heat_scale*self.CoolDownMul,0,30))
-		self:SetCoolTime(CurTime() + (((Damage*Shots*0.01) - 0.1)*self.Owner.css_cooltime_scale * self.CoolDownMul))
-	end
-	--]]
-	--if SERVER  then 
-		self:SetCoolDown(math.Clamp(self:GetCoolDown()+(Damage*Shots*0.01)*GetConVarNumber("sv_css_heat_scale"),0,20))
-		self:SetCoolTime(CurTime() + ((Damage*Shots*0.01) - 0.1)*GetConVarNumber("sv_css_cooltime_scale"))
-	--end
-
-	--[[
-	if game.SinglePlayer() then
-		self:SetNWFloat("SinglePlayerNetwork",self.CoolDown)
-	end
-	--]]
-	
+	self:SetCoolDown(math.Clamp(self:GetCoolDown()+(Damage*Shots*0.01)*GetConVarNumber("sv_css_heat_scale"),0,20))
+	self:SetCoolTime(CurTime() + ((Damage*Shots*0.01) - 0.1)*GetConVarNumber("sv_css_cooltime_scale"))
 end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
@@ -844,7 +877,9 @@ function SWEP:Reload()
 	
 	if CLIENT then
 		if self.ReloadSound then
-			self:EmitGunSound(self.ReloadSound)
+			if not self.HasPumpAction then
+				self:EmitGunSound(self.ReloadSound)
+			end
 		end
 	end
 	
@@ -963,6 +998,19 @@ end
 
 function SWEP:Think()
 
+	if self.HasBurstFire then
+		if self:GetNextBulletDelay() <= CurTime() and self:GetBulletQueue() > 0 then
+		
+			self:SetNextBulletDelay(CurTime() + self.Primary.Delay/3)
+			self:SetBulletQueue(self:GetBulletQueue() - 1)
+			
+			if self:Clip1() > 0 then
+				self:PreShootBullet()
+			end
+			
+		end
+	end
+
 	if not IsFirstTimePredicted( ) then return end
 
 	if CLIENT then
@@ -1024,6 +1072,13 @@ function SWEP:Think()
 				self:SetClip1(self:Clip1()+1)
 				self.Owner:RemoveAmmo(1,ammotype)
 				self:SetNextShell(CurTime()+0.5)
+
+				if CLIENT then
+					if self.ReloadSound then
+						self:EmitGunSound(self.ReloadSound)
+					end
+				end
+				
 			else
 				self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
 				self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
@@ -1403,16 +1458,26 @@ end
 
 function SWEP:PreThrowObject()
 	if self:IsUsing() then return end
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + 2)
-	self.CanHolster = false
-	self:SendWeaponAnim(ACT_VM_PULLPIN)
 	
-	self.IsThrowing = true
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	
-	self.ThrowAnimation = CurTime() + 0.85
-	self.Throw = CurTime() + 1
-	self.ThrowRemove = CurTime() + 2
-	self.SpecialThrow = false
+	if self.HasPreThrow then
+		self:SendWeaponAnim(ACT_VM_PULLPIN)
+		self.CanHolster = false
+		self.IsThrowing = true
+		self.SpecialThrow = false
+		self.ThrowAnimation = CurTime() + 0.85
+		self.Throw = CurTime() + 1
+		self.ThrowRemove = CurTime() + 2
+	else			
+		self.CanHolster = false
+		self.IsThrowing = true
+		self.SpecialThrow = false
+		self.ThrowAnimation = CurTime()
+		self.Throw = CurTime() + 0.15
+		self.ThrowRemove = CurTime() + 1
+	end
+	
 end
 
 function SWEP:ThrowObject(object,force)
@@ -1421,15 +1486,23 @@ function SWEP:ThrowObject(object,force)
 	local pos = self.Owner:GetShootPos() + EA:Right() * 5 - EA:Up() * 4 + EA:Forward() * 8	
 
 	local ent = ents.Create(object)		
-		ent:SetPos(pos)
-		ent:SetAngles(EA)
-		ent:Spawn()
-		ent:Activate()
-		ent:SetOwner(self.Owner)
+	ent:SetPos(pos)
+	ent:SetAngles(EA)
+	ent:Spawn()
+	ent:Activate()
+	ent:Fire()
+	ent:SetOwner(self.Owner)
+	
+	if ent:GetPhysicsObject():IsValid() then
 		ent:GetPhysicsObject():SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force + EA:Up()*50)
 		ent:GetPhysicsObject():AddAngleVelocity(Vector(1000,1000,1000))
-		ent.Damage = 100
-		ent.Radius = 100
+	else
+		ent:SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force + EA:Up()*50)
+	end
+	
+	ent.Damage = 100
+	ent.Radius = 100
+	
 end
 
 function SWEP:QuickKnife()

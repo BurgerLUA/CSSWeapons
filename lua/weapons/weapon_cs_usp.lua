@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_pist_usp.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "revolver"
 
-SWEP.Primary.Damage			= 32
+SWEP.Primary.Damage			= 34
 SWEP.Primary.NumShots 		= 1
 SWEP.Primary.Sound			= Sound("weapons/usp/usp_unsil-1.wav")
-SWEP.Primary.Cone			= .01
+SWEP.Primary.Cone			= 0.00800
 SWEP.Primary.ClipSize		= 12
 SWEP.Primary.SpareClip		= 100
-SWEP.Primary.Delay			= 1/(400/60)
+SWEP.Primary.Delay			= 0.15 --1/(400/60)
 SWEP.Primary.Ammo			= "SniperPenetratedRound"
 SWEP.Primary.Automatic 		= false
 

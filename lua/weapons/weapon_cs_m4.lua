@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_rif_m4a1.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
 
-SWEP.Primary.Damage			= 32
+SWEP.Primary.Damage			= 33
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/m4a1/m4a1_unsil-1.wav")
-SWEP.Primary.Cone			= 0.0075
+SWEP.Primary.Cone			= 0.00700
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
-SWEP.Primary.Delay			= 1/(666/60)
+SWEP.Primary.Delay			= 0.09 --1/(666/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 

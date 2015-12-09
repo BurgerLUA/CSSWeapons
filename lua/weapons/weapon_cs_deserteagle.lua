@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_pist_deagle.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "revolver"
 
-SWEP.Primary.Damage			= 50
+SWEP.Primary.Damage			= 54
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/deagle/deagle-1.wav")
-SWEP.Primary.Cone			= 0.0075
+SWEP.Primary.Cone			= 0.01300
 SWEP.Primary.ClipSize		= 7
 SWEP.Primary.SpareClip		= 35
-SWEP.Primary.Delay			= 1/(267/60)
+SWEP.Primary.Delay			= 0.225 --1/(267/60)
 SWEP.Primary.Ammo			= "CombineCannon"
 SWEP.Primary.Automatic 		= false
 

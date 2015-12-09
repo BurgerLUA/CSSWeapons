@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_snip_g3sg1.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
 
-SWEP.Primary.Damage			= 79
+SWEP.Primary.Damage			= 80
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/g3sg1/g3sg1-1.wav")
-SWEP.Primary.Cone			= 0
+SWEP.Primary.Cone			= 0.02580
 SWEP.Primary.ClipSize		= 20
 SWEP.Primary.SpareClip		= 90
-SWEP.Primary.Delay			= 1/(240/60)
+SWEP.Primary.Delay			= 0.25 --1/(240/60)
 SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic 		= true
 

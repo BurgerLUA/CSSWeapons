@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_rif_aug.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "smg"
 
-SWEP.Primary.Damage			= 31
+SWEP.Primary.Damage			= 32
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/aug/aug-1.wav")
-SWEP.Primary.Cone			= .0075
+SWEP.Primary.Cone			= 0.00549
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
-SWEP.Primary.Delay			= 1/(666/60)
+SWEP.Primary.Delay			= 0.09 ---1/(666/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 

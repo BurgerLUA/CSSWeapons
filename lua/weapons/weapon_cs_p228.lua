@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_pist_p228.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "revolver"
 
-SWEP.Primary.Damage			= 39
+SWEP.Primary.Damage			= 40
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/p228/p228-1.wav")
-SWEP.Primary.Cone			= .0075
+SWEP.Primary.Cone			= 0.01100
 SWEP.Primary.ClipSize		= 13
 SWEP.Primary.SpareClip		= 52
-SWEP.Primary.Delay			= 1/(400/60)
+SWEP.Primary.Delay			= 0.015 --1/(400/60)
 SWEP.Primary.Ammo			= "GaussEnergy"
 SWEP.Primary.Automatic 		= false
 

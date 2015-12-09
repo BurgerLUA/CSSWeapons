@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_snip_sg550.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
 
-SWEP.Primary.Damage			= 69
+SWEP.Primary.Damage			= 70
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/sg550/sg550-1.wav")
-SWEP.Primary.Cone			= 0
+SWEP.Primary.Cone			= 0.02570
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
-SWEP.Primary.Delay			= 1/(240/60)
+SWEP.Primary.Delay			= 0.25 --1/(240/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 

@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_snip_scout.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
 
-SWEP.Primary.Damage			= 74
+SWEP.Primary.Damage			= 75
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/scout/scout_fire-1.wav")
-SWEP.Primary.Cone			= 0
+SWEP.Primary.Cone			= 0.03170
 SWEP.Primary.ClipSize		= 10
 SWEP.Primary.SpareClip		= 90
-SWEP.Primary.Delay			= 1/(48/60)
+SWEP.Primary.Delay			= 1.25 --1/(48/60)
 SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic 		= false
 

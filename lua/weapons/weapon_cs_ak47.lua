@@ -22,21 +22,21 @@ SWEP.WorldModel				= "models/weapons/w_rif_ak47.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
 
-SWEP.Primary.Damage			= 35
+SWEP.Primary.Damage			= 36
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
-SWEP.Primary.Cone			= .004
+SWEP.Primary.Cone			= 0.00916
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
-SWEP.Primary.Delay			= 1/(600/60)
+SWEP.Primary.Delay			= 0.1 --1/(600/60)
 SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1.25
+SWEP.RecoilMul				= 1
 SWEP.VelConeMul				= 1.5
 
 SWEP.HasScope 				= false
-SWEP.ZoomAmount 			= 1.5
+SWEP.ZoomAmount 			= 0.5
 SWEP.HasCrosshair 			= true
 SWEP.HasCSSZoom 			= false
 
@@ -47,9 +47,7 @@ SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
 
-
-
 SWEP.HasIronSights 			= true
 SWEP.IronSightTime			= 0.25
-SWEP.IronSightsPos 			= Vector(-6.6, -10.855, 2.64)
-SWEP.IronSightsAng 			= Vector(2.299, 0., 0)
+SWEP.IronSightsPos 			= Vector(-6.6, -23, 3.125)
+SWEP.IronSightsAng 			= Vector(2.1, 0, 0)

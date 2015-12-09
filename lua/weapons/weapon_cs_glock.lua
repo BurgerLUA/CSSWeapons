@@ -22,17 +22,17 @@ SWEP.WorldModel				= "models/weapons/w_pist_glock18.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "revolver"
 
-SWEP.Primary.Damage			= 24
+SWEP.Primary.Damage			= 25
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/glock/glock18-1.wav")
-SWEP.Primary.Cone			= 0.015
+SWEP.Primary.Cone			= 0.01000
 SWEP.Primary.ClipSize		= 20
 SWEP.Primary.SpareClip		= 120
-SWEP.Primary.Delay			= 1/(400/60)
+SWEP.Primary.Delay			= 0.15 --1/(400/60)
 SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul				= 0
+SWEP.RecoilMul				= 1
 SWEP.VelConeMul				= 0.5
 
 SWEP.HasScope 				= false

@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_smg_mac10.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "pistol"
 
-SWEP.Primary.Damage			= 28
+SWEP.Primary.Damage			= 29
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/mac10/mac10-1.wav")
-SWEP.Primary.Cone			= 0.025
+SWEP.Primary.Cone			= 0.01900
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 100
-SWEP.Primary.Delay			= 1/(800/60)
+SWEP.Primary.Delay			= 0.075 --1/(800/60)
 SWEP.Primary.Ammo			= "SniperPenetratedRound"
 SWEP.Primary.Automatic 		= true
 

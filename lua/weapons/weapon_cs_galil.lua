@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_rif_galil.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
 
-SWEP.Primary.Damage			= 29
+SWEP.Primary.Damage			= 30
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/galil/galil-1.wav")
-SWEP.Primary.Cone			= 0.01
+SWEP.Primary.Cone			= 0.01253
 SWEP.Primary.ClipSize		= 35
 SWEP.Primary.SpareClip		= 90
-SWEP.Primary.Delay			= 1/(666/60)
+SWEP.Primary.Delay			= 0.09 --1/(666/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 

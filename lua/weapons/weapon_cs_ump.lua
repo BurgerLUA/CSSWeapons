@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_smg_ump45.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "smg"
 
-SWEP.Primary.Damage			= 29
+SWEP.Primary.Damage			= 30
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ump45/ump45-1.wav")
-SWEP.Primary.Cone			= .01
+SWEP.Primary.Cone			= 0.01919
 SWEP.Primary.ClipSize		= 25
 SWEP.Primary.SpareClip		= 100
-SWEP.Primary.Delay			= 1/(666/60)
+SWEP.Primary.Delay			= 0.105 --1/(666/60)
 SWEP.Primary.Ammo			= "SniperPenetratedRound"
 SWEP.Primary.Automatic 		= true
 

@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_pist_elite.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "duel"
 
-SWEP.Primary.Damage			= 44
+SWEP.Primary.Damage			= 45
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/elite/elite-1.wav")
-SWEP.Primary.Cone			= 0.02
+SWEP.Primary.Cone			= 0.00800
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 120
-SWEP.Primary.Delay			= 1/(750/60)
+SWEP.Primary.Delay			= 0.12 --1/(750/60)
 SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic 		= false
 

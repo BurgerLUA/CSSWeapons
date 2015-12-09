@@ -22,13 +22,13 @@ SWEP.WorldModel				= "models/weapons/w_pist_fiveseven.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "revolver"
 
-SWEP.Primary.Damage			= 24
+SWEP.Primary.Damage			= 25
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/fiveseven/fiveseven-1.wav")
-SWEP.Primary.Cone			= 0.01
+SWEP.Primary.Cone			= 0.01000
 SWEP.Primary.ClipSize		= 20
 SWEP.Primary.SpareClip		= 100
-SWEP.Primary.Delay			= 1/(400/60)
+SWEP.Primary.Delay			= 0.15 --1/(400/60)
 SWEP.Primary.Ammo			= "AlyxGun"
 SWEP.Primary.Automatic 		= false
 

@@ -22,17 +22,17 @@ SWEP.WorldModel				= "models/weapons/w_snip_awp.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
 
-SWEP.Primary.Damage			= 114
+SWEP.Primary.Damage			= 115
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/awp/awp1.wav")
-SWEP.Primary.Cone			= 0
+SWEP.Primary.Cone			= 0.08080
 SWEP.Primary.ClipSize		= 10
 SWEP.Primary.SpareClip		= 30
-SWEP.Primary.Delay			= 1/(41/60)
+SWEP.Primary.Delay			= 1.5 --1/(41/60)
 SWEP.Primary.Ammo			= "SniperRound"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 2
 SWEP.VelConeMul				= 3
 
 SWEP.HasScope 				= true
@@ -46,3 +46,8 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
+
+SWEP.HasIronSights 			= false
+SWEP.IronSightTime			= 0.5
+SWEP.IronSightsPos = Vector(-10, 5, 5)
+SWEP.IronSightsAng = Vector(0, 0, 0)

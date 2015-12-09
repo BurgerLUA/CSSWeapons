@@ -378,10 +378,17 @@ function SWEP:PreShootBullet()
 	
 	if not IsFirstTimePredicted() then return end
 	
-	local Damage,Shots,Cone,Recoil = self:Modifiers(self.Primary.Damage,self.Primary.NumShots,self.Primary.Cone,self.RecoilMul)
+	local Damage,Shots,Cone,Recoil = self:Modifiers(self.Primary.Damage,math.max(1,self.Primary.NumShots),self.Primary.Cone,self.RecoilMul)
 	local Source = self.Owner:GetShootPos()
 	local Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
 	
+	--[[
+	print("Damage", Damage)
+	print("Shots", Shots)
+	print("Cone", Cone)
+	print("Recoil", Recoil)
+	--]]
+
 	self:ShootBullet(Damage,Shots,Cone,Source,Direction,Source)
 	self:TakePrimaryAmmo(1)
 	self:AddHeat(Damage,Shots)
@@ -439,7 +446,7 @@ function SWEP:WeaponEffects()
 		self:EmitGunSound(GunSound)
 	end
 	
-	if not (self.HasIronSights and self:GetIsZoomed()) then
+	if not (self.HasIronSights and self:GetIsZoomed()) or self.HasGoodSights then
 		if self:GetIsSilenced() then
 			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK_SILENCED)
 		else
@@ -506,7 +513,6 @@ function SWEP:Recoil(Damage,Shots,Cone,Recoil)
 end
 
 function SWEP:SecondaryAttack()
-
 	
 	if self.HasBoltAction and (self.HasScope or self.HasIronsights) and self:GetBoltDelay() > CurTime() then
 		if self:GetWasZoomed() then
@@ -517,16 +523,19 @@ function SWEP:SecondaryAttack()
 	end
 	
 	if self:IsBusy() then return end
-	if self:IsUsing() then return end
 	
-	if self.HasBurstFire then
-		self:SwitchFireMode()
-	elseif self.HasIronSights or self.HasScope then
-		self:HandleZoom(1)
-	elseif self.HasSilencer then
-		self:Silencer()
+	if self:IsUsing() then
+		if self.HasBurstFire then
+			self:SwitchFireMode()
+		elseif self.HasSilencer then
+			self:Silencer()
+		end
+	else
+		if self.HasIronSights or self.HasScope then
+			self:HandleZoom(1)
+		end
 	end
-	
+
 end
 
 
@@ -757,9 +766,22 @@ function SWEP:IsUsing()
 	if self.Owner:KeyDown(IN_USE) then return true end
 end
 
+
+
 function SWEP:Reload()
 
 	if self:IsBusy() then return end
+	--[[
+	if self.Owner:KeyPressed(IN_USE) then
+		if self.HasBurstFire then
+			self:SwitchFireMode()
+		elseif self.HasSilencer then
+			self:Silencer()
+		end
+		return
+	end
+	if self:IsUsing() then return end
+	--]]
 	if self:Clip1() >= self.Primary.ClipSize then return end
 	if self:GetNextPrimaryFire() > CurTime() then return end
 	if self.Owner:GetAmmoCount(self:GetPrimaryAmmoType()) == 0  then return end
@@ -1076,7 +1098,8 @@ function SWEP:DrawHUD()
 
 	local length = GetConVarNumber("cl_css_crosshair_length")
 	local width = GetConVarNumber("cl_css_crosshair_width")
-	local convar = GetConVarNumber("fov_desired")
+	
+	local fovbonus = GetConVarNumber("fov_desired")/self.Owner:GetFOV()
 
 	local r = GetConVarNumber("cl_css_crosshair_color_r")
 	local g = GetConVarNumber("cl_css_crosshair_color_g")
@@ -1085,10 +1108,10 @@ function SWEP:DrawHUD()
 	
 	local VelCone = self.Owner:GetVelocity():Length()*0.0001
 	
-	Cone = math.Clamp(self:HandleCone(self.Primary.Cone) * 900,0,1000)
+	Cone = math.Clamp(self:HandleCone(self.Primary.Cone) * 900,0,1000)*fovbonus
 
 	if self.HasCrosshair then
-		if not self:GetIsZoomed() then
+		if (not self:GetIsZoomed()) or self.EnableIronCross then
 
 			if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
 				if width > 1 then
@@ -1130,7 +1153,7 @@ function SWEP:DrawHUD()
 	if self.HasScope then
 		if self:GetIsZoomed() then
 
-			local fovbonus = convar/self.Owner:GetFOV()
+			
 			local space = 1
 			
 			surface.SetDrawColor(Color(0,0,0))
@@ -1147,7 +1170,7 @@ function SWEP:DrawHUD()
 				surface.DrawLine(0,y/2,x,y/2)
 				
 				if Cone > 0.1 then
-					surface.DrawCircle( x/2, y/2, math.Clamp(Cone*fovbonus,3,x/2*0.33), Color(r,g,b,a) )
+					surface.DrawCircle( x/2, y/2, math.Clamp(Cone,3,x/2*0.33), Color(r,g,b,a) )
 				end	
 				
 			else
@@ -1155,7 +1178,7 @@ function SWEP:DrawHUD()
 				--Cone = math.Clamp(self:HandleCone(self.Primary.Cone) * 900,width,x/2)
 				
 				surface.DrawCircle( x/2, y/2, 6, Color(255,0,0,50))
-				surface.DrawCircle( x/2, y/2, math.Clamp(Cone*fovbonus,0,x/2*0.33), Color(r,g,b,255) )
+				surface.DrawCircle( x/2, y/2, math.Clamp(Cone,0,x/2*0.33), Color(r,g,b,255) )
 				
 			end
 

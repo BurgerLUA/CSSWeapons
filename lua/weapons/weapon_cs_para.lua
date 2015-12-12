@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "5.56MM M249"
+SWEP.PrintName				= "5.56MM M249 PARA"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -51,5 +51,5 @@ SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true
 SWEP.HasGoodSights			= true
 SWEP.IronSightTime			= 0.25
-SWEP.IronSightsPos 			= Vector(-5.961, 0, 2.359)
-SWEP.IronSightsAng 			= Vector(0, 0, 0)
+SWEP.IronSightsPos 			= Vector(-6, 10, -2)
+SWEP.IronSightsAng 			= Vector(2, 0, 0)

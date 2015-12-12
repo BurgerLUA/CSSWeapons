@@ -64,9 +64,13 @@ function CSSSpeedModMovement(ply,mv)
 					if CurrentWeapon.Base == "weapon_cs_base" then
 						WeaponSpeed = CurrentWeapon.MoveSpeed
 						if CurrentWeapon.HasScope == true then
-							if CurrentWeapon:GetNWInt("zoommode",0) ~= 0 then
+							if CurrentWeapon:GetIsZoomed() then
 								if CurrentWeapon.IgnoreZoomSlow == false then
-									WeaponSpeed = WeaponSpeed * 0.5
+									if CurrentWeapon.ZoomAmount > 5 then
+										WeaponSpeed = WeaponSpeed * 0.1
+									else
+										WeaponSpeed = WeaponSpeed * 0.75
+									end
 								end
 							end
 						end

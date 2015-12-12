@@ -298,7 +298,9 @@ function SWEP:Deploy()
 		self:SendWeaponAnim(ACT_VM_DRAW)
 	end
 
-	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+	if self.WeaponType ~= "Throwable" then
+		self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+	end
 	
 	return true
 	
@@ -389,7 +391,7 @@ function SWEP:PreShootBullet()
 	print("Recoil", Recoil)
 	--]]
 
-	self:ShootBullet(Damage,Shots,Cone,Source,Direction,Source)
+	self:ShootBullet(Damage,Shots,Cone,Source,Direction,true)
 	self:TakePrimaryAmmo(1)
 	self:AddHeat(Damage,Shots)
 	
@@ -462,11 +464,11 @@ end
 
 function SWEP:HandleCone(Cone)
 
-	local VelCone = self.Owner:GetVelocity():Length()*0.0001 * self.VelConeMul
-
 	if self.HasBurstFire then
 		if self:GetIsBurst() then
-			Cone = Cone * 0.66
+			if self.HoldType ~= "shotgun" then
+				Cone = Cone * 0.66
+			end
 		end
 	elseif self.HasSilencer then
 		if self:GetIsSilenced() then
@@ -482,16 +484,27 @@ function SWEP:HandleCone(Cone)
 		end
 	end
 	
-	local FirstShotCone = 1
-	
-	if self:GetCoolDown() == 0 and self.HoldType != "shotgun" then
-		FirstShotCone = 0.001
+	if self.HasScope and self:GetIsZoomed() and not self.HasCrosshair then
+		Cone = Cone * 0
+	elseif self:GetCoolDown() < 1 and self.HoldType != "shotgun" then
+		Cone = Cone * self:GetCoolDown()
 	end
 	
 
-	Cone = ( VelCone * GetConVarNumber("sv_css_velcone_scale") ) + (Cone * FirstShotCone * GetConVarNumber("sv_css_cone_scale")) + (self:GetCoolDown()/100)
 	
-
+	Cone = Cone * GetConVarNumber("sv_css_cone_scale")
+	
+	local VelConvar = self.VelConeMul * GetConVarNumber("sv_css_velcone_scale") * 0.0001
+	local VelCone = self.Owner:GetVelocity():Length() * VelConvar
+	local AirCone = 400 * VelConvar
+	
+	if self.Owner:IsOnGround() then
+		Cone = Cone + VelCone
+	else
+		Cone = Cone + math.max(AirCone,VelCone)
+	end
+	
+	Cone = Cone + (self:GetCoolDown()/100)
 
 	return Cone
 
@@ -653,7 +666,7 @@ function SWEP:AddHeat(Damage,Shots)
 	self:SetCoolTime(CurTime() + ((Damage*Shots*0.01))*GetConVarNumber("sv_css_cooltime_scale"))
 end
 
-function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
+function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	
 	if not IsFirstTimePredicted( ) then return end
 	
@@ -663,31 +676,23 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	bullet.Spread	= Vector(Cone, Cone, 0)
 	bullet.Src		= Source
 	bullet.Dir		= Direction
-	bullet.Tracer	= 1
+	
+	if EnableTracer then
+		bullet.Tracer	= 1
+	end
+	
 	bullet.TracerName = "Tracer"
 	bullet.Force	= Vector(0,0,0)
 	bullet.Callback = function( attacker, tr, dmginfo)
 		if attacker:IsPlayer() or attacker:IsBot() then
 		
+			if not EnableTracer then
+				--util.ParticleTracer( "Tracer", Source, tr.HitPos, true )
+			end
+		
+		
 			if GetConVarNumber("sv_css_enable_penetration") == 1 then
-			
-				local matmul = 1
-				local mat = tr.MatType
-			
-				if mat == MAT_GLASS or MAT_SAND or MAT_SNOW or MAT_DIRT then
-					matmul = 0.75
-				elseif mat == MAT_ANTLION or mat == MAT_ALIENFLESH or mat == MAT_FLESH then
-					matmul = 1
-				elseif mat == MAT_CONCRETE then
-					matmul = 5
-				elseif mat == MAT_METAL then
-					matmul = 10
-				else
-					matmul = 1
-				end
-
 				self:WorldBulletSolution(tr.HitPos,Direction,Damage)
-
 			end
 			
 			if SERVER then
@@ -705,20 +710,48 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastHitPos)
 	
 end
 
+--PrecacheParticleSystem("Tracer")
+
 function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 
 	local Amount = 3
 	
 	local data = {}
+	
+	--print(Direction)
 	data.start = Pos + Direction
 	data.endpos = Pos + Direction*Amount
 	
 	local trace = util.TraceLine(data)
-	local NewDamage = Damage - ( GetConVarNumber("sv_css_penetration_scale") * Amount )
+	local HitEnt = trace.Entity
 	
-	if trace.HitWorld and NewDamage > 1 then
-		self:WorldBulletSolution(Pos + Direction*Amount,Direction,NewDamage)
+	local MatMul = 1
+	local mat = trace.MatType
+
+	if mat == MAT_GLASS then
+		MatMul = 0.5
+	elseif MAT_SAND or MAT_SNOW or MAT_DIRT then
+		MatMul = 2
+	elseif mat == MAT_ANTLION or mat == MAT_ALIENFLESH or mat == MAT_FLESH then
+		MatMul = 0.75
+	elseif mat == MAT_CONCRETE then
+		MatMul = 5
+	elseif mat == MAT_METAL then
+		MatMul = 10
 	end
+
+	local DamageMath = math.Round(Damage - (GetConVarNumber("sv_css_penetration_scale")*MatMul*Amount),2)
+	
+	if DamageMath > 0 then
+	
+		if trace.StartSolid then
+			self:WorldBulletSolution(data.endpos,Direction,DamageMath)
+		else
+			self:ShootBullet(DamageMath, 1, 0, data.endpos,Direction,false)
+		end
+	
+	end
+
 
 end
 
@@ -765,8 +798,6 @@ end
 function SWEP:IsUsing()
 	if self.Owner:KeyDown(IN_USE) then return true end
 end
-
-
 
 function SWEP:Reload()
 
@@ -1114,9 +1145,12 @@ function SWEP:DrawHUD()
 		if (not self:GetIsZoomed()) or self.EnableIronCross then
 
 			if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
+			
+				Cone = math.Max(Cone,width,length/4)
 				if width > 1 then
 					local fix = length/2
 				
+	
 					surface.SetDrawColor(r,g,b,a)
 					surface.DrawRect( x/2 - width/2, y/2 - length/2 + Cone + fix , width, length )
 					surface.DrawRect( x/2 - width/2, y/2 - length/2 - Cone - fix, width, length )
@@ -1124,10 +1158,10 @@ function SWEP:DrawHUD()
 					surface.DrawRect( x/2 - length/2 - Cone - fix, y/2 - width/2, length, width )
 				else
 					surface.SetDrawColor(r,g,b,a)
-					surface.DrawLine( x/2+1+Cone+length, y/2, x/2+0.5+Cone, y/2 )
-					surface.DrawLine( x/2-1-Cone-length, y/2, x/2-0.5-Cone, y/2 )
-					surface.DrawLine( x/2, y/2+1+Cone+length, x/2, y/2+0.5+Cone )
-					surface.DrawLine( x/2, y/2-1-Cone-length, x/2, y/2-0.5-Cone )
+					surface.DrawLine( x/2+0+Cone+length, y/2, x/2+(-0)+Cone, y/2 )
+					surface.DrawLine( x/2-0-Cone-length, y/2, x/2-(-0)-Cone, y/2 )
+					surface.DrawLine( x/2, y/2+0+Cone+length, x/2, y/2+(-0)+Cone )
+					surface.DrawLine( x/2, y/2-0-Cone-length, x/2, y/2-(-0)-Cone )
 				end
 			end
 		
@@ -1307,6 +1341,10 @@ end
 
 function SWEP:SwitchToPrimary()
 
+	self.Owner:ConCommand("lastinv")
+
+
+	--[[
 	local foundp = false
 	local founds = false
 	
@@ -1340,7 +1378,7 @@ function SWEP:SwitchToPrimary()
 		self.CanHolster = true
 		self.Owner:SelectWeapon(self.Owner:GetWeapons()[1]:GetClass() )
 	end
-
+	--]]
 end
 
 function SWEP:QuickThrow()

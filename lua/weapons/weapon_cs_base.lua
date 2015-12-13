@@ -105,6 +105,7 @@ SWEP.Cost					= 0
 SWEP.MoveSpeed				= 250
 
 SWEP.Primary.Damage			= 35
+SWEP.Primary.Range			= 56756
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
 SWEP.Primary.Cone			= 0
@@ -128,6 +129,8 @@ SWEP.RecoilMul				= 1
 SWEP.VelConeMul				= 1
 SWEP.CoolDownMul			= 1
 
+SWEP.BurstSpeedOverride 	= 1
+
 SWEP.HasCrosshair 			= true
 
 SWEP.HasScope 				= false
@@ -138,6 +141,7 @@ SWEP.IgnoreZoomSlow			= false
 
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false 
+SWEP.BurstOverride			= 3
 
 SWEP.HasIronSights 			= false
 SWEP.IronSightTime			= 1
@@ -358,14 +362,19 @@ function SWEP:PrimaryAttack()
 	end
 
 	if self.HasBurstFire and self:GetIsBurst() then
-		if self.HoldType == "shotgun" then
-			self:SetBulletQueue(1)
-			self:SetNextBulletDelay(CurTime() + (self.Primary.Delay / 32) )
+	
+		local Delay = self.BurstSpeedOverride * self.Primary.Delay
+	
+		self:SetBulletQueue(self.BurstOverride - 1)
+		self:SetNextBulletDelay(CurTime() + (Delay / self.BurstOverride) )
+		
+		if self.BurstOverride >= self:Clip1() then
+			self:SetNextPrimaryFire(CurTime() + Delay*2)
 		else
-			self:SetBulletQueue(2)
-			self:SetNextBulletDelay(CurTime() + (self.Primary.Delay / 3) )
+			self:SetNextPrimaryFire(CurTime() + Delay*self.BurstOverride*2)
 		end
-		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*3)
+		
+		
 	else
 		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	end
@@ -662,8 +671,8 @@ function SWEP:CanPrimaryAttack()
 end
 
 function SWEP:AddHeat(Damage,Shots)
-	self:SetCoolDown(math.Clamp(self:GetCoolDown()+(Damage*Shots*0.01)*GetConVarNumber("sv_css_heat_scale"),0,20))
-	self:SetCoolTime(CurTime() + ((Damage*Shots*0.01))*GetConVarNumber("sv_css_cooltime_scale"))
+	self:SetCoolDown(math.Clamp(self:GetCoolDown()+0.1+(Damage*Shots*0.01)*GetConVarNumber("sv_css_heat_scale"),0,20))
+	self:SetCoolTime(CurTime() + math.Max(self.Primary.Delay*1.1, ((Damage*Shots*0.01)))*GetConVarNumber("sv_css_cooltime_scale"))
 end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
@@ -676,9 +685,13 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	bullet.Spread	= Vector(Cone, Cone, 0)
 	bullet.Src		= Source
 	bullet.Dir		= Direction
+	--bullet.Distance	= self.Primary.Range
+	bullet.HullSize = 512
 	
 	if EnableTracer then
 		bullet.Tracer	= 1
+	else
+		bullet.Tracer	= 0
 	end
 	
 	bullet.TracerName = "Tracer"
@@ -1043,7 +1056,7 @@ function SWEP:Think()
 		
 	end
 
-	if self:GetCoolTime() < CurTime() then
+	if self:GetCoolTime() <= CurTime() then
 		if self:GetCoolDown() ~= 0 then
 			local CoolMod = math.Clamp(self:GetCoolDown() - FrameTime()*6.6,0,20)
 			self:SetCoolDown(CoolMod)

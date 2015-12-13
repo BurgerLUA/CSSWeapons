@@ -67,7 +67,7 @@ function CSSSpeedModMovement(ply,mv)
 							if CurrentWeapon:GetIsZoomed() then
 								if CurrentWeapon.IgnoreZoomSlow == false then
 									if CurrentWeapon.ZoomAmount > 5 then
-										WeaponSpeed = WeaponSpeed * 0.1
+										WeaponSpeed = WeaponSpeed * 0.5
 									else
 										WeaponSpeed = WeaponSpeed * 0.75
 									end
@@ -83,6 +83,15 @@ function CSSSpeedModMovement(ply,mv)
 			ply.GetSlow = math.Clamp(ply.GetSlow - 1000*engine.TickInterval(),0,99)
 
 			--if SlowEnable == false then
+			
+				local WalkMul = 1
+			
+				if mv:KeyDown(IN_WALK) then
+					WalkMul = 0.5
+				end
+			
+			
+			
 			
 				ForwardMove = mv:GetForwardSpeed()
 				SideMove = mv:GetSideSpeed()
@@ -128,8 +137,8 @@ function CSSSpeedModMovement(ply,mv)
 				--]]
 			--end
 			
-			mv:SetForwardSpeed( ForwardMove * SpeedMod)
-			mv:SetSideSpeed( SideMove * SpeedMod)
+			mv:SetForwardSpeed( ForwardMove * SpeedMod * WalkMul)
+			mv:SetSideSpeed( SideMove * SpeedMod * WalkMul)
 
 		end
 	end

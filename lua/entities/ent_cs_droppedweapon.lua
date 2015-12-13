@@ -39,9 +39,13 @@ function ENT:Use(activator,caller,useType,value)
 	
 	if ( activator:IsPlayer() ) then
 	
+		--print(activator:GetEyeTrace().Entity)
+		
+		--if activator:GetEyeTrace().Entity ~= self then return end
+	
 		if activator:GetActiveWeapon():IsScripted() then
 			if activator:GetActiveWeapon().Base == "weapon_cs_base" then
-				if activator:GetActiveWeapon().IsReloading ==1 then return end
+				if activator:GetActiveWeapon():GetIsReloading() then return end
 			end
 		end
 

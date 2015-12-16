@@ -336,7 +336,16 @@ function SWEP:PrimaryAttack()
 
 	if not self:CanPrimaryAttack() then return end
 	if self:IsBusy() then return end
-	if self:IsUsing() then return end
+	if self:IsUsing() then 
+		--[[
+		if self.HasBurstFire then
+			self:SwitchFireMode()
+		elseif self.HasSilencer then
+			self:Silencer()
+		end
+		--]]
+		return 
+	end
 	
 	if self.WeaponType == "Throwable" then
 		self:PreThrowObject()

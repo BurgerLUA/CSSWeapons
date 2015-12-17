@@ -59,10 +59,12 @@ function CSSSpeedModMovement(ply,mv)
 			
 			local CurrentWeapon = ply:GetActiveWeapon()
 			
+			
 			if IsValid(CurrentWeapon) then
 				if CurrentWeapon:IsScripted() then
 					if CurrentWeapon.Base == "weapon_cs_base" then
 						WeaponSpeed = CurrentWeapon.MoveSpeed
+						--[[
 						if CurrentWeapon.HasScope == true then
 							if CurrentWeapon:GetIsZoomed() then
 								if CurrentWeapon.IgnoreZoomSlow == false then
@@ -74,6 +76,7 @@ function CSSSpeedModMovement(ply,mv)
 								end
 							end
 						end
+						--]]
 					end
 				end
 			end

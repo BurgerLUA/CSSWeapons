@@ -450,7 +450,7 @@ function SWEP:WeaponEffects()
 	end
 	
 	--if CLIENT then
-		if not (self.HasIronSights and self.IsZoomed) then
+		if not (!self.HasIronSights and self.IsZoomed) then
 			if self:GetIsSilenced() then
 				self:SendWeaponAnim(ACT_VM_PRIMARYATTACK_SILENCED)
 			else

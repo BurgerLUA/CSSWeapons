@@ -556,15 +556,19 @@ function SWEP:SecondaryAttack()
 			elseif self.HasSilencer then
 				self:Silencer()
 			end
+		else
+			if self.HasIronSights or self.HasScope then
+				self:HandleZoom(1)
+			end
 		end
 	end
-	
+	--[[
 	if CLIENT then
 		if self.HasIronSights or self.HasScope then
 			self:HandleZoom(1)
 		end
 	end
-
+	--]]
 
 end
 
@@ -923,7 +927,7 @@ function SWEP:GetViewModelPosition( pos, ang )
 
 	if ( !self.IronSightsPos ) then return pos, ang end
 
-	local bIron = self:GetIsZoomed() and self.HasIronSights
+	local bIron = self.IsZoomed and self.HasIronSights
 	
 	if ( bIron != self.bLastIron ) then
 	

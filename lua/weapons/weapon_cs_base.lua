@@ -995,32 +995,18 @@ end
 
 function SWEP:Think()
 
-	if CLIENT then
-		self.ViewModelFOV = GetConVarNumber("cl_css_viewmodel_fov")
-		--self:RemoveRecoil()
-	end
-
-
-	
 	self:HandleCoolDown() -- don't predict
 	self:HandleShotgunReloadThinkAnimations() -- don't predict
-	
-	
-	
-	
-	self:EquipThink()
-	self:HandleBoltZoomMod()
+	self:EquipThink() -- don't predict, ever
+	self:HandleBoltZoomMod() -- don't predict, ever
+	self:HandleBurstFireShoot() -- don't predict, ever
+	self:HandleReloadThink() -- don't predict, ever
 	
 	if CLIENT then
+		self.ViewModelFOV = GetConVarNumber("cl_css_viewmodel_fov")
 		self:HandleZoomMod()
 	end
-	
-	self:HandleBurstFireShoot() -- don't predict, ever
 
-	--if IsFirstTimePredicted( ) then
-		self:HandleReloadThink() -- don't predict, ever
-	--end
-	
 end
 
 function SWEP:HandleBurstFireShoot()

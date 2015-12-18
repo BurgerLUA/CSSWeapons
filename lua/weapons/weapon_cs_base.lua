@@ -362,7 +362,6 @@ function SWEP:AfterPump()
 		self:SetIsShotgunReload(false)
 		self:SetIsReloading(false)
 		self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
-		print("ASS")
 		self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 		return 
 	end
@@ -1017,7 +1016,10 @@ function SWEP:HandleBurstFireShoot()
 			if self:Clip1() > 0 then
 				self:TakePrimaryAmmo(1)
 				self:EmitGunSound(self.Primary.Sound)
-				self:PreShootBullet()
+				self:WeaponEffects() 
+				if IsFirstTimePredicted() then
+					self:PreShootBullet()
+				end
 			end
 			
 		end
@@ -1053,9 +1055,6 @@ function SWEP:HandleReloadThink()
 	
 		if self:GetNextShell() <= CurTime() then
 			if self.Owner:GetAmmoCount( self.Primary.Ammo ) > 0 and self:Clip1() < self.Primary.ClipSize then 
-			
-				print("Shell")
-			
 				self:SendWeaponAnim(ACT_VM_RELOAD)
 				self:SetClip1(self:Clip1()+1)
 				self.Owner:RemoveAmmo(1,self.Primary.Ammo)

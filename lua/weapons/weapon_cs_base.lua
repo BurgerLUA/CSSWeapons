@@ -309,7 +309,7 @@ function SWEP:Holster()
 	
 	if self:IsBusy() then return false end
 
-	self:SetIsZoomed(false)
+	self.IsZoomed = false
 	
 	--WHAT THE FUCK IS THIS???
 	--[[
@@ -399,9 +399,9 @@ end
 function SWEP:AfterZoom()
 	if self.HasScope then
 		if self.HasBoltAction then
-			if self:GetIsZoomed() then
-				self:SetIsZoomed(false)
-				self:SetWasZoomed(true)
+			if self.IsZoomed then
+				self.IsZoomed = false
+				self.WasZoomed = true
 				self:SetBoltDelay(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 			end
 		end
@@ -450,15 +450,15 @@ function SWEP:WeaponEffects()
 	end
 	
 	--if CLIENT then
-		if not (!self.HasIronSights and self.IsZoomed) then
+		--if not (!self.HasIronSights and self.IsZoomed) then
 			if self:GetIsSilenced() then
 				self:SendWeaponAnim(ACT_VM_PRIMARYATTACK_SILENCED)
 			else
 				self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 			end
-		else
+		--else
 			self.Weapon:MuzzleFlash()
-		end
+		--end
 	--end
 	
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
@@ -487,7 +487,7 @@ function SWEP:HandleCone(Cone)
 		end
 	end
 	
-	--if self.HasScope and self:GetIsZoomed() and not self.HasCrosshair then
+	--if self.HasScope and self.IsZoomed and not self.HasCrosshair then
 	--	Cone = Cone * 0
 	--elseif self:GetCoolDown() < 1 and self.HoldType != "shotgun" then
 		Cone = Cone * (1+self:GetCoolDown())
@@ -543,7 +543,7 @@ function SWEP:SecondaryAttack()
 		if self:GetWasZoomed() then
 			self:SetWasZoomed(false)
 		else
-			self:SetWasZoomed(true)
+			self.WasZoomed = true
 		end
 	end
 	
@@ -626,14 +626,6 @@ function SWEP:HandleZoom(delay)
 			self:EmitGunSound("weapons/zoom.wav")
 		end
 	end
-
-	--[[
-	if self:GetIsZoomed() then
-		self:SetIsZoomed(false)
-	else
-		self:SetIsZoomed(true)
-	end
-	--]]
 	
 	if self.IsZoomed then
 		self.IsZoomed = false
@@ -663,8 +655,6 @@ end
 
 function SWEP:TranslateFOV(fov)
 
-	--local ZoomMag = 1 + ( self:GetZoomMod() * self.ZoomAmount )
-	
 	local ZoomMag = 1 + ( self.ZoomMod * self.ZoomAmount )
 
 	fov = GetConVar("fov_desired"):GetFloat() / ZoomMag
@@ -849,11 +839,15 @@ function SWEP:Reload()
 	--]]
 	if self:Clip1() >= self.Primary.ClipSize then return end
 	if self:GetNextPrimaryFire() > CurTime() then return end
-	if self.Owner:GetAmmoCount(self:GetPrimaryAmmoType()) == 0  then return end
+	if self.Owner:GetAmmoCount(self:GetPrimaryAmmoType()) == 0  then
+		if self.Owner:IsBot() then
+			self.Owner:GiveAmmo(self.Primary.ClipSize,self.Primary.Ammo,true)
+		end
+	return end
 	if self.WeaponType == "Throwable" then return end
 	
 	if self.HasZoom or self.HasIronSights then
-		--self:SetIsZoomed(false)
+		--self.IsZoomed = false
 		self.IsZoomed = false
 	end
 
@@ -895,7 +889,7 @@ function SWEP:Reload()
 	self.Owner:SetAnimation(PLAYER_RELOAD)
 	
 	if self.HasScope then
-		self:SetIsZoomed(false)
+		self.IsZoomed = false
 		self:SetNextZoomTime(CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate()))
 	end
 	
@@ -1143,7 +1137,7 @@ function SWEP:HandleBoltZoomMod()
 		if self.WasZoomed then
 			if not self:GetIsReloading() then
 				self:SetWasZoomed(false)
-				--self:SetIsZoomed(true)
+				--self.IsZoomed = true
 				self.WasZoomed = false
 				self.IsZoomed = true
 			end
@@ -1230,7 +1224,7 @@ function SWEP:DrawHUD()
 	Cone = math.Clamp(self:HandleCone(self.Primary.Cone) * 900,0,1000)*fovbonus
 
 	if self.HasCrosshair then
-		--if (not self:GetIsZoomed()) or self.EnableIronCross then
+		--if (not self.IsZoomed) or self.EnableIronCross then
 		if (not self.IsZoomed) or self.EnableIronCross then
 
 			if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
@@ -1267,7 +1261,7 @@ function SWEP:DrawHUD()
 		end
 	end
 	
-	--if self.HasScope and self:GetIsZoomed() then
+	--if self.HasScope and self.IsZoomed then
 	if self.HasScope and self.IsZoomed  then
 		self.Owner:DrawViewModel(false)	
 	else
@@ -1275,7 +1269,7 @@ function SWEP:DrawHUD()
 	end
 
 	if self.HasScope then
-		--if self:GetIsZoomed() then
+		--if self.IsZoomed then
 		if self.IsZoomed then
 
 			
@@ -1317,7 +1311,7 @@ function SWEP:DrawHUD()
 end
 
 function SWEP:HUDShouldDraw( element )
-	--if self:GetIsZoomed() and element == "CHudWeaponSelection" then return false end
+	--if self.IsZoomed and element == "CHudWeaponSelection" then return false end
 	if self.IsZoomed and element == "CHudWeaponSelection" then return false end
 	return true
 end

@@ -22,10 +22,10 @@ SWEP.WorldModel				= "models/weapons/w_shot_m3super90.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "shotgun"
 
-SWEP.Primary.Damage			= 120/12 --Not CSS Damage but the issue is that this pack doesn't use range
+SWEP.Primary.Damage			= 120/12
 SWEP.Primary.NumShots		= 12
 SWEP.Primary.Sound			= Sound("weapons/m3/m3-1.wav")
-SWEP.Primary.Cone			= (0.04000 + 0.01000)*1.3
+SWEP.Primary.Cone			= 0.08
 SWEP.Primary.ClipSize		= 8
 SWEP.Primary.SpareClip		= 32
 SWEP.Primary.Delay			= 0.88 --1/(68/60)

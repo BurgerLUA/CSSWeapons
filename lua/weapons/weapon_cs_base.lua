@@ -489,7 +489,7 @@ function SWEP:HandleCone(Cone)
 	--if self.HasScope and self.IsZoomed and not self.HasCrosshair then
 	--	Cone = Cone * 0
 	--elseif self:GetCoolDown() < 1 and self.HoldType != "shotgun" then
-		Cone = Cone * (1+self:GetCoolDown())
+		Cone = Cone * ((1+self:GetCoolDown())^self.Primary.Cone)
 	--end
 
 	Cone = Cone * GetConVarNumber("sv_css_cone_scale")
@@ -681,8 +681,8 @@ function SWEP:CanPrimaryAttack()
 end
 
 function SWEP:AddHeat(Damage,Shots)
-	self:SetCoolDown(math.Clamp(self:GetCoolDown()+0.1+(Damage*Shots*0.01)*GetConVarNumber("sv_css_heat_scale"),0,20))
-	self:SetCoolTime(CurTime() + math.Max(self.Primary.Delay*1.1, ((Damage*Shots*0.01)))*GetConVarNumber("sv_css_cooltime_scale"))
+	self:SetCoolDown(math.Clamp(self:GetCoolDown()+(Damage*Shots*(0.2 - self.Primary.Cone)*0.06)*GetConVarNumber("sv_css_heat_scale"),0,math.max(0.005,self.Primary.Cone,0.008)*1000))
+	self:SetCoolTime(CurTime() + math.Max(self.Primary.Delay*1.01, ((Damage*Shots*0.01)))*GetConVarNumber("sv_css_cooltime_scale"))
 end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)

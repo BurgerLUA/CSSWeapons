@@ -521,12 +521,32 @@ function SWEP:AddRecoil()
 	local Shots = self.Primary.NumShots
 	local Recoil = self.RecoilMul
 
-	local ViewKick = -(Damage*Shots/20)*Recoil
+	local ViewKick = -(Damage*Shots/20)*Recoil*2
 	local UpPunch = (ViewKick/2)*3
 	local SidePunch = 0
 
 	if self.HasSideRecoil then
-		SidePunch =	(ViewKick/2)*math.Rand(-1,1)*0.5
+	
+		local Math1 = math.abs(self.PunchAngleUp.p)
+		local Math2 = math.abs(UpPunch*self.Primary.Damage*self.Primary.Cone*1.25)
+	
+		print(Math1,Math2)
+	
+		if Math1 >= Math2 then
+		
+			local Math3 = 1
+		
+			if self.PunchAngleUp.y > 1 then
+				Math3 = math.Rand(0,1)
+			elseif self.PunchAngleUp.y < -1 then
+				Math3 = math.Rand(-1,0)
+			else
+				Math3 = math.Rand(-1,1)
+			end
+		
+			SidePunch =	UpPunch*Math3*0.75
+			
+		end
 	end
 	
 	self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0)

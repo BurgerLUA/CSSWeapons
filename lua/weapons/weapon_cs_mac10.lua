@@ -50,6 +50,6 @@ SWEP.HasSideRecoil			= true
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true
 SWEP.HasGoodSights			= true
-SWEP.IronSightTime			= 0.25
+SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-7, 0, -1)
 SWEP.IronSightsAng 			= Vector(6, -2, 0)

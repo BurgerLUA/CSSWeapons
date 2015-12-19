@@ -530,8 +530,6 @@ function SWEP:AddRecoil()
 		local Math1 = math.abs(self.PunchAngleUp.p)
 		local Math2 = math.abs(UpPunch*self.Primary.Damage*self.Primary.Cone*1.25)
 	
-		print(Math1,Math2)
-	
 		if Math1 >= Math2 then
 		
 			local Math3 = 1

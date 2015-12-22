@@ -3,7 +3,7 @@ function CSSDamage(ply, hitgroup, dmginfo)
 	local ReportedDamage
 	
 	local Weapon = dmginfo:GetInflictor()
-
+	
 	if not ply:HasGodMode() and GetConVarNumber("sbox_godmode") == 0 then
 	
 		if GetConVarNumber("sv_css_enable_damagesounds") == 1 then
@@ -78,3 +78,16 @@ function CSSDeath( victim, inflictor, attacker )
 end
 
 hook.Add("PlayerDeath","CSS: Death Sounds",CSSDeath)
+
+function CSSBoltFix(victim,dmginfo)
+
+	local Attacker = dmginfo:GetAttacker()
+	local Inflictor = dmginfo:GetInflictor()
+	
+	if Inflictor:GetClass() == "crossbow_bolt" and dmginfo:GetDamage() <= 1 then
+		dmginfo:SetDamage(100)
+	end
+
+end
+
+hook.Add("EntityTakeDamage","CSS Bolt Fix",CSSBoltFix)

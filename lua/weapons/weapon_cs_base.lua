@@ -759,7 +759,6 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 	
 	local data = {}
 	
-	--print(Direction)
 	data.start = Pos + Direction
 	data.endpos = Pos + Direction*Amount
 	
@@ -1540,7 +1539,7 @@ function SWEP:ThrowObject(object,force)
 		ent:GetPhysicsObject():SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force + EA:Up()*50)
 		--ent:GetPhysicsObject():AddAngleVelocity(Vector(1000,1000,1000))
 	else
-		ent:SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force + EA:Up()*50)
+		ent:SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force)
 	end
 	
 	ent.Damage = 100

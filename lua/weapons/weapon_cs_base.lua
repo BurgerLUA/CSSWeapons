@@ -335,7 +335,7 @@ function SWEP:GetZoomed()
 	if game.SinglePlayer() then
 		return self.Owner:GetFOV() < GetConVar("fov_desired"):GetFloat()
 	else
-		return self.IsZoom
+		return self.IsZoomed
 	end
 end
 

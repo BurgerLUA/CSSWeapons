@@ -182,8 +182,9 @@ function SWEP:SetupDataTables( )
 	
 	self:NetworkVar("Float",8,"NextBulletDelay")
 	self:SetNextBulletDelay(0)
-	self:NetworkVar("Float",9,"ZoomMod")
-	self:SetZoomMod(0)
+	
+	--self:NetworkVar("Float",9,"ZoomMod")
+	--self:SetZoomMod(0)
 	
 	self:NetworkVar("Int",0,"BulletQueue")
 	self:SetBulletQueue(0)
@@ -207,7 +208,7 @@ function SWEP:Initialize()
 	
 	util.PrecacheSound(self.Primary.Sound)
 	
-	if CLIENT then
+	if (CLIENT or game.SinglePlayer()) then
 		if GetConVarNumber("cl_css_customslots") == 1 then
 			if self.WeaponType == "Primary" then
 				self.Slot = 2
@@ -305,11 +306,37 @@ end
 function SWEP:Holster()
 	
 	if self:IsBusy() then return false end
-
-	self.IsZoomed = false
 	
+	self:SetZoomed(false)
+
 	return true
 	
+end
+
+SWEP.IsZoomed = false
+
+function SWEP:SetZoomed(shouldzoom)
+	if shouldzoom then
+		if game.SinglePlayer() then
+			self.Owner:SetFOV( GetConVar("fov_desired"):GetFloat() / (1 + self.ZoomAmount), 0.1 )
+		else
+			self.IsZoomed = true
+		end
+	else
+		if game.SinglePlayer() then
+			self.Owner:SetFOV( GetConVar("fov_desired"):GetFloat(), 0.1 )
+		else
+			self.IsZoomed = false
+		end
+	end
+end
+
+function SWEP:GetZoomed()
+	if game.SinglePlayer() then
+		return self.Owner:GetFOV() < GetConVar("fov_desired"):GetFloat()
+	else
+		return self.IsZoom
+	end
 end
 
 function SWEP:PrimaryAttack()
@@ -326,12 +353,12 @@ function SWEP:PrimaryAttack()
 	self:HandleBurstDelay() -- don't predict
 	self:WeaponEffects() -- don't predict, has animations
 	
-	if IsFirstTimePredicted() then
+	if (IsFirstTimePredicted() or game.SinglePlayer()) then
 	
 		self:AfterZoom() -- Predict?
 		self:PreShootBullet() -- Predict
 		
-		if CLIENT then 
+		if (CLIENT or game.SinglePlayer()) then 
 			self:AddRecoil() -- Predict
 		end
 		
@@ -396,8 +423,8 @@ end
 function SWEP:AfterZoom()
 	if self.HasScope then
 		if self.HasBoltAction then
-			if self.IsZoomed then
-				self.IsZoomed = false
+			if self:GetZoomed() then
+				self:SetZoomed(false)
 				self.WasZoomed = true
 				self:SetBoltDelay(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 			end
@@ -447,18 +474,13 @@ function SWEP:WeaponEffects()
 		self:EmitGunSound(GunSound)
 	end
 	
-	--if CLIENT then
-		--if not (!self.HasIronSights and self.IsZoomed) then
-			if self:GetIsSilenced() then
-				self:SendWeaponAnim(ACT_VM_PRIMARYATTACK_SILENCED)
-			else
-				self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-			end
-		--else
-			self.Weapon:MuzzleFlash()
-		--end
-	--end
-	
+	if self:GetIsSilenced() then
+		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK_SILENCED)
+	else
+		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+	end
+
+	self.Weapon:MuzzleFlash()
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 
 end
@@ -482,14 +504,8 @@ function SWEP:HandleCone(Cone)
 			Cone = Cone * 0.8
 		end
 	end
-	
-	--if self.HasScope and self.IsZoomed and not self.HasCrosshair then
-	--	Cone = Cone * 0
-	--elseif self:GetCoolDown() < 1 and self.HoldType != "shotgun" then
-		Cone = Cone * ((1+self:GetCoolDown())^self.Primary.Cone)
-	--end
 
-	Cone = Cone * GetConVarNumber("sv_css_cone_scale")
+	Cone = (Cone * ((1+self:GetCoolDown())^self.Primary.Cone) * GetConVarNumber("sv_css_cone_scale")) + (self:GetCoolDown()/100)
 	
 	local VelConvar = self.VelConeMul * GetConVarNumber("sv_css_velcone_scale") * 0.0001
 	local VelCone = self.Owner:GetVelocity():Length() * VelConvar
@@ -500,14 +516,12 @@ function SWEP:HandleCone(Cone)
 	else
 		Cone = Cone + math.max(AirCone,VelCone)
 	end
-	
-	Cone = Cone + (self:GetCoolDown()/100)
 
 	return Cone
 
 end
 
-if CLIENT then
+if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleUp = Angle(0,0,0)
 	SWEP.PunchAngleDown = Angle(0,0,0)
 end
@@ -549,8 +563,6 @@ function SWEP:AddRecoil()
 	
 end
 
-SWEP.IsZoomed = false
-
 function SWEP:SecondaryAttack()
 	
 	if self.HasBoltAction and (self.HasScope or self.HasIronsights) and self:GetBoltDelay() > CurTime() then
@@ -563,7 +575,7 @@ function SWEP:SecondaryAttack()
 	
 	if self:IsBusy() then return end
 	
-	if IsFirstTimePredicted() then
+	if (IsFirstTimePredicted() or game.SinglePlayer()) then
 		if self:IsUsing() then
 			if self.HasBurstFire then
 				self:SwitchFireMode()
@@ -576,19 +588,12 @@ function SWEP:SecondaryAttack()
 			end
 		end
 	end
-	--[[
-	if CLIENT then
-		if self.HasIronSights or self.HasScope then
-			self:HandleZoom(1)
-		end
-	end
-	--]]
 
 end
 
 function SWEP:SwitchFireMode()
 
-	if not IsFirstTimePredicted() then return end
+	if not (IsFirstTimePredicted() or game.SinglePlayer()) then return end
 	
 	local Message = "Semi-Automatic"
 
@@ -615,12 +620,12 @@ function SWEP:Silencer()
 		
 	if self:GetIsSilenced() then
 		self:SendWeaponAnim(ACT_VM_DETACH_SILENCER)
-		if not IsFirstTimePredicted() then return end
+		if not (IsFirstTimePredicted() or game.SinglePlayer()) then return end
 		self.WorldModel = self.WorldModel1
 		self:SetIsSilenced(false)
 	else
 		self:SendWeaponAnim(ACT_VM_ATTACH_SILENCER)
-		if not IsFirstTimePredicted() then return end
+		if not (IsFirstTimePredicted() or game.SinglePlayer()) then return end
 		self.WorldModel = self.WorldModel2
 		self:SetIsSilenced(true)
 	end
@@ -631,22 +636,22 @@ end
 
 function SWEP:HandleZoom(delay)
 
-	if not IsFirstTimePredicted() then return end
+	if not (IsFirstTimePredicted() or game.SinglePlayer()) then return end
 	if not self:CanBoltZoom() then return end
 	if self:IsBusy() then return end
 	
 	if self.HasScope then
-		if CLIENT then
+		if (CLIENT or game.SinglePlayer()) then
 			self:EmitGunSound("weapons/zoom.wav")
 		end
 	end
-	
-	if self.IsZoomed then
-		self.IsZoomed = false
+
+	if self:GetZoomed() then
+		self:SetZoomed(false)
 	else
-		self.IsZoomed = true
+		self:SetZoomed(true)
 	end
-	
+
 	self:SetNextZoomTime(CurTime() + delay)
 	
 end
@@ -669,9 +674,10 @@ end
 
 function SWEP:TranslateFOV(fov)
 
-	local ZoomMag = 1 + ( self.ZoomMod * self.ZoomAmount )
-
-	fov = GetConVar("fov_desired"):GetFloat() / ZoomMag
+	if not game.SinglePlayer() then
+		local ZoomMag = 1 + ( self.ZoomMod * self.ZoomAmount )
+		fov = GetConVar("fov_desired"):GetFloat() / ZoomMag
+	end
 	
 	return fov
 	
@@ -806,7 +812,7 @@ function SWEP:BulletEffect(HitPos,StartPos,HitEntity,SurfaceProp)
 	effect:SetSurfaceProp(SurfaceProp)
 	effect:SetDamageType(DMG_BULLET)
 	
-	if CLIENT then
+	if (CLIENT or game.SinglePlayer()) then
 		effect:SetEntity(HitEntity)
 	else
 		effect:SetEntIndex(HitEntity:EntIndex())
@@ -852,16 +858,15 @@ function SWEP:Reload()
 	--]]
 	if self:Clip1() >= self.Primary.ClipSize then return end
 	if self:GetNextPrimaryFire() > CurTime() then return end
-	if self.Owner:GetAmmoCount(self:GetPrimaryAmmoType()) == 0  then
+	if self.WeaponType == "Throwable" then return end
+	if self.Owner:GetAmmoCount(self:GetPrimaryAmmoType()) == 0 	then
 		if self.Owner:IsBot() then
 			self.Owner:GiveAmmo(self.Primary.ClipSize,self.Primary.Ammo,true)
 		end
 	return end
-	if self.WeaponType == "Throwable" then return end
 	
 	if self.HasZoom or self.HasIronSights then
-		--self.IsZoomed = false
-		self.IsZoomed = false
+		self:SetZoomed(false)
 	end
 
 	if SERVER then
@@ -883,7 +888,7 @@ function SWEP:Reload()
 		self:SendWeaponAnim(ACT_VM_RELOAD)
 	end
 	
-	if CLIENT then
+	if (CLIENT or game.SinglePlayer()) then
 		if self.ReloadSound then
 			if not self.HasPumpAction then
 				self:EmitGunSound(self.ReloadSound)
@@ -902,7 +907,7 @@ function SWEP:Reload()
 	self.Owner:SetAnimation(PLAYER_RELOAD)
 	
 	if self.HasScope then
-		self.IsZoomed = false
+		self:SetZoomed(false)
 		self:SetNextZoomTime(CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate()))
 	end
 	
@@ -933,8 +938,8 @@ function SWEP:GetViewModelPosition( pos, ang )
 	ang = LocalPlayer():EyeAngles()
 
 	if ( !self.IronSightsPos ) then return pos, ang end
-
-	local bIron = self.IsZoomed and self.HasIronSights
+	
+	local bIron = self:GetZoomed() and self.HasIronSights
 	
 	if ( bIron != self.bLastIron ) then
 	
@@ -970,19 +975,13 @@ function SWEP:GetViewModelPosition( pos, ang )
 	end
 	
 	local Offset = self.IronSightsPos
+	
+	if game.SinglePlayer() then
+		Offset = Offset - Vector(0,Offset.y,0)
+	end
+	
 
 	if ( self.IronSightsAng ) then
-	
-		--[[
-		local VModel = LocalPlayer():GetViewModel()
-		
-		local Edit = Angle(0,0,0)
-		Edit:RotateAroundAxis( Edit:Right(), 	self.IronSightsAng.x * Mul )
-		Edit:RotateAroundAxis( Edit:Up(), 		self.IronSightsAng.y * Mul )
-		Edit:RotateAroundAxis( Edit:Forward(), 	self.IronSightsAng.z * Mul )
-		
-		local CompAngles = VModel:GetAngles() - ang - Edit
-		--]]
 		
 		ang = ang * 1
 		
@@ -1013,11 +1012,12 @@ function SWEP:Think()
 	self:HandleBurstFireShoot() -- don't predict, ever
 	self:HandleReloadThink() -- don't predict, ever
 	
-	if CLIENT then
+	if (CLIENT or game.SinglePlayer()) then
 		self.ViewModelFOV = GetConVarNumber("cl_css_viewmodel_fov")
 		self:HandleZoomMod()
+		self:RemoveRecoil()
 	end
-
+	
 end
 
 function SWEP:HandleBurstFireShoot()
@@ -1030,10 +1030,10 @@ function SWEP:HandleBurstFireShoot()
 			if self:Clip1() > 0 then
 				self:TakePrimaryAmmo(1)
 				self:WeaponEffects()
-				if IsFirstTimePredicted() then
+				if (IsFirstTimePredicted() or game.SinglePlayer()) then
 					self:PreShootBullet()
 					
-					if CLIENT then 
+					if (CLIENT or game.SinglePlayer()) then 
 						self:AddRecoil()
 					end
 				
@@ -1078,7 +1078,7 @@ function SWEP:HandleReloadThink()
 				self.Owner:RemoveAmmo(1,self.Primary.Ammo)
 				self:SetNextShell(CurTime()+0.5)
 
-				if CLIENT then
+				if (CLIENT or game.SinglePlayer()) then
 					if self.ReloadSound then
 						self:EmitGunSound(self.ReloadSound)
 					end
@@ -1101,7 +1101,7 @@ function SWEP:HandleShotgunReloadThinkAnimations()
 			if self.Owner:GetAmmoCount( self.Primary.Ammo ) > 0 and self:Clip1() < self.Primary.ClipSize then 
 				self:SendWeaponAnim(ACT_VM_RELOAD)
 
-				if CLIENT then
+				if (CLIENT or game.SinglePlayer()) then
 					if self.ReloadSound then
 						self:EmitGunSound(self.ReloadSound)
 					end
@@ -1129,34 +1129,29 @@ end
 SWEP.ZoomMod = 0
 
 function SWEP:HandleZoomMod()
-	if self.IsZoomed then
-		if self.HasIronSights then
-			self.ZoomMod = math.min(self.ZoomMod + FrameTime()*6,1)
-			--self:SetZoomMod(math.min(self:GetZoomMod() + FrameTime()*6,1))
+	if not game.SinglePlayer() then
+		if self:GetZoomed() then
+			if self.HasIronSights then
+				self.ZoomMod = math.min(self.ZoomMod + FrameTime()*6,1)
+			else
+				self.ZoomMod = 1
+			end
 		else
-			--self:SetZoomMod(1)
-			self.ZoomMod = 1
-		end
-	else
-		if self.HasIronSights then
-			self.ZoomMod = math.max(self.ZoomMod - FrameTime()*6,0)
-			--self:SetZoomMod(math.max(self:GetZoomMod() - FrameTime()*6,0))
-		else
-			--self:SetZoomMod(0)
-			self.ZoomMod = 0
+			if self.HasIronSights then
+				self.ZoomMod = math.max(self.ZoomMod - FrameTime()*6,0)
+			else
+				self.ZoomMod = 0
+			end
 		end
 	end
 end
 
 function SWEP:HandleBoltZoomMod()
 	if self:CanBoltZoom() then
-		--if self.WasZoomed then
 		if self.WasZoomed then
 			if not self:GetIsReloading() then
 				self.WasZoomed = false
-				--self.IsZoomed = true
-				self.WasZoomed = false
-				self.IsZoomed = true
+				self:SetZoomed(true)
 			end
 		end
 	end
@@ -1217,11 +1212,6 @@ function SWEP:AdjustMouseSensitivity()
 end
 
 function SWEP:DrawHUD()
-
-	self:RemoveRecoil()
-
-
-	--if not LocalPlayer().css_cone_scale and not game.SinglePlayer() then return end
 	
 	local x = ScrW()
 	local y = ScrH()
@@ -1241,8 +1231,7 @@ function SWEP:DrawHUD()
 	Cone = math.Clamp(self:HandleCone(self.Primary.Cone) * 900,0,1000)*fovbonus
 
 	if self.HasCrosshair then
-		--if (not self.IsZoomed) or self.EnableIronCross then
-		if (not self.IsZoomed) or self.EnableIronCross then
+		if !self:GetZoomed() or self.EnableIronCross then
 
 			if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
 			
@@ -1278,16 +1267,14 @@ function SWEP:DrawHUD()
 		end
 	end
 	
-	--if self.HasScope and self.IsZoomed then
-	if self.HasScope and self.IsZoomed  then
+	if self.HasScope and self.IsZoomeded then
 		self.Owner:DrawViewModel(false)	
 	else
 		self.Owner:DrawViewModel(true)
 	end
 
 	if self.HasScope then
-		--if self.IsZoomed then
-		if self.IsZoomed then
+		if self:GetZoomed() then
 
 			
 			local space = 1
@@ -1328,8 +1315,7 @@ function SWEP:DrawHUD()
 end
 
 function SWEP:HUDShouldDraw( element )
-	--if self.IsZoomed and element == "CHudWeaponSelection" then return false end
-	if self.IsZoomed and element == "CHudWeaponSelection" then return false end
+	if self:GetZoomed() and element == "CHudWeaponSelection" then return false end
 	return true
 end
 
@@ -1443,45 +1429,7 @@ end
 -- Note: CanHolster
 
 function SWEP:SwitchToPrimary()
-
 	self.Owner:ConCommand("lastinv")
-
-
-	--[[
-	local foundp = false
-	local founds = false
-	
-	for k,v in pairs(self.Owner:GetWeapons()) do
-		if v:IsScripted() then
-			if foundp == false then
-				if weapons.GetStored(v:GetClass()).WeaponType == "Primary" then
-					self.CanHolster = true
-					self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
-					foundp = true
-				end
-			end
-		end
-	end
-	
-	if foundp == false then
-		for k,v in pairs(self.Owner:GetWeapons()) do
-			if v:IsScripted() then
-				if founds == false then
-					if weapons.GetStored(v:GetClass()).WeaponType == "Secondary" then
-						self.CanHolster = true
-						self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
-						founds = true
-					end
-				end
-			end
-		end
-	end
-
-	if founds == false and foundp == false then
-		self.CanHolster = true
-		self.Owner:SelectWeapon(self.Owner:GetWeapons()[1]:GetClass() )
-	end
-	--]]
 end
 
 function SWEP:QuickThrow()
@@ -1524,7 +1472,7 @@ function SWEP:PreThrowObject()
 end
 
 function SWEP:ThrowObject(object,force)
-	if CLIENT then return end
+	if (CLIENT or game.SinglePlayer()) then return end
 	local EA =  self.Owner:EyeAngles()
 	local pos = self.Owner:GetShootPos() + EA:Right() * 5 - EA:Up() * 4 + EA:Forward() * 8	
 

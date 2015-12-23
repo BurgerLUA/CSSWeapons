@@ -45,7 +45,7 @@ SWEP.HasBoltAction 			= true
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
-SWEP.HasSideRecoil			= true
+SWEP.HasSideRecoil			= false
 
 SWEP.HasIronSights 			= false
 SWEP.EnableIronCross		= false

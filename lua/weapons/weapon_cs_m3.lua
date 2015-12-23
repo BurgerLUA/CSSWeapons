@@ -22,8 +22,8 @@ SWEP.WorldModel				= "models/weapons/w_shot_m3super90.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "shotgun"
 
-SWEP.Primary.Damage			= 120/12
-SWEP.Primary.NumShots		= 12
+SWEP.Primary.Damage			= 120/9
+SWEP.Primary.NumShots		= 9
 SWEP.Primary.Sound			= Sound("weapons/m3/m3-1.wav")
 SWEP.Primary.Cone			= 0.08
 SWEP.Primary.ClipSize		= 8

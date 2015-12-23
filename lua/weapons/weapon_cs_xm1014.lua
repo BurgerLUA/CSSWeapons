@@ -22,8 +22,8 @@ SWEP.WorldModel				= "models/weapons/w_shot_xm1014.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "shotgun"
 
-SWEP.Primary.Damage			= 105/12
-SWEP.Primary.NumShots		= 12
+SWEP.Primary.Damage			= 105/6
+SWEP.Primary.NumShots		= 6
 SWEP.Primary.Sound			= Sound("weapons/xm1014/xm1014-1.wav")
 SWEP.Primary.Cone			= 0.09
 SWEP.Primary.ClipSize		= 7

@@ -140,6 +140,7 @@ SWEP.ZoomAmount 			= 1
 SWEP.IgnoreZoomSlow			= false
 
 SWEP.HasBurstFire 			= false
+SWEP.BurstConeMul			= 1
 SWEP.HasSilencer 			= false 
 SWEP.BurstOverride			= 3
 
@@ -197,10 +198,6 @@ function SWEP:SetupDataTables( )
 	self:SetIsSilenced( false )
 	self:NetworkVar("Bool",4,"IsNormalReload")
 	self:SetIsNormalReload( false )
-	self:NetworkVar("Bool",5,"IsZoomed")
-	self:SetIsZoomed( false )
-	self:NetworkVar("Bool",6,"WasZoomed")
-	self:SetWasZoomed( false )
 
 end
 
@@ -311,17 +308,6 @@ function SWEP:Holster()
 
 	self.IsZoomed = false
 	
-	--WHAT THE FUCK IS THIS???
-	--[[
-	if self.Slot then
-		if self.Slot > 1 then 
-			self.Owner:SetNWString("cssprimary",self:GetClass())
-		else
-			self.Owner:SetNWString("csssecondary",self:GetClass())
-		end
-	end
-	--]]
-	
 	return true
 	
 end
@@ -370,12 +356,24 @@ end
 function SWEP:HandleBurstDelay()
 	if self.HasBurstFire then
 		if self:GetIsBurst() then
-			local Delay = self.BurstSpeedOverride * self.Primary.Delay
-			local NumBullets = self.BurstOverride - 1
-			self:SetBulletQueue(NumBullets)
-			self:SetNextBulletDelay(CurTime() + (Delay / self.BurstOverride) )
+			if self:GetBulletQueue() == 0 then
+
+				local NumBullets = self.BurstOverride - 1
+
+				self:SetNextBulletDelay(CurTime() + self:GetBurstMath() )
+				self:SetBulletQueue(NumBullets)
+				
+				if self.BurstSound then
+					self:EmitGunSound(self.BurstSound)
+				end
+
+			end			
 		end
 	end
+end
+
+function SWEP:GetBurstMath()
+	return (self.BurstSpeedOverride * self.Primary.Delay) / self.BurstOverride
 end
 
 function SWEP:WeaponDelay()
@@ -412,7 +410,12 @@ function SWEP:PreShootBullet() -- Should be predicted
 	local Shots = self.Primary.NumShots
 	local Cone = self:HandleCone(self.Primary.Cone)
 	local Source = self.Owner:GetShootPos()
-	local Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
+	local Direction = self.Owner:GetAimVector()
+	
+	if self.Owner:IsPlayer() then
+		Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
+	end
+	
 	self:ShootBullet(Damage,Shots,Cone,Source,Direction,true)
 	self:AddHeat(Damage,Shots)
 end
@@ -435,11 +438,7 @@ function SWEP:WeaponEffects()
 	if self.HasBurstFire then
 		if self.BurstSound != nil then
 			if self:GetIsBurst() then
-				if self:GetBulletQueue() == 0 then
-					GunSound = self.BurstSound
-				else
-					GunSound = nil
-				end
+				GunSound = nil
 			end
 		end
 	end
@@ -468,9 +467,7 @@ function SWEP:HandleCone(Cone)
 
 	if self.HasBurstFire then
 		if self:GetIsBurst() then
-			if self.HoldType ~= "shotgun" then
-				Cone = Cone * 0.66
-			end
+			Cone = Cone * self.BurstConeMul
 		end
 	elseif self.HasSilencer then
 		if self:GetIsSilenced() then
@@ -478,7 +475,7 @@ function SWEP:HandleCone(Cone)
 		end
 	end
 	
-	if self.Owner:Crouching() and self.Owner:IsOnGround() then
+	if self.Owner:IsPlayer() and self.Owner:Crouching() and self.Owner:IsOnGround() then
 		if self.WeaponType == "Secondary" and self.HoldType == "revolver" then
 			Cone = Cone * 0.5
 		else
@@ -557,8 +554,8 @@ SWEP.IsZoomed = false
 function SWEP:SecondaryAttack()
 	
 	if self.HasBoltAction and (self.HasScope or self.HasIronsights) and self:GetBoltDelay() > CurTime() then
-		if self:GetWasZoomed() then
-			self:SetWasZoomed(false)
+		if self.WasZoomed then
+			self.WasZoomed = false
 		else
 			self.WasZoomed = true
 		end
@@ -689,7 +686,7 @@ function SWEP:CanPrimaryAttack()
 			return false 
 		end
 	elseif self:Clip1() <= 0 then
-		self:EmitSound("weapons/clipempty_pistol.wav",100,100)
+		self.Owner:EmitSound("weapons/clipempty_pistol.wav",100,100)
 		self:SetNextPrimaryFire(CurTime() + 0.25)
 		return false
 	end
@@ -725,7 +722,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	bullet.TracerName = "Tracer"
 	bullet.Force	= Vector(0,0,0)
 	bullet.Callback = function( attacker, tr, dmginfo)
-		if attacker:IsPlayer() or attacker:IsBot() then
+		if attacker:IsPlayer() then
 		
 			if not EnableTracer then
 				--util.ParticleTracer( "Tracer", Source, tr.HitPos, true )
@@ -836,7 +833,7 @@ function SWEP:IsBusy()
 end
 
 function SWEP:IsUsing()
-	if self.Owner:KeyDown(IN_USE) then return true end
+	if self.Owner:IsPlayer() and self.Owner:KeyDown(IN_USE) then return true end
 end
 
 function SWEP:Reload()
@@ -1027,15 +1024,19 @@ function SWEP:HandleBurstFireShoot()
 	if self.HasBurstFire then
 		if self:GetNextBulletDelay() <= CurTime() and self:GetBulletQueue() > 0 then
 		
-			self:SetNextBulletDelay(CurTime() + self.Primary.Delay/3)
+			self:SetNextBulletDelay(CurTime() + self:GetBurstMath())
 			self:SetBulletQueue(self:GetBulletQueue() - 1)
-			
+
 			if self:Clip1() > 0 then
 				self:TakePrimaryAmmo(1)
-				self:EmitGunSound(self.Primary.Sound)
-				self:WeaponEffects() 
+				self:WeaponEffects()
 				if IsFirstTimePredicted() then
 					self:PreShootBullet()
+					
+					if CLIENT then 
+						self:AddRecoil()
+					end
+				
 				end
 			end
 			
@@ -1149,10 +1150,10 @@ end
 
 function SWEP:HandleBoltZoomMod()
 	if self:CanBoltZoom() then
-		--if self:GetWasZoomed() then
+		--if self.WasZoomed then
 		if self.WasZoomed then
 			if not self:GetIsReloading() then
-				self:SetWasZoomed(false)
+				self.WasZoomed = false
 				--self.IsZoomed = true
 				self.WasZoomed = false
 				self.IsZoomed = true
@@ -1550,3 +1551,9 @@ end
 function SWEP:QuickKnife()
 
 end
+
+AccessorFunc(SWEP,"fNPCMinBurst","NPCMinBurst")
+AccessorFunc(SWEP,"fNPCMaxBurst","NPCMaxBurst")
+AccessorFunc(SWEP,"fNPCFireRate","NPCFireRate")
+AccessorFunc(SWEP,"fNPCMinRestTime","NPCMinRest")
+AccessorFunc(SWEP,"fNPCMaxRestTime","NPCMaxRest")

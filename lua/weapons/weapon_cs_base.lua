@@ -833,7 +833,7 @@ end
 function SWEP:EmitGunSound(GunSound,Level)
 
 	--if CLIENT or game.SinglePlayer() then
-		self.Weapon:EmitSound(GunSound, 511 , 100, 1, CHAN_WEAPON )
+	--	self.Weapon:EmitSound(GunSound, 511 , 100, 1, CHAN_WEAPON )
 	--else
 	
 	if SERVER then
@@ -841,7 +841,7 @@ function SWEP:EmitGunSound(GunSound,Level)
 		
 		--print(self:Clip1())
 		
-		--[[
+		
 		net.Start("CSSCustomSound")
 			net.WriteVector(self:GetPos())
 			net.WriteEntity(self.Weapon)
@@ -849,7 +849,7 @@ function SWEP:EmitGunSound(GunSound,Level)
 			net.WriteFloat(Level)
 			net.WriteFloat(CHAN_WEAPON)
 		net.Broadcast()
-		--]]
+		
 		
 	end
 	

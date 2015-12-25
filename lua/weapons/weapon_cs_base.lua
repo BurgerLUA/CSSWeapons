@@ -832,7 +832,7 @@ end
 function SWEP:EmitGunSound(GunSound,Level)
 
 	--if CLIENT or game.SinglePlayer() then
-		self.Weapon:EmitSound(GunSound, SNDLVL_GUNFIRE , 100, 1, CHAN_WEAPON )
+		self.Weapon:EmitSound(GunSound, 511 , 100, 1, CHAN_WEAPON )
 	--else
 	
 	if SERVER then

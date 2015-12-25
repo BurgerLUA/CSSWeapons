@@ -58,7 +58,20 @@ game.AddAmmoType({name = "hegrenade", })
 game.AddAmmoType({name = "flashgrenade", })
 game.AddAmmoType({name = "smokegrenade",})
 
+if SERVER then
+	util.AddNetworkString("CSSCustomSound")
+end
+
 if CLIENT then
+	
+	net.Receive( "CSSCustomSound", function( len )
+		local ply = LocalPlayer()
+
+	
+	
+	end )
+	
+	
 	
 	language.Add("AlyxGun_ammo","5.7mm")
 	language.Add("SniperPenetratedRound_ammo",".45 ACP")
@@ -75,6 +88,9 @@ if CLIENT then
 	language.Add("smokegrenade_ammo","Smoke Grenade")
 
 	surface.CreateFont( "csd",{font = "csd",size = 48,weight = 700})
+	
+	
+	
 	
 end
 
@@ -351,12 +367,13 @@ function SWEP:PrimaryAttack()
 	self:AfterPump() -- don't predict, has animations
 	self:WeaponDelay() -- don't predict, has delay
 	self:HandleBurstDelay() -- don't predict
-	self:WeaponEffects() -- don't predict, has animations
+	self:WeaponAnimation() -- don't predict, has animations
 	
 	if (IsFirstTimePredicted() or game.SinglePlayer()) then
 	
-		self:AfterZoom() -- Predict?
+		self:AfterZoom() -- Predict
 		self:PreShootBullet() -- Predict
+		self:WeaponSound() -- Predict
 		
 		if (CLIENT or game.SinglePlayer()) then 
 			self:AddRecoil() -- Predict
@@ -391,7 +408,7 @@ function SWEP:HandleBurstDelay()
 				self:SetBulletQueue(NumBullets)
 				
 				if self.BurstSound then
-					self:EmitGunSound(self.BurstSound)
+					self:EmitGunSound(self.BurstSound, (50 + self.Primary.Damage)/100 )
 				end
 
 			end			
@@ -447,31 +464,11 @@ function SWEP:PreShootBullet() -- Should be predicted
 	self:AddHeat(Damage,Shots)
 end
 
-function SWEP:WeaponEffects()
+function SWEP:WeaponAnimation()
 
-	local GunSound = self.Primary.Sound
-	
 	if self:GetIsShotgunReload() then
 		self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
 		return
-	end
-	
-	if self.HasSilencer then
-		if self:GetIsSilenced() then
-			GunSound = self.Secondary.Sound
-		end
-	end
-	
-	if self.HasBurstFire then
-		if self.BurstSound != nil then
-			if self:GetIsBurst() then
-				GunSound = nil
-			end
-		end
-	end
-	
-	if GunSound ~= nil then
-		self:EmitGunSound(GunSound)
 	end
 	
 	if self:GetIsSilenced() then
@@ -484,6 +481,36 @@ function SWEP:WeaponEffects()
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 
 end
+
+function SWEP:WeaponSound()
+
+	local GunSound = self.Primary.Sound
+	local SoundMul = 1
+
+
+	if self.HasSilencer then
+		if self:GetIsSilenced() then
+			GunSound = self.Secondary.Sound
+			SoundMul = 0.1
+		end
+	end
+
+	if self.HasBurstFire then
+		if self.BurstSound != nil then
+			if self:GetIsBurst() then
+				GunSound = nil
+			end
+		end
+	end
+	
+	if GunSound ~= nil then
+		self:EmitGunSound(GunSound, ((50 + self.Primary.Damage)/100)*SoundMul  )
+	end
+
+
+end
+
+
 
 function SWEP:HandleCone(Cone)
 
@@ -603,11 +630,15 @@ function SWEP:SwitchFireMode()
 
 	if self:GetIsBurst() then
 		self:SetIsBurst(false)
-		self.Weapon:EmitSound("weapons/smg1/switch_single.wav")
+		if (CLIENT or game.SinglePlayer()) then
+			self:EmitGunSound("weapons/smg1/switch_single.wav")
+		end
 		self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to "..Message )
 	else
 		self:SetIsBurst(true)
-		self.Weapon:EmitSound("weapons/smg1/switch_burst.wav")
+		if (CLIENT or game.SinglePlayer()) then
+			self.Weapon:EmitSound("weapons/smg1/switch_burst.wav")
+		end
 		self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to Burst Fire Mode" )
 	end
 
@@ -798,9 +829,59 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 
 end
 
-function SWEP:EmitGunSound(GunSound)
-	self.Weapon:EmitSound(GunSound, SNDLVL_GUNFIRE , 100, 1, CHAN_WEAPON )
+function SWEP:EmitGunSound(GunSound,Level)
+
+	--if CLIENT or game.SinglePlayer() then
+		self.Weapon:EmitSound(GunSound, SNDLVL_GUNFIRE , 100, 1, CHAN_WEAPON )
+	--else
+	
+	if SERVER then
+		if not Level then Level = 1 end
+		
+		--print(self:Clip1())
+		
+		--[[
+		net.Start("CSSCustomSound")
+			net.WriteVector(self:GetPos())
+			net.WriteEntity(self.Weapon)
+			net.WriteString(GunSound)
+			net.WriteFloat(Level)
+			net.WriteFloat(CHAN_WEAPON)
+		net.Broadcast()
+		--]]
+		
+	end
+	
 end
+
+
+if SERVER then
+	util.AddNetworkString("CSSCustomSound")
+end
+
+if CLIENT then
+	
+	net.Receive( "CSSCustomSound", function( len )
+		local ply = LocalPlayer()
+		
+		local Pos = net.ReadVector()
+		local Weapon = net.ReadEntity()
+		local GunSound = net.ReadString()
+		local Level = (net.ReadFloat()*30)^0.1
+		local Channel = net.ReadFloat()
+		
+		local Distance = ply:GetPos():Distance(Pos)
+		local FinalPos = ply:GetPos() + (Pos - ply:GetPos()):Angle():Forward()*256
+		local FinalVolume =  math.Clamp( (1024*Level) / Distance,0,1)
+		local FinalPitch = 90 + 10 * FinalVolume
+		
+		if FinalVolume > 0 then
+			EmitSound(GunSound,FinalPos,Weapon:EntIndex(),Channel,FinalVolume,511,SND_NOFLAGS,FinalPitch)
+		end
+		
+	end )
+end
+
 
 function SWEP:BulletEffect(HitPos,StartPos,HitEntity,SurfaceProp)
 	
@@ -1029,7 +1110,7 @@ function SWEP:HandleBurstFireShoot()
 
 			if self:Clip1() > 0 then
 				self:TakePrimaryAmmo(1)
-				self:WeaponEffects()
+				self:WeaponAnimation()
 				if (IsFirstTimePredicted() or game.SinglePlayer()) then
 					self:PreShootBullet()
 					

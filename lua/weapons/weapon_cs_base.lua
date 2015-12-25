@@ -369,11 +369,12 @@ function SWEP:PrimaryAttack()
 	self:HandleBurstDelay() -- don't predict
 	self:WeaponAnimation() -- don't predict, has animations
 	
+	
 	if (IsFirstTimePredicted() or game.SinglePlayer()) then
 	
 		self:AfterZoom() -- Predict
 		self:PreShootBullet() -- Predict
-		self:WeaponSound() -- Predict
+		self:WeaponSound()
 		
 		if (CLIENT or game.SinglePlayer()) then 
 			self:AddRecoil() -- Predict
@@ -637,7 +638,7 @@ function SWEP:SwitchFireMode()
 	else
 		self:SetIsBurst(true)
 		if (CLIENT or game.SinglePlayer()) then
-			self.Weapon:EmitSound("weapons/smg1/switch_burst.wav")
+			self:EmitGunSound("weapons/smg1/switch_burst.wav")
 		end
 		self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to Burst Fire Mode" )
 	end

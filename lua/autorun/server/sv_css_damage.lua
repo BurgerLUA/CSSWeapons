@@ -4,6 +4,10 @@ function CSSDamage(ply, hitgroup, dmginfo)
 	
 	local Weapon = dmginfo:GetInflictor()
 	
+	if Weapon:IsPlayer() and IsValid(Weapon:GetActiveWeapon()) then
+		Weapon = Weapon:GetActiveWeapon()
+	end
+	
 	if not ply:HasGodMode() and GetConVarNumber("sbox_godmode") == 0 then
 	
 		if GetConVarNumber("sv_css_enable_damagesounds") == 1 then
@@ -22,7 +26,10 @@ function CSSDamage(ply, hitgroup, dmginfo)
 				if (Weapon:IsWeapon()) then
 					if Weapon:IsScripted() then
 						if Weapon.Base == "weapon_cs_base" then
-							dmginfo:ScaleDamage( GetConVarNumber("sv_css_damage_scale") )
+							dmginfo:ScaleDamage( GetConVarNumber("sv_css_damage_scale") )	
+							if Weapon:GetClass() == "weapon_cs_ar2" then
+								ReportedDamage:SetDamageType(DMG_DISSOLVE)
+							end
 						end
 					end
 				end
@@ -42,13 +49,20 @@ function CSSDamage(ply, hitgroup, dmginfo)
 				ReportedDamage:ScaleDamage(1)
 			end
 			
-			ReportedDamage:SetDamageForce(Vector(0,0,0))
-			ply:TakeDamageInfo(ReportedDamage) --???
 			
+
+			
+			
+			ReportedDamage:SetDamageForce(Vector(0,0,0))
+			
+			ply:TakeDamageInfo(ReportedDamage)
+			
+			
+			ply:SetVelocity(-ply:GetVelocity())
 			dmginfo:SetDamageForce(Vector(0,0,0))
 			dmginfo:ScaleDamage(0)
 			
-			--return
+			
 
 		else
 			if IsValid(Weapon) then
@@ -78,6 +92,7 @@ function CSSDeath( victim, inflictor, attacker )
 end
 
 hook.Add("PlayerDeath","CSS: Death Sounds",CSSDeath)
+hook.Add("PlayerDeathSound","CSS Death Sound Override",function() return true end)
 
 function CSSBoltFix(victim,dmginfo)
 

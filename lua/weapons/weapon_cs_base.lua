@@ -407,10 +407,6 @@ function SWEP:HandleBurstDelay()
 
 				self:SetNextBulletDelay(CurTime() + self:GetBurstMath() )
 				self:SetBulletQueue(NumBullets)
-				
-				if self.BurstSound then
-					self:EmitGunSound(self.BurstSound, (50 + self.Primary.Damage)/100 )
-				end
 
 			end			
 		end
@@ -632,13 +628,13 @@ function SWEP:SwitchFireMode()
 	if self:GetIsBurst() then
 		self:SetIsBurst(false)
 		if (CLIENT or game.SinglePlayer()) then
-			self:EmitGunSound("weapons/smg1/switch_single.wav")
+			self:EmitGunSound("weapons/smg1/switch_single.wav",0.01)
 		end
 		self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to "..Message )
 	else
 		self:SetIsBurst(true)
 		if (CLIENT or game.SinglePlayer()) then
-			self:EmitGunSound("weapons/smg1/switch_burst.wav")
+			self:EmitGunSound("weapons/smg1/switch_burst.wav",0.01)
 		end
 		self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to Burst Fire Mode" )
 	end
@@ -674,7 +670,7 @@ function SWEP:HandleZoom(delay)
 	
 	if self.HasScope then
 		if (CLIENT or game.SinglePlayer()) then
-			self:EmitGunSound("weapons/zoom.wav")
+			self:EmitGunSound("weapons/zoom.wav",0.01)
 		end
 	end
 
@@ -757,8 +753,14 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 		bullet.Tracer	= 0
 	end
 	
-	bullet.TracerName = "Tracer"
-	bullet.Force	= Vector(0,0,0)
+	if self:GetClass() == "weapon_cs_ar2" then
+		bullet.TracerName = "AR2Tracer"
+	else
+		bullet.TracerName = "Tracer"
+	end
+	
+	
+	bullet.Force	= nil
 	bullet.Callback = function( attacker, tr, dmginfo)
 		if attacker:IsPlayer() then
 		
@@ -832,11 +834,10 @@ end
 
 function SWEP:EmitGunSound(GunSound,Level)
 
-	--if CLIENT or game.SinglePlayer() then
-	--	self.Weapon:EmitSound(GunSound, 511 , 100, 1, CHAN_WEAPON )
-	--else
+	if CLIENT or game.SinglePlayer() then
+		self.Weapon:EmitSound(GunSound, 511 , 100, 1, CHAN_WEAPON )
+	elseif SERVER then
 	
-	if SERVER then
 		if not Level then Level = 1 end
 		
 		--print(self:Clip1())
@@ -873,11 +874,23 @@ if CLIENT then
 		
 		local Distance = ply:GetPos():Distance(Pos)
 		local FinalPos = ply:GetPos() + (Pos - ply:GetPos()):Angle():Forward()*256
-		local FinalVolume =  math.Clamp( (1024*Level) / Distance,0,1)
-		local FinalPitch = 90 + 10 * FinalVolume
+		local FinalVolume =  math.Clamp( (1024*Level*1.5) / Distance,0,1)
+		local FinalPitch = 50 + 50 * FinalVolume
+
+		if ply ~= Weapon.Owner and FinalVolume > 0 then
 		
-		if FinalVolume > 0 then
-			EmitSound(GunSound,FinalPos,Weapon:EntIndex(),Channel,FinalVolume,511,SND_NOFLAGS,FinalPitch)
+			local SoundData = {
+				name = Weapon:GetClass() .. Weapon:EntIndex(),
+				channel = Channel,
+				sound = GunSound,
+				pitch = FinalPitch,
+				volume = FinalVolume
+			}
+			
+			sound.Add(SoundData)
+			Weapon:StopSound(Weapon:GetClass() .. Weapon:EntIndex())
+			sound.Play(Weapon:GetClass() .. Weapon:EntIndex(),FinalPos,75,0,0)
+
 		end
 		
 	end )
@@ -1112,9 +1125,11 @@ function SWEP:HandleBurstFireShoot()
 			if self:Clip1() > 0 then
 				self:TakePrimaryAmmo(1)
 				self:WeaponAnimation()
+				
+				
 				if (IsFirstTimePredicted() or game.SinglePlayer()) then
 					self:PreShootBullet()
-					
+					self:WeaponSound()
 					if (CLIENT or game.SinglePlayer()) then 
 						self:AddRecoil()
 					end

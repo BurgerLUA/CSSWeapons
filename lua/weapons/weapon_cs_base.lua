@@ -877,20 +877,22 @@ if CLIENT then
 		local FinalVolume =  math.Clamp( (1024*Level*1.5) / Distance,0,1)
 		local FinalPitch = 50 + 50 * FinalVolume
 
-		if ply ~= Weapon.Owner and FinalVolume > 0 then
-		
-			local SoundData = {
-				name = Weapon:GetClass() .. Weapon:EntIndex(),
-				channel = Channel,
-				sound = GunSound,
-				pitch = FinalPitch,
-				volume = FinalVolume
-			}
+		if IsValid(Weapon.Owner) then
+			if ply ~= Weapon.Owner and FinalVolume > 0 then
 			
-			sound.Add(SoundData)
-			Weapon:StopSound(Weapon:GetClass() .. Weapon:EntIndex())
-			sound.Play(Weapon:GetClass() .. Weapon:EntIndex(),FinalPos,75,0,0)
+				local SoundData = {
+					name = Weapon:GetClass() .. Weapon:EntIndex(),
+					channel = Channel,
+					sound = GunSound,
+					pitch = FinalPitch,
+					volume = FinalVolume
+				}
+				
+				sound.Add(SoundData)
+				Weapon:StopSound(Weapon:GetClass() .. Weapon:EntIndex())
+				sound.Play(Weapon:GetClass() .. Weapon:EntIndex(),FinalPos,75,0,0)
 
+			end
 		end
 		
 	end )

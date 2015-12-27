@@ -25,14 +25,14 @@ SWEP.HoldType				= "shotgun"
 SWEP.Primary.Damage			= 120/9
 SWEP.Primary.NumShots		= 9
 SWEP.Primary.Sound			= Sound("weapons/m3/m3-1.wav")
-SWEP.Primary.Cone			= 0.08
+SWEP.Primary.Cone			= 0.06
 SWEP.Primary.ClipSize		= 8
 SWEP.Primary.SpareClip		= 32
 SWEP.Primary.Delay			= 0.88 --1/(68/60)
 SWEP.Primary.Ammo			= "Buckshot"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 2
 SWEP.VelConeMul				= 1.5
 
 SWEP.HasScope 				= false
@@ -53,3 +53,5 @@ SWEP.HasGoodSights			= true
 SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-6, 0, 1.5)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
+
+SWEP.DamageFalloff			= 250

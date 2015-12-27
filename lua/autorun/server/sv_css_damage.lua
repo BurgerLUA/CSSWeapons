@@ -20,21 +20,22 @@ function CSSDamage(ply, hitgroup, dmginfo)
 			end
 		end
 		
-		if Weapon.DamageFalloff > 0 then
-		
-			local Distance = Attacker:GetPos():Distance(ply:GetPos())
-		
-			local DFMod = 0.5 + math.min(0.5, (100*Weapon.DamageFalloff) / Distance )*0.5)
-		
-			dmginfo:ScaleDamage(DFMod)
-		
-		
+		if Weapon and Weapon.DamageFalloff then
+			if Weapon.DamageFalloff > 0 then
+			
+				local Distance = Attacker:GetPos():Distance(ply:GetPos())
+			
+				local DFMod = 0.1 + math.min(1, ( (Weapon.DamageFalloff) / Distance ))*0.9
+			
+				
+				print("Before:",dmginfo:GetDamage())
+			
+				dmginfo:ScaleDamage(DFMod)
+				
+				print("After:",dmginfo:GetDamage())
+				
+			end
 		end
-		
-		
-		
-		
-		
 
 		if GetConVarNumber("sv_css_enable_damagemod") == 1 then
 

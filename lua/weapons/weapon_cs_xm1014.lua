@@ -22,17 +22,17 @@ SWEP.WorldModel				= "models/weapons/w_shot_xm1014.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "shotgun"
 
-SWEP.Primary.Damage			= 105/6
+SWEP.Primary.Damage			= 108/6
 SWEP.Primary.NumShots		= 6
 SWEP.Primary.Sound			= Sound("weapons/xm1014/xm1014-1.wav")
-SWEP.Primary.Cone			= 0.09
+SWEP.Primary.Cone			= 0.065
 SWEP.Primary.ClipSize		= 7
 SWEP.Primary.SpareClip		= 32
 SWEP.Primary.Delay			= 0.25 --1/(240/60)
 SWEP.Primary.Ammo			= "Buckshot"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 2
 SWEP.VelConeMul				= 2
 
 SWEP.HasScope 				= false
@@ -53,3 +53,5 @@ SWEP.HasGoodSights			= true
 SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-6, 0, 1.5)
 SWEP.IronSightsAng 			= Vector(0, -1, 0)
+
+SWEP.DamageFalloff			= 200

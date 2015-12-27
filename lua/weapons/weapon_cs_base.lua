@@ -53,6 +53,7 @@ CreateClientConVar("cl_css_crosshair_color_g", "255", true, true )
 CreateClientConVar("cl_css_crosshair_color_b", "50", true, true )
 CreateClientConVar("cl_css_crosshair_color_a", "200", true, true )
 CreateClientConVar("cl_css_quick", "1", true, true )
+CreateClientConVar("cl_css_crosshair_dynamic", "1", true, true )
 
 game.AddAmmoType({name = "hegrenade", })
 game.AddAmmoType({name = "flashgrenade", })
@@ -358,6 +359,10 @@ end
 
 function SWEP:PrimaryAttack()
 	
+	if self:GetIsReloading() and self:GetIsShotgunReload() then
+		self:FinishShotgunReload()
+	end
+	
 	if not self:CanPrimaryAttack() then return end
 	if self:IsBusy() then return end
 	if self:IsUsing() then return end
@@ -388,6 +393,18 @@ function SWEP:PrimaryAttack()
 	end
 
 end
+
+function SWEP:HandleReloadCancel()
+
+	if self:GetIsShotgunReload() then
+		self:SetIsReloading(false)
+		self:SetIsShotgunReload(false)
+	end
+
+
+
+end
+
 
 function SWEP:AfterPump()
 	if self:GetIsShotgunReload() then
@@ -1185,15 +1202,22 @@ function SWEP:HandleReloadThink()
 				end
 				
 			else
-				self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
-				self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
-				self:SetIsShotgunReload(false)
-				self:SetIsReloading(false)
+				self:FinishShotgunReload()
 			end
 		end
 		
 	end
 end
+
+function SWEP:FinishShotgunReload()
+	self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
+	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+	self:SetIsShotgunReload(false)
+	self:SetIsReloading(false)
+end
+
+
+
 
 function SWEP:HandleShotgunReloadThinkAnimations()
 	if self:GetIsShotgunReload() then
@@ -1328,7 +1352,12 @@ function SWEP:DrawHUD()
 	
 	local VelCone = self.Owner:GetVelocity():Length()*0.0001
 	
-	Cone = math.Clamp(self:HandleCone(self.Primary.Cone) * 900,0,1000)*fovbonus
+	
+	if GetConVarNumber("cl_css_crosshair_dynamic") == 0 then
+		Cone = math.Clamp(self.Primary.Cone*900,0,1000)
+	else
+		Cone = math.Clamp(self:HandleCone(self.Primary.Cone) * 900,0,1000)*fovbonus
+	end
 
 	if self.HasCrosshair then
 		if !self:GetZoomed() or self.EnableIronCross then

@@ -178,6 +178,7 @@ SWEP.IsPrivate 				= false
 
 SWEP.HasPreThrow			= true
 SWEP.CanHolster = true
+SWEP.DamageFalloff 			= 0
 
 function SWEP:SetupDataTables( )
 
@@ -877,7 +878,7 @@ if CLIENT then
 		local FinalVolume =  math.Clamp( (1024*Level*1.5) / Distance,0,1)
 		local FinalPitch = 50 + 50 * FinalVolume
 
-		if IsValid(Weapon.Owner) then
+		if Weapon and Weapon.Owner then
 			if ply ~= Weapon.Owner and FinalVolume > 0 then
 			
 				local SoundData = {

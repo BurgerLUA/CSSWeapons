@@ -8,6 +8,8 @@ function CSSDamage(ply, hitgroup, dmginfo)
 		Weapon = Weapon:GetActiveWeapon()
 	end
 	
+	local Attacker = dmginfo:GetAttacker()
+	
 	if not ply:HasGodMode() and GetConVarNumber("sbox_godmode") == 0 then
 	
 		if GetConVarNumber("sv_css_enable_damagesounds") == 1 then
@@ -17,6 +19,22 @@ function CSSDamage(ply, hitgroup, dmginfo)
 				ply:EmitSound("player/kevlar"..math.random(1,5)..".wav",SNDLVL_TALKING,100,1,CHAN_BODY)
 			end
 		end
+		
+		if Weapon.DamageFalloff > 0 then
+		
+			local Distance = Attacker:GetPos():Distance(ply:GetPos())
+		
+			local DFMod = 0.5 + math.min(0.5, (100*Weapon.DamageFalloff) / Distance )*0.5)
+		
+			dmginfo:ScaleDamage(DFMod)
+		
+		
+		end
+		
+		
+		
+		
+		
 
 		if GetConVarNumber("sv_css_enable_damagemod") == 1 then
 
@@ -49,10 +67,6 @@ function CSSDamage(ply, hitgroup, dmginfo)
 				ReportedDamage:ScaleDamage(1)
 			end
 			
-			
-
-			
-			
 			ReportedDamage:SetDamageForce(Vector(0,0,0))
 			
 			ply:TakeDamageInfo(ReportedDamage)
@@ -61,9 +75,6 @@ function CSSDamage(ply, hitgroup, dmginfo)
 			ply:SetVelocity(-ply:GetVelocity())
 			dmginfo:SetDamageForce(Vector(0,0,0))
 			dmginfo:ScaleDamage(0)
-			
-			
-
 		else
 			if IsValid(Weapon) then
 				if (Weapon:IsWeapon()) then

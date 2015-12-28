@@ -320,15 +320,10 @@ function SWEP:Deploy()
 	
 end
 
-
 function SWEP:Holster()
-	
 	if self:IsBusy() then return false end
-	
 	self:SetZoomed(false)
-
 	return true
-	
 end
 
 SWEP.IsZoomed = false
@@ -395,16 +390,11 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:HandleReloadCancel()
-
 	if self:GetIsShotgunReload() then
 		self:SetIsReloading(false)
 		self:SetIsShotgunReload(false)
 	end
-
-
-
 end
-
 
 function SWEP:AfterPump()
 	if self:GetIsShotgunReload() then
@@ -522,10 +512,7 @@ function SWEP:WeaponSound()
 		self:EmitGunSound(GunSound, ((50 + self.Primary.Damage)/100)*SoundMul  )
 	end
 
-
 end
-
-
 
 function SWEP:HandleCone(Cone)
 
@@ -568,34 +555,32 @@ if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleDown = Angle(0,0,0)
 end
 
+function SWEP:GetRecoilMath()
+	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*0.15
+end
+
 function SWEP:AddRecoil()
-
-	local Damage = self.Primary.Damage
-	local Shots = self.Primary.NumShots
-	local Recoil = self.RecoilMul
-
-	local ViewKick = -(Damage*Shots/20)*Recoil*2
-	local UpPunch = (ViewKick/2)*3
+ 
+	local UpPunch = -self:GetRecoilMath()
 	local SidePunch = 0
 
 	if self.HasSideRecoil then
 	
-		local Math1 = math.abs(self.PunchAngleUp.p)
-		local Math2 = math.abs(UpPunch*self.Primary.Damage*self.Primary.Cone*1.25)
-	
-		if Math1 >= Math2 then
+		local Math = math.abs(self.PunchAngleUp.p) / (self:GetRecoilMath()*0.3) * GetConVarNumber("sv_css_recoil_scale")
 		
-			local Math3 = 1
+		if Math > 1 * GetConVarNumber("sv_css_recoil_scale") then
 		
+			local Add = 1
+			
 			if self.PunchAngleUp.y > 1 then
-				Math3 = math.Rand(0,1)
+				Add = math.Rand(0,1)
 			elseif self.PunchAngleUp.y < -1 then
-				Math3 = math.Rand(-1,0)
+				Add = math.Rand(-1,0)
 			else
-				Math3 = math.Rand(-1,1)
+				Add = math.Rand(-1,1)
 			end
-		
-			SidePunch =	UpPunch*Math3*0.75
+			
+			SidePunch =	UpPunch*Add*Math*0.25
 			
 		end
 	end
@@ -777,15 +762,9 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 		bullet.TracerName = "Tracer"
 	end
 	
-	
 	bullet.Force	= nil
 	bullet.Callback = function( attacker, tr, dmginfo)
 		if attacker:IsPlayer() then
-		
-			if not EnableTracer then
-				--util.ParticleTracer( "Tracer", Source, tr.HitPos, true )
-			end
-		
 		
 			if GetConVarNumber("sv_css_enable_penetration") == 1 then
 				self:WorldBulletSolution(tr.HitPos,Direction,Damage)
@@ -838,13 +817,11 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 	local DamageMath = math.Round(Damage - (GetConVarNumber("sv_css_penetration_scale")*MatMul*Amount),2)
 	
 	if DamageMath > 0 then
-	
 		if trace.StartSolid then
 			self:WorldBulletSolution(data.endpos,Direction,DamageMath)
 		else
 			self:ShootBullet(DamageMath, 1, 0, data.endpos,Direction,false)
 		end
-	
 	end
 
 
@@ -858,9 +835,6 @@ function SWEP:EmitGunSound(GunSound,Level)
 	
 		if not Level then Level = 1 end
 		
-		--print(self:Clip1())
-		
-		
 		net.Start("CSSCustomSound")
 			net.WriteVector(self:GetPos())
 			net.WriteEntity(self.Weapon)
@@ -868,7 +842,6 @@ function SWEP:EmitGunSound(GunSound,Level)
 			net.WriteFloat(Level)
 			net.WriteFloat(CHAN_WEAPON)
 		net.Broadcast()
-		
 		
 	end
 	
@@ -892,8 +865,8 @@ if CLIENT then
 		
 		local Distance = ply:GetPos():Distance(Pos)
 		local FinalPos = ply:GetPos() + (Pos - ply:GetPos()):Angle():Forward()*256
-		local FinalVolume =  math.Clamp( (1024*Level*1.5) / Distance,0,1)
-		local FinalPitch = 50 + 50 * FinalVolume
+		local FinalVolume =  math.Clamp( (1024*Level*1) / Distance,0,1)
+		local FinalPitch = 75 + 25 * FinalVolume
 
 		if Weapon and Weapon.Owner then
 			if ply ~= Weapon.Owner and FinalVolume > 0 then
@@ -1454,13 +1427,12 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 
 	if (self.InfoMarkup == nil ) then
 	
-		local Damage
-		local Cone
-		local Recoil
-
-		Damage = self.Primary.NumShots * self.Primary.Damage * GetConVarNumber("sv_css_damage_scale")
-		Cone = self.Primary.Cone * GetConVarNumber("sv_css_cone_scale")
-		Recoil = Damage * self.RecoilMul * GetConVarNumber("sv_css_recoil_scale")
+		local Damage = self.Primary.NumShots * self.Primary.Damage * GetConVarNumber("sv_css_damage_scale")
+		local Delay = math.floor((self.Primary.Delay^-1)*60)
+		local DPS = math.floor((self.Primary.Delay^-1) * Damage )
+		local Cone = (self.Primary.Cone * GetConVarNumber("sv_css_cone_scale")) * (360/1)
+		local Recoil = self:GetRecoilMath() * 0.25
+		local KillTime = math.Round((math.ceil(100/Damage) - 1) * (self.Primary.Delay),2)
 		
 		local str
 		local title_color = "<color=0,0,0,255>"
@@ -1468,10 +1440,11 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 		
 		str = "<font=HudSelectionText>"
 		str = str .. title_color .. "Damage:</color> "..text_color..Damage.."</color>\n" 
-		str = str .. title_color .. "Firerate:</color> "..text_color.. math.floor((self.Primary.Delay^-1)*60) .. " RPM" .."</color>\n"
-		str = str .. title_color .. "Damage Per Second:</color> "..text_color..math.floor((self.Primary.Delay^-1) * Damage ).. "DPS" .. "</color>\n"
-		str = str .. title_color .. "Recoil:</color> "..text_color.. math.floor(Recoil / 2) .. "%" .."</color>\n" 
-		str = str .. title_color .. "Accuracy:</color> "..text_color.. 100 - (Cone*100) .. "%" .. "</color>\n"
+		str = str .. title_color .. "Firerate:</color> "..text_color.. Delay .. " RPM" .."</color>\n"
+		str = str .. title_color .. "Damage Per Second:</color> "..text_color.. DPS .. "DPS" .. "</color>\n"
+		str = str .. title_color .. "Recoil:</color> "..text_color.. Recoil .. " degrees" .."</color>\n" 
+		str = str .. title_color .. "Inaccuracy:</color> "..text_color.. Cone .. " degrees" .. "</color>\n"
+		str = str .. title_color .. "Kill Time:</color> "..text_color.. KillTime .. " seconds" .. "</color>\n"
 		str = str .. "</font>"
 		
 		self.InfoMarkup = markup.Parse( str, 250 )

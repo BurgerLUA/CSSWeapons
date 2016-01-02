@@ -67,13 +67,8 @@ if CLIENT then
 	
 	net.Receive( "CSSCustomSound", function( len )
 		local ply = LocalPlayer()
-
-	
-	
 	end )
-	
-	
-	
+
 	language.Add("AlyxGun_ammo","5.7mm")
 	language.Add("SniperPenetratedRound_ammo",".45 ACP")
 	language.Add("Gravity_ammo","4.6mm")
@@ -89,11 +84,11 @@ if CLIENT then
 	language.Add("smokegrenade_ammo","Smoke Grenade")
 
 	surface.CreateFont( "csd",{font = "csd",size = 48,weight = 700})
-	
-	
-	
-	
 end
+
+
+--player_manager.AddValidHands( "css_arctic", "models/weapons/ct_arms.mdl", 0, "00000000" )
+
 
 SWEP.DrawAmmo				= true
 SWEP.DrawCrosshair			= false
@@ -301,7 +296,8 @@ function SWEP:Deploy()
 	self.Owner:DrawViewModel(true)
 
 	if self.HasSilencer then
-		if self.IsSilenced then
+	
+		if self:GetIsSilenced() then
 			self:SendWeaponAnim(ACT_VM_DRAW_SILENCED)
 			self.WorldModel = self.WorldModel2
 		else
@@ -370,6 +366,11 @@ function SWEP:PrimaryAttack()
 	self:HandleBurstDelay() -- don't predict
 	self:WeaponAnimation() -- don't predict, has animations
 	
+	--[[
+	if (CLIENT or game.SinglePlayer()) then 
+		self:AddRecoil() -- Predict
+	end
+	--]]
 	
 	if (IsFirstTimePredicted() or game.SinglePlayer()) then
 	
@@ -379,10 +380,6 @@ function SWEP:PrimaryAttack()
 		
 		if (CLIENT or game.SinglePlayer()) then 
 			self:AddRecoil() -- Predict
-		end
-		
-		if self.HasBoltAction then
-			self:SetBoltDelay(CurTime() + self.Primary.Delay)
 		end
 		
 	end
@@ -428,6 +425,11 @@ end
 function SWEP:WeaponDelay()
 	
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+	
+	if self.HasBoltAction then
+		self.BoltDelay = CurTime() + self.Primary.Delay
+	end
+	
 
 	if self.HasBurstFire then
 		if self:GetIsBurst() then
@@ -448,7 +450,7 @@ function SWEP:AfterZoom()
 			if self:GetZoomed() then
 				self:SetZoomed(false)
 				self.WasZoomed = true
-				self:SetBoltDelay(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+				self.BoltDelay = CurTime() + self.Owner:GetViewModel():SequenceDuration()
 			end
 		end
 	end
@@ -556,7 +558,7 @@ if (CLIENT or game.SinglePlayer()) then
 end
 
 function SWEP:GetRecoilMath()
-	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*0.15
+	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*0.15*GetConVarNumber("sv_css_recoil_scale")
 end
 
 function SWEP:AddRecoil()
@@ -566,7 +568,7 @@ function SWEP:AddRecoil()
 
 	if self.HasSideRecoil then
 	
-		local Math = math.abs(self.PunchAngleUp.p) / (self:GetRecoilMath()*0.3) * GetConVarNumber("sv_css_recoil_scale")
+		local Math = math.abs(self.PunchAngleUp.p) / (self:GetRecoilMath()*0.3)
 		
 		if Math > 1 * GetConVarNumber("sv_css_recoil_scale") then
 		
@@ -592,11 +594,13 @@ end
 
 function SWEP:SecondaryAttack()
 	
-	if self.HasBoltAction and (self.HasScope or self.HasIronsights) and self:GetBoltDelay() > CurTime() then
-		if self.WasZoomed then
-			self.WasZoomed = false
-		else
-			self.WasZoomed = true
+	if CLIENT then
+		if self.HasBoltAction and (self.HasScope or self.HasIronsights) and self.BoltDelay > CurTime() then
+			if self.WasZoomed then
+				self.WasZoomed = false
+			else
+				self.WasZoomed = true
+			end
 		end
 	end
 	
@@ -610,8 +614,10 @@ function SWEP:SecondaryAttack()
 				self:Silencer()
 			end
 		else
-			if self.HasIronSights or self.HasScope then
-				self:HandleZoom(1)
+			if (CLIENT or game.SinglePlayer()) then
+				if self.HasIronSights or self.HasScope then
+					self:HandleZoom(1)
+				end
 			end
 		end
 	end
@@ -672,9 +678,7 @@ function SWEP:HandleZoom(delay)
 	if self:IsBusy() then return end
 	
 	if self.HasScope then
-		if (CLIENT or game.SinglePlayer()) then
-			self:EmitGunSound("weapons/zoom.wav",0.01)
-		end
+		self:EmitGunSound("weapons/zoom.wav",0.01)
 	end
 
 	if self:GetZoomed() then
@@ -683,16 +687,23 @@ function SWEP:HandleZoom(delay)
 		self:SetZoomed(true)
 	end
 
-	self:SetNextZoomTime(CurTime() + delay)
+	self.NextZoomTime = CurTime() + delay
 	
 end
+
+if CLIENT then 
+	SWEP.BoltDelay = 0
+	SWEP.NextZoomTime = 0
+end
+
+
 
 function SWEP:CanBoltZoom()
 
 	if not self.HasBoltAction then 
 		return true
 	else
-		if self:GetBoltDelay() <= CurTime() then
+		if self.BoltDelay <= CurTime() then
 			return true
 		else
 			return false
@@ -734,7 +745,12 @@ end
 
 function SWEP:AddHeat(Damage,Shots)
 	self:SetCoolDown(math.Clamp(self:GetCoolDown()+(Damage*Shots*(0.2 - self.Primary.Cone)*0.06)*GetConVarNumber("sv_css_heat_scale"),0,math.max(0.005,self.Primary.Cone,0.008)*1000))
-	self:SetCoolTime(CurTime() + math.Max(self.Primary.Delay*1.01, ((Damage*Shots*0.01)))*GetConVarNumber("sv_css_cooltime_scale"))
+	--self:SetCoolTime(CurTime() + math.Max(self.Primary.Delay*1.01, ((Damage*Shots*0.01)))*GetConVarNumber("sv_css_cooltime_scale"))
+	if self.HasScope and self.HasBoltAction then
+		self:SetCoolTime(CurTime() + self.Primary.Delay)
+	else
+		self:SetCoolTime(CurTime() + self.Primary.Delay + self.Primary.Delay*Damage*Shots*0.01)
+	end
 end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
@@ -868,7 +884,7 @@ if CLIENT then
 		local FinalVolume =  math.Clamp( (1024*Level*1) / Distance,0,1)
 		local FinalPitch = 75 + 25 * FinalVolume
 
-		if Weapon and Weapon.Owner then
+		if IsValid(Weapon) and IsValid(Weapon.Owner) then
 			if ply ~= Weapon.Owner and FinalVolume > 0 then
 			
 				local SoundData = {
@@ -879,9 +895,13 @@ if CLIENT then
 					volume = FinalVolume
 				}
 				
-				sound.Add(SoundData)
-				Weapon:StopSound(Weapon:GetClass() .. Weapon:EntIndex())
-				sound.Play(Weapon:GetClass() .. Weapon:EntIndex(),FinalPos,75,0,0)
+				
+					sound.Add(SoundData)
+					
+				if Weapon and Weapon.Owner then
+					Weapon:StopSound(Weapon:GetClass() .. Weapon:EntIndex())
+					sound.Play(Weapon:GetClass() .. Weapon:EntIndex(),FinalPos,75,0,0)
+				end
 
 			end
 		end
@@ -996,7 +1016,7 @@ function SWEP:Reload()
 	
 	if self.HasScope then
 		self:SetZoomed(false)
-		self:SetNextZoomTime(CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate()))
+		self.NextZoomTime = CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate())
 	end
 	
 	if SERVER then
@@ -1096,14 +1116,14 @@ function SWEP:Think()
 	self:HandleCoolDown() -- don't predict
 	self:HandleShotgunReloadThinkAnimations() -- don't predict
 	self:EquipThink() -- don't predict, ever
-	self:HandleBoltZoomMod() -- don't predict, ever
 	self:HandleBurstFireShoot() -- don't predict, ever
 	self:HandleReloadThink() -- don't predict, ever
 	
 	if (CLIENT or game.SinglePlayer()) then
 		self.ViewModelFOV = GetConVarNumber("cl_css_viewmodel_fov")
+		self:HandleBoltZoomMod()
 		self:HandleZoomMod()
-		self:RemoveRecoil()
+		--self:RemoveRecoil()
 	end
 	
 end
@@ -1217,7 +1237,7 @@ end
 function SWEP:HandleCoolDown()
 	if self:GetCoolTime() <= CurTime() then
 		if self:GetCoolDown() ~= 0 then
-			local CoolMod = math.Clamp(self:GetCoolDown() - FrameTime()*6.6,0,20)
+			local CoolMod = math.Clamp(self:GetCoolDown() - FrameTime()*6.6*GetConVarNumber("sv_css_cooldown_scale"),0,20)
 			self:SetCoolDown(CoolMod)
 		end
 	end
@@ -1264,7 +1284,7 @@ function SWEP:RemoveRecoil()
 	local yDown = self:HandleLimits(self.PunchAngleDown.y)
 	local rDown = self:HandleLimits(self.PunchAngleDown.r)
 
-	local FrameMul = FrameTime() * 10
+	local FrameMul = 0.3
 	local UpMul = 1 * FrameMul
 	local DownMul = 0.75 * FrameMul
 	
@@ -1308,8 +1328,12 @@ function SWEP:AdjustMouseSensitivity()
 	
 end
 
+local StoredCrosshair = nil
+
 function SWEP:DrawHUD()
-	
+
+	self:RemoveRecoil()
+
 	local x = ScrW()
 	local y = ScrH()
 
@@ -1331,38 +1355,51 @@ function SWEP:DrawHUD()
 	else
 		Cone = math.Clamp(self:HandleCone(self.Primary.Cone) * 900,0,1000)*fovbonus
 	end
+	
+	if not StoredCrosshair then
+		StoredCrosshair = Cone
+	end
+	
+	local PingMul = math.Clamp(300 - LocalPlayer():Ping(),60,300)*0.5
+	
+	if Cone > StoredCrosshair then
+		StoredCrosshair = math.min(Cone,StoredCrosshair + FrameTime()*PingMul )
+	elseif Cone < StoredCrosshair then
+		StoredCrosshair = math.max(Cone,StoredCrosshair - FrameTime()*PingMul )
+	end
 
 	if self.HasCrosshair then
+	
 		if !self:GetZoomed() or self.EnableIronCross then
+		
+			local FinalCone = math.Max(StoredCrosshair,width,length/4)
 
 			if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
-			
-				Cone = math.Max(Cone,width,length/4)
 				if width > 1 then
 					local fix = length/2
 				
 	
 					surface.SetDrawColor(r,g,b,a)
-					surface.DrawRect( x/2 - width/2, y/2 - length/2 + Cone + fix , width, length )
-					surface.DrawRect( x/2 - width/2, y/2 - length/2 - Cone - fix, width, length )
-					surface.DrawRect( x/2 - length/2 + Cone + fix, y/2 - width/2, length, width )
-					surface.DrawRect( x/2 - length/2 - Cone - fix, y/2 - width/2, length, width )
+					surface.DrawRect( x/2 - width/2, y/2 - length/2 + FinalCone + fix , width, length )
+					surface.DrawRect( x/2 - width/2, y/2 - length/2 - FinalCone - fix, width, length )
+					surface.DrawRect( x/2 - length/2 + FinalCone + fix, y/2 - width/2, length, width )
+					surface.DrawRect( x/2 - length/2 - FinalCone - fix, y/2 - width/2, length, width )
 				else
 					surface.SetDrawColor(r,g,b,a)
-					surface.DrawLine( x/2+0+Cone+length, y/2, x/2+(-0)+Cone, y/2 )
-					surface.DrawLine( x/2-0-Cone-length, y/2, x/2-(-0)-Cone, y/2 )
-					surface.DrawLine( x/2, y/2+0+Cone+length, x/2, y/2+(-0)+Cone )
-					surface.DrawLine( x/2, y/2-0-Cone-length, x/2, y/2-(-0)-Cone )
+					surface.DrawLine( x/2+0+FinalCone+length, y/2, x/2+(-0)+FinalCone, y/2 )
+					surface.DrawLine( x/2-0-FinalCone-length, y/2, x/2-(-0)-FinalCone, y/2 )
+					surface.DrawLine( x/2, y/2+0+FinalCone+length, x/2, y/2+(-0)+FinalCone )
+					surface.DrawLine( x/2, y/2-0-FinalCone-length, x/2, y/2-(-0)-FinalCone )
 				end
 			end
 		
 			if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
 				if GetConVarNumber("cl_css_crosshair_style") == 4 then
-					surface.DrawCircle(x/2,y/2, Cone + length, Color(r,g,b,a))
+					surface.DrawCircle(x/2,y/2, FinalCone + length, Color(r,g,b,a))
 				elseif GetConVarNumber("cl_css_crosshair_style") == 3 then
-					surface.DrawCircle(x/2,y/2, Cone + length/2, Color(r,g,b,a))
+					surface.DrawCircle(x/2,y/2, FinalCone + length/2, Color(r,g,b,a))
 				else
-					surface.DrawCircle(x/2,y/2, Cone, Color(r,g,b,a))
+					surface.DrawCircle(x/2,y/2, FinalCone, Color(r,g,b,a))
 				end
 			end
 		
@@ -1378,7 +1415,6 @@ function SWEP:DrawHUD()
 	if self.HasScope then
 		if self:GetZoomed() then
 
-			
 			local space = 1
 			
 			surface.SetDrawColor(Color(0,0,0))
@@ -1387,8 +1423,6 @@ function SWEP:DrawHUD()
 			surface.DrawTexturedRectRotated(x/2 - y/4,y/2 + y/4,y/2 + space,y/2 + space,90-180-180)
 			surface.DrawTexturedRectRotated(x/2 + y/4,y/2 + y/4,y/2 + space,y/2 + space,180-180-180)
 			surface.DrawTexturedRectRotated(x/2 + y/4,y/2 - y/4,y/2 + space,y/2 + space,270-180-180)
-			
-			
 			
 			if self.ZoomAmount > 6 then
 				surface.DrawLine(x/2,0,x/2,y)
@@ -1399,12 +1433,8 @@ function SWEP:DrawHUD()
 				end	
 				
 			else
-			
-				--Cone = math.Clamp(self:HandleCone(self.Primary.Cone) * 900,width,x/2)
-				
 				surface.DrawCircle( x/2, y/2, 6, Color(255,0,0,50))
 				surface.DrawCircle( x/2, y/2, math.Clamp(Cone,0,x/2*0.33), Color(r,g,b,255) )
-				
 			end
 
 			surface.SetDrawColor(Color(0,0,0))

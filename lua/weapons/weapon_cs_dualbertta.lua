@@ -25,7 +25,7 @@ SWEP.HoldType				= "duel"
 SWEP.Primary.Damage			= 45
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/elite/elite-1.wav")
-SWEP.Primary.Cone			= 0.01
+SWEP.Primary.Cone			= 0.015
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 120
 SWEP.Primary.Delay			= 0.12 --1/(750/60)
@@ -34,6 +34,7 @@ SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul 				= 1
 SWEP.VelConeMul				= 1
+SWEP.HeatMul			= 1
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount				= 0.5

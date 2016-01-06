@@ -25,7 +25,7 @@ SWEP.HoldType				= "ar2"
 SWEP.Primary.Damage			= 35
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/m249/m249-1.wav")
-SWEP.Primary.Cone			= 0.02
+SWEP.Primary.Cone			= 0.009
 SWEP.Primary.ClipSize		= 100
 SWEP.Primary.SpareClip		= 200
 SWEP.Primary.Delay			= 0.08 --1/(750/60)
@@ -34,6 +34,7 @@ SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1
 SWEP.VelConeMul				= 2
+SWEP.HeatMul			= 1
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.5

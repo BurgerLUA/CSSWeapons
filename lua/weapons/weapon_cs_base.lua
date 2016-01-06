@@ -139,7 +139,7 @@ SWEP.BurstSound				= nil
 
 SWEP.RecoilMul				= 1
 SWEP.VelConeMul				= 1
-SWEP.CoolDownMul			= 1
+SWEP.HeatMul			= 1
 
 SWEP.BurstSpeedOverride 	= 1
 
@@ -536,7 +536,8 @@ function SWEP:HandleCone(Cone)
 		end
 	end
 
-	Cone = (Cone * ((1+self:GetCoolDown())^self.Primary.Cone) * GetConVarNumber("sv_css_cone_scale")) + (self:GetCoolDown()/100)
+	Cone = Cone * GetConVarNumber("sv_css_cone_scale")
+	Cone = Cone + (self:GetCoolDown()*self.HeatMul*0.01)
 	
 	local VelConvar = self.VelConeMul * GetConVarNumber("sv_css_velcone_scale") * 0.0001
 	local VelCone = self.Owner:GetVelocity():Length() * VelConvar
@@ -744,13 +745,16 @@ function SWEP:CanPrimaryAttack()
 end
 
 function SWEP:AddHeat(Damage,Shots)
-	self:SetCoolDown(math.Clamp(self:GetCoolDown()+(Damage*Shots*(0.2 - self.Primary.Cone)*0.06)*GetConVarNumber("sv_css_heat_scale"),0,math.max(0.005,self.Primary.Cone,0.008)*1000))
-	--self:SetCoolTime(CurTime() + math.Max(self.Primary.Delay*1.01, ((Damage*Shots*0.01)))*GetConVarNumber("sv_css_cooltime_scale"))
-	if self.HasScope and self.HasBoltAction then
-		self:SetCoolTime(CurTime() + self.Primary.Delay)
-	else
-		self:SetCoolTime(CurTime() + self.Primary.Delay + self.Primary.Delay*Damage*Shots*0.01)
-	end
+
+	
+
+	local DamageMod = Damage*Shots*0.01
+	local ConeMod = 10 ^ (math.max(0.001,self.Primary.Cone))
+
+	self:SetCoolDown( self:GetCoolDown() + DamageMod*ConeMod*GetConVarNumber("sv_css_heat_scale") )
+	self:SetCoolTime( CurTime() + self.Primary.Delay + self.Primary.Delay*DamageMod*ConeMod*GetConVarNumber("sv_css_cooltime_scale") )
+	
+
 end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)

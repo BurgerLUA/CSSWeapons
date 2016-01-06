@@ -21,7 +21,7 @@ function ENT:Initialize()
 			phys:SetBuoyancyRatio(0)
 		end
 		
-		self.Delay = CurTime() + 3
+		self.Delay = CurTime() + 2
 	end
 end
 

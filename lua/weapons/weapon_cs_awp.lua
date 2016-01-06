@@ -28,12 +28,13 @@ SWEP.Primary.Sound			= Sound("weapons/awp/awp1.wav")
 SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= 10
 SWEP.Primary.SpareClip		= 30
-SWEP.Primary.Delay			= 1.5 --1/(41/60)
+SWEP.Primary.Delay			= 1.5
 SWEP.Primary.Ammo			= "SniperRound"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 2
 SWEP.VelConeMul				= 3
+SWEP.HeatMul			= 1
 
 SWEP.HasScope 				= true
 SWEP.ZoomAmount 			= 9

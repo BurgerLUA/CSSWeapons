@@ -25,15 +25,16 @@ SWEP.HoldType				= "smg"
 SWEP.Primary.Damage			= 32
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/aug/aug-1.wav")
-SWEP.Primary.Cone			= 0.00125
+SWEP.Primary.Cone			= 0.0015
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
-SWEP.Primary.Delay			= 0.09 ---1/(666/60)
+SWEP.Primary.Delay			= 0.09
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul 				= 1
 SWEP.VelConeMul				= 1.5
+SWEP.HeatMul			= 1
 
 SWEP.HasScope 				= true
 SWEP.ZoomAmount				= 3

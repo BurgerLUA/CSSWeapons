@@ -34,12 +34,12 @@ SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 1
 SWEP.VelConeMul				= 0.1
+SWEP.HeatMul			= 1
 
 SWEP.HasScope 				= true
 SWEP.ZoomAmount 			= 9
 SWEP.HasCrosshair 			= false
 SWEP.HasCSSZoom 			= false
-SWEP.IgnoreZoomSlow			= true
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= true

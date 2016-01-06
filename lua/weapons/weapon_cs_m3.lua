@@ -32,8 +32,9 @@ SWEP.Primary.Delay			= 0.88 --1/(68/60)
 SWEP.Primary.Ammo			= "Buckshot"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul				= 2
+SWEP.RecoilMul				= 1
 SWEP.VelConeMul				= 1.5
+SWEP.HeatMul			= 1
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.25

@@ -33,8 +33,9 @@ SWEP.Primary.Ammo			= "GaussEnergy"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 1
+SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 0.5
-SWEP.HeatMul			= 1
+SWEP.HeatMul				= 1
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.75
@@ -47,6 +48,7 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= false
+SWEP.HasDownRecoil			= false
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true
@@ -55,3 +57,4 @@ SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-5.921, 0, 1.679)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
 
+SWEP.DamageFalloff			= 1000

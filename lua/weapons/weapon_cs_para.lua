@@ -25,16 +25,17 @@ SWEP.HoldType				= "ar2"
 SWEP.Primary.Damage			= 35
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/m249/m249-1.wav")
-SWEP.Primary.Cone			= 0.009
+SWEP.Primary.Cone			= 0.015
 SWEP.Primary.ClipSize		= 100
 SWEP.Primary.SpareClip		= 200
 SWEP.Primary.Delay			= 0.08 --1/(750/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 1.1
+SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 2
-SWEP.HeatMul			= 1
+SWEP.HeatMul				= 1.1
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.5
@@ -47,6 +48,7 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false 
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
+SWEP.HasDownRecoil			= true
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true
@@ -54,3 +56,5 @@ SWEP.HasGoodSights			= true
 SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-6, 10, -2)
 SWEP.IronSightsAng 			= Vector(2, 0, 0)
+
+SWEP.DamageFalloff			= 1500

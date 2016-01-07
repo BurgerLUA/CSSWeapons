@@ -33,6 +33,7 @@ SWEP.Primary.Ammo			= "Buckshot"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 1
+SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 2
 SWEP.HeatMul				= 1
 
@@ -47,6 +48,7 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
+SWEP.HasDownRecoil			= false
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true

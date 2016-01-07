@@ -33,8 +33,9 @@ SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1
+SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 1.5
-SWEP.HeatMul			= 1
+SWEP.HeatMul				= 1
 
 SWEP.HasScope 				= true
 SWEP.ZoomAmount 			= 3
@@ -46,7 +47,8 @@ SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
-SWEP.HasSideRecoil			= false
+SWEP.HasSideRecoil			= true
+SWEP.HasDownRecoil			= false
 
 SWEP.HasIronSights 			= false
 SWEP.EnableIronCross		= false
@@ -54,3 +56,5 @@ SWEP.HasGoodSights			= false
 SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-5.921, 0, 1.679)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
+
+SWEP.DamageFalloff			= 1500

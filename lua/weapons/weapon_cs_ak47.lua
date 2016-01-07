@@ -32,9 +32,10 @@ SWEP.Primary.Delay			= 0.1
 SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 3
+SWEP.SideRecoilMul			= 0.1
 SWEP.VelConeMul				= 1.5
-SWEP.HeatMul			= 1
+SWEP.HeatMul				= 0.75
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
@@ -47,6 +48,7 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
+SWEP.HasDownRecoil			= false
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true
@@ -54,3 +56,5 @@ SWEP.HasGoodSights			= true
 SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-3, 20, 0)
 SWEP.IronSightsAng 			= Vector(1.25, 1, 0)
+
+SWEP.DamageFalloff			= 1500

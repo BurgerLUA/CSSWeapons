@@ -138,8 +138,9 @@ SWEP.ReloadSound 			= nil
 SWEP.BurstSound				= nil
 
 SWEP.RecoilMul				= 1
+SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 1
-SWEP.HeatMul			= 1
+SWEP.HeatMul				= 1
 
 SWEP.BurstSpeedOverride 	= 1
 
@@ -292,7 +293,10 @@ function SWEP:Deploy()
 		
 	end
 
-	self.Owner:GetHands():SetMaterial("")
+	if IsValid(self.Owner:GetHands()) then
+		self.Owner:GetHands():SetMaterial("")
+	end
+	
 	self.Owner:DrawViewModel(true)
 
 	if self.HasSilencer then
@@ -559,7 +563,7 @@ if (CLIENT or game.SinglePlayer()) then
 end
 
 function SWEP:GetRecoilMath()
-	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*0.15*GetConVarNumber("sv_css_recoil_scale")
+	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*(self.Primary.Delay*12.5)*0.15*GetConVarNumber("sv_css_recoil_scale")
 end
 
 function SWEP:AddRecoil()
@@ -567,27 +571,22 @@ function SWEP:AddRecoil()
 	local UpPunch = -self:GetRecoilMath()
 	local SidePunch = 0
 
-	if self.HasSideRecoil then
+	local Math = math.abs(self.PunchAngleUp.p*3)
 	
-		local Math = math.abs(self.PunchAngleUp.p) / (self:GetRecoilMath()*0.3)
-		
-		if Math > 1 * GetConVarNumber("sv_css_recoil_scale") then
-		
-			local Add = 1
-			
-			if self.PunchAngleUp.y > 1 then
-				Add = math.Rand(0,1)
-			elseif self.PunchAngleUp.y < -1 then
-				Add = math.Rand(-1,0)
-			else
-				Add = math.Rand(-1,1)
-			end
-			
-			SidePunch =	UpPunch*Add*Math*0.25
-			
+	print(Math)
+	
+	if self.HasSideRecoil then
+		if math.max(Math*self.SideRecoilMul,Math) > 1 then
+			SidePunch = UpPunch*math.random(-1,1)*self.SideRecoilMul
 		end
 	end
 	
+	if self.HasDownRecoil then
+		if Math > 2 then
+			UpPunch = UpPunch*math.random(-1,1)
+		end
+	end
+
 	self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0)
 	self.PunchAngleDown = self.PunchAngleDown + Angle(UpPunch,SidePunch,0)
 	
@@ -746,15 +745,27 @@ end
 
 function SWEP:AddHeat(Damage,Shots)
 
-	
-
 	local DamageMod = Damage*Shots*0.01
-	local ConeMod = 10 ^ (math.max(0.001,self.Primary.Cone))
-
-	self:SetCoolDown( self:GetCoolDown() + DamageMod*ConeMod*GetConVarNumber("sv_css_heat_scale") )
-	self:SetCoolTime( CurTime() + self.Primary.Delay + self.Primary.Delay*DamageMod*ConeMod*GetConVarNumber("sv_css_cooltime_scale") )
+	--local ConeMod = 1000 ^ -(math.max(0.0001,self.Primary.Cone))
+	local ConeMod = (math.max(0.001,self.Primary.Cone)^-0.1)
+	--local DelayMod = (self.Primary.Delay^-0.1)*0.25
+	local WeightMod = (self.MoveSpeed / 250)	
+	local DelayMod = 0
+	
+	--[[
+	if CLIENT then
+		print("-------------------------------------")
+		print("DamageMod:",DamageMod)
+		print("ConeMod:",ConeMod)
+		print("WeightMod:",WeightMod)
+		print("-------------------------------------")
+	end
+	--]]
 	
 
+	self:SetCoolDown( self:GetCoolDown() + DamageMod*ConeMod*WeightMod*GetConVarNumber("sv_css_heat_scale") )
+	self:SetCoolTime( CurTime() + self.Primary.Delay + 0.1*GetConVarNumber("sv_css_cooltime_scale") )
+	
 end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
@@ -849,8 +860,13 @@ end
 
 function SWEP:EmitGunSound(GunSound,Level)
 
-	if CLIENT or game.SinglePlayer() then
-		self.Weapon:EmitSound(GunSound, 511 , 100, 1, CHAN_WEAPON )
+	--if CLIENT or game.SinglePlayer() then
+	
+	--self.Owner:EmitSound(GunSound, 100 , 100, 1, CHAN_WEAPON )
+	
+	self.Weapon:EmitSound(GunSound)
+		
+	--[[
 	elseif SERVER then
 	
 		if not Level then Level = 1 end
@@ -864,6 +880,7 @@ function SWEP:EmitGunSound(GunSound,Level)
 		net.Broadcast()
 		
 	end
+	--]]
 	
 end
 
@@ -893,14 +910,14 @@ if CLIENT then
 			
 				local SoundData = {
 					name = Weapon:GetClass() .. Weapon:EntIndex(),
-					channel = Channel,
+					channel = CHAN_VOICE,
 					sound = GunSound,
 					pitch = FinalPitch,
 					volume = FinalVolume
 				}
 				
 				
-					sound.Add(SoundData)
+				sound.Add(SoundData)
 					
 				if Weapon and Weapon.Owner then
 					Weapon:StopSound(Weapon:GetClass() .. Weapon:EntIndex())
@@ -1123,11 +1140,16 @@ function SWEP:Think()
 	self:HandleBurstFireShoot() -- don't predict, ever
 	self:HandleReloadThink() -- don't predict, ever
 	
+	
 	if (CLIENT or game.SinglePlayer()) then
 		self.ViewModelFOV = GetConVarNumber("cl_css_viewmodel_fov")
 		self:HandleBoltZoomMod()
 		self:HandleZoomMod()
-		--self:RemoveRecoil()
+		
+		if IsFirstTimePredicted() then 
+			self:RemoveRecoil()
+		end
+		
 	end
 	
 end
@@ -1336,8 +1358,6 @@ local StoredCrosshair = nil
 
 function SWEP:DrawHUD()
 
-	self:RemoveRecoil()
-
 	local x = ScrW()
 	local y = ScrH()
 
@@ -1364,13 +1384,14 @@ function SWEP:DrawHUD()
 		StoredCrosshair = Cone
 	end
 	
-	local PingMul = math.Clamp(300 - LocalPlayer():Ping(),60,300)*0.5
+	local PingMul = math.Clamp(300 - LocalPlayer():Ping(),100,300)*2
 	
 	if Cone > StoredCrosshair then
 		StoredCrosshair = math.min(Cone,StoredCrosshair + FrameTime()*PingMul )
 	elseif Cone < StoredCrosshair then
 		StoredCrosshair = math.max(Cone,StoredCrosshair - FrameTime()*PingMul )
 	end
+
 
 	if self.HasCrosshair then
 	

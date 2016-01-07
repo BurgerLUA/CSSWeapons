@@ -25,16 +25,17 @@ SWEP.HoldType				= "smg"
 SWEP.Primary.Damage			= 26
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/p90/p90-1.wav")
-SWEP.Primary.Cone			= 0.009
+SWEP.Primary.Cone			= 0.018
 SWEP.Primary.ClipSize		= 50
 SWEP.Primary.SpareClip		= 100
 SWEP.Primary.Delay			= 0.07 --1/(857/60)
 SWEP.Primary.Ammo			= "AlyxGun"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 1.5
+SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 0.75
-SWEP.HeatMul			= 1
+SWEP.HeatMul				= 0.5
 
 SWEP.HasScope 				= true
 SWEP.ZoomAmount 			= 1
@@ -47,6 +48,7 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
+SWEP.HasDownRecoil			= true
 
 SWEP.HasIronSights 			= false
 SWEP.EnableIronCross		= false
@@ -55,4 +57,4 @@ SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(0, 0, 0)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
 
-
+SWEP.DamageFalloff			= 750

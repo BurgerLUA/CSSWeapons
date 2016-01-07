@@ -25,7 +25,7 @@ SWEP.HoldType				= "ar2"
 SWEP.Primary.Damage			= 33
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/m4a1/m4a1_unsil-1.wav")
-SWEP.Primary.Cone			= 0.0045
+SWEP.Primary.Cone			= 0.0055
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.09 --1/(666/60)
@@ -36,9 +36,10 @@ SWEP.WorldModel1			= "models/weapons/w_rif_m4a1.mdl"
 SWEP.WorldModel2 			= "models/weapons/w_rif_m4a1_silencer.mdl"
 SWEP.Secondary.Sound		= Sound("weapons/m4a1/m4a1-1.wav")
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 0.75
+SWEP.SideRecoilMul			= 0.5
 SWEP.VelConeMul				= 1.5
-SWEP.HeatMul			= 1
+SWEP.HeatMul				= 1
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
@@ -51,6 +52,7 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= true
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
+SWEP.HasDownRecoil			= false
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true
@@ -58,3 +60,5 @@ SWEP.HasGoodSights			= true
 SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-3, 10, 0)
 SWEP.IronSightsAng 			= Vector(1.25, 1, 0)
+
+SWEP.DamageFalloff			= 1500

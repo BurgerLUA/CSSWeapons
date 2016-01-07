@@ -25,16 +25,17 @@ SWEP.HoldType				= "ar2"
 SWEP.Primary.Damage			= 30
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/famas/famas-1.wav")
-SWEP.Primary.Cone			= 0.0035
+SWEP.Primary.Cone			= 0.005
 SWEP.Primary.ClipSize		= 25
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.09 --1/(666/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul 				= 1
+SWEP.RecoilMul 				= 0.5
+SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 1.5
-SWEP.HeatMul			= 1
+SWEP.HeatMul				= 0.7
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
@@ -47,7 +48,9 @@ SWEP.HasBurstFire			= true
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
-SWEP.BurstConeMul			= 0.75
+SWEP.HasDownRecoil			= false
+
+SWEP.BurstConeMul			= 0.33
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true
@@ -55,3 +58,5 @@ SWEP.HasGoodSights			= true
 SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-3, 0, 1)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
+
+SWEP.DamageFalloff			= 1500

@@ -25,16 +25,17 @@ SWEP.HoldType				= "smg"
 SWEP.Primary.Damage			= 32
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/aug/aug-1.wav")
-SWEP.Primary.Cone			= 0.0015
+SWEP.Primary.Cone			= 0.002
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.09
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul 				= 1
+SWEP.RecoilMul 				= 1.25
+SWEP.SideRecoilMul			= 0.5
 SWEP.VelConeMul				= 1.5
-SWEP.HeatMul			= 1
+SWEP.HeatMul				= 1
 
 SWEP.HasScope 				= true
 SWEP.ZoomAmount				= 3
@@ -47,6 +48,7 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
+SWEP.HasDownRecoil			= false
 
 SWEP.HasIronSights 			= false
 SWEP.EnableIronCross		= false
@@ -54,3 +56,5 @@ SWEP.HasGoodSights			= false
 SWEP.IronSightTime			= 0
 SWEP.IronSightsPos 			= Vector(0, 0, 0)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
+
+SWEP.DamageFalloff			= 1500

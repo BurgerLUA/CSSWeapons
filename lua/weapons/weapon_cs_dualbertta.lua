@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "9MM DUAL BERTTA"
+SWEP.PrintName				= "9MM DUAL BERTTAS"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Secondary"
 
@@ -25,7 +25,7 @@ SWEP.HoldType				= "duel"
 SWEP.Primary.Damage			= 45
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/elite/elite-1.wav")
-SWEP.Primary.Cone			= 0.015
+SWEP.Primary.Cone			= 0.03
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 120
 SWEP.Primary.Delay			= 0.12 --1/(750/60)
@@ -33,8 +33,9 @@ SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul 				= 1
+SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 1
-SWEP.HeatMul			= 1
+SWEP.HeatMul				= 0.5
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount				= 0.5
@@ -47,6 +48,7 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false 
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= false
+SWEP.HasDownRecoil			= false
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true
@@ -54,3 +56,5 @@ SWEP.HasGoodSights			= true
 SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(0, 20, 3)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
+
+SWEP.DamageFalloff			= 1000

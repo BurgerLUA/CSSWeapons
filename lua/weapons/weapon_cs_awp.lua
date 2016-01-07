@@ -32,9 +32,10 @@ SWEP.Primary.Delay			= 1.5
 SWEP.Primary.Ammo			= "SniperRound"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul				= 2
+SWEP.RecoilMul				= 0.1
+SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 3
-SWEP.HeatMul			= 1
+SWEP.HeatMul				= 1
 
 SWEP.HasScope 				= true
 SWEP.ZoomAmount 			= 9
@@ -47,6 +48,7 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= false
+SWEP.HasDownRecoil			= false
 
 SWEP.HasIronSights 			= false
 SWEP.EnableIronCross		= false
@@ -54,3 +56,5 @@ SWEP.HasGoodSights			= false
 SWEP.IronSightTime			= 0
 SWEP.IronSightsPos 			= Vector(0, 0, 0)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
+
+SWEP.DamageFalloff			= 2000

@@ -573,8 +573,6 @@ function SWEP:AddRecoil()
 
 	local Math = math.abs(self.PunchAngleUp.p*3)
 	
-	print(Math)
-	
 	if self.HasSideRecoil then
 		if math.max(Math*self.SideRecoilMul,Math) > 1 then
 			SidePunch = UpPunch*math.random(-1,1)*self.SideRecoilMul
@@ -746,22 +744,8 @@ end
 function SWEP:AddHeat(Damage,Shots)
 
 	local DamageMod = Damage*Shots*0.01
-	--local ConeMod = 1000 ^ -(math.max(0.0001,self.Primary.Cone))
 	local ConeMod = (math.max(0.001,self.Primary.Cone)^-0.1)
-	--local DelayMod = (self.Primary.Delay^-0.1)*0.25
 	local WeightMod = (self.MoveSpeed / 250)	
-	local DelayMod = 0
-	
-	--[[
-	if CLIENT then
-		print("-------------------------------------")
-		print("DamageMod:",DamageMod)
-		print("ConeMod:",ConeMod)
-		print("WeightMod:",WeightMod)
-		print("-------------------------------------")
-	end
-	--]]
-	
 
 	self:SetCoolDown( self:GetCoolDown() + DamageMod*ConeMod*WeightMod*GetConVarNumber("sv_css_heat_scale") )
 	self:SetCoolTime( CurTime() + self.Primary.Delay + 0.1*GetConVarNumber("sv_css_cooltime_scale") )

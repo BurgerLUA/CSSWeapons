@@ -796,6 +796,26 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 		end
 	end
 	
+	--[[
+	if SERVER then
+		local PhysBullet = ents.Create("ent_cs_bullet")
+		PhysBullet:SetPos(Source)
+		
+		print( self.Owner:EyeAngles() )
+		
+		PhysBullet:SetAngles( self.Owner:EyeAngles() + Angle(math.Rand(-Cone,Cone)*45,math.Rand(-Cone,Cone)*45,0) )
+		PhysBullet:Spawn()
+		PhysBullet:SetNWInt("Damage",Damage)
+		PhysBullet:SetOwner(self.Owner)
+		
+		print(PhysBullet:GetAngles())
+		
+	end
+	--]]
+	
+	
+	
+	
 	self.Owner:FireBullets(bullet)
 	
 end

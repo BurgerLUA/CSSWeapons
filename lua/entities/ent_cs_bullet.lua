@@ -10,6 +10,7 @@ AddCSLuaFile()
 
 function ENT:Initialize()
 	if SERVER then
+	
 		self:SetModel("models/weapons/shell.mdl") 
 
 		local size = 0.1
@@ -18,8 +19,6 @@ function ENT:Initialize()
 		self:SetCollisionBounds( Vector( -size, -size, -size ), Vector( size, size, size ) )
 		self:SetCollisionGroup(COLLISION_GROUP_PROJECTILE)
 		
-		
-
 		local phys = self:GetPhysicsObject()
 		if phys:IsValid() then
 			phys:Wake()
@@ -27,8 +26,8 @@ function ENT:Initialize()
 			phys:EnableGravity(false)
 			phys:EnableDrag(false)
 			phys:SetMass(1)
+			phys:SetVelocity(self:GetForward()*10000)
 		end
-		
 		
 		self.StartTime = CurTime()
 		self.Damage = self:GetNWInt("Damage",100)
@@ -50,12 +49,9 @@ function ENT:PhysicsCollide( data, collider )
 		
 			SafeRemoveEntityDelayed(self,10)
 			
-			
 			local damageinfo = DamageInfo()
-			
 			damageinfo:SetDamage(self.Damage)
 			damageinfo:SetAttacker(self.Owner)
-			
 			if IsValid(self.Owner:GetActiveWeapon()) then
 				damageinfo:SetInflictor(self.Owner:GetActiveWeapon())
 			else
@@ -63,7 +59,6 @@ function ENT:PhysicsCollide( data, collider )
 			end
 			
 			data.HitEntity:TakeDamageInfo(damageinfo)
-			
 			
 		end
 
@@ -73,8 +68,7 @@ function ENT:PhysicsCollide( data, collider )
 			e:SetSurfaceProp(1)
 			e:SetDamageType(DMG_BULLET)
 			--e:SetHitBox(data.HitBox)
-			
-		
+
 		if CLIENT then
 			e:SetEntity(data.HitEntity)
 		else
@@ -86,51 +80,17 @@ function ENT:PhysicsCollide( data, collider )
 	--end
 	
 end
---[[
-function ENT:Touch( otherEntity )
-	if otherEntity:GetClass() ~= "trigger_soundscape" then
-		print(otherEntity)
-		local tr = self:GetTouchTrace()
-		local hitPos = tr.HitPos
-	end
-end
---]]
 
 function ENT:Think()
-
-
 	if SERVER then
+	
 		local timepassed = CurTime() - self.StartTime
 		local damage = self.Damage - timepassed*30
 		local phys = self:GetPhysicsObject()
 		
-		--print(damage)
-		
 		if damage < 10 then
-			--phys:EnableGravity(true)
-			--print("FALL")
 			phys:ApplyForceCenter(Vector(0,0,-25))
 		end
 		
-		
-	end
-	
-
-	
-	
-end
-
-local material = Material( "sprites/splodesprite" )
-local color = Color( 255, 255, 255, 255 ) --Define this sort of stuff outside of loops to make more efficient code.
-
-function ENT:Draw()
-	if CLIENT then
-		--self:DrawModel()
-		--[[
-		cam.Start3D( EyePos(), EyeAngles() ) -- Start the 3D function so we can draw onto the screen.
-			render.SetMaterial( material ) -- Tell render what material we want, in this case the flash from the gravgun
-			render.DrawSprite( self:GetPos(), 16, 16, color ) -- Draw the sprite in the middle of the map, at 16x16 in it's original colour with full alpha.
-		cam.End3D()
-		--]]
 	end
 end

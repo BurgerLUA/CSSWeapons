@@ -48,7 +48,6 @@ function CSSSpeedModMovement(ply,mv)
 
 	if not ply:IsBot() then
 	
-	
 		if SlowEnable then
 
 			if not ply.GetSlow then
@@ -62,7 +61,7 @@ function CSSSpeedModMovement(ply,mv)
 			
 			if IsValid(CurrentWeapon) then
 				if CurrentWeapon:IsScripted() then
-					if CurrentWeapon.Base == "weapon_cs_base" then
+					if CurrentWeapon.MoveSpeed then
 						WeaponSpeed = CurrentWeapon.MoveSpeed
 						--[[
 						if CurrentWeapon.HasScope == true then

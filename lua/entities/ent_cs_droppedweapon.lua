@@ -39,10 +39,6 @@ function ENT:Use(activator,caller,useType,value)
 	
 	if ( activator:IsPlayer() ) then
 	
-		local ActDistance = activator:GetEyeTrace().HitPos:Distance(activator:EyePos())
-		
-		if ActDistance > 70 then return end
-	
 		if activator:GetActiveWeapon():IsScripted() then
 			if activator:GetActiveWeapon().Base == "weapon_cs_base" then
 				if activator:GetActiveWeapon():GetIsReloading() then return end

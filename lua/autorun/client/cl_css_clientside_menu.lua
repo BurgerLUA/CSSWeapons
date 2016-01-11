@@ -135,26 +135,32 @@ function CSSClientsideWeaponSettings()
 		WidthSlider:SetDecimals( 0 ) -- Sets a decimal. Zero means it's a whole number
 		WidthSlider:SetConVar( "cl_css_crosshair_width" ) -- Set the convar
 		
-	local DnymaicCrosshairsCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
-		DnymaicCrosshairsCheckBox:SetText( "Enable Dynamic Crosshairs" )
-		DnymaicCrosshairsCheckBox:SetTextColor( Color(0, 0, 0, 255) )
-		DnymaicCrosshairsCheckBox:SizeToContents()
-		DnymaicCrosshairsCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40)
-		DnymaicCrosshairsCheckBox:SetConVar( "cl_css_crosshair_dynamic" ) 
+	local DynamicCrosshairsCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
+		DynamicCrosshairsCheckBox:SetText( "Enable Dynamic Crosshairs" )
+		DynamicCrosshairsCheckBox:SetTextColor( Color(0, 0, 0, 255) )
+		DynamicCrosshairsCheckBox:SizeToContents()
+		DynamicCrosshairsCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40)
+		DynamicCrosshairsCheckBox:SetConVar( "cl_css_crosshair_dynamic" ) 
 		
+	local DotCrosshairsCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
+		DotCrosshairsCheckBox:SetText( "Enable Crosshair Dot" )
+		DotCrosshairsCheckBox:SetTextColor( Color(0, 0, 0, 255) )
+		DotCrosshairsCheckBox:SizeToContents()
+		DotCrosshairsCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20)
+		DotCrosshairsCheckBox:SetConVar( "cl_css_crosshair_dot" ) 	
 
 	local QuickThrowCheckBox = vgui.Create("DCheckBoxLabel", Base1)
 		QuickThrowCheckBox:SetText( "Enable QuickThrow (LeftClick + E)" )
 		QuickThrowCheckBox:SetTextColor( Color(0, 0, 0, 255) )
 		QuickThrowCheckBox:SizeToContents()
-		QuickThrowCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20)
+		QuickThrowCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20 + 20)
 		QuickThrowCheckBox:SetConVar( "cl_css_quick" )
 		
 	local CustomSlotsCheckBox = vgui.Create("DCheckBoxLabel", Base1)
 		CustomSlotsCheckBox:SetText( "Enable Custom slots (Primary in slot 3, secondary in slot 2)" )
 		CustomSlotsCheckBox:SetTextColor( Color(0, 0, 0, 255) )
 		CustomSlotsCheckBox:SizeToContents()
-		CustomSlotsCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20 + 20)
+		CustomSlotsCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20 + 20 + 20)
 		CustomSlotsCheckBox:SetConVar( "cl_css_customslots" )
 	
 		
@@ -166,7 +172,7 @@ function CSSClientsideWeaponSettings()
 			WModelCheckBox:SetText( "Draw Thirdperson/Firstperson Mag drops (Requires Additional Addon)" )
 			WModelCheckBox:SetTextColor( Color(0, 0, 0, 255) )
 			WModelCheckBox:SizeToContents()
-			WModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20 + 20 + 20)
+			WModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20 + 20 + 20 + 20)
 			WModelCheckBox:SetConVar( "cl_css_mags" )	
 
 	end

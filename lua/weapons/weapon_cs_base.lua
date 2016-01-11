@@ -54,6 +54,7 @@ CreateClientConVar("cl_css_crosshair_color_b", "50", true, true )
 CreateClientConVar("cl_css_crosshair_color_a", "200", true, true )
 CreateClientConVar("cl_css_quick", "1", true, true )
 CreateClientConVar("cl_css_crosshair_dynamic", "1", true, true )
+CreateClientConVar("cl_css_crosshair_dot", "0", true, true )
 
 game.AddAmmoType({name = "hegrenade", })
 game.AddAmmoType({name = "flashgrenade", })
@@ -1184,8 +1185,6 @@ function SWEP:HandleBurstFireShoot()
 	end
 end
 
-
-
 function SWEP:HandleReloadThink()
 
 	if self:GetIsNormalReload() then
@@ -1239,9 +1238,6 @@ function SWEP:FinishShotgunReload()
 	self:SetIsReloading(false)
 end
 
-
-
-
 function SWEP:HandleShotgunReloadThinkAnimations()
 	if self:GetIsShotgunReload() then
 		if self:GetNextShell() <= CurTime() then
@@ -1262,7 +1258,6 @@ function SWEP:HandleShotgunReloadThinkAnimations()
 	end
 	
 end
-
 
 function SWEP:HandleCoolDown()
 	if self:GetCoolTime() <= CurTime() then
@@ -1400,27 +1395,76 @@ function SWEP:DrawHUD()
 	if self.HasCrosshair then
 	
 		if !self:GetZoomed() or self.EnableIronCross then
-		
-			local FinalCone = math.Max(StoredCrosshair,width,length/4)
+
+			local XRound = math.floor(x/2)
+			local YRound = math.floor(y/2)
+			
+			--length = math.cos(CurTime()*2)*10 + 15
+			
+			local WRound = math.floor(width/2)
+			local LRound = math.floor(length/2)
+			
+			local FinalCone = math.floor(math.Max(StoredCrosshair,WRound*2,LRound/2))
+
+			surface.SetDrawColor(r,g,b,a)
+			
+			local Max = 0
+			
+			if GetConVarNumber("cl_css_crosshair_dot") >= 1 then
+				Max = math.max(1,width)
+				surface.DrawRect( XRound - math.floor(Max*0.5), YRound -  math.floor(Max*0.5) , Max, Max )
+			end
+			
 
 			if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
+
 				if width > 1 then
-					local fix = length/2
 				
-	
-					surface.SetDrawColor(r,g,b,a)
-					surface.DrawRect( x/2 - width/2, y/2 - length/2 + FinalCone + fix , width, length )
-					surface.DrawRect( x/2 - width/2, y/2 - length/2 - FinalCone - fix, width, length )
-					surface.DrawRect( x/2 - length/2 + FinalCone + fix, y/2 - width/2, length, width )
-					surface.DrawRect( x/2 - length/2 - FinalCone - fix, y/2 - width/2, length, width )
+					local x1 = XRound - WRound 
+					local x2 = XRound - WRound
+					local y3 = YRound - WRound
+					local y4 = YRound - WRound
+					
+					-------- Position --- Length --- Spacing
+					local y1 = YRound + math.max(FinalCone,0) -- red
+					local y2 = YRound - (LRound*2) - math.max(FinalCone,0) -- white
+					
+					local x3 = XRound + math.max(FinalCone,0) -- blue
+					local x4 = XRound - (LRound*2) - math.max(FinalCone,0) -- black
+				
+					--surface.SetDrawColor(255,0,0,255) --red
+					surface.DrawRect( x1, y1, WRound*2, LRound*2 )
+					
+					--surface.SetDrawColor(255,255,255,255) --white
+					surface.DrawRect( x2, y2, WRound*2, LRound*2 )
+					
+					--surface.SetDrawColor(0,0,255,255) -- blue
+					surface.DrawRect( x3, y3, LRound*2, WRound*2 )
+					
+					--surface.SetDrawColor(0,0,0,255) -- black
+					surface.DrawRect( x4, y4, LRound*2, WRound*2 )
+			
 				else
-					surface.SetDrawColor(r,g,b,a)
-					surface.DrawLine( x/2+0+FinalCone+length, y/2, x/2+(-0)+FinalCone, y/2 )
-					surface.DrawLine( x/2-0-FinalCone-length, y/2, x/2-(-0)-FinalCone, y/2 )
-					surface.DrawLine( x/2, y/2+0+FinalCone+length, x/2, y/2+(-0)+FinalCone )
-					surface.DrawLine( x/2, y/2-0-FinalCone-length, x/2, y/2-(-0)-FinalCone )
+				
+					local x1 = XRound + FinalCone + LRound*2
+					local x2 = XRound - FinalCone - LRound*2
+					local y3 = YRound + FinalCone + LRound*2
+					local y4 = YRound - FinalCone - LRound*2
+
+					surface.DrawLine( x1, YRound, XRound+FinalCone, YRound )
+					
+					surface.DrawLine( x2, YRound, XRound-FinalCone, YRound )
+					
+					surface.DrawLine( XRound, y3, XRound, YRound+FinalCone )
+					
+					surface.DrawLine( XRound, y4, XRound, YRound-FinalCone )
+					
 				end
+			
 			end
+			
+
+			
 		
 			if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
 				if GetConVarNumber("cl_css_crosshair_style") == 4 then

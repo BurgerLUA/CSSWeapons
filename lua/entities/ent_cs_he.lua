@@ -26,16 +26,37 @@ function ENT:Initialize()
 end
 
 function ENT:PhysicsCollide(data, physobj)
+
 	if SERVER then
 	
 		self.HitP = data.HitPos
 		self.HitN = data.HitNormal
 
 		if self:GetVelocity():Length() > 50 then
-			self:EmitSound("weapons/hegrenade/he_bounce-1.wav",100,100)
-		end
 		
+			self:EmitSound("weapons/hegrenade/he_bounce-1.wav")
+			
+			if data.HitEntity and data.HitEntity:Health() then
+
+				local dmginfo = DamageInfo()
+				
+				dmginfo:SetDamage(10)
+				dmginfo:SetAttacker(self.Owner or self)
+				dmginfo:SetInflictor(self)
+				dmginfo:SetDamageType(DMG_CRUSH)
+			
+				data.HitEntity:TakeDamageInfo(dmginfo)
+				
+				if data.HitEntity:IsPlayer() then
+					data.HitEntity:EmitSound("vo/npc/male01/ow01.wav")
+				end
+				
+			end
+			
+		end
+
 	end
+	
 end
 
 function ENT:Think()
@@ -58,7 +79,7 @@ function ENT:Detonate(self,pos)
 		util.Effect( "Explosion", effectdata)
 
 		if self.Owner then
-			util.BlastDamage(self, self.Owner, pos, 400, 300)
+			util.BlastDamage(self, self.Owner, pos, 400, 98)
 		end
 		
 		self:EmitSound("weapons/hegrenade/explode"..math.random(3,5)..".wav",100,100)

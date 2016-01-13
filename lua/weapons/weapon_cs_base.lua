@@ -371,6 +371,8 @@ function SWEP:PrimaryAttack()
 	self:HandleBurstDelay() -- don't predict
 	self:WeaponAnimation() -- don't predict, has animations
 	
+	--print(self.Primary.Damage)
+	
 	--[[
 	if (CLIENT or game.SinglePlayer()) then 
 		self:AddRecoil() -- Predict
@@ -733,7 +735,7 @@ function SWEP:CanPrimaryAttack()
 			return false 
 		end
 	elseif self:Clip1() <= 0 then
-		self.Owner:EmitSound("weapons/clipempty_pistol.wav",100,100)
+		self.Owner:EmitSound("weapons/clipempty_pistol.wav")
 		self:SetNextPrimaryFire(CurTime() + 0.25)
 		return false
 	end
@@ -1383,7 +1385,7 @@ function SWEP:DrawHUD()
 		StoredCrosshair = Cone
 	end
 	
-	local PingMul = math.Clamp(300 - LocalPlayer():Ping(),100,300)*2
+	local PingMul = 10000/LocalPlayer():Ping()
 	
 	if Cone > StoredCrosshair then
 		StoredCrosshair = math.min(Cone,StoredCrosshair + FrameTime()*PingMul )

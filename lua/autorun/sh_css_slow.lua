@@ -41,8 +41,6 @@ end
 
 hook.Add("PlayerShouldTakeDamage","CSS: Slow Damage",CSSSlowDamage)
 
-local ForwardMove = 0
-local SideMove = 0
 
 function CSSSpeedModMovement(ply,mv)
 
@@ -84,60 +82,18 @@ function CSSSpeedModMovement(ply,mv)
 
 			ply.GetSlow = math.Clamp(ply.GetSlow - 1000*engine.TickInterval(),0,99)
 
-			--if SlowEnable == false then
-			
-				local WalkMul = 1
-			
-				if mv:KeyDown(IN_WALK) then
-					WalkMul = 0.5
-				end
-			
-			
-			
-			
-				ForwardMove = mv:GetForwardSpeed()
-				SideMove = mv:GetSideSpeed()
-				
-			--else
-				--[[
-				local SprintMod = ply:GetRunSpeed()/270
-				
-				if mv:KeyDown(IN_SPEED) then
-					SprintMod = ply:GetRunSpeed()/ply:GetWalkSpeed()
-				end
-				
-				local Max = 10000 * engine.TickInterval() * SprintMod
-				local Acc = 1000 * engine.TickInterval() * 0.4
-				local Dec = 1000 * engine.TickInterval() * 0.4
+			local WalkMul = 1
+		
+			local BaseSpeed = ply:GetWalkSpeed()
+		
+			if mv:KeyDown(IN_SPEED) then
+				BaseSpeed = ply:GetRunSpeed()
+			elseif mv:KeyDown(IN_WALK) then
+				WalkMul = 0.5
+			end
 
-				ForwardMove = math.Clamp(ForwardMove + math.Clamp(mv:GetForwardSpeed(),-Acc,Acc),-Max,Max)
-				SideMove = math.Clamp(SideMove + math.Clamp(mv:GetSideSpeed(),-Acc,Acc),-Max,Max)
-
-				if mv:GetForwardSpeed() == 0 then
-					if ForwardMove < 0 then
-						ForwardMove = ForwardMove + Dec*SprintMod*(ply:GetWalkSpeed()/270)
-					elseif ForwardMove > 0 then
-						ForwardMove = ForwardMove - Dec*SprintMod*(ply:GetWalkSpeed()/270)
-					end
-				end
-
-				if mv:GetSideSpeed() == 0 then
-					if SideMove < 0 then
-						if SideMove > -Dec then
-							SideMove = 0
-						else
-							SideMove = SideMove + Dec*SprintMod*(ply:GetWalkSpeed()/270)
-						end
-					elseif SideMove > 0 then
-						if SideMove < Dec then
-							SideMove = 0
-						else
-							SideMove = SideMove - Dec*SprintMod*(ply:GetWalkSpeed()/270)
-						end
-					end
-				end
-				--]]
-			--end
+			local ForwardMove = math.Clamp(mv:GetForwardSpeed(),-1,1) * BaseSpeed
+			local SideMove = math.Clamp(mv:GetSideSpeed(),-1,1) * BaseSpeed
 			
 			mv:SetForwardSpeed( ForwardMove * SpeedMod * WalkMul)
 			mv:SetSideSpeed( SideMove * SpeedMod * WalkMul)

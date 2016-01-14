@@ -34,7 +34,7 @@ SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1.5
 SWEP.SideRecoilMul			= 0.1
-SWEP.VelConeMul				= 1.5
+SWEP.VelConeMul				= 1.75
 SWEP.HeatMul				= 0.75
 
 SWEP.HasScope 				= false

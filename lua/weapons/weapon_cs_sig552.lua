@@ -25,14 +25,14 @@ SWEP.HoldType				= "ar2"
 SWEP.Primary.Damage			= 33
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/sg552/sg552-1.wav")
-SWEP.Primary.Cone			= 0.005
+SWEP.Primary.Cone			= 0.006
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.09 --1/(666/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 1.25
 SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 1.5
 SWEP.HeatMul				= 0.9

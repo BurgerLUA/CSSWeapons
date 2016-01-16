@@ -23,7 +23,7 @@ function CSSDamage(ply, hitgroup, dmginfo)
 		if Weapon and Weapon.DamageFalloff then
 			if Weapon.DamageFalloff > 0 then
 				local Distance = Attacker:GetPos():Distance(ply:GetPos())
-				local DamageMul = math.Clamp(GetConVarNumber(sv_css_damagefalloff_scale),0,1)
+				local DamageMul = math.Clamp(GetConVarNumber("sv_css_damagefalloff_scale"),0,1)
 				local DFMod = (1 - DamageMul) + math.min(1, ( (Weapon.DamageFalloff) / Distance ))*DamageMul
 				dmginfo:ScaleDamage(DFMod)
 			end

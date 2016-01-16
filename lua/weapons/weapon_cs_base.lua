@@ -33,11 +33,17 @@ CreateConVar("sv_css_c4_notifyplayers", "1", AllFCVar , "1 enables players to re
 CreateConVar("sv_css_c4_timelimit", "0", AllFCVar , "Global delay in minutes in which you can plant C4. Default is 0." )
 
 
-CreateConVar("sv_css_enable_mags", "0", AllFCVar , "1 enables cosmetic magazine drops. Requires separate addon. Default is 0." )
+
+
 CreateConVar("sv_css_enable_damagesounds", "1", AllFCVar , "1 enables damage sounds, 0 disables. Default is 1." )
 CreateConVar("sv_css_enable_deathsounds", "0", AllFCVar , "1 enables death sounds, 0 disables. Default is 1." )
 
 --CreateConVar("sv_css_enable_speedmod", "0", AllFCVar , "1 enables speed mod, 0 disables. Default is 1." ) -LOCATED IN SH_CSS_SLOW.LUA
+
+CreateConVar("cl_css_quick", "0", AllFCVar , "1 enables quick grenades, 0 disables. Default is 1." )
+CreateConVar("sv_css_enable_mags", "0", AllFCVar , "1 enables cosmetic magazine drops. Requires separate addon. Default is 0." )
+
+
 
 CreateClientConVar("cl_css_customslots", "0", true, true )
 CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )

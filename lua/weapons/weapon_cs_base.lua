@@ -10,15 +10,19 @@ CreateConVar("sv_css_heat_scale", "1", AllFCVar , "This is the value that the sp
 CreateConVar("sv_css_cooltime_scale", "1", AllFCVar , "This is the value that the cooldown delay time from CSS weapons is multiplied by. Default is 1." )
 CreateConVar("sv_css_cooldown_scale", "1", AllFCVar , "This is the value that the cooldown amount from CSS weapons is multiplied by. Default is 1." )
 
-CreateConVar("sv_css_enable_csszoom", "0", AllFCVar , "1 enables CSS-Like zooms for the AUG and SG552. Default is 0." )
+CreateConVar("sv_css_damagefalloff_scale", "0.5", AllFCVar , "This is the value that the damage falloff amount from CSS weapons is multiplied by. Default is 0.5." )
+CreateConVar("sv_css_enable_penetration", "1", AllFCVar , "1 enable penetration through objects, 0 disables. Default is 1." )
+CreateConVar("sv_css_penetration_scale", "1", AllFCVar , "Base damage lost per unit of penetration. Default is 1." )
+
 
 CreateConVar("sv_css_ammo_loaded", "1", AllFCVar , "1 enables giving weapons already loaded. Default is 1." )
 CreateConVar("sv_css_ammo_givespare", "1", AllFCVar , "1 enables giving spare ammo to players upon pickup. Default is 1." )
+CreateConVar("sv_css_limit_equipped", "0", AllFCVar , "1 limits only one primary weapon and one secondary weapon. Equipment is unlimited. Default is 0." )
 
 CreateConVar("sv_css_enable_drops", "1", AllFCVar , "1 enables players to drop css weapons on death, all other values disables it. Default is 1." )
 CreateConVar("sv_css_timed_drops", "1", AllFCVar , "1 creates a removal time limit for weapons that drop. 0 never removes weapon drops." )
 CreateConVar("sv_css_drop_timer", "60", AllFCVar , "This is the value in seconds that determines how long the weapons are removed after they are dropped. Default is 60." )
-CreateConVar("sv_css_limit_equipped", "0", AllFCVar , "1 limits only one primary weapon and one secondary weapon. Equipment is unlimited. Default is 0." )
+
 
 CreateConVar("sv_css_enable_c4nonadmin", "1", AllFCVar , "1 enables non-admins to use c4, all other values disables it. Default is 1." )
 CreateConVar("sv_css_c4_time_explosion", "45", AllFCVar , "This is the value in seconds that the C4 detonates when planted. Default is 45." )
@@ -28,23 +32,16 @@ CreateConVar("sv_css_c4_radius", "1500", AllFCVar , "This is the value in units 
 CreateConVar("sv_css_c4_notifyplayers", "1", AllFCVar , "1 enables players to receive cosmetic round winning notifications and sounds, all other values disables it. Default is 1." )
 CreateConVar("sv_css_c4_timelimit", "0", AllFCVar , "Global delay in minutes in which you can plant C4. Default is 0." )
 
-CreateConVar("sv_css_enable_penetration", "1", AllFCVar , "1 enable penetration through objects, 0 disables. Default is 1." )
-CreateConVar("sv_css_penetration_scale", "1", AllFCVar , "Base damage lost per unit of penetration. Default is 1." )
 
-CreateConVar("sv_css_enable_mags", "1", AllFCVar , "1 enables cosmetic magazine drops. Requires separate addon. Default is 0." )
-
-CreateConVar("sv_css_enable_damagemod", "1", AllFCVar , "1 enables damage modifications, 0 disables. Default is 1." )
+CreateConVar("sv_css_enable_mags", "0", AllFCVar , "1 enables cosmetic magazine drops. Requires separate addon. Default is 0." )
 CreateConVar("sv_css_enable_damagesounds", "1", AllFCVar , "1 enables damage sounds, 0 disables. Default is 1." )
-CreateConVar("sv_css_enable_deathsounds", "1", AllFCVar , "1 enables death sounds, 0 disables. Default is 1." )
+CreateConVar("sv_css_enable_deathsounds", "0", AllFCVar , "1 enables death sounds, 0 disables. Default is 1." )
 
---CreateConVar("sv_css_enable_speedmod", "0", AllFCVar , "1 enables speed mod, 0 disables. Default is 1." )
+--CreateConVar("sv_css_enable_speedmod", "0", AllFCVar , "1 enables speed mod, 0 disables. Default is 1." ) -LOCATED IN SH_CSS_SLOW.LUA
 
 CreateClientConVar("cl_css_customslots", "0", true, true )
 CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
-CreateClientConVar("cl_css_equipment", "1", true, true )
-CreateClientConVar("cl_css_shells", "1", true, true )
-CreateClientConVar("cl_css_mags", "1", true, true )
-CreateClientConVar("cl_css_viewmodel_cmodel", "1", true, true )
+
 CreateClientConVar("cl_css_crosshair_style", "1", true, true )
 CreateClientConVar("cl_css_crosshair_length", "15", true, true )
 CreateClientConVar("cl_css_crosshair_width", "1", true, true )
@@ -52,7 +49,7 @@ CreateClientConVar("cl_css_crosshair_color_r", "50", true, true )
 CreateClientConVar("cl_css_crosshair_color_g", "255", true, true )
 CreateClientConVar("cl_css_crosshair_color_b", "50", true, true )
 CreateClientConVar("cl_css_crosshair_color_a", "200", true, true )
-CreateClientConVar("cl_css_quick", "1", true, true )
+
 CreateClientConVar("cl_css_crosshair_dynamic", "1", true, true )
 CreateClientConVar("cl_css_crosshair_dot", "0", true, true )
 
@@ -566,7 +563,7 @@ if (CLIENT or game.SinglePlayer()) then
 end
 
 function SWEP:GetRecoilMath()
-	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*(self.Primary.Delay*12.5)*0.15*GetConVarNumber("sv_css_recoil_scale")
+	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*self.Primary.Delay*1.875*GetConVarNumber("sv_css_recoil_scale")
 end
 
 function SWEP:AddRecoil()
@@ -808,7 +805,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 		
 		PhysBullet:SetAngles( self.Owner:EyeAngles() + Angle(math.Rand(-Cone,Cone)*45,math.Rand(-Cone,Cone)*45,0) )
 		PhysBullet:Spawn()
-		PhysBullet:SetNWInt("Damage",Damage)
+		PhysBullet:SetNWFloat("Damage",Damage)
 		PhysBullet:SetOwner(self.Owner)
 		
 		print(PhysBullet:GetAngles())

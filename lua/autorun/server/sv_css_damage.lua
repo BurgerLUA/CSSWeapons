@@ -20,6 +20,8 @@ function CSSDamage(ply, hitgroup, dmginfo)
 			end
 		end
 		
+		
+		
 		if Weapon and Weapon.DamageFalloff then
 			if Weapon.DamageFalloff > 0 then
 				local Distance = Attacker:GetPos():Distance(ply:GetPos())

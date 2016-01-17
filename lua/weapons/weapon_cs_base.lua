@@ -91,95 +91,124 @@ if CLIENT then
 end
 
 
---player_manager.AddValidHands( "css_arctic", "models/weapons/ct_arms.mdl", 0, "00000000" )
+-- Base Stats all weapons should have
 
-
-SWEP.DrawAmmo				= true
-SWEP.DrawCrosshair			= false
-
-SWEP.VModelFlip				= false
-SWEP.VModelFOV				= 47
-
-SWEP.CSMuzzleFlashes 		= true
-SWEP.CSMuzzleX				= false
-
-SWEP.Weight					= 0
-SWEP.AutoSwitchTo			= false
-SWEP.AutoSwitchFrom			= false
-
-SWEP.WeaponType				= "Primary"
 SWEP.Category				= "Counter-Strike"
-SWEP.Author					= "Burger"
-SWEP.Contact				= ""
-SWEP.Purpose				= ""
-SWEP.Instructions			= ""
-
-SWEP.Spawnable				= false
-SWEP.UseHands				= true
+SWEP.PrintName				= "Counter Strike Source Weapon Base"
+SWEP.Base					= "weapon_base"
+SWEP.WeaponType				= "Primary"
 
 SWEP.Cost					= 0
 SWEP.MoveSpeed				= 250
 
-SWEP.Primary.Damage			= 35
-SWEP.Primary.Range			= 56756
+SWEP.Spawnable				= false
+SWEP.AdminOnly 				= false
+
+SWEP.Slot					= 3
+SWEP.SlotPos				= 1
+
+SWEP.ViewModel 				= "models/weapons/cstrike/c_rif_ak47.mdl"
+SWEP.WorldModel				= "models/weapons/w_rif_ak47.mdl"
+SWEP.VModelFlip 			= false
+SWEP.HoldType				= "ar2"
+
+SWEP.Primary.Damage			= 36
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
-SWEP.Primary.Cone			= 0
-SWEP.Primary.Automatic 		= true
-SWEP.Primary.Delay			= .14
-
+SWEP.Primary.Cone			= 0.00125
 SWEP.Primary.ClipSize		= 30
-SWEP.Primary.DefaultClip	= 0
-SWEP.Primary.Ammo			= "ar2"
 SWEP.Primary.SpareClip		= 90
+SWEP.Primary.Delay			= 0.1
+SWEP.Primary.Ammo			= "StriderMinigun"
+SWEP.Primary.Automatic 		= true
 
+SWEP.RecoilMul				= 1.5
+SWEP.SideRecoilMul			= 0.1
+SWEP.VelConeMul				= 1.75
+SWEP.HeatMul				= 0.75
+
+SWEP.HasScope 				= false
+SWEP.ZoomAmount 			= 1
+SWEP.HasCrosshair 			= true
+SWEP.HasCSSZoom 			= false
+
+SWEP.HasPumpAction 			= false
+SWEP.HasBoltAction 			= false
+SWEP.HasBurstFire 			= false
+SWEP.HasSilencer 			= false
+SWEP.HasDoubleZoom			= false
+SWEP.HasSideRecoil			= true
+SWEP.HasDownRecoil			= false
+
+SWEP.HasIronSights 			= true
+SWEP.EnableIronCross		= true
+SWEP.HasGoodSights			= true
+SWEP.IronSightTime			= 0.125
+SWEP.IronSightsPos 			= Vector(-3, 20, 0)
+SWEP.IronSightsAng 			= Vector(1.25, 1, 0)
+
+SWEP.DamageFalloff			= 1500
+
+-- End of base stats
+
+--Special stuff
+
+SWEP.ReloadSound 			= nil
+SWEP.BurstSound				= nil
+SWEP.BurstSpeedOverride 	= 1
+SWEP.BurstConeMul			= 1
+SWEP.BurstOverride			= 3
+
+
+
+--Deprecated?
+SWEP.IgnoreZoomSlow			= false
+
+-- I know what this is
+SWEP.DrawAmmo				= true
+SWEP.DrawCrosshair			= false
+SWEP.Weight					= 0
+SWEP.AutoSwitchTo			= false
+SWEP.AutoSwitchFrom			= false
+
+SWEP.BurgerBase				= true
+
+SWEP.UseHands				= true
+
+SWEP.Primary.DefaultClip	= 0
 SWEP.Secondary.Ammo 		= "none"
 SWEP.Secondary.ClipSize 	= -1
 SWEP.Secondary.DefaultClip 	= -1
 SWEP.Secondary.Automatic	= false
 
-SWEP.ReloadSound 			= nil
-SWEP.BurstSound				= nil
-
-SWEP.RecoilMul				= 1
-SWEP.SideRecoilMul			= 1
-SWEP.VelConeMul				= 1
-SWEP.HeatMul				= 1
-
-SWEP.BurstSpeedOverride 	= 1
-
-SWEP.HasCrosshair 			= true
-
-SWEP.HasScope 				= false
-SWEP.HasDoubleZoom			= false
-SWEP.HasCSSZoom 			= false
-SWEP.ZoomAmount 			= 1
-SWEP.IgnoreZoomSlow			= false
-
-SWEP.HasBurstFire 			= false
-SWEP.BurstConeMul			= 1
-SWEP.HasSilencer 			= false 
-SWEP.BurstOverride			= 3
-
-SWEP.HasIronSights 			= false
-SWEP.IronSightTime			= 1
-SWEP.IronSightsPos 			= Vector( 0, 0, 0 )
-SWEP.IronSightsAng 			= Vector( 0, 0, 0 )
-
-SWEP.HasPumpAction 			= false
-SWEP.HasBoltAction 			= false
-SWEP.HasSideRecoil			= false
-
-SWEP.BurgerBase				= true
-
+-- Stored Data, like datatables
 SWEP.AlreadyGiven			= false
 SWEP.SpecialThrow 			= false
 SWEP.PhysBullets			= false
 SWEP.IsPrivate 				= false
-
 SWEP.HasPreThrow			= true
-SWEP.CanHolster = true
-SWEP.DamageFalloff 			= 0
+SWEP.CanHolster 			= true
+SWEP.IsZoomed 				= false
+SWEP.ZoomMod 				= 0
+
+-- Not really used anymore but w/e
+SWEP.Author					= "Burger"
+SWEP.Contact				= ""
+SWEP.Purpose				= ""
+SWEP.Instructions			= ""
+
+--WTF IS THIS
+SWEP.VModelFOV				= 47
+SWEP.CSMuzzleFlashes 		= true
+SWEP.CSMuzzleX				= false
+
+
+if (CLIENT or game.SinglePlayer()) then
+	SWEP.PunchAngleUp = Angle(0,0,0)
+	SWEP.PunchAngleDown = Angle(0,0,0)
+	SWEP.BoltDelay = 0
+	SWEP.NextZoomTime = 0
+end
 
 function SWEP:SetupDataTables( )
 
@@ -224,7 +253,17 @@ function SWEP:Initialize()
 
 	self:SetHoldType( self.HoldType )
 	
-	util.PrecacheSound(self.Primary.Sound)
+	if self.Primary.Sound then
+		util.PrecacheSound(self.Primary.Sound)
+	end
+	
+	if self.Secondary.Sound then
+		util.PrecacheSound(self.Secondary.Sound)
+	end
+	
+	if self.ReloadSound then
+		util.PrecacheSound(self.ReloadSound)
+	end
 	
 	if (CLIENT or game.SinglePlayer()) then
 		if GetConVarNumber("cl_css_customslots") == 1 then
@@ -239,9 +278,7 @@ function SWEP:Initialize()
 end
 
 function SWEP:EquipAmmo(ply)
-	if GetConVarNumber("sv_css_ammo_givespare") == 1 then
-		ply:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
-	elseif self.WeaponType == "Equipment" then
+	if GetConVarNumber("sv_css_ammo_givespare") == 1 or self.WeaponType == "Equipment" then
 		ply:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
 	elseif self.WeaponType == "Throwable" then
 		ply:GiveAmmo(1,self.Primary.Ammo,false)
@@ -329,8 +366,6 @@ function SWEP:Holster()
 	self:SetZoomed(false)
 	return true
 end
-
-SWEP.IsZoomed = false
 
 function SWEP:SetZoomed(shouldzoom)
 	if shouldzoom then
@@ -563,11 +598,6 @@ function SWEP:HandleCone(Cone)
 
 end
 
-if (CLIENT or game.SinglePlayer()) then
-	SWEP.PunchAngleUp = Angle(0,0,0)
-	SWEP.PunchAngleDown = Angle(0,0,0)
-end
-
 function SWEP:GetRecoilMath()
 	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*self.Primary.Delay*1.875*GetConVarNumber("sv_css_recoil_scale")
 end
@@ -695,13 +725,6 @@ function SWEP:HandleZoom(delay)
 	
 end
 
-if CLIENT then 
-	SWEP.BoltDelay = 0
-	SWEP.NextZoomTime = 0
-end
-
-
-
 function SWEP:CanBoltZoom()
 
 	if not self.HasBoltAction then 
@@ -804,23 +827,25 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	
 	--[[
 	if SERVER then
-		local PhysBullet = ents.Create("ent_cs_bullet")
-		PhysBullet:SetPos(Source)
-		
-		print( self.Owner:EyeAngles() )
-		
-		PhysBullet:SetAngles( self.Owner:EyeAngles() + Angle(math.Rand(-Cone,Cone)*45,math.Rand(-Cone,Cone)*45,0) )
-		PhysBullet:Spawn()
-		PhysBullet:SetNWFloat("Damage",Damage)
-		PhysBullet:SetOwner(self.Owner)
-		
-		print(PhysBullet:GetAngles())
+	
+		for i=1,Shots do
+	
+			local PhysBullet = ents.Create("ent_cs_bullet")
+			PhysBullet:SetPos(Source)
+			
+			--print( self.Owner:EyeAngles() )
+			
+			PhysBullet:SetAngles( self.Owner:EyeAngles() + Angle(math.Rand(-Cone,Cone)*45,math.Rand(-Cone,Cone)*45,0) )
+			PhysBullet:Spawn()
+			PhysBullet:SetNWFloat("Damage",Damage)
+			PhysBullet:SetOwner(self.Owner)
+			
+			--print(PhysBullet:GetAngles())
+			
+		end
 		
 	end
 	--]]
-	
-	
-	
 	
 	self.Owner:FireBullets(bullet)
 	
@@ -894,53 +919,6 @@ function SWEP:EmitGunSound(GunSound,Level)
 	
 end
 
-
-if SERVER then
-	util.AddNetworkString("CSSCustomSound")
-end
-
-if CLIENT then
-	
-	net.Receive( "CSSCustomSound", function( len )
-		local ply = LocalPlayer()
-		
-		local Pos = net.ReadVector()
-		local Weapon = net.ReadEntity()
-		local GunSound = net.ReadString()
-		local Level = (net.ReadFloat()*30)^0.1
-		local Channel = net.ReadFloat()
-		
-		local Distance = ply:GetPos():Distance(Pos)
-		local FinalPos = ply:GetPos() + (Pos - ply:GetPos()):Angle():Forward()*256
-		local FinalVolume =  math.Clamp( (1024*Level*1) / Distance,0,1)
-		local FinalPitch = 75 + 25 * FinalVolume
-
-		if IsValid(Weapon) and IsValid(Weapon.Owner) then
-			if ply ~= Weapon.Owner and FinalVolume > 0 then
-			
-				local SoundData = {
-					name = Weapon:GetClass() .. Weapon:EntIndex(),
-					channel = CHAN_VOICE,
-					sound = GunSound,
-					pitch = FinalPitch,
-					volume = FinalVolume
-				}
-				
-				
-				sound.Add(SoundData)
-					
-				if Weapon and Weapon.Owner then
-					Weapon:StopSound(Weapon:GetClass() .. Weapon:EntIndex())
-					sound.Play(Weapon:GetClass() .. Weapon:EntIndex(),FinalPos,75,0,0)
-				end
-
-			end
-		end
-		
-	end )
-end
-
-
 function SWEP:BulletEffect(HitPos,StartPos,HitEntity,SurfaceProp)
 	
 	if HitEntity:IsPlayer() then return end
@@ -984,17 +962,6 @@ end
 function SWEP:Reload()
 	
 	if self:IsBusy() then return end
-	--[[
-	if self.Owner:KeyPressed(IN_USE) then
-		if self.HasBurstFire then
-			self:SwitchFireMode()
-		elseif self.HasSilencer then
-			self:Silencer()
-		end
-		return
-	end
-	if self:IsUsing() then return end
-	--]]
 	if self:Clip1() >= self.Primary.ClipSize then return end
 	if self:GetNextPrimaryFire() > CurTime() then return end
 	if self.WeaponType == "Throwable" then return end
@@ -1273,8 +1240,6 @@ function SWEP:HandleCoolDown()
 	end
 end
 
-SWEP.ZoomMod = 0
-
 function SWEP:HandleZoomMod()
 	if not game.SinglePlayer() then
 		if self:GetZoomed() then
@@ -1467,10 +1432,7 @@ function SWEP:DrawHUD()
 				end
 			
 			end
-			
 
-			
-		
 			if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
 				if GetConVarNumber("cl_css_crosshair_style") == 4 then
 					surface.DrawCircle(x/2,y/2, FinalCone + length, Color(r,g,b,a))
@@ -1568,9 +1530,6 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 	
 end
 
--- NOTE: HASANIMATED
-
-
 function SWEP:EquipThink()
 
 	if self.WeaponType ~= "Throwable" then return end
@@ -1635,8 +1594,6 @@ function SWEP:EquipThink()
 	
 	
 end
-
--- Note: CanHolster
 
 function SWEP:SwitchToPrimary()
 	self.Owner:ConCommand("lastinv")

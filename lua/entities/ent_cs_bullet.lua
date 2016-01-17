@@ -30,10 +30,9 @@ function ENT:Initialize()
 		end
 		
 		self.StartTime = CurTime()
-		self.Damage = self:GetNWInt("Damage",100)
 		
-		util.SpriteTrail( self, 0, Color(255,255,0,255) , true , 0.25 , 0 , 0.0025*self.Damage, 2, "debug/modelstats.vmt" )
-		util.SpriteTrail( self, 0, Color(255,255,255,10) , true , 5 , 0 , 0.05*self.Damage, 64, "trails/smoke.vmt" )
+		util.SpriteTrail( self, 0, Color(255,255,0,255) , true , 0.25 , 0 , 0.0025*self:GetNWFloat("Damage",100), 2, "debug/modelstats.vmt" )
+		util.SpriteTrail( self, 0, Color(255,255,255,10) , true , 5 , 0 , 0.05*self:GetNWFloat("Damage",100), 64, "trails/smoke.vmt" )
 		--util.SpriteTrail( self, 0, Color(255,255,255,50) , true , 5 , 0 , 0.05*self.Damage, 64, "trails/tube.vmt" )
 		
 	end
@@ -50,7 +49,7 @@ function ENT:PhysicsCollide( data, collider )
 			SafeRemoveEntityDelayed(self,10)
 			
 			local damageinfo = DamageInfo()
-			damageinfo:SetDamage(self.Damage)
+			damageinfo:SetDamage(self:GetNWFloat("Damage",100))
 			damageinfo:SetAttacker(self.Owner)
 			if IsValid(self.Owner:GetActiveWeapon()) then
 				damageinfo:SetInflictor(self.Owner:GetActiveWeapon())
@@ -85,7 +84,7 @@ function ENT:Think()
 	if SERVER then
 	
 		local timepassed = CurTime() - self.StartTime
-		local damage = self.Damage - timepassed*30
+		local damage = self:GetNWFloat("Damage",100) - timepassed*30
 		local phys = self:GetPhysicsObject()
 		
 		if damage < 10 then

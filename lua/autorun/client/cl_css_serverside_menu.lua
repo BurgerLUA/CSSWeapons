@@ -24,6 +24,16 @@ local ItemTable = {}
 	
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Damage Falloff Multiplier (Higher means less damage at longer ranges)"
+	ItemTable[count]["command"] = "sv_css_damagefalloff_scale"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 1
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
 	ItemTable[count]["name"] = "Recoil Multiplier (Higher means weapons have a bigger kickback)"
 	ItemTable[count]["command"] = "sv_css_recoil_scale"
 	ItemTable[count]["min"] = 0
@@ -280,8 +290,15 @@ local ItemTable = {}
 	
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "DCheckBoxLabel"
-	ItemTable[count]["text"] = "AUG and SG552 Aim Like Counter-Strike"
-	ItemTable[count]["command"] = "sv_css_enable_csszoom"
+	ItemTable[count]["text"] = "Enable Ironsights"
+	ItemTable[count]["command"] = "sv_css_enable_ironsights"
+	ItemTable[count]["height"] = 25
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable Quick HE Grenades (E+MOUSE1)"
+	ItemTable[count]["command"] = "sv_css_quick"
 	ItemTable[count]["height"] = 25
 	count = count + 1
 	

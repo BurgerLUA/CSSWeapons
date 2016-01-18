@@ -9,8 +9,8 @@ CreateConVar("sv_css_velcone_scale", "1", AllFCVar , "This is the value that the
 CreateConVar("sv_css_heat_scale", "1", AllFCVar , "This is the value that the spread from CSS weapons is multiplied. Default is 1." )
 CreateConVar("sv_css_cooltime_scale", "1", AllFCVar , "This is the value that the cooldown delay time from CSS weapons is multiplied by. Default is 1." )
 CreateConVar("sv_css_cooldown_scale", "1", AllFCVar , "This is the value that the cooldown amount from CSS weapons is multiplied by. Default is 1." )
-
 CreateConVar("sv_css_damagefalloff_scale", "0.5", AllFCVar , "This is the value that the damage falloff amount from CSS weapons is multiplied by. Default is 0.5." )
+
 CreateConVar("sv_css_enable_penetration", "1", AllFCVar , "1 enable penetration through objects, 0 disables. Default is 1." )
 CreateConVar("sv_css_penetration_scale", "1", AllFCVar , "Base damage lost per unit of penetration. Default is 1." )
 
@@ -33,7 +33,7 @@ CreateConVar("sv_css_c4_notifyplayers", "1", AllFCVar , "1 enables players to re
 CreateConVar("sv_css_c4_timelimit", "0", AllFCVar , "Global delay in minutes in which you can plant C4. Default is 0." )
 
 
-
+CreateConVar("sv_css_enable_ironsights", "1", AllFCVar , "1 enables ironsights, 0 disables. Default is 1." )
 
 CreateConVar("sv_css_enable_damagesounds", "1", AllFCVar , "1 enables damage sounds, 0 disables. Default is 1." )
 CreateConVar("sv_css_enable_deathsounds", "0", AllFCVar , "1 enables death sounds, 0 disables. Default is 1." )
@@ -147,7 +147,7 @@ SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-3, 20, 0)
 SWEP.IronSightsAng 			= Vector(1.25, 1, 0)
 
-SWEP.DamageFalloff			= 1500
+SWEP.DamageFalloff			= 1000000
 
 -- End of base stats
 
@@ -577,7 +577,7 @@ function SWEP:HandleCone(Cone)
 		if self.WeaponType == "Secondary" and self.HoldType == "revolver" then
 			Cone = Cone * 0.5
 		else
-			Cone = Cone * 0.8
+			Cone = Cone * 0.75
 		end
 	end
 
@@ -649,7 +649,7 @@ function SWEP:SecondaryAttack()
 			end
 		else
 			if (CLIENT or game.SinglePlayer()) then
-				if self.HasIronSights or self.HasScope then
+				if (self.HasIronSights and GetConVar("sv_css_enable_ironsights"):GetFloat() == 1) or self.HasScope then
 					self:HandleZoom(1)
 				end
 			end
@@ -1329,7 +1329,17 @@ function SWEP:DrawHUD()
 
 	local x = ScrW()
 	local y = ScrH()
+	
+	if LocalPlayer():ShouldDrawLocalPlayer() then
+	
+		local HitPos = LocalPlayer():GetEyeTrace().HitPos
+		local Screen = HitPos:ToScreen()
+		
+		x = Screen.x * 2
+		y = Screen.y * 2
 
+	end
+	
 	local length = GetConVarNumber("cl_css_crosshair_length")
 	local width = GetConVarNumber("cl_css_crosshair_width")
 	
@@ -1341,7 +1351,6 @@ function SWEP:DrawHUD()
 	local a = GetConVarNumber("cl_css_crosshair_color_a")
 	
 	local VelCone = self.Owner:GetVelocity():Length()*0.0001
-	
 	
 	if GetConVarNumber("cl_css_crosshair_dynamic") == 0 then
 		Cone = math.Clamp(self.Primary.Cone*900,0,1000)
@@ -1361,129 +1370,138 @@ function SWEP:DrawHUD()
 		StoredCrosshair = math.max(Cone,StoredCrosshair - FrameTime()*PingMul )
 	end
 
-
 	if self.HasCrosshair then
-	
 		if !self:GetZoomed() or self.EnableIronCross then
-
-			local XRound = math.floor(x/2)
-			local YRound = math.floor(y/2)
-			
-			--length = math.cos(CurTime()*2)*10 + 15
-			
-			local WRound = math.floor(width/2)
-			local LRound = math.floor(length/2)
-			
-			local FinalCone = math.floor(math.Max(StoredCrosshair,WRound*2,LRound/2))
-
-			surface.SetDrawColor(r,g,b,a)
-			
-			local Max = 0
-			
-			if GetConVarNumber("cl_css_crosshair_dot") >= 1 then
-				Max = math.max(1,width)
-				surface.DrawRect( XRound - math.floor(Max*0.5), YRound -  math.floor(Max*0.5) , Max, Max )
-			end
-			
-
-			if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
-
-				if width > 1 then
-				
-					local x1 = XRound - WRound 
-					local x2 = XRound - WRound
-					local y3 = YRound - WRound
-					local y4 = YRound - WRound
-					
-					-------- Position --- Length --- Spacing
-					local y1 = YRound + math.max(FinalCone,0) -- red
-					local y2 = YRound - (LRound*2) - math.max(FinalCone,0) -- white
-					
-					local x3 = XRound + math.max(FinalCone,0) -- blue
-					local x4 = XRound - (LRound*2) - math.max(FinalCone,0) -- black
-				
-					--surface.SetDrawColor(255,0,0,255) --red
-					surface.DrawRect( x1, y1, WRound*2, LRound*2 )
-					
-					--surface.SetDrawColor(255,255,255,255) --white
-					surface.DrawRect( x2, y2, WRound*2, LRound*2 )
-					
-					--surface.SetDrawColor(0,0,255,255) -- blue
-					surface.DrawRect( x3, y3, LRound*2, WRound*2 )
-					
-					--surface.SetDrawColor(0,0,0,255) -- black
-					surface.DrawRect( x4, y4, LRound*2, WRound*2 )
-			
-				else
-				
-					local x1 = XRound + FinalCone + LRound*2
-					local x2 = XRound - FinalCone - LRound*2
-					local y3 = YRound + FinalCone + LRound*2
-					local y4 = YRound - FinalCone - LRound*2
-
-					surface.DrawLine( x1, YRound, XRound+FinalCone, YRound )
-					
-					surface.DrawLine( x2, YRound, XRound-FinalCone, YRound )
-					
-					surface.DrawLine( XRound, y3, XRound, YRound+FinalCone )
-					
-					surface.DrawLine( XRound, y4, XRound, YRound-FinalCone )
-					
-				end
-			
-			end
-
-			if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
-				if GetConVarNumber("cl_css_crosshair_style") == 4 then
-					surface.DrawCircle(x/2,y/2, FinalCone + length, Color(r,g,b,a))
-				elseif GetConVarNumber("cl_css_crosshair_style") == 3 then
-					surface.DrawCircle(x/2,y/2, FinalCone + length/2, Color(r,g,b,a))
-				else
-					surface.DrawCircle(x/2,y/2, FinalCone, Color(r,g,b,a))
-				end
-			end
-		
+			self:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
 		end
-	end
-	
-	if self.HasScope and self.IsZoomeded then
-		self.Owner:DrawViewModel(false)	
-	else
-		self.Owner:DrawViewModel(true)
 	end
 
 	if self.HasScope then
 		if self:GetZoomed() then
-
-			local space = 1
-			
-			surface.SetDrawColor(Color(0,0,0))
-			surface.SetMaterial(Material("gui/sniper_corner"))
-			surface.DrawTexturedRectRotated(x/2 - y/4,y/2 - y/4,y/2 + space,y/2 + space,0-180-180)
-			surface.DrawTexturedRectRotated(x/2 - y/4,y/2 + y/4,y/2 + space,y/2 + space,90-180-180)
-			surface.DrawTexturedRectRotated(x/2 + y/4,y/2 + y/4,y/2 + space,y/2 + space,180-180-180)
-			surface.DrawTexturedRectRotated(x/2 + y/4,y/2 - y/4,y/2 + space,y/2 + space,270-180-180)
-			
-			if self.ZoomAmount > 6 then
-				surface.DrawLine(x/2,0,x/2,y)
-				surface.DrawLine(0,y/2,x,y/2)
-				
-				if Cone > 0.1 then
-					surface.DrawCircle( x/2, y/2, math.Clamp(Cone,3,x/2*0.33), Color(r,g,b,a) )
-				end	
-				
+			if LocalPlayer():ShouldDrawLocalPlayer() then
+				self:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
 			else
-				surface.DrawCircle( x/2, y/2, 6, Color(255,0,0,50))
-				surface.DrawCircle( x/2, y/2, math.Clamp(Cone,0,x/2*0.33), Color(r,g,b,255) )
+				self:DrawCustomScope(x,y,r,g,b,a)
 			end
-
-			surface.SetDrawColor(Color(0,0,0))
-			surface.SetMaterial(Material("vgui/gfx/vgui/solid_background"))
-			surface.DrawTexturedRectRotated(x/4 - y/4,y/2,x/2 - y/2,y,0)
-			surface.DrawTexturedRectRotated(x - x/4 + y/4,y/2,x/2 - y/2,y,0)
 			
+			self.Owner:DrawViewModel(false)	
+		else
+			self.Owner:DrawViewModel(true)
 		end
 	end
+	
+end
+
+function SWEP:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
+
+	local XRound = math.floor(x/2)
+	local YRound = math.floor(y/2)
+	
+	--length = math.cos(CurTime()*2)*10 + 15
+	
+	local WRound = math.floor(width/2)
+	local LRound = math.floor(length/2)
+	
+	local FinalCone = math.floor(math.Max(StoredCrosshair,WRound*2,LRound/2))
+
+	surface.SetDrawColor(r,g,b,a)
+	
+	local Max = 0
+	
+	if GetConVarNumber("cl_css_crosshair_dot") >= 1 then
+		Max = math.max(1,width)
+		surface.DrawRect( XRound - math.floor(Max*0.5), YRound -  math.floor(Max*0.5) , Max, Max )
+	end
+	
+
+	if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
+
+		if width > 1 then
+		
+			local x1 = XRound - WRound 
+			local x2 = XRound - WRound
+			local y3 = YRound - WRound
+			local y4 = YRound - WRound
+			
+			-------- Position --- Length --- Spacing
+			local y1 = YRound + math.max(FinalCone,0) -- red
+			local y2 = YRound - (LRound*2) - math.max(FinalCone,0) -- white
+			
+			local x3 = XRound + math.max(FinalCone,0) -- blue
+			local x4 = XRound - (LRound*2) - math.max(FinalCone,0) -- black
+		
+			--surface.SetDrawColor(255,0,0,255) --red
+			surface.DrawRect( x1, y1, WRound*2, LRound*2 )
+			
+			--surface.SetDrawColor(255,255,255,255) --white
+			surface.DrawRect( x2, y2, WRound*2, LRound*2 )
+			
+			--surface.SetDrawColor(0,0,255,255) -- blue
+			surface.DrawRect( x3, y3, LRound*2, WRound*2 )
+			
+			--surface.SetDrawColor(0,0,0,255) -- black
+			surface.DrawRect( x4, y4, LRound*2, WRound*2 )
+	
+		else
+		
+			local x1 = XRound + FinalCone + LRound*2
+			local x2 = XRound - FinalCone - LRound*2
+			local y3 = YRound + FinalCone + LRound*2
+			local y4 = YRound - FinalCone - LRound*2
+
+			surface.DrawLine( x1, YRound, XRound+FinalCone, YRound )
+			
+			surface.DrawLine( x2, YRound, XRound-FinalCone, YRound )
+			
+			surface.DrawLine( XRound, y3, XRound, YRound+FinalCone )
+			
+			surface.DrawLine( XRound, y4, XRound, YRound-FinalCone )
+			
+		end
+	
+	end
+
+	if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
+		if GetConVarNumber("cl_css_crosshair_style") == 4 then
+			surface.DrawCircle(x/2,y/2, FinalCone + length, Color(r,g,b,a))
+		elseif GetConVarNumber("cl_css_crosshair_style") == 3 then
+			surface.DrawCircle(x/2,y/2, FinalCone + length/2, Color(r,g,b,a))
+		else
+			surface.DrawCircle(x/2,y/2, FinalCone, Color(r,g,b,a))
+		end
+	end
+
+end
+
+function SWEP:DrawCustomScope(x,y,r,g,b,a)
+
+	local space = 1
+	
+	surface.SetDrawColor(Color(0,0,0))
+	surface.SetMaterial(Material("gui/sniper_corner"))
+	surface.DrawTexturedRectRotated(x/2 - y/4,y/2 - y/4,y/2 + space,y/2 + space,0-180-180)
+	surface.DrawTexturedRectRotated(x/2 - y/4,y/2 + y/4,y/2 + space,y/2 + space,90-180-180)
+	surface.DrawTexturedRectRotated(x/2 + y/4,y/2 + y/4,y/2 + space,y/2 + space,180-180-180)
+	surface.DrawTexturedRectRotated(x/2 + y/4,y/2 - y/4,y/2 + space,y/2 + space,270-180-180)
+	
+	if self.ZoomAmount > 6 then
+		surface.DrawLine(x/2,0,x/2,y)
+		surface.DrawLine(0,y/2,x,y/2)
+		
+		if Cone > 0.1 then
+			surface.DrawCircle( x/2, y/2, math.Clamp(Cone,3,x/2*0.33), Color(r,g,b,a) )
+		end	
+		
+	else
+		surface.DrawCircle( x/2, y/2, 6, Color(255,0,0,50))
+		surface.DrawCircle( x/2, y/2, math.Clamp(Cone,0,x/2*0.33), Color(r,g,b,255) )
+	end
+
+	surface.SetDrawColor(Color(0,0,0))
+	surface.SetMaterial(Material("vgui/gfx/vgui/solid_background"))
+	surface.DrawTexturedRectRotated(x/4 - y/4,y/2,x/2 - y/2,y,0)
+	surface.DrawTexturedRectRotated(x - x/4 + y/4,y/2,x/2 - y/2,y,0)
+	
 end
 
 function SWEP:HUDShouldDraw( element )
@@ -1497,12 +1515,13 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 
 	if (self.InfoMarkup == nil ) then
 	
-		local Damage = self.Primary.NumShots * self.Primary.Damage * GetConVarNumber("sv_css_damage_scale")
+		local Damage = math.floor(self.Primary.NumShots * self.Primary.Damage * GetConVarNumber("sv_css_damage_scale"))
 		local Delay = math.floor((self.Primary.Delay^-1)*60)
 		local DPS = math.floor((self.Primary.Delay^-1) * Damage )
-		local Cone = (self.Primary.Cone * GetConVarNumber("sv_css_cone_scale")) * (360/1)
-		local Recoil = self:GetRecoilMath() * 0.25
+		local Cone = math.Round((self.Primary.Cone * GetConVarNumber("sv_css_cone_scale")) * (360/1),2)
+		local Recoil = math.Round(self:GetRecoilMath() * 0.25,2)
 		local KillTime = math.Round((math.ceil(100/Damage) - 1) * (self.Primary.Delay),2)
+		local DamageFalloff =  math.floor( (self.DamageFalloff  / 64) * 1.22 ) * 2
 		
 		local str
 		local title_color = "<color=0,0,0,255>"
@@ -1510,6 +1529,7 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 		
 		str = "<font=HudSelectionText>"
 		str = str .. title_color .. "Damage:</color> "..text_color..Damage.."</color>\n" 
+		str = str .. title_color .. "Max Range:</color> "..text_color..DamageFalloff.. " meters" .."</color>\n" 
 		str = str .. title_color .. "Firerate:</color> "..text_color.. Delay .. " RPM" .."</color>\n"
 		str = str .. title_color .. "Damage Per Second:</color> "..text_color.. DPS .. "DPS" .. "</color>\n"
 		str = str .. title_color .. "Recoil:</color> "..text_color.. Recoil .. " degrees" .."</color>\n" 

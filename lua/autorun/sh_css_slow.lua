@@ -1,18 +1,18 @@
 local SlowEnable = false
 
+local AllFCVar = FCVAR_REPLICATED + FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_SERVER_CAN_EXECUTE
+
 if SERVER then
-	CreateConVar("sv_css_enable_speedmod", "1", FCVAR_REPLICATED  + FCVAR_ARCHIVE , "1 enables speed mod, 0 disables. Default is 1." )
+	CreateConVar("sv_css_enable_speedmod", "1", AllFCVar , "1 enables speed mod, 0 disables. Default is 1." )
 end
 
 local NextThink = 0
 
 function CSSUpdateConvars()
-
+	
 	if SERVER then
-
 		SlowEnable = (GetConVarNumber("sv_css_enable_speedmod") == 1)
 		SetGlobalBool( "SlowEnable", SlowEnable )	
-
 	else
 		SlowEnable = GetGlobalBool( "SlowEnable", false )
 	end
@@ -36,7 +36,7 @@ function CSSSlowDamage(ply,attacker)
 			end
 		end
 	end
-
+	
 end
 
 hook.Add("PlayerShouldTakeDamage","CSS: Slow Damage",CSSSlowDamage)
@@ -63,7 +63,7 @@ function CSSSpeedModMovement(ply,mv)
 						WeaponSpeed = CurrentWeapon.MoveSpeed
 						--[[
 						if CurrentWeapon.HasScope == true then
-							if CurrentWeapon:GetIsZoomed() then
+							if CurrentWeapon:GetZoomed() then
 								if CurrentWeapon.IgnoreZoomSlow == false then
 									if CurrentWeapon.ZoomAmount > 5 then
 										WeaponSpeed = WeaponSpeed * 0.5

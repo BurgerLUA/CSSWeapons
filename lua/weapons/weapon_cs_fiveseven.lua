@@ -35,7 +35,7 @@ SWEP.Primary.Automatic 		= false
 SWEP.RecoilMul 				= 0.5
 SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 0.25
-SWEP.HeatMul				= 1
+SWEP.HeatMul				= 0.75
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.75
@@ -57,4 +57,4 @@ SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-5.921, 0, 1.679)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
 
-SWEP.DamageFalloff			= 1000
+SWEP.DamageFalloff			= 2000

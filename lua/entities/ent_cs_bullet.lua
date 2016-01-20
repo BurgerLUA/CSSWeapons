@@ -31,7 +31,7 @@ function ENT:Initialize()
 		
 		self.StartTime = CurTime()
 		
-		util.SpriteTrail( self, 0, Color(255,255,0,255) , true , 0.25 , 0 , 0.0025*self:GetNWFloat("Damage",100), 2, "debug/modelstats.vmt" )
+		util.SpriteTrail( self, 0, self:GetColor() , true , 0.25 , 0 , 0.0025*self:GetNWFloat("Damage",100), 2, "debug/modelstats.vmt" )
 		util.SpriteTrail( self, 0, Color(255,255,255,10) , true , 5 , 0 , 0.05*self:GetNWFloat("Damage",100), 64, "trails/smoke.vmt" )
 		--util.SpriteTrail( self, 0, Color(255,255,255,50) , true , 5 , 0 , 0.05*self.Damage, 64, "trails/tube.vmt" )
 		
@@ -40,43 +40,33 @@ end
 
 function ENT:PhysicsCollide( data, collider )
 
-	collider:EnableMotion(false)
+	if SERVER then
 	
-	--if data.Hit then
+		self:SetCollisionGroup(COLLISION_GROUP_WORLD)
 	
-		if SERVER then
+		SafeRemoveEntityDelayed(self,10)
 		
-			SafeRemoveEntityDelayed(self,10)
-			
-			local damageinfo = DamageInfo()
-			damageinfo:SetDamage(self:GetNWFloat("Damage",100))
+		local damageinfo = DamageInfo()
+		damageinfo:SetDamage(self:GetNWFloat("Damage",100))
+		
+		if IsValid(self.Owner) then
 			damageinfo:SetAttacker(self.Owner)
+			
 			if IsValid(self.Owner:GetActiveWeapon()) then
 				damageinfo:SetInflictor(self.Owner:GetActiveWeapon())
 			else
 				damageinfo:SetInflictor(self)
 			end
 			
-			data.HitEntity:TakeDamageInfo(damageinfo)
-			
-		end
-
-		local e = EffectData()
-			e:SetOrigin(data.HitPos)
-			e:SetStart(data.HitPos - data.HitNormal)
-			e:SetSurfaceProp(1)
-			e:SetDamageType(DMG_BULLET)
-			--e:SetHitBox(data.HitBox)
-
-		if CLIENT then
-			e:SetEntity(data.HitEntity)
 		else
-			e:SetEntIndex(data.HitEntity:EntIndex())
+			damageinfo:SetAttacker(self)
+			damageinfo:SetInflictor(self)
 		end
+
+		data.HitEntity:TakeDamageInfo(damageinfo)
 		
-		util.Effect("Impact", e)
+	end
 		
-	--end
 	
 end
 

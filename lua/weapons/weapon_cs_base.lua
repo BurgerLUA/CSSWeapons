@@ -1616,7 +1616,17 @@ function SWEP:EquipThink()
 end
 
 function SWEP:SwitchToPrimary()
-	self.Owner:ConCommand("lastinv")
+
+	if self.Owner:IsBot() then
+	
+		local Weapons = self.Owner:GetWeapons()
+	
+		self.Owner:SetActiveWeapon(Weapons[1])
+	
+	else
+		self.Owner:ConCommand("lastinv")
+	end
+	
 end
 
 function SWEP:QuickThrow()

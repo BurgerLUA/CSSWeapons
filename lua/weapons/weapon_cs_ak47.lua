@@ -25,17 +25,17 @@ SWEP.HoldType				= "ar2"
 SWEP.Primary.Damage			= 36
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
-SWEP.Primary.Cone			= 0.00125
+SWEP.Primary.Cone			= 0.0025
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
-SWEP.Primary.Delay			= 0.1
+SWEP.Primary.Delay			= 0.11
 SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1.5
-SWEP.SideRecoilMul			= 0.1
+SWEP.RecoilMul				= 1
+SWEP.SideRecoilMul			= 0.5
 SWEP.VelConeMul				= 1.75
-SWEP.HeatMul				= 0.75
+SWEP.HeatMul				= 0.8
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1

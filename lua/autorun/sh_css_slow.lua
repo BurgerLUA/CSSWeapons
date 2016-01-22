@@ -53,50 +53,41 @@ function CSSSpeedModMovement(ply,mv)
 			end
 			
 			local WeaponSpeed = 270
-			
 			local CurrentWeapon = ply:GetActiveWeapon()
 			
-			
 			if IsValid(CurrentWeapon) then
-				if CurrentWeapon:IsScripted() then
-					if CurrentWeapon.MoveSpeed then
-						WeaponSpeed = CurrentWeapon.MoveSpeed
-						--[[
-						if CurrentWeapon.HasScope == true then
-							if CurrentWeapon:GetZoomed() then
-								if CurrentWeapon.IgnoreZoomSlow == false then
-									if CurrentWeapon.ZoomAmount > 5 then
-										WeaponSpeed = WeaponSpeed * 0.5
-									else
-										WeaponSpeed = WeaponSpeed * 0.75
-									end
-								end
-							end
+			
+				if CurrentWeapon.MoveSpeed then
+			
+					if CurrentWeapon:IsScripted() then
+						if CurrentWeapon.MoveSpeed then
+							WeaponSpeed = CurrentWeapon.MoveSpeed
 						end
-						--]]
 					end
+
+					local SpeedMod = ( WeaponSpeed * (100 - ply.GetSlow)/100 ) / 270
+
+					ply.GetSlow = math.Clamp(ply.GetSlow - 1000*engine.TickInterval(),0,99)
+
+					local WalkMul = 1
+				
+					local BaseSpeed = ply:GetWalkSpeed()
+				
+					if mv:KeyDown(IN_SPEED) then
+						BaseSpeed = ply:GetRunSpeed()
+					elseif mv:KeyDown(IN_WALK) then
+						WalkMul = 0.5
+					end
+
+					local ForwardMove = math.Clamp(mv:GetForwardSpeed(),-1,1) * BaseSpeed
+					local SideMove = math.Clamp(mv:GetSideSpeed(),-1,1) * BaseSpeed
+					
+					mv:SetForwardSpeed( ForwardMove * SpeedMod * WalkMul)
+					mv:SetSideSpeed( SideMove * SpeedMod * WalkMul)
+					
 				end
-			end
 			
-			local SpeedMod = ( WeaponSpeed * (100 - ply.GetSlow)/100 ) / 270
-
-			ply.GetSlow = math.Clamp(ply.GetSlow - 1000*engine.TickInterval(),0,99)
-
-			local WalkMul = 1
-		
-			local BaseSpeed = ply:GetWalkSpeed()
-		
-			if mv:KeyDown(IN_SPEED) then
-				BaseSpeed = ply:GetRunSpeed()
-			elseif mv:KeyDown(IN_WALK) then
-				WalkMul = 0.5
 			end
-
-			local ForwardMove = math.Clamp(mv:GetForwardSpeed(),-1,1) * BaseSpeed
-			local SideMove = math.Clamp(mv:GetSideSpeed(),-1,1) * BaseSpeed
-			
-			mv:SetForwardSpeed( ForwardMove * SpeedMod * WalkMul)
-			mv:SetSideSpeed( SideMove * SpeedMod * WalkMul)
 
 		end
 	end

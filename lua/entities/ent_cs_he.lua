@@ -36,19 +36,22 @@ function ENT:PhysicsCollide(data, physobj)
 		
 			self:EmitSound("weapons/hegrenade/he_bounce-1.wav")
 			
-			if data.HitEntity and data.HitEntity:Health() then
+			if self:GetVelocity():Length() > 100 then
+				if data.HitEntity and data.HitEntity:Health() then
 
-				local dmginfo = DamageInfo()
+					local dmginfo = DamageInfo()
+					
+					dmginfo:SetDamage(10)
+					dmginfo:SetAttacker(self.Owner or self)
+					dmginfo:SetInflictor(self)
+					dmginfo:SetDamageType(DMG_CRUSH)
 				
-				dmginfo:SetDamage(10)
-				dmginfo:SetAttacker(self.Owner or self)
-				dmginfo:SetInflictor(self)
-				dmginfo:SetDamageType(DMG_CRUSH)
-			
-				data.HitEntity:TakeDamageInfo(dmginfo)
-				
-				if data.HitEntity:IsPlayer() then
-					data.HitEntity:EmitSound("vo/npc/male01/ow01.wav")
+					data.HitEntity:TakeDamageInfo(dmginfo)
+					
+					if data.HitEntity:IsPlayer() then
+						data.HitEntity:EmitSound("vo/npc/male01/ow01.wav")
+					end
+					
 				end
 				
 			end

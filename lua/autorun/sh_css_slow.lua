@@ -52,25 +52,19 @@ function CSSSpeedModMovement(ply,mv)
 				ply.GetSlow = 0
 			end
 			
-			local WeaponSpeed = 270
 			local CurrentWeapon = ply:GetActiveWeapon()
 			
 			if IsValid(CurrentWeapon) then
 			
 				if CurrentWeapon.MoveSpeed then
 			
-					if CurrentWeapon:IsScripted() then
-						if CurrentWeapon.MoveSpeed then
-							WeaponSpeed = CurrentWeapon.MoveSpeed
-						end
-					end
-
+					local WeaponSpeed = CurrentWeapon.MoveSpeed
+					
 					local SpeedMod = ( WeaponSpeed * (100 - ply.GetSlow)/100 ) / 270
 
 					ply.GetSlow = math.Clamp(ply.GetSlow - 1000*engine.TickInterval(),0,99)
 
 					local WalkMul = 1
-				
 					local BaseSpeed = ply:GetWalkSpeed()
 				
 					if mv:KeyDown(IN_SPEED) then

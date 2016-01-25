@@ -14,7 +14,7 @@ SWEP.MoveSpeed				= 210
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
 
-SWEP.Slot					= 4
+SWEP.Slot					= 3
 SWEP.SlotPos				= 1
 
 SWEP.ViewModel 				= "models/weapons/cstrike/c_snip_g3sg1.mdl"

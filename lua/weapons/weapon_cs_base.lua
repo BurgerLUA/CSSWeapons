@@ -327,6 +327,24 @@ function SWEP:Deploy()
 					end
 				end
 			end
+		elseif GetConVarNumber("sv_css_limit_equipped") == 2 then
+			for k,v in pairs (self.Owner:GetWeapons()) do
+				if v.BurgerBase ~= nil then
+					if v ~= self then
+						if self.Slot == v.Slot and not (v.WeaponType == "Free" or v.WeaponType == "Throwable") then
+							self.Owner:StripWeapon(v:GetClass())
+							local dropped = ents.Create("ent_cs_droppedweapon")
+							dropped:SetPos(self.Owner:GetPos() + self.Owner:OBBCenter() )
+							dropped:SetAngles(self.Owner:EyeAngles() )
+							dropped:SetModel(weapons.GetStored(v:GetClass()).WorldModel)
+							dropped:Spawn()
+							dropped:Activate()
+							dropped:SetNWString("class",v:GetClass())
+							dropped:SetNWInt("clip",v:Clip1())
+						end
+					end
+				end
+			end
 		end
 		
 		self.GetMagModel = string.Replace( self.WorldModel,"/w_" , "/unloaded/" )

@@ -87,7 +87,7 @@ if CLIENT then
 	language.Add("flashgrenade_ammo","Flash Grenade")
 	language.Add("smokegrenade_ammo","Smoke Grenade")
 
-	surface.CreateFont( "csd",{font = "csd",size = 48,weight = 700})
+	surface.CreateFont( "csd",{font = "csd",size = 64,weight = 0})
 end
 
 
@@ -253,6 +253,14 @@ function SWEP:Initialize()
 
 	self:SetHoldType( self.HoldType )
 	
+	if SERVER then
+		if self.Owner:IsNPC() then
+			self.Owner:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_PERFECT )
+		end
+	end
+	
+	
+	
 	if self.Primary.Sound then
 		util.PrecacheSound(self.Primary.Sound)
 	end
@@ -295,7 +303,9 @@ function SWEP:OwnerChanged()
 				end
 
 				if GetConVarNumber("sv_css_ammo_givespare") == 1 then
-					self.Owner:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
+					if self.Owner:IsPlayer() then
+						self.Owner:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
+					end
 				end
 
 				self.AlreadyGiven = true
@@ -388,13 +398,17 @@ end
 function SWEP:SetZoomed(shouldzoom)
 	if shouldzoom then
 		if game.SinglePlayer() then
-			self.Owner:SetFOV( GetConVar("fov_desired"):GetFloat() / (1 + self.ZoomAmount), 0.1 )
+			if self.Owner:IsPlayer() then
+				self.Owner:SetFOV( GetConVar("fov_desired"):GetFloat() / (1 + self.ZoomAmount), 0.1 )
+			end
 		else
 			self.IsZoomed = true
 		end
 	else
 		if game.SinglePlayer() then
-			self.Owner:SetFOV( GetConVar("fov_desired"):GetFloat(), 0.1 )
+			if self.Owner:IsPlayer() then
+				self.Owner:SetFOV( GetConVar("fov_desired"):GetFloat(), 0.1 )
+			end
 		else
 			self.IsZoomed = false
 		end
@@ -666,11 +680,19 @@ function SWEP:SecondaryAttack()
 				self:Silencer()
 			end
 		else
-			if (CLIENT or game.SinglePlayer()) then
+		
+			if self.HasIronSights and GetConVar("sv_css_enable_ironsights"):GetFloat() == 0 then
+				if self.HasBurstFire then
+					self:SwitchFireMode()
+				elseif self.HasSilencer then
+					self:Silencer()
+				end
+			elseif (CLIENT or game.SinglePlayer()) then
 				if (self.HasIronSights and GetConVar("sv_css_enable_ironsights"):GetFloat() == 1) or self.HasScope then
 					self:HandleZoom(1)
 				end
 			end
+			
 		end
 	end
 
@@ -1687,7 +1709,7 @@ function SWEP:PreThrowObject()
 end
 
 function SWEP:ThrowObject(object,force)
-	if (CLIENT or game.SinglePlayer()) then return end
+	if (CLIENT) then return end
 	local EA =  self.Owner:EyeAngles()
 	local pos = self.Owner:GetShootPos() + EA:Right() * 5 - EA:Up() * 4 + EA:Forward() * 8	
 

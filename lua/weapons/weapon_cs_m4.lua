@@ -39,7 +39,7 @@ SWEP.Secondary.Sound		= Sound("weapons/m4a1/m4a1-1.wav")
 SWEP.RecoilMul				= 0.75
 SWEP.SideRecoilMul			= 0.5
 SWEP.VelConeMul				= 1.5
-SWEP.HeatMul				= 1
+SWEP.HeatMul				= 1.25
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1

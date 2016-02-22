@@ -25,7 +25,7 @@ SWEP.HoldType				= "smg"
 SWEP.Primary.Damage			= 26
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/p90/p90-1.wav")
-SWEP.Primary.Cone			= 0.018
+SWEP.Primary.Cone			= 0.009
 SWEP.Primary.ClipSize		= 50
 SWEP.Primary.SpareClip		= 100
 SWEP.Primary.Delay			= 0.07 --1/(857/60)
@@ -57,4 +57,4 @@ SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(0, 0, 0)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
 
-SWEP.DamageFalloff			= 1250
+SWEP.DamageFalloff			= 1000

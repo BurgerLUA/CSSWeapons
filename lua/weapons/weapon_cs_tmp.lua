@@ -32,7 +32,7 @@ SWEP.Primary.Delay			= 0.07 --1/(857/60)
 SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 1.1
 SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 0.5
 SWEP.HeatMul				= 1
@@ -48,7 +48,7 @@ SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
-SWEP.HasDownRecoil			= false
+SWEP.HasDownRecoil			= true
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true
@@ -57,4 +57,4 @@ SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-5.921, 0, 1.679)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
 
-SWEP.DamageFalloff			= 750
+SWEP.DamageFalloff			= 500

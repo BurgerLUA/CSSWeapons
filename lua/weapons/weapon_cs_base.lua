@@ -652,6 +652,11 @@ function SWEP:AddRecoil()
 			UpPunch = UpPunch*math.random(-1,1)
 		end
 	end
+	
+	if self.HasScope and self.ZoomAmount > 4 and self:GetZoomed() then
+		UpPunch = UpPunch*0.5
+		SidePunch = SidePunch*0.5
+	end
 
 	self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0)
 	self.PunchAngleDown = self.PunchAngleDown + Angle(UpPunch,SidePunch,0)

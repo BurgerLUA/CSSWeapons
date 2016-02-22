@@ -25,16 +25,16 @@ SWEP.HoldType				= "ar2"
 SWEP.Primary.Damage			= 80
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/g3sg1/g3sg1-1.wav")
-SWEP.Primary.Cone			= 0
+SWEP.Primary.Cone			= 0.00125
 SWEP.Primary.ClipSize		= 20
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.25 --1/(240/60)
 SWEP.Primary.Ammo			= "StriderMinigun"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul 				= 1
+SWEP.RecoilMul 				= 1.25
 SWEP.SideRecoilMul			= 1
-SWEP.VelConeMul				= 10
+SWEP.VelConeMul				= 5
 SWEP.HeatMul				= 1
 
 SWEP.HasScope 				= true

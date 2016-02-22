@@ -32,8 +32,8 @@ SWEP.Primary.Delay			= 0.09 --1/(666/60)
 SWEP.Primary.Ammo			= "SniperPenetratedRound"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1
-SWEP.SideRecoilMul			= 1
+SWEP.RecoilMul				= 0.9
+SWEP.SideRecoilMul			= 0.5
 SWEP.VelConeMul				= 0.5
 SWEP.HeatMul				= 1
 
@@ -57,4 +57,4 @@ SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-5.921, 0, 1.679)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
 
-SWEP.DamageFalloff			= 1500
+SWEP.DamageFalloff			= 1000

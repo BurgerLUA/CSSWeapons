@@ -42,11 +42,13 @@ end
 hook.Add("PlayerShouldTakeDamage","CSS: Slow Damage",CSSSlowDamage)
 
 
-function CSSSpeedModMovement(ply,mv)
+function CSSSpeedModMovement(ply,mv,cmd)
 
-	if not ply:IsBot() then
-	
+	--if not ply:IsBot() then
+
 		if SlowEnable then
+		
+			--if ( not IsFirstTimePredicted() ) then return end
 
 			if not ply.GetSlow then
 				ply.GetSlow = 0
@@ -72,20 +74,28 @@ function CSSSpeedModMovement(ply,mv)
 					elseif mv:KeyDown(IN_WALK) then
 						WalkMul = 0.5
 					end
-
-					local ForwardMove = math.Clamp(mv:GetForwardSpeed(),-1,1) * BaseSpeed
-					local SideMove = math.Clamp(mv:GetSideSpeed(),-1,1) * BaseSpeed
 					
-					mv:SetForwardSpeed( ForwardMove * SpeedMod * WalkMul)
-					mv:SetSideSpeed( SideMove * SpeedMod * WalkMul)
+					local ForwardMove = math.Clamp(mv:GetForwardSpeed(),-1,1)
+					local SideMove = math.Clamp(mv:GetSideSpeed(),-1,1)
+				
+					local LocalMove = Vector(SideMove,ForwardMove):GetNormalized()
+
+					local ForwardSpeed = LocalMove.y * SpeedMod * WalkMul * BaseSpeed
+					local SideSpeed = LocalMove.x * SpeedMod * WalkMul * BaseSpeed
+					
+					print(ForwardSpeed)
+					
+					mv:SetForwardSpeed( ForwardSpeed )
+					mv:SetSideSpeed( SideSpeed )
 					
 				end
 			
 			end
 
 		end
-	end
+		
+	--end
 
 end
 
-hook.Add("PlayerTick","CSS: SpeedMod Movement",CSSSpeedModMovement)
+hook.Add("SetupMove","CSS: SpeedMod Movement",CSSSpeedModMovement)

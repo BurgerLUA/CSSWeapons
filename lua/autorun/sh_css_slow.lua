@@ -83,7 +83,7 @@ function CSSSpeedModMovement(ply,mv,cmd)
 					local ForwardSpeed = LocalMove.y * SpeedMod * WalkMul * BaseSpeed
 					local SideSpeed = LocalMove.x * SpeedMod * WalkMul * BaseSpeed
 					
-					print(ForwardSpeed)
+					--print(ForwardSpeed)
 					
 					mv:SetForwardSpeed( ForwardSpeed )
 					mv:SetSideSpeed( SideSpeed )

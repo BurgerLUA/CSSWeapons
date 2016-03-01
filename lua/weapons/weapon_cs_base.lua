@@ -1415,7 +1415,7 @@ function SWEP:DrawHUD()
 		StoredCrosshair = math.max(Cone,StoredCrosshair - FrameTime()*PingMul )
 	end
 
-	if self.HasCrosshair then
+	if self.HasCrosshair or (self.Owner:IsPlayer() and self.Owner:IsBot()) then
 		if !self:GetZoomed() or self.EnableIronCross then
 			self:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
 		end

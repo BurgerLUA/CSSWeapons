@@ -65,8 +65,7 @@ function SWEP:SecondaryAttack()
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:SetNextPrimaryFire(CurTime() + self.Secondary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Secondary.Delay)
-	self:Swing(self.Secondary.Damage)
-	
+	self:Swing(self.Secondary.Damage)	
 end
 
 function SWEP:Reload()
@@ -86,17 +85,16 @@ end
 
 function SWEP:Swing(damage)
 
-	--if CLIENT then return end
-
-	--local damage = self:GetNWInt("damage")
 
 	local heavy = ACT_VM_MISSCENTER
 	local light = ACT_VM_PRIMARYATTACK
 	local miss = ACT_VM_PRIMARYATTACK
 
-
-
-	local coneents = ents.FindInCone(self.Owner:GetShootPos(),self.Owner:GetAimVector(),40,1)
+	local coneents = {self.Owner}
+	
+	if IsFirstTimePredicted() then
+		coneents = ents.FindInCone(self.Owner:GetShootPos(),self.Owner:GetAimVector(),40,1)
+	end
 	
 	table.RemoveByValue( coneents, self.Owner )
 	

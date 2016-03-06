@@ -32,7 +32,7 @@ SWEP.Primary.Delay			= 0.09 --1/(666/60)
 SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul 				= 0.5
+SWEP.RecoilMul 				= 0.75
 SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 1.5
 SWEP.HeatMul				= 1
@@ -50,7 +50,9 @@ SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
 SWEP.HasDownRecoil			= false
 
-SWEP.BurstConeMul			= 1
+SWEP.BurstConeMul			= 0.75
+SWEP.BurstHeatMul			= 0.1
+SWEP.BurstRecoilMul			= 0.5
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true

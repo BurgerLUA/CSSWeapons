@@ -139,6 +139,7 @@ SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
 SWEP.HasDownRecoil			= false
+SWEP.HasDryFire				= true
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true
@@ -157,9 +158,10 @@ SWEP.ReloadSound 			= nil
 SWEP.BurstSound				= nil
 SWEP.BurstSpeedOverride 	= 1
 SWEP.BurstConeMul			= 1
+SWEP.BurstHeatMul			= 1
+SWEP.BurstZoomMul			= 1
+SWEP.BurstRecoilMul			= 1
 SWEP.BurstOverride			= 3
-
-
 
 --Deprecated?
 SWEP.IgnoreZoomSlow			= false
@@ -399,7 +401,14 @@ function SWEP:SetZoomed(shouldzoom)
 	if shouldzoom then
 		if game.SinglePlayer() then
 			if self.Owner:IsPlayer() then
-				self.Owner:SetFOV( GetConVar("fov_desired"):GetFloat() / (1 + self.ZoomAmount), 0.1 )
+			
+				local ZoomAmount = self.ZoomAmount
+				
+				if self.HasBurstFire and self:GetIsBurst() then
+					ZoomAmount = ZoomAmount * self.BurstZoomMul
+				end
+			
+				self.Owner:SetFOV( GetConVar("fov_desired"):GetFloat() / (1 + ZoomAmount), 0.1 )
 			end
 		else
 			self.IsZoomed = true
@@ -428,11 +437,15 @@ function SWEP:PrimaryAttack()
 	if self:GetIsReloading() and self:GetIsShotgunReload() then
 		self:FinishShotgunReload()
 	end
-	
-	if not self:CanPrimaryAttack() then return end
+
+	if not self:CanPrimaryAttack() then	return end
 	if self:IsBusy() then return end
 	if self:IsUsing() then return end
 	if self.WeaponType == "Throwable" then self:PreThrowObject() return end
+	
+	
+	
+	
 	
 	self:TakePrimaryAmmo(1)
 	
@@ -441,19 +454,14 @@ function SWEP:PrimaryAttack()
 	self:HandleBurstDelay() -- don't predict
 	self:WeaponAnimation() -- don't predict, has animations
 	
-	--print(self.Primary.Damage)
-	
-	--[[
-	if (CLIENT or game.SinglePlayer()) then 
-		self:AddRecoil() -- Predict
-	end
-	--]]
+	self.Weapon:MuzzleFlash()
+	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	
 	if (IsFirstTimePredicted() or game.SinglePlayer()) then
 	
 		self:AfterZoom() -- Predict
 		self:PreShootBullet() -- Predict
-		self:WeaponSound()
+		self:WeaponSound() -- Predict
 		
 		if (CLIENT or game.SinglePlayer()) then 
 			self:AddRecoil() -- Predict
@@ -556,13 +564,19 @@ function SWEP:WeaponAnimation()
 	end
 	
 	if self:GetIsSilenced() then
-		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK_SILENCED)
+		if self:Clip1() == 0 and self.HasDryFire then
+			self:SendWeaponAnim(ACT_VM_DRYFIRE_SILENCED)
+		else
+			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK_SILENCED)
+		end
+		
 	else
-		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+		if self:Clip1() == 0 and self.HasDryFire then
+			self:SendWeaponAnim(ACT_VM_DRYFIRE)
+		else
+			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+		end
 	end
-
-	self.Weapon:MuzzleFlash()
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
 
 end
 
@@ -638,6 +652,11 @@ function SWEP:AddRecoil()
  
 	local UpPunch = -self:GetRecoilMath()
 	local SidePunch = 0
+	
+	if self.HasBurstFire and self:GetIsBurst() then
+		UpPunch = UpPunch*self.BurstRecoilMul
+	end
+	
 
 	local Math = math.abs(self.PunchAngleUp.p*3)
 	
@@ -789,7 +808,15 @@ end
 function SWEP:TranslateFOV(fov)
 
 	if not game.SinglePlayer() then
-		local ZoomMag = 1 + ( self.ZoomMod * self.ZoomAmount )
+	
+		local ZoomAmount = self.ZoomAmount
+	
+		if self.HasBurstFire and self:GetIsBurst() then
+			ZoomAmount = ZoomAmount*self.BurstZoomMul
+		end
+		
+		local ZoomMag = 1 + ( self.ZoomMod * ZoomAmount )
+		
 		fov = GetConVar("fov_desired"):GetFloat() / ZoomMag
 	end
 	
@@ -806,7 +833,11 @@ function SWEP:CanPrimaryAttack()
 			return false 
 		end
 	elseif self:Clip1() <= 0 then
-		self.Owner:EmitSound("weapons/clipempty_pistol.wav")
+	
+		if (IsFirstTimePredicted() or game.SinglePlayer()) then
+			self:EmitGunSound("weapons/clipempty_pistol.wav")
+		end
+
 		self:SetNextPrimaryFire(CurTime() + 0.25)
 		return false
 	end
@@ -819,9 +850,16 @@ function SWEP:AddHeat(Damage,Shots)
 
 	local DamageMod = Damage*Shots*0.01
 	local ConeMod = (math.max(0.001,self.Primary.Cone)^-0.1)
-	local WeightMod = (self.MoveSpeed / 250)	
+	local WeightMod = (self.MoveSpeed / 250 )
+	local BurstMod = 1
+	
+	if self.HasBurstFire and self:GetIsBurst() then
+		BurstMod = self.BurstHeatMul
+	end
 
-	self:SetCoolDown( self:GetCoolDown() + DamageMod*ConeMod*WeightMod*GetConVarNumber("sv_css_heat_scale") )
+	
+	
+	self:SetCoolDown( self:GetCoolDown() + DamageMod*ConeMod*WeightMod*GetConVarNumber("sv_css_heat_scale")*BurstMod )
 	self:SetCoolTime( CurTime() + self.Primary.Delay + 0.1*GetConVarNumber("sv_css_cooltime_scale") )
 	
 end
@@ -1324,7 +1362,7 @@ function SWEP:RemoveRecoil()
 	local yDown = self:HandleLimits(self.PunchAngleDown.y)
 	local rDown = self:HandleLimits(self.PunchAngleDown.r)
 
-	local FrameMul = 0.3
+	local FrameMul = 0.25
 	local UpMul = 1 * FrameMul
 	local DownMul = 0.75 * FrameMul
 	
@@ -1446,16 +1484,25 @@ function SWEP:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
 	
 	local WRound = math.floor(width/2)
 	local LRound = math.floor(length/2)
-	
 	local FinalCone = math.floor(math.Max(StoredCrosshair,WRound*2,LRound/2))
 
-	surface.SetDrawColor(r,g,b,a)
+	
 	
 	local Max = 0
 	
 	if GetConVarNumber("cl_css_crosshair_dot") >= 1 then
 		Max = math.max(1,width)
+		
+		surface.SetDrawColor(Color(0,0,0,255))
+		surface.DrawRect( XRound - math.floor(Max*0.5) - 1, YRound -  math.floor(Max*0.5) - 1 , Max+2, Max+2 )
+		
+		surface.SetDrawColor(r,g,b,a)
 		surface.DrawRect( XRound - math.floor(Max*0.5), YRound -  math.floor(Max*0.5) , Max, Max )
+		
+
+		
+		
+		
 	end
 	
 
@@ -1493,14 +1540,38 @@ function SWEP:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
 			local x2 = XRound - FinalCone - LRound*2
 			local y3 = YRound + FinalCone + LRound*2
 			local y4 = YRound - FinalCone - LRound*2
-
-			surface.DrawLine( x1, YRound, XRound+FinalCone, YRound )
 			
+			local Offset = 1
+
+			surface.SetDrawColor(Color(0,0,0,255))
+			
+			local ShadowWidth = 3
+			local ShadowLength = LRound*2 + Offset*3
+			
+
+			
+			surface.DrawRect( x1 - LRound*2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
+			
+			surface.DrawRect( x2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
+			
+			surface.DrawRect( XRound - Offset, y3 - LRound*2 - 1 , ShadowWidth, ShadowLength )
+			
+			surface.DrawRect( XRound - Offset, y4 - 1 , ShadowWidth, ShadowLength )
+			
+			
+			surface.SetDrawColor(r,g,b,a)
+			
+			surface.DrawLine( x1, YRound, XRound+FinalCone, YRound )
+
 			surface.DrawLine( x2, YRound, XRound-FinalCone, YRound )
 			
 			surface.DrawLine( XRound, y3, XRound, YRound+FinalCone )
 			
+			
 			surface.DrawLine( XRound, y4, XRound, YRound-FinalCone )
+
+			
+			
 			
 		end
 	
@@ -1528,18 +1599,23 @@ function SWEP:DrawCustomScope(x,y,r,g,b,a)
 	surface.DrawTexturedRectRotated(x/2 - y/4,y/2 + y/4,y/2 + space,y/2 + space,90-180-180)
 	surface.DrawTexturedRectRotated(x/2 + y/4,y/2 + y/4,y/2 + space,y/2 + space,180-180-180)
 	surface.DrawTexturedRectRotated(x/2 + y/4,y/2 - y/4,y/2 + space,y/2 + space,270-180-180)
-	
+
 	if self.ZoomAmount > 6 then
 		surface.DrawLine(x/2,0,x/2,y)
 		surface.DrawLine(0,y/2,x,y/2)
 		
-		if Cone > 0.1 then
+		local size = math.Clamp(Cone,6,x/2*0.33)
+		
+		if size > 6 then
 			surface.DrawCircle( x/2, y/2, math.Clamp(Cone,3,x/2*0.33), Color(r,g,b,a) )
 		end	
 		
 	else
 		surface.DrawCircle( x/2, y/2, 6, Color(255,0,0,50))
-		surface.DrawCircle( x/2, y/2, math.Clamp(Cone,0,x/2*0.33), Color(r,g,b,255) )
+		
+		local size = math.Clamp(Cone,6,x/2*0.33)
+		
+		surface.DrawCircle( x/2, y/2, size, Color(r,g,b,255) )
 	end
 
 	surface.SetDrawColor(Color(0,0,0))

@@ -51,6 +51,7 @@ SWEP.HasSideRecoil			= false
 SWEP.HasDownRecoil			= false
 
 SWEP.BurstConeMul			= 1.5
+SWEP.BurstHeatMul			= 0.5
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true

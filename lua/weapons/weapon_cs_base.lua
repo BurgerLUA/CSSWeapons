@@ -383,8 +383,9 @@ function SWEP:Deploy()
 		self:SendWeaponAnim(ACT_VM_DRAW)
 	end
 
+	
 	if self.WeaponType ~= "Throwable" then
-		self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+		self:SetNextPrimaryFire(CurTime() + math.min(self.Owner:GetViewModel():SequenceDuration(),2) )
 	end
 	
 	return true
@@ -442,11 +443,7 @@ function SWEP:PrimaryAttack()
 	if self:IsBusy() then return end
 	if self:IsUsing() then return end
 	if self.WeaponType == "Throwable" then self:PreThrowObject() return end
-	
-	
-	
-	
-	
+
 	self:TakePrimaryAmmo(1)
 	
 	self:AfterPump() -- don't predict, has animations
@@ -883,7 +880,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 		bullet.Tracer	= 0
 	end
 	
-	if self:GetClass() == "weapon_cs_ar2" then
+	if self.Primary.Ammo == "ar2" then
 		bullet.TracerName = "AR2Tracer"
 	else
 		bullet.TracerName = "Tracer"

@@ -385,7 +385,7 @@ function SWEP:Deploy()
 
 	
 	if self.WeaponType ~= "Throwable" then
-		self:SetNextPrimaryFire(CurTime() + math.min(self.Owner:GetViewModel():SequenceDuration(),2) )
+		self:SetNextPrimaryFire(CurTime() + math.Clamp(self.Owner:GetViewModel():SequenceDuration(),0.1,1) )
 	end
 	
 	return true

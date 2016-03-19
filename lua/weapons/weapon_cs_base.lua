@@ -183,6 +183,8 @@ SWEP.Secondary.ClipSize 	= -1
 SWEP.Secondary.DefaultClip 	= -1
 SWEP.Secondary.Automatic	= false
 
+SWEP.HasDual				= false
+
 -- Stored Data, like datatables
 SWEP.AlreadyGiven			= false
 SWEP.SpecialThrow 			= false
@@ -204,6 +206,8 @@ SWEP.VModelFOV				= 47
 SWEP.CSMuzzleFlashes 		= true
 SWEP.CSMuzzleX				= false
 
+SWEP.TracerOverride			= 1
+SWEP.EnableTracer			= true
 
 if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleUp = Angle(0,0,0)
@@ -248,6 +252,9 @@ function SWEP:SetupDataTables( )
 	self:SetIsSilenced( false )
 	self:NetworkVar("Bool",4,"IsNormalReload")
 	self:SetIsNormalReload( false )
+	self:NetworkVar("Bool",5,"IsLeftFire")
+	self:SetIsLeftFire( false )
+	
 
 end
 
@@ -440,18 +447,26 @@ function SWEP:PrimaryAttack()
 	end
 
 	if not self:CanPrimaryAttack() then	return end
-	if self:IsBusy() then return end
-	if self:IsUsing() then return end
-	if self.WeaponType == "Throwable" then self:PreThrowObject() return end
-
+	if not self:CanShoot() then return end
 	self:TakePrimaryAmmo(1)
 	
 	self:AfterPump() -- don't predict, has animations
 	self:WeaponDelay() -- don't predict, has delay
 	self:HandleBurstDelay() -- don't predict
-	self:WeaponAnimation() -- don't predict, has animations
 	
-	self.Weapon:MuzzleFlash()
+	if self.HasDual then
+		if self:GetIsLeftFire() then
+			self:WeaponAnimation(self:Clip1(),ACT_VM_SECONDARYATTACK)
+			self:SetIsLeftFire(false)
+		else
+			self:WeaponAnimation(self:Clip1(),ACT_VM_PRIMARYATTACK)
+			self:SetIsLeftFire(true)
+		end
+	else
+		self:WeaponAnimation(self:Clip1(),ACT_VM_PRIMARYATTACK)
+	end
+
+	--self.Weapon:MuzzleFlash()
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	
 	if (IsFirstTimePredicted() or game.SinglePlayer()) then
@@ -466,6 +481,13 @@ function SWEP:PrimaryAttack()
 		
 	end
 
+end
+
+function SWEP:CanShoot()
+	if self:IsBusy() then return false end
+	if self:IsUsing() then return false end
+	if self.WeaponType == "Throwable" then self:PreThrowObject() return false end
+	return true
 end
 
 function SWEP:HandleReloadCancel()
@@ -511,7 +533,6 @@ function SWEP:WeaponDelay()
 	if self.HasBoltAction then
 		self.BoltDelay = CurTime() + self.Primary.Delay
 	end
-	
 
 	if self.HasBurstFire then
 		if self:GetIsBurst() then
@@ -549,11 +570,11 @@ function SWEP:PreShootBullet() -- Should be predicted
 		Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
 	end
 	
-	self:ShootBullet(Damage,Shots,Cone,Source,Direction,true)
+	self:ShootBullet(Damage,Shots,Cone,Source,Direction,self.EnableTracer)
 	self:AddHeat(Damage,Shots)
 end
 
-function SWEP:WeaponAnimation()
+function SWEP:WeaponAnimation(clip,animation)
 
 	if self:GetIsShotgunReload() then
 		self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
@@ -561,17 +582,16 @@ function SWEP:WeaponAnimation()
 	end
 	
 	if self:GetIsSilenced() then
-		if self:Clip1() == 0 and self.HasDryFire then
+		if clip == 0 and self.HasDryFire then
 			self:SendWeaponAnim(ACT_VM_DRYFIRE_SILENCED)
 		else
 			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK_SILENCED)
 		end
-		
 	else
-		if self:Clip1() == 0 and self.HasDryFire then
+		if clip == 0 and self.HasDryFire then
 			self:SendWeaponAnim(ACT_VM_DRYFIRE)
 		else
-			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+			self:SendWeaponAnim(animation)
 		end
 	end
 
@@ -701,7 +721,6 @@ function SWEP:SecondaryAttack()
 				self:Silencer()
 			end
 		else
-		
 			if self.HasIronSights and GetConVar("sv_css_enable_ironsights"):GetFloat() == 0 then
 				if self.HasBurstFire then
 					self:SwitchFireMode()
@@ -713,7 +732,6 @@ function SWEP:SecondaryAttack()
 					self:HandleZoom(1)
 				end
 			end
-			
 		end
 	end
 
@@ -857,7 +875,9 @@ function SWEP:AddHeat(Damage,Shots)
 	
 	
 	self:SetCoolDown( self:GetCoolDown() + DamageMod*ConeMod*WeightMod*GetConVarNumber("sv_css_heat_scale")*BurstMod )
-	self:SetCoolTime( CurTime() + self.Primary.Delay + 0.1*GetConVarNumber("sv_css_cooltime_scale") )
+	
+	self:SetCoolTime( CurTime() + (self.Primary.Delay + 0.1)*GetConVarNumber("sv_css_cooltime_scale") )
+
 	
 end
 
@@ -875,9 +895,9 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	bullet.HullSize = 512
 	
 	if EnableTracer then
-		bullet.Tracer	= 1
+		bullet.Tracer = self.TracerOverride
 	else
-		bullet.Tracer	= 0
+		bullet.Tracer = 0
 	end
 	
 	if self.Primary.Ammo == "ar2" then
@@ -1219,9 +1239,9 @@ function SWEP:HandleBurstFireShoot()
 			self:SetBulletQueue(self:GetBulletQueue() - 1)
 
 			if self:Clip1() > 0 then
+			
 				self:TakePrimaryAmmo(1)
-				self:WeaponAnimation()
-				
+				self:WeaponAnimation(self:Clip1(),ACT_VM_PRIMARYATTACK)
 				
 				if (IsFirstTimePredicted() or game.SinglePlayer()) then
 					self:PreShootBullet()
@@ -1229,8 +1249,8 @@ function SWEP:HandleBurstFireShoot()
 					if (CLIENT or game.SinglePlayer()) then 
 						self:AddRecoil()
 					end
-				
 				end
+				
 			end
 			
 		end

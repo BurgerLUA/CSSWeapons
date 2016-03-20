@@ -210,6 +210,8 @@ SWEP.CSMuzzleX				= false
 SWEP.TracerOverride			= 1
 SWEP.EnableTracer			= true
 
+SWEP.DisableReloadUntilEmpty = false
+
 if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleUp = Angle(0,0,0)
 	SWEP.PunchAngleDown = Angle(0,0,0)
@@ -1075,6 +1077,7 @@ function SWEP:Reload()
 	if self:Clip1() >= self.Primary.ClipSize then return end
 	if self:GetNextPrimaryFire() > CurTime() then return end
 	if self.WeaponType == "Throwable" then return end
+	if (self:Clip1() > 0 and self.DisableReloadUntilEmpty) then return end
 	if self.Owner:GetAmmoCount(self:GetPrimaryAmmoType()) == 0 	then
 		if self.Owner:IsBot() then
 			self.Owner:GiveAmmo(self.Primary.ClipSize,self.Primary.Ammo,true)

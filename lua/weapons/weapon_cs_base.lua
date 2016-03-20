@@ -131,6 +131,7 @@ SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
 SWEP.HasCrosshair 			= true
 SWEP.HasCSSZoom 			= false
+SWEP.HasSpecialFire			= false
 
 SWEP.HasPumpAction 			= false
 SWEP.HasBoltAction 			= false
@@ -139,7 +140,7 @@ SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
 SWEP.HasDownRecoil			= false
-SWEP.HasDryFire				= true
+SWEP.HasDryFire				= false
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true
@@ -715,14 +716,18 @@ function SWEP:SecondaryAttack()
 	
 	if (IsFirstTimePredicted() or game.SinglePlayer()) then
 		if self:IsUsing() then
-			if self.HasBurstFire then
+			if self.HasSpecialFire then
+				self:SpecialFire()
+			elseif self.HasBurstFire then
 				self:SwitchFireMode()
 			elseif self.HasSilencer then
 				self:Silencer()
 			end
 		else
 			if self.HasIronSights and GetConVar("sv_css_enable_ironsights"):GetFloat() == 0 then
-				if self.HasBurstFire then
+				if self.HasSpecialFire then
+					self:SpecialFire()
+				elseif self.HasBurstFire then
 					self:SwitchFireMode()
 				elseif self.HasSilencer then
 					self:Silencer()
@@ -734,6 +739,11 @@ function SWEP:SecondaryAttack()
 			end
 		end
 	end
+
+end
+
+function SWEP:SpecialFire()
+
 
 end
 
@@ -1659,6 +1669,7 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 		local Cone = math.Round((self.Primary.Cone * GetConVarNumber("sv_css_cone_scale")) * (360/1),2)
 		local Recoil = math.Round(self:GetRecoilMath() * 0.25,2)
 		local KillTime = math.Round((math.ceil(100/Damage) - 1) * (self.Primary.Delay),2)
+		local MissKillTime = math.Round( ( (math.ceil(100/Damage) - 1) * (self.Primary.Delay) ) + self.Primary.Delay,2)
 		local DamageFalloff =  math.floor( (self.DamageFalloff  / 64) * 1.22 ) * 2
 		
 		local str
@@ -1673,6 +1684,7 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 		str = str .. title_color .. "Recoil:</color> "..text_color.. Recoil .. " degrees" .."</color>\n" 
 		str = str .. title_color .. "Inaccuracy:</color> "..text_color.. Cone .. " degrees" .. "</color>\n"
 		str = str .. title_color .. "Kill Time:</color> "..text_color.. KillTime .. " seconds" .. "</color>\n"
+		str = str .. title_color .. "Miss Kill Time:</color> "..text_color.. MissKillTime .. " seconds" .. "</color>\n"
 		str = str .. "</font>"
 		
 		self.InfoMarkup = markup.Parse( str, 250 )

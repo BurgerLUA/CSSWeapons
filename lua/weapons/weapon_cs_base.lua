@@ -112,6 +112,8 @@ SWEP.WorldModel				= "models/weapons/w_rif_ak47.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
 
+SWEP.AddFOV					= 0
+
 SWEP.Primary.Damage			= 36
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
@@ -150,6 +152,8 @@ SWEP.IronSightsPos 			= Vector(-3, 20, 0)
 SWEP.IronSightsAng 			= Vector(1.25, 1, 0)
 
 SWEP.DamageFalloff			= 1000000
+
+SWEP.IgnoreDrawDelay		= false
 
 -- End of base stats
 
@@ -270,9 +274,7 @@ function SWEP:Initialize()
 			self.Owner:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_PERFECT )
 		end
 	end
-	
-	
-	
+
 	if self.Primary.Sound then
 		util.PrecacheSound(self.Primary.Sound)
 	end
@@ -381,7 +383,6 @@ function SWEP:Deploy()
 	self.Owner:DrawViewModel(true)
 
 	if self.HasSilencer then
-	
 		if self:GetIsSilenced() then
 			self:SendWeaponAnim(ACT_VM_DRAW_SILENCED)
 			self.WorldModel = self.WorldModel2
@@ -395,7 +396,10 @@ function SWEP:Deploy()
 
 	
 	if self.WeaponType ~= "Throwable" then
-		self:SetNextPrimaryFire(CurTime() + math.Clamp(self.Owner:GetViewModel():SequenceDuration(),0.1,1) )
+		if not self.IgnoreDrawDelay then
+			print("IGNORED")
+			self:SetNextPrimaryFire(CurTime() + math.Clamp(self.Owner:GetViewModel():SequenceDuration(),0.1,1) )
+		end
 	end
 	
 	return true
@@ -800,10 +804,10 @@ function SWEP:HandleZoom(delay)
 
 	if not (IsFirstTimePredicted() or game.SinglePlayer()) then return end
 	if not self:CanBoltZoom() then return end
-	if self:IsBusy() then return end
+	--if self:IsBusy() then return end
 	
 	if self.HasScope then
-		self:EmitGunSound("weapons/zoom.wav",0.01)
+		self.Owner:EmitSound("weapons/zoom.wav",0.01)
 	end
 
 	if self:GetZoomed() then
@@ -862,7 +866,7 @@ function SWEP:CanPrimaryAttack()
 	elseif self:Clip1() <= 0 then
 	
 		if (IsFirstTimePredicted() or game.SinglePlayer()) then
-			self:EmitGunSound("weapons/clipempty_pistol.wav")
+			self.Owner:EmitSound("weapons/clipempty_pistol.wav")
 		end
 
 		self:SetNextPrimaryFire(CurTime() + 0.25)
@@ -1166,8 +1170,8 @@ function SWEP:GetViewModelPosition( pos, ang )
 		self.fIronTime = CurTime()
 		
 		if ( bIron ) then 
-			self.SwayScale 	= 0.5
-			self.BobScale 	= 0.5
+			self.SwayScale 	= 0.1
+			self.BobScale 	= 0.1
 		else 
 			self.SwayScale 	= 1
 			self.BobScale 	= 1
@@ -1232,7 +1236,7 @@ function SWEP:Think()
 	
 	
 	if (CLIENT or game.SinglePlayer()) then
-		self.ViewModelFOV = GetConVarNumber("cl_css_viewmodel_fov")
+		self.ViewModelFOV = GetConVarNumber("cl_css_viewmodel_fov") + self.AddFOV	
 		self:HandleBoltZoomMod()
 		self:HandleZoomMod()
 		
@@ -1286,6 +1290,8 @@ function SWEP:HandleReloadThink()
 				self.Owner:RemoveAmmo(self.Owner:GetAmmoCount(self.Primary.Ammo),self.Primary.Ammo)
 			end
 
+			--self:SendWeaponAnim(ACT_VM_IDLE)
+			
 			self:SetIsNormalReload(false)
 			self:SetIsReloading(false)
 			
@@ -1484,9 +1490,7 @@ function SWEP:DrawHUD()
 	end
 
 	if self.HasCrosshair or (self.Owner:IsPlayer() and self.Owner:IsBot()) then
-		if !self:GetZoomed() or self.EnableIronCross then
-			self:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
-		end
+		self:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
 	end
 
 	if self.HasScope then
@@ -1528,94 +1532,97 @@ function SWEP:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
 		
 		surface.SetDrawColor(r,g,b,a)
 		surface.DrawRect( XRound - math.floor(Max*0.5), YRound -  math.floor(Max*0.5) , Max, Max )
-		
-
-		
-		
-		
 	end
 	
-
-	if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
-
-		if width > 1 then
-		
-			local x1 = XRound - WRound 
-			local x2 = XRound - WRound
-			local y3 = YRound - WRound
-			local y4 = YRound - WRound
-			
-			-------- Position --- Length --- Spacing
-			local y1 = YRound + math.max(FinalCone,0) -- red
-			local y2 = YRound - (LRound*2) - math.max(FinalCone,0) -- white
-			
-			local x3 = XRound + math.max(FinalCone,0) -- blue
-			local x4 = XRound - (LRound*2) - math.max(FinalCone,0) -- black
-		
-			--surface.SetDrawColor(255,0,0,255) --red
-			surface.DrawRect( x1, y1, WRound*2, LRound*2 )
-			
-			--surface.SetDrawColor(255,255,255,255) --white
-			surface.DrawRect( x2, y2, WRound*2, LRound*2 )
-			
-			--surface.SetDrawColor(0,0,255,255) -- blue
-			surface.DrawRect( x3, y3, LRound*2, WRound*2 )
-			
-			--surface.SetDrawColor(0,0,0,255) -- black
-			surface.DrawRect( x4, y4, LRound*2, WRound*2 )
 	
-		else
+	if !self:GetZoomed() or self.EnableIronCross then
+
+		if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
+
+			if width > 1 then
+			
+				local x1 = XRound - WRound 
+				local x2 = XRound - WRound
+				local y3 = YRound - WRound
+				local y4 = YRound - WRound
+				
+				-------- Position --- Length --- Spacing
+				local y1 = YRound + math.max(FinalCone,0) -- red
+				local y2 = YRound - (LRound*2) - math.max(FinalCone,0) -- white
+				
+				local x3 = XRound + math.max(FinalCone,0) -- blue
+				local x4 = XRound - (LRound*2) - math.max(FinalCone,0) -- black
+			
+				--surface.SetDrawColor(255,0,0,255) --red
+				surface.DrawRect( x1, y1, WRound*2, LRound*2 )
+				
+				--surface.SetDrawColor(255,255,255,255) --white
+				surface.DrawRect( x2, y2, WRound*2, LRound*2 )
+				
+				--surface.SetDrawColor(0,0,255,255) -- blue
+				surface.DrawRect( x3, y3, LRound*2, WRound*2 )
+				
+				--surface.SetDrawColor(0,0,0,255) -- black
+				surface.DrawRect( x4, y4, LRound*2, WRound*2 )
 		
-			local x1 = XRound + FinalCone + LRound*2
-			local x2 = XRound - FinalCone - LRound*2
-			local y3 = YRound + FinalCone + LRound*2
-			local y4 = YRound - FinalCone - LRound*2
+			else
 			
-			local Offset = 1
+				local x1 = XRound + FinalCone + LRound*2
+				local x2 = XRound - FinalCone - LRound*2
+				local y3 = YRound + FinalCone + LRound*2
+				local y4 = YRound - FinalCone - LRound*2
+				
+				local Offset = 1
 
-			surface.SetDrawColor(Color(0,0,0,255))
-			
-			local ShadowWidth = 3
-			local ShadowLength = LRound*2 + Offset*3
-			
+				surface.SetDrawColor(Color(0,0,0,255))
+				
+				local ShadowWidth = 3
+				local ShadowLength = LRound*2 + Offset*3
+				
 
-			
-			surface.DrawRect( x1 - LRound*2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
-			
-			surface.DrawRect( x2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
-			
-			surface.DrawRect( XRound - Offset, y3 - LRound*2 - 1 , ShadowWidth, ShadowLength )
-			
-			surface.DrawRect( XRound - Offset, y4 - 1 , ShadowWidth, ShadowLength )
-			
-			
-			surface.SetDrawColor(r,g,b,a)
-			
-			surface.DrawLine( x1, YRound, XRound+FinalCone, YRound )
+				
+				surface.DrawRect( x1 - LRound*2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
+				
+				surface.DrawRect( x2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
+				
+				surface.DrawRect( XRound - Offset, y3 - LRound*2 - 1 , ShadowWidth, ShadowLength )
+				
+				surface.DrawRect( XRound - Offset, y4 - 1 , ShadowWidth, ShadowLength )
+				
+				
+				surface.SetDrawColor(r,g,b,a)
+				
+				surface.DrawLine( x1, YRound, XRound+FinalCone, YRound )
 
-			surface.DrawLine( x2, YRound, XRound-FinalCone, YRound )
-			
-			surface.DrawLine( XRound, y3, XRound, YRound+FinalCone )
-			
-			
-			surface.DrawLine( XRound, y4, XRound, YRound-FinalCone )
+				surface.DrawLine( x2, YRound, XRound-FinalCone, YRound )
+				
+				surface.DrawLine( XRound, y3, XRound, YRound+FinalCone )
+				
+				
+				surface.DrawLine( XRound, y4, XRound, YRound-FinalCone )
 
-			
-			
-			
+				
+				
+				
+			end
+		
 		end
-	
+		
+		if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
+			if GetConVarNumber("cl_css_crosshair_style") == 4 then
+				surface.DrawCircle(x/2,y/2, FinalCone + length, Color(r,g,b,a))
+			elseif GetConVarNumber("cl_css_crosshair_style") == 3 then
+				surface.DrawCircle(x/2,y/2, FinalCone + length/2, Color(r,g,b,a))
+			else
+				surface.DrawCircle(x/2,y/2, FinalCone, Color(r,g,b,a))
+			end
+		end
+		
+	elseif not self.EnableIronCross and self:GetZoomed() then
+		surface.DrawCircle(x/2,y/2, FinalCone, Color(r,g,b,a*0.125))
 	end
 
-	if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
-		if GetConVarNumber("cl_css_crosshair_style") == 4 then
-			surface.DrawCircle(x/2,y/2, FinalCone + length, Color(r,g,b,a))
-		elseif GetConVarNumber("cl_css_crosshair_style") == 3 then
-			surface.DrawCircle(x/2,y/2, FinalCone + length/2, Color(r,g,b,a))
-		else
-			surface.DrawCircle(x/2,y/2, FinalCone, Color(r,g,b,a))
-		end
-	end
+	
 
 end
 
@@ -1848,6 +1855,121 @@ end
 
 function SWEP:QuickKnife()
 
+end
+
+function SWEP:Swing(damage)
+
+	if not IsFirstTimePredicted() then return end
+	
+	local trace = self.Owner:GetEyeTrace() 
+	
+	if trace.Hit and trace.StartPos:Distance(trace.HitPos) < 40 and not (trace.Entity:IsPlayer() or trace.Entity:IsNPC()) then
+		self:StabEffect(trace.StartPos,trace.HitPos,trace.SurfaceProps,trace.Entity)
+	end
+	
+	if CLIENT then return end
+	
+	local Length = self.Owner:GetVelocity():Length()*0.25
+	
+	local coneents = {self.Owner}
+	coneents = ents.FindInCone(self.Owner:GetShootPos(),self.Owner:GetAimVector(),40 + Length,45)
+	
+	self.HitAThing = false
+	
+	for k,v in pairs(coneents) do
+		if self.HitAThing == false then
+			if v ~= self.Owner then
+				if v:IsPlayer() or v:IsNPC() then
+				
+					local Angle01 = self.Owner:GetAngles()
+					local Angle02 = v:GetAngles()
+					Angle01:Normalize()
+					Angle02:Normalize()
+				
+					local angle = math.abs(Angle01.y - Angle02.y)
+					
+					print(math.floor(Angle01.y),math.floor(Angle02.y),math.floor(angle))
+					
+					if angle < 45 or angle > (360-45) then
+						damage = damage * 10
+					end
+					
+					self.HitAThing = true
+					
+					self:StabDamage(damage,v)
+					
+					if damage <= 50 then
+						self:StabSound(v,"weapons/knife/knife_hit"..math.random(1,4)..".wav")
+					else
+						self:StabSound(v,"weapons/knife/knife_stab.wav")
+					end
+					
+					
+				end
+			end
+		end
+	end
+
+	if not self.HitAThing then
+		if trace.StartPos:Distance(trace.HitPos) < 40 then
+			self:StabSound(self.Owner,"weapons/knife/knife_hitwall1.wav")
+			if trace.Entity:IsValid() then
+				self:StabDamage(damage,trace.Entity)
+			end
+		else
+			self:StabSound(self.Owner,"weapons/knife/knife_slash1.wav")
+		end
+	end
+
+end
+
+function SWEP:StabEffect(StartPos,HitPos,SurfaceProp,HitEntity)
+	if HitEntity:IsPlayer() then return end
+	
+	local effect = EffectData()
+		effect:SetOrigin(HitPos)
+		effect:SetStart(StartPos)
+		effect:SetSurfaceProp(SurfaceProp)
+		effect:SetDamageType(DMG_SLASH)
+		
+	if CLIENT then
+		effect:SetEntity(HitEntity)
+	else
+		effect:SetEntIndex(HitEntity:EntIndex())
+	end
+		
+	util.Effect("Impact", effect)
+end
+
+function SWEP:StabSound(ent,sound)
+	net.Start("CSS_SendSoundDelay")
+		net.WriteEntity(ent)
+		net.WriteString(sound)
+	net.Broadcast()
+end
+
+if SERVER then
+	util.AddNetworkString( "CSS_SendSoundDelay" )
+end
+
+if CLIENT then
+	net.Receive("CSS_SendSoundDelay", function(len)
+		local GetEntity = net.ReadEntity()
+		local GetSound = Sound(net.ReadString())
+		GetEntity:EmitSound(GetSound)
+	end)
+end
+
+function SWEP:StabDamage(damage, entity)
+	local dmginfo = DamageInfo()
+		dmginfo:SetDamage( damage )
+		dmginfo:SetDamageType( DMG_SLASH )
+		dmginfo:SetAttacker( self.Owner )
+		dmginfo:SetInflictor( self )
+		dmginfo:SetDamageForce( self.Owner:GetForward()*100 )
+	if SERVER then
+		entity:TakeDamageInfo( dmginfo )
+	end
 end
 
 AccessorFunc(SWEP,"fNPCMinBurst","NPCMinBurst")

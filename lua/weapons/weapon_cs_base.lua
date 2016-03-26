@@ -397,7 +397,6 @@ function SWEP:Deploy()
 	
 	if self.WeaponType ~= "Throwable" then
 		if not self.IgnoreDrawDelay then
-			print("IGNORED")
 			self:SetNextPrimaryFire(CurTime() + math.Clamp(self.Owner:GetViewModel():SequenceDuration(),0.1,1) )
 		end
 	end
@@ -902,7 +901,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	if not IsFirstTimePredicted( ) then return end
 	
 	local bullet = {}
-	bullet.Damage	= Damage
+	bullet.Damage	= Damage * GetConVarNumber("sv_css_damage_scale")
 	bullet.Num		= Shots
 	bullet.Spread	= Vector(Cone, Cone, 0)
 	bullet.Src		= Source
@@ -926,6 +925,17 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	bullet.Callback = function( attacker, tr, dmginfo)
 		if attacker:IsPlayer() then
 		
+			local Weapon = attacker:GetActiveWeapon()
+
+			if Weapon and Weapon.DamageFalloff then
+				if Weapon.DamageFalloff > 0 then
+					local Distance = tr.StartPos:Distance(tr.HitPos)
+					local DamageMul = math.Clamp(GetConVarNumber("sv_css_damagefalloff_scale"),0,1)
+					local DFMod = (1 - DamageMul) + math.min(1, ( (Weapon.DamageFalloff) / Distance ))*DamageMul
+					dmginfo:ScaleDamage(DFMod)
+				end
+			end
+
 			if GetConVarNumber("sv_css_enable_penetration") == 1 then
 				self:WorldBulletSolution(tr.HitPos,Direction,Damage)
 			end
@@ -1899,9 +1909,9 @@ function SWEP:Swing(damage)
 					self:StabDamage(damage,v)
 					
 					if damage <= 50 then
-						self:StabSound(v,"weapons/knife/knife_hit"..math.random(1,4)..".wav")
+						self:StabSound(self.Owner,"weapons/knife/knife_hit"..math.random(1,4)..".wav")
 					else
-						self:StabSound(v,"weapons/knife/knife_stab.wav")
+						self:StabSound(self.Owner,"weapons/knife/knife_stab.wav")
 					end
 					
 					

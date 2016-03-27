@@ -382,16 +382,20 @@ function SWEP:Deploy()
 	
 	self.Owner:DrawViewModel(true)
 
-	if self.HasSilencer then
-		if self:GetIsSilenced() then
-			self:SendWeaponAnim(ACT_VM_DRAW_SILENCED)
-			self.WorldModel = self.WorldModel2
+	--print(self.IgnoreDrawDelay)
+	
+	if not self.IgnoreDrawDelay then
+		if self.HasSilencer then
+			if self:GetIsSilenced() then
+				self:SendWeaponAnim(ACT_VM_DRAW_SILENCED)
+				self.WorldModel = self.WorldModel2
+			else
+				self:SendWeaponAnim(ACT_VM_DRAW)
+				self.WorldModel = self.WorldModel1
+			end
 		else
 			self:SendWeaponAnim(ACT_VM_DRAW)
-			self.WorldModel = self.WorldModel1
 		end
-	else
-		self:SendWeaponAnim(ACT_VM_DRAW)
 	end
 
 	
@@ -404,6 +408,17 @@ function SWEP:Deploy()
 	return true
 	
 end
+
+function SWEP:SetDeploySpeed(speed)
+
+	if self.IgnoreDrawDelay then
+		speed = speed * 10
+	end
+	
+	return speed
+
+end
+
 
 function SWEP:Holster()
 	if self:IsBusy() then return false end

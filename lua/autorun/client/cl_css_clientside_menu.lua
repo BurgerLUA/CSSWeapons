@@ -6,7 +6,7 @@ function CSSClientsideWeaponSettings()
 
 	local MenuBase = vgui.Create("DFrame")
 		MenuBase:SetSize(ScrH()/2,ScrH()/2)
-		MenuBase:SetPos(0,0)
+		MenuBase:SetPos(ScrH()/4,ScrH()/4)
 		MenuBase:SetTitle("Counter Strike Source Client Settings")
 		MenuBase:SetDeleteOnClose(false)
 		MenuBase:SetDraggable( true )
@@ -184,3 +184,13 @@ function CSSClientsideWeaponSettings()
 end
 
 concommand.Add("cssplayersettings", CSSClientsideWeaponSettings)
+
+function CSS_ContextMenuOpen()
+
+	--CSSClientsideWeaponSettings()
+
+
+end
+
+hook.Add("ContextMenuOpen","CSS Context Menu",CSS_ContextMenuOpen)
+

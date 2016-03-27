@@ -67,7 +67,7 @@ function SWEP:SecondaryAttack()
 	self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
 	self:SetNextPrimaryFire(CurTime() + self.Secondary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Secondary.Delay)
-	self:Swing(self.Secondary.Damage)	
+	self:Swing(self.Primary.Damage * (65/25) )	
 end
 
 function SWEP:Reload()
@@ -83,64 +83,6 @@ function SWEP:Deploy()
 	
 	return true
 end
-
---[[
-
-function SWEP:QuickKnife()
-
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*1.5)
-	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay*1.5)
-	self:Swing(55)
-
-	timer.Simple(1, function()
-	
-		if not IsValid(self) then return end
-		if not IsValid(self.Owner) then return end
-		
-		if not self.Owner:GetActiveWeapon():GetClass() == "weapon_cs_knife" then return end
-
-		local foundp = false
-		local founds = false
-		
-		for k,v in pairs(self.Owner:GetWeapons()) do
-			if v:IsScripted() then
-				if foundp == false then
-					if weapons.GetStored(v:GetClass()).WeaponType == "Primary" then
-						self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
-						foundp = true
-					end
-				end
-			end
-		end
-		
-		if foundp == false then
-			for k,v in pairs(self.Owner:GetWeapons()) do
-				if v:IsScripted() then
-					if founds == false then
-						if weapons.GetStored(v:GetClass()).WeaponType == "Secondary" then
-							self.Owner:SelectWeapon(self.Owner:GetWeapons()[k]:GetClass() )
-							founds = true
-						end
-					end
-				end
-			end
-		end
-
-		if founds == false and foundp == false then
-			self.Owner:SelectWeapon(self.Owner:GetWeapons()[1]:GetClass() )
-		end
-	
-	end)
-
-end
-
---]]
-
-
-
-
-
 
 function GetActivities( ent )
   local k, v, t

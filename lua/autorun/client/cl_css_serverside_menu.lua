@@ -1,4 +1,3 @@
-
 surface.CreateFont("TitleFont", {size = 30, weight = 400, antialias = true, font = "Arial"})
 surface.CreateFont("SliderFont", {size = 15, weight = 400, antialias = true, font = "Arial"})
 surface.CreateFont("WarningFont", {size = 20, weight = 400, antialias = false, bold = true, outline = true, font = "Arial"})
@@ -18,7 +17,7 @@ local ItemTable = {}
 	ItemTable[count]["command"] = "sv_css_damage_scale"
 	ItemTable[count]["min"] = 0
 	ItemTable[count]["max"] = 10
-	ItemTable[count]["decimals"] = 1
+	ItemTable[count]["decimals"] = 2
 	ItemTable[count]["height"] = 40
 	count = count + 1
 	
@@ -27,8 +26,8 @@ local ItemTable = {}
 	ItemTable[count]["name"] = "Damage Falloff Multiplier (Higher means less damage at longer ranges)"
 	ItemTable[count]["command"] = "sv_css_damagefalloff_scale"
 	ItemTable[count]["min"] = 0
-	ItemTable[count]["max"] = 10
-	ItemTable[count]["decimals"] = 1
+	ItemTable[count]["max"] = 1
+	ItemTable[count]["decimals"] = 2
 	ItemTable[count]["height"] = 40
 	count = count + 1
 	
@@ -38,7 +37,7 @@ local ItemTable = {}
 	ItemTable[count]["command"] = "sv_css_recoil_scale"
 	ItemTable[count]["min"] = 0
 	ItemTable[count]["max"] = 10
-	ItemTable[count]["decimals"] = 1
+	ItemTable[count]["decimals"] = 2
 	ItemTable[count]["height"] = 40
 	count = count + 1
 	
@@ -48,7 +47,7 @@ local ItemTable = {}
 	ItemTable[count]["command"] = "sv_css_cone_scale"
 	ItemTable[count]["min"] = 0
 	ItemTable[count]["max"] = 10
-	ItemTable[count]["decimals"] = 1
+	ItemTable[count]["decimals"] = 2
 	ItemTable[count]["height"] = 40
 	count = count + 1
 	
@@ -58,7 +57,7 @@ local ItemTable = {}
 	ItemTable[count]["command"] = "sv_css_heat_scale"
 	ItemTable[count]["min"] = 0
 	ItemTable[count]["max"] = 10
-	ItemTable[count]["decimals"] = 1
+	ItemTable[count]["decimals"] = 2
 	ItemTable[count]["height"] = 40
 	count = count + 1
 	
@@ -68,7 +67,7 @@ local ItemTable = {}
 	ItemTable[count]["command"] = "sv_css_cooltime_scale"
 	ItemTable[count]["min"] = 0
 	ItemTable[count]["max"] = 10
-	ItemTable[count]["decimals"] = 1
+	ItemTable[count]["decimals"] = 2
 	ItemTable[count]["height"] = 40
 	count = count + 1
 	
@@ -78,7 +77,7 @@ local ItemTable = {}
 	ItemTable[count]["command"] = "sv_css_cooldown_scale"
 	ItemTable[count]["min"] = 0
 	ItemTable[count]["max"] = 10
-	ItemTable[count]["decimals"] = 1
+	ItemTable[count]["decimals"] = 2
 	ItemTable[count]["height"] = 40
 	count = count + 1
 	
@@ -88,7 +87,7 @@ local ItemTable = {}
 	ItemTable[count]["command"] = "sv_css_velcone_scale"
 	ItemTable[count]["min"] = 0
 	ItemTable[count]["max"] = 10
-	ItemTable[count]["decimals"] = 1
+	ItemTable[count]["decimals"] = 2
 	ItemTable[count]["height"] = 40
 	count = count + 1
 	
@@ -325,14 +324,6 @@ function CSSServersideWeaponSettings()
 			draw.RoundedBox( 8, 0, 0, MenuBase:GetWide(), MenuBase:GetTall(), Color( 0, 0, 0, 150 ) )
 		end
 		MenuBase:MakePopup()
-		
-	--[[
-	local MenuBar = vgui.Create("DMenuBar",MenuBase)
-		MenuBar:DockMargin( -3, -6, -3, 0 )
-		
-		local MenuBar_File = MenuBar:AddMenu( "File" )
-		MenuBar_File:AddOption( "Send", SendCommandsToServer ):SetIcon( "icon16/page_white_go.png" )
-	--]]
 	
 	local ScrollBar = vgui.Create( "DScrollPanel", MenuBase )
 		ScrollBar:SetSize( MenuBase:GetWide() - 50, MenuBase:GetTall() - 75 )
@@ -345,14 +336,9 @@ function CSSServersideWeaponSettings()
 		Base1.Paint = function()
 			draw.RoundedBox( 8, 0, 0, Base1:GetWide(), Base1:GetTall(), Color( 255, 255, 255, 255 ) )
 		end
-
-	----
-	----
-	----
 	
 	local DermaTitle = {}
 	local DermaObj = {}
-	
 	
 	local height = 0
 	
@@ -364,71 +350,35 @@ function CSSServersideWeaponSettings()
 		DermaObj[k] = vgui.Create(Table["type"],Base1)
 		DermaObj[k]:SetPos(5, height)
 		
-		
 		if Table["type"] == "Slider" then
 			DermaTitle[k] = vgui.Create("DLabel",Base1)
 			DermaTitle[k]:SetPos(25, height - 10)
 			DermaTitle[k]:SetFont("SliderFont")
 			DermaTitle[k]:SetColor(Color(0,0,0,255))
 			DermaTitle[k]:SetText( Table["name"] )
-			DermaTitle[k]:SizeToContents()
-			
-			
-			
-			--Located in Client, this is called when specific Derma Objects generate. Table["command"] is equal to a command like sv_css_recoil_scale
-			--CSSAskForCommand(Table["command"])
-			
-			
-			--print("DERMA:" .. CSSAskForCommand(Table["command"]))
-			
+			DermaTitle[k]:SizeToContents()			
 			DermaObj[k]:SetWide( Base1:GetWide() - 10 - 20 )
 			DermaObj[k]:SetValue(GetConVarNumber(Table["command"]))
 			DermaObj[k]:SetMin( Table["min"] ) -- Minimum number of the slider
 			DermaObj[k]:SetMax( Table["max"] ) -- Maximum number of the slider
 			DermaObj[k]:SetDecimals( Table["decimals"] ) -- Sets a decimal. Zero means it's a whole number
-			DermaObj[k]:SetConVar( Table["command"] ) -- Set the convar
-			
+			DermaObj[k]:SetConVar( Table["command"] ) -- Set the convar	
 		elseif Table["type"] == "DLabel" then
-		
 			DermaObj[k]:SetFont( Table["font"])
 			DermaObj[k]:SetColor(Color(0,0,0,255))
 			DermaObj[k]:SetText( Table["text"] )
 			DermaObj[k]:SizeToContents()
-			
 		elseif Table["type"] == "DCheckBoxLabel" then
-			
 			DermaObj[k]:SetText( Table["text"] )
 			DermaObj[k]:SetTextColor( Color(0, 0, 0, 255) )
 			DermaObj[k]:SizeToContents()
 			DermaObj[k]:SetPos(15, height)
-			
 			DermaObj[k]:SetConVar( Table["command"] )
-		
 		end
 		
 		height = height + Table["height"]
 
 	end
-	
-	--[[
-	function SendCommandsToServer()
-		for k,v in pairs(ItemTable) do
-			local Table = v
-			
-			local Value1 = DermaObj[k]:GetValue()
-			
-			local Command = Table["command"]
-			
-			if type(Value1) == "number" then
-				print(Command)
-				CSSNetCommandSend(Command,Value1)
-			end
-
-		end
-	end
-	--]]
-	
-	
 	
 end
 

@@ -51,6 +51,7 @@ CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
 CreateClientConVar("cl_css_crosshair_style", "1", true, true )
 CreateClientConVar("cl_css_crosshair_length", "15", true, true )
 CreateClientConVar("cl_css_crosshair_width", "1", true, true )
+
 CreateClientConVar("cl_css_crosshair_color_r", "50", true, true )
 CreateClientConVar("cl_css_crosshair_color_g", "255", true, true )
 CreateClientConVar("cl_css_crosshair_color_b", "50", true, true )
@@ -58,6 +59,10 @@ CreateClientConVar("cl_css_crosshair_color_a", "200", true, true )
 
 CreateClientConVar("cl_css_crosshair_dynamic", "1", true, true )
 CreateClientConVar("cl_css_crosshair_dot", "0", true, true )
+CreateClientConVar("cl_css_crosshair_shadow", "0", true, true )
+CreateClientConVar("cl_css_crosshair_smoothing", "1", true, true )
+CreateClientConVar("cl_css_crosshair_smoothing_mul", "1", true, true )
+CreateClientConVar("cl_css_crosshair_neversights", "0", true, true )
 
 game.AddAmmoType({name = "hegrenade", })
 game.AddAmmoType({name = "flashgrenade", })
@@ -168,6 +173,8 @@ SWEP.BurstZoomMul			= 1
 SWEP.BurstRecoilMul			= 1
 SWEP.BurstOverride			= 3
 
+SWEP.PenetrationLossScale	= 1
+
 --Deprecated?
 SWEP.IgnoreZoomSlow			= false
 
@@ -239,7 +246,6 @@ function SWEP:SetupDataTables( )
 	self:SetAttachDelay(0)
 	self:NetworkVar("Float",6,"BoltDelay")
 	self:SetBoltDelay(0)
-	
 	self:NetworkVar("Float",8,"NextBulletDelay")
 	self:SetNextBulletDelay(0)
 	
@@ -583,7 +589,7 @@ end
 function SWEP:PreShootBullet() -- Should be predicted
 	local Damage = self.Primary.Damage
 	local Shots = self.Primary.NumShots
-	local Cone = self:HandleCone(self.Primary.Cone)
+	local Cone = self:HandleCone(self.Primary.Cone,false)
 	local Source = self.Owner:GetShootPos()
 	local Direction = self.Owner:GetAimVector()
 	
@@ -591,7 +597,27 @@ function SWEP:PreShootBullet() -- Should be predicted
 		Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
 	end
 	
-	self:ShootBullet(Damage,Shots,Cone,Source,Direction,self.EnableTracer)
+	if Shots == 1 then
+		self:ShootBullet(Damage,Shots,Cone,Source,Direction,self.EnableTracer)
+	else
+		for i=1, Shots do
+		
+			math.randomseed( os.time() + i*math.random(-100,100) )
+			
+			local Multi01 = math.random(-100,100) / 100
+			local Multi02 = math.random(-100,100) / 100
+			local Multi03 = math.random(-100,100) / 100
+			
+			local RandAngle = Angle(Cone*Multi01*45,Cone*Multi02*45,Cone*Multi03*45)
+			local UselessVector, UsefulAngle = WorldToLocal(Vector(0,0,0), self.Owner:EyeAngles() , Vector(0,0,0), RandAngle )
+			local NewDirection = ( UsefulAngle + self.Owner:GetPunchAngle() ):Forward()
+
+			self:ShootBullet(Damage,1,0,Source,NewDirection,self.EnableTracer)
+			
+		end
+	end
+	
+	
 	self:AddHeat(Damage,Shots)
 end
 
@@ -645,7 +671,7 @@ function SWEP:WeaponSound()
 
 end
 
-function SWEP:HandleCone(Cone)
+function SWEP:HandleCone(Cone,IsCrosshair)
 
 	if self.HasBurstFire then
 		if self:GetIsBurst() then
@@ -666,7 +692,12 @@ function SWEP:HandleCone(Cone)
 	end
 
 	Cone = Cone * GetConVarNumber("sv_css_cone_scale")
-	Cone = Cone + (self:GetCoolDown()*self.HeatMul*0.01)
+	
+	if IsCrosshair then
+		Cone = Cone + (self.ClientCoolDown*self.HeatMul*0.01)
+	else
+		Cone = Cone + (self:GetCoolDown()*self.HeatMul*0.01)
+	end
 	
 	local VelConvar = self.VelConeMul * GetConVarNumber("sv_css_velcone_scale") * 0.0001
 	local VelCone = self.Owner:GetVelocity():Length() * VelConvar
@@ -891,6 +922,11 @@ function SWEP:CanPrimaryAttack()
 	
 end
 
+if CLIENT then
+	SWEP.ClientCoolDown = 0
+	SWEP.ClientCoolTime = 0
+end
+
 function SWEP:AddHeat(Damage,Shots)
 
 	local DamageMod = Damage*Shots*0.01
@@ -901,13 +937,17 @@ function SWEP:AddHeat(Damage,Shots)
 	if self.HasBurstFire and self:GetIsBurst() then
 		BurstMod = self.BurstHeatMul
 	end
-
 	
+	local CoolDown = DamageMod*ConeMod*WeightMod*GetConVarNumber("sv_css_heat_scale")*BurstMod
+	local CoolTime = CurTime() + (self.Primary.Delay + 0.1)*GetConVarNumber("sv_css_cooltime_scale")
 	
-	self:SetCoolDown( self:GetCoolDown() + DamageMod*ConeMod*WeightMod*GetConVarNumber("sv_css_heat_scale")*BurstMod )
+	self:SetCoolDown( self:GetCoolDown() + CoolDown )
+	self:SetCoolTime( CoolTime )
 	
-	self:SetCoolTime( CurTime() + (self.Primary.Delay + 0.1)*GetConVarNumber("sv_css_cooltime_scale") )
-
+	if CLIENT then
+		self.ClientCoolDown = self.ClientCoolDown + CoolDown
+		self.ClientCoolTime = CoolTime
+	end
 	
 end
 
@@ -922,7 +962,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	bullet.Src		= Source
 	bullet.Dir		= Direction
 	--bullet.Distance	= self.Primary.Range
-	bullet.HullSize = 512
+	bullet.HullSize = 0
 	
 	if EnableTracer then
 		bullet.Tracer = self.TracerOverride
@@ -938,6 +978,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	
 	bullet.Force	= nil
 	bullet.Callback = function( attacker, tr, dmginfo)
+	
 		if attacker:IsPlayer() then
 		
 			local Weapon = attacker:GetActiveWeapon()
@@ -1021,7 +1062,7 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 		MatMul = 10
 	end
 
-	local DamageMath = math.Round(Damage - (GetConVarNumber("sv_css_penetration_scale")*MatMul*Amount),2)
+	local DamageMath = math.Round(Damage - (GetConVarNumber("sv_css_penetration_scale")*MatMul*math.max(0.1,self.PenetrationLossScale)*Amount),2)
 	
 	if DamageMath > 0 then
 		if trace.StartSolid then
@@ -1181,13 +1222,37 @@ function SWEP:Reload()
 	
 end
 
+if CLIENT then
+	SWEP.DesiredViewAngles = Angle(0,0,0)
+end
+
 function SWEP:GetViewModelPosition( pos, ang )
 
 	ang = LocalPlayer():EyeAngles()
+	
+	--[[
+	local CursorX, CursorY = input.GetCursorPos()
+	
+	local x = ScrW()
+	local y = ScrH()
+	
+	local CursorMulY = ( (CursorX - x/2)/x ) * 45
+	local CursorMulP = ( (CursorY - y/2)/y ) * 45
+	
+	local DesiredAngle = ang
 
+	if math.abs(CursorMulY) > 2 or math.abs(CursorMulP) > 2 then
+
+	end
+	
+	self.DesiredViewAngles = ang + Angle(CursorMulP,-CursorMulY,0)
+
+	ang = ang - self.DesiredViewAngles*FrameTime()
+	--]]
+	
 	if ( !self.IronSightsPos ) then return pos, ang end
 	
-	local bIron = self:GetZoomed() and self.HasIronSights
+	local bIron = self:GetZoomed() --and self.HasIronSights
 	
 	if ( bIron != self.bLastIron ) then
 	
@@ -1224,6 +1289,10 @@ function SWEP:GetViewModelPosition( pos, ang )
 	
 	local Offset = self.IronSightsPos
 	
+	if GetConVarNumber("cl_css_crosshair_neversights") == 1 and self.HasScope == false then
+		Offset = Offset - Vector(Offset.x/2,0,Offset.z/2)
+	end
+	
 	if game.SinglePlayer() then
 		Offset = Offset - Vector(0,Offset.y,0)
 	end
@@ -1259,9 +1328,15 @@ function SWEP:Think()
 	self:HandleBurstFireShoot() -- don't predict, ever
 	self:HandleReloadThink() -- don't predict, ever
 	
-	
 	if (CLIENT or game.SinglePlayer()) then
-		self.ViewModelFOV = GetConVarNumber("cl_css_viewmodel_fov") + self.AddFOV	
+	
+		local FOVMOD = math.max(90 - self.Owner:GetFOV(),GetConVarNumber("cl_css_viewmodel_fov") + self.AddFOV)
+		
+		if self.HasScope and self:GetZoomed() then
+			FOVMOD = 100
+		end
+	
+		self.ViewModelFOV = FOVMOD
 		self:HandleBoltZoomMod()
 		self:HandleZoomMod()
 		
@@ -1376,12 +1451,28 @@ function SWEP:HandleShotgunReloadThinkAnimations()
 end
 
 function SWEP:HandleCoolDown()
+
+	local CoolMul = GetConVarNumber("sv_css_cooldown_scale")*0.1
+
 	if self:GetCoolTime() <= CurTime() then
 		if self:GetCoolDown() ~= 0 then
-			local CoolMod = math.Clamp(self:GetCoolDown() - FrameTime()*6.6*GetConVarNumber("sv_css_cooldown_scale"),0,20)
-			self:SetCoolDown(CoolMod)
+			self:SetCoolDown(math.Clamp(self:GetCoolDown() - CoolMul,0,10))
 		end
 	end
+	
+	if CLIENT then
+		if self.ClientCoolTime <= CurTime() then
+			if self.ClientCoolDown ~= 0 then 
+				self.ClientCoolDown = math.Clamp(self.ClientCoolDown - CoolMul,0,10)
+			end
+		end
+		
+		--print("STORED:",self.ClientCoolDown)
+	end
+	
+	--print("NETWORKED:", self:GetCoolDown() )
+	
+	
 end
 
 function SWEP:HandleZoomMod()
@@ -1467,7 +1558,9 @@ function SWEP:AdjustMouseSensitivity()
 	
 end
 
-local StoredCrosshair = nil
+if CLIENT then
+	SWEP.StoredCrosshair = nil
+end
 
 function SWEP:DrawHUD()
 
@@ -1487,7 +1580,7 @@ function SWEP:DrawHUD()
 	local length = GetConVarNumber("cl_css_crosshair_length")
 	local width = GetConVarNumber("cl_css_crosshair_width")
 	
-	local fovbonus = GetConVarNumber("fov_desired")/self.Owner:GetFOV()
+	local fovbonus = GetConVarNumber("fov_desired") / self.Owner:GetFOV()
 
 	local r = GetConVarNumber("cl_css_crosshair_color_r")
 	local g = GetConVarNumber("cl_css_crosshair_color_g")
@@ -1499,31 +1592,39 @@ function SWEP:DrawHUD()
 	if GetConVarNumber("cl_css_crosshair_dynamic") == 0 then
 		Cone = math.Clamp(self.Primary.Cone*900,0,1000)
 	else
-		Cone = math.Clamp(self:HandleCone(self.Primary.Cone) * 900,0,1000)*fovbonus
+		Cone = math.Clamp(self:HandleCone(self.Primary.Cone,true) * 900,0,1000)*fovbonus
 	end
 	
-	if not StoredCrosshair then
-		StoredCrosshair = Cone
-	end
+	local ConeToSend = Cone
 	
-	local PingMul = 10000/LocalPlayer():Ping()
+	if GetConVarNumber("cl_css_crosshair_smoothing") == 1 then
 	
-	if Cone > StoredCrosshair then
-		StoredCrosshair = math.min(Cone,StoredCrosshair + FrameTime()*PingMul )
-	elseif Cone < StoredCrosshair then
-		StoredCrosshair = math.max(Cone,StoredCrosshair - FrameTime()*PingMul )
-	end
+		if not self.StoredCrosshair then
+			self.StoredCrosshair = Cone
+		end
+		
+		local SmoothingMul = GetConVarNumber("cl_css_crosshair_smoothing_mul") * FrameTime() * fovbonus
+		
+		if Cone > self.StoredCrosshair then
+			self.StoredCrosshair = math.min(Cone,self.StoredCrosshair + 500 * SmoothingMul )
+		elseif Cone < self.StoredCrosshair then
+			self.StoredCrosshair = math.max(Cone,self.StoredCrosshair - 300 * SmoothingMul )
+		end
+		
+		ConeToSend = self.StoredCrosshair
 
+	end
+	
 	if self.HasCrosshair or (self.Owner:IsPlayer() and self.Owner:IsBot()) then
-		self:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
+		self:DrawCustomCrosshair(x,y,ConeToSend,length,width,r,g,b,a)
 	end
 
 	if self.HasScope then
 		if self:GetZoomed() then
 			if LocalPlayer():ShouldDrawLocalPlayer() then
-				self:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
+				self:DrawCustomCrosshair(x,y,ConeToSend,length,width,r,g,b,a)
 			else
-				self:DrawCustomScope(x,y,r,g,b,a)
+				self:DrawCustomScope(x,y,ConeToSend,r,g,b,a)
 			end
 			
 			self.Owner:DrawViewModel(false)	
@@ -1534,33 +1635,23 @@ function SWEP:DrawHUD()
 	
 end
 
-function SWEP:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
+function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 
 	local XRound = math.floor(x/2)
 	local YRound = math.floor(y/2)
-	
-	--length = math.cos(CurTime()*2)*10 + 15
-	
 	local WRound = math.floor(width/2)
 	local LRound = math.floor(length/2)
-	local FinalCone = math.floor(math.Max(StoredCrosshair,WRound*2,LRound/2))
+	
+	local FinalCone = math.floor( math.Max(Cone,WRound*2,LRound/2) )
+	
+	self:DrawShadowCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,width,r,g,b,a)
+	self:DrawNormalCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,width,r,g,b,a)
 
-	
-	
-	local Max = 0
-	
-	if GetConVarNumber("cl_css_crosshair_dot") >= 1 then
-		Max = math.max(1,width)
-		
-		surface.SetDrawColor(Color(0,0,0,255))
-		surface.DrawRect( XRound - math.floor(Max*0.5) - 1, YRound -  math.floor(Max*0.5) - 1 , Max+2, Max+2 )
-		
-		surface.SetDrawColor(r,g,b,a)
-		surface.DrawRect( XRound - math.floor(Max*0.5), YRound -  math.floor(Max*0.5) , Max, Max )
-	end
-	
-	
-	if !self:GetZoomed() or self.EnableIronCross then
+end
+
+function SWEP:DrawNormalCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,width,r,g,b,a)
+
+	if !self:GetZoomed() or self.EnableIronCross or GetConVarNumber("cl_css_crosshair_neversights") == 1 then
 
 		if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
 
@@ -1571,23 +1662,15 @@ function SWEP:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
 				local y3 = YRound - WRound
 				local y4 = YRound - WRound
 				
-				-------- Position --- Length --- Spacing
-				local y1 = YRound + math.max(FinalCone,0) -- red
-				local y2 = YRound - (LRound*2) - math.max(FinalCone,0) -- white
-				
-				local x3 = XRound + math.max(FinalCone,0) -- blue
-				local x4 = XRound - (LRound*2) - math.max(FinalCone,0) -- black
-			
-				--surface.SetDrawColor(255,0,0,255) --red
+				local y1 = YRound + math.max(FinalCone,0)
+				local y2 = YRound - (LRound*2) - math.max(FinalCone,0)
+				local x3 = XRound + math.max(FinalCone,0)
+				local x4 = XRound - (LRound*2) - math.max(FinalCone,0)
+
+				surface.SetDrawColor(r,g,b,a)
 				surface.DrawRect( x1, y1, WRound*2, LRound*2 )
-				
-				--surface.SetDrawColor(255,255,255,255) --white
 				surface.DrawRect( x2, y2, WRound*2, LRound*2 )
-				
-				--surface.SetDrawColor(0,0,255,255) -- blue
 				surface.DrawRect( x3, y3, LRound*2, WRound*2 )
-				
-				--surface.SetDrawColor(0,0,0,255) -- black
 				surface.DrawRect( x4, y4, LRound*2, WRound*2 )
 		
 			else
@@ -1597,61 +1680,102 @@ function SWEP:DrawCustomCrosshair(x,y,length,width,r,g,b,a)
 				local y3 = YRound + FinalCone + LRound*2
 				local y4 = YRound - FinalCone - LRound*2
 				
-				local Offset = 1
-
-				surface.SetDrawColor(Color(0,0,0,255))
-				
-				local ShadowWidth = 3
-				local ShadowLength = LRound*2 + Offset*3
-				
-
-				
-				surface.DrawRect( x1 - LRound*2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
-				
-				surface.DrawRect( x2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
-				
-				surface.DrawRect( XRound - Offset, y3 - LRound*2 - 1 , ShadowWidth, ShadowLength )
-				
-				surface.DrawRect( XRound - Offset, y4 - 1 , ShadowWidth, ShadowLength )
-				
-				
 				surface.SetDrawColor(r,g,b,a)
-				
 				surface.DrawLine( x1, YRound, XRound+FinalCone, YRound )
-
-				surface.DrawLine( x2, YRound, XRound-FinalCone, YRound )
-				
-				surface.DrawLine( XRound, y3, XRound, YRound+FinalCone )
-				
-				
+				surface.DrawLine( x2, YRound, XRound-FinalCone, YRound )		
+				surface.DrawLine( XRound, y3, XRound, YRound+FinalCone )		
 				surface.DrawLine( XRound, y4, XRound, YRound-FinalCone )
 
-				
-				
-				
 			end
-		
+			
 		end
 		
-		if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
-			if GetConVarNumber("cl_css_crosshair_style") == 4 then
-				surface.DrawCircle(x/2,y/2, FinalCone + length, Color(r,g,b,a))
-			elseif GetConVarNumber("cl_css_crosshair_style") == 3 then
-				surface.DrawCircle(x/2,y/2, FinalCone + length/2, Color(r,g,b,a))
-			else
-				surface.DrawCircle(x/2,y/2, FinalCone, Color(r,g,b,a))
-			end
+		if GetConVarNumber("cl_css_crosshair_dot") >= 1 then
+			local Max = math.max(1,width)
+			surface.SetDrawColor(r,g,b,a)
+			surface.DrawRect( XRound - WRound, YRound - WRound , Max, Max )
 		end
 		
-	elseif not self.EnableIronCross and self:GetZoomed() then
-		surface.DrawCircle(x/2,y/2, FinalCone, Color(r,g,b,a*0.125))
 	end
-
 	
+	if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
+	
+		local Offset = 0
+	
+		if GetConVarNumber("cl_css_crosshair_style") == 4 then
+			Offset = LRound*2
+		elseif GetConVarNumber("cl_css_crosshair_style") == 3 then
+			Offset = LRound
+		else
+			Offset = 0
+		end
+		
+		surface.DrawCircle(XRound,YRound, FinalCone + Offset, Color(r,g,b,a))
+		
+		if WRound*2 > 1 then
+				surface.DrawCircle(XRound,YRound, FinalCone + Offset + 1, Color(r,g,b,a))
+		end
+		
+	end
 
 end
 
-function SWEP:DrawCustomScope(x,y,r,g,b,a)
+function SWEP:DrawShadowCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,width,r,g,b,a)
+
+	if (!self:GetZoomed() or self.EnableIronCross or GetConVarNumber("cl_css_crosshair_neversights") == 1) and GetConVarNumber("cl_css_crosshair_shadow") >= 1 and WRound == 0 then
+	
+		local x1 = XRound + FinalCone + LRound*2
+		local x2 = XRound - FinalCone - LRound*2
+		local y3 = YRound + FinalCone + LRound*2
+		local y4 = YRound - FinalCone - LRound*2
+
+		local Offset = 1
+		local ShadowWidth = 3
+		local ShadowLength = LRound*2 + Offset*3
+
+		surface.SetDrawColor(Color(0,0,0,255))
+		surface.DrawRect( x1 - LRound*2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
+		surface.DrawRect( x2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
+		surface.DrawRect( XRound - Offset, y3 - LRound*2 - 1 , ShadowWidth, ShadowLength )
+		surface.DrawRect( XRound - Offset, y4 - 1 , ShadowWidth, ShadowLength )
+		
+		if GetConVarNumber("cl_css_crosshair_dot") >= 1 then
+	
+			local Max = math.max(1,width)
+			
+			if width <= 1 then
+				surface.SetDrawColor(Color(0,0,0,255))
+				surface.DrawRect( XRound - WRound - 1, YRound - WRound - 1 , Max + 2, Max + 2 )
+			end
+
+		end
+		
+		
+		if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
+		
+			local Offset = 0
+	
+			if GetConVarNumber("cl_css_crosshair_style") == 4 then
+				Offset = LRound*2
+			elseif GetConVarNumber("cl_css_crosshair_style") == 3 then
+				Offset = LRound
+			else
+				Offset = 0
+			end
+		
+			surface.DrawCircle(x/2,y/2, FinalCone + Offset - 1, Color(0,0,0,a))
+			surface.DrawCircle(x/2,y/2, FinalCone + Offset + 1, Color(0,0,0,a))
+			
+		end
+
+		
+	end
+
+end
+
+
+
+function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 
 	local space = 1
 	

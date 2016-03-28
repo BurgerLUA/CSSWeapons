@@ -22,7 +22,7 @@ SWEP.WorldModel				= "models/weapons/w_shot_m3super90.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "shotgun"
 
-SWEP.Primary.Damage			= 120/9
+SWEP.Primary.Damage			= 14
 SWEP.Primary.NumShots		= 9
 SWEP.Primary.Sound			= Sound("weapons/m3/m3-1.wav")
 SWEP.Primary.Cone			= 0.04
@@ -58,3 +58,5 @@ SWEP.IronSightsPos 			= Vector(-6, 0, 1.5)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
 
 SWEP.DamageFalloff			= 250
+
+SWEP.PenetrationLossScale	= 0.5

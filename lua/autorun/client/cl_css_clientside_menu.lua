@@ -2,6 +2,135 @@ surface.CreateFont("TitleFont", {size = 30, weight = 400, antialias = true, font
 surface.CreateFont("SliderFont", {size = 15, weight = 400, antialias = true, font = "Arial"})
 surface.CreateFont("WarningFont", {size = 20, weight = 400, antialias = false, bold = true, outline = true, font = "Arial"})
 
+local count = 1
+local ItemTable = {}
+
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DLabel"
+	ItemTable[count]["font"] = "TitleFont"
+	ItemTable[count]["text"] = "Viewmodel Settings"
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Viewmodel FOV"
+	ItemTable[count]["command"] = "cl_css_viewmodel_fov"
+	ItemTable[count]["min"] = 30
+	ItemTable[count]["max"] = 60
+	ItemTable[count]["decimals"] = 0
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DLabel"
+	ItemTable[count]["font"] = "TitleFont"
+	ItemTable[count]["text"] = "Crosshair Settings"
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DLabel"
+	ItemTable[count]["font"] = "SliderFont"
+	ItemTable[count]["text"] = "Crosshair Color"
+	ItemTable[count]["height"] = 30
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DColorMixer"
+	ItemTable[count]["height"] = 220
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Crosshair Style"
+	ItemTable[count]["command"] = "cl_css_crosshair_style"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 5
+	ItemTable[count]["decimals"] = 0
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Crosshair Length"
+	ItemTable[count]["command"] = "cl_css_crosshair_length"
+	ItemTable[count]["min"] = 1
+	ItemTable[count]["max"] = 20
+	ItemTable[count]["decimals"] = 0
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Crosshair width"
+	ItemTable[count]["command"] = "cl_css_crosshair_width"
+	ItemTable[count]["min"] = 1
+	ItemTable[count]["max"] = 2
+	ItemTable[count]["decimals"] = 0
+	ItemTable[count]["height"] = 40
+	count = count + 1
+
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable Crosshair Center Dot"
+	ItemTable[count]["command"] = "cl_css_crosshair_dot"
+	ItemTable[count]["height"] = 25
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable Crosshair Shadow (Width 1 only)"
+	ItemTable[count]["command"] = "cl_css_crosshair_shadow"
+	ItemTable[count]["height"] = 25
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable Dynamic Crosshairs"
+	ItemTable[count]["command"] = "cl_css_crosshair_dynamic"
+	ItemTable[count]["height"] = 25
+	count = count + 1
+
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable Crosshair Smoothing (Requires Dynamic Crosshairs)"
+	ItemTable[count]["command"] = "cl_css_crosshair_smoothing"
+	ItemTable[count]["height"] = 35
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Smoothing speed multiplier (Requires Crosshair Smoothing)"
+	ItemTable[count]["command"] = "cl_css_crosshair_smoothing_mul"
+	ItemTable[count]["min"] = 0.01
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 2
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DLabel"
+	ItemTable[count]["font"] = "TitleFont"
+	ItemTable[count]["text"] = "Other Settings"
+	ItemTable[count]["height"] = 40
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable Custom Slots(Primary in slot 3, secondary in slot 2)"
+	ItemTable[count]["command"] = "cl_css_customslots"
+	ItemTable[count]["height"] = 25
+	count = count + 1
+
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Never use ironsights (DOES NOTHING, AS OF NOW :0)"
+	ItemTable[count]["command"] = "cl_css_crosshair_neversights"
+	ItemTable[count]["height"] = 25
+	count = count + 1
+	
+	
 function CSSClientsideWeaponSettings()
 
 	local MenuBase = vgui.Create("DFrame")
@@ -31,155 +160,72 @@ function CSSClientsideWeaponSettings()
 		Base1.Paint = function()
 			draw.RoundedBox( 8, 0, 0, Base1:GetWide(), Base1:GetTall(), Color( 255, 255, 255, 255 ) )
 		end
-	
-	local Title1 = vgui.Create("DLabel", Base1)
-		Title1:SetPos(5,5)
-		Title1:SetFont("TitleFont")
-		Title1:SetColor(Color(0,0,0,255))
-		Title1:SetText( "VIEWMODEL SETTINGS" )
-		Title1:SizeToContents()
 		
-	local ViewmodelSliderTitle = vgui.Create("DLabel", Base1)
-		ViewmodelSliderTitle:SetPos(25,35)
-		ViewmodelSliderTitle:SetFont("SliderFont")
-		ViewmodelSliderTitle:SetColor(Color(0,0,0,255))
-		ViewmodelSliderTitle:SetText( "Weapon FOV" )
-		ViewmodelSliderTitle:SizeToContents()
-	
-	local ViewmodelSlider = vgui.Create( "Slider", Base1 )
-		ViewmodelSlider:SetPos( 5,40 )
-		ViewmodelSlider:SetWide( Base1:GetWide() - 10 - 20 )
-		ViewmodelSlider:SetMin( 10 ) -- Minimum number of the slider
-		ViewmodelSlider:SetMax( 90 ) -- Maximum number of the slider
-		ViewmodelSlider:SetDecimals( 1 ) -- Sets a decimal. Zero means it's a whole number
-		ViewmodelSlider:SetConVar( "cl_css_viewmodel_fov" ) -- Set the convar
-	
-	local Title1 = vgui.Create("DLabel", Base1)
-		Title1:SetPos(5,120)
-		Title1:SetFont("TitleFont")
-		Title1:SetColor(Color(0,0,0,255))
-		Title1:SetText( "CROSSHAIR SETTINGS" )
-		Title1:SizeToContents()
-	
-	local Mixer = vgui.Create( "DColorMixer", Base1 )
-		Mixer:SetPos( 5,160 )
-		Mixer:SizeToContents()
-		Mixer:SetPalette( true ) 		--Show/hide the palette			DEF:true
-		Mixer:SetAlphaBar( true ) 		--Show/hide the alpha bar		DEF:true
-		Mixer:SetWangs( true )	 		--Show/hide the R G B A indicators 	DEF:true
-		Mixer:SetColor( Color( GetConVarNumber("cl_css_crosshair_color_r"),GetConVarNumber("cl_css_crosshair_color_g"),GetConVarNumber("cl_css_crosshair_color_b"), GetConVarNumber("cl_css_crosshair_color_a") ) )--Set the default color
-	
-	local ColorButton = vgui.Create( "DButton", Base1 )
-		ColorButton:SetPos( 10, 160 + 250 )
-		ColorButton:SetSize( 250, 30 )
-		ColorButton:SetText( "Apply Color" )
-		ColorButton.DoClick = function()
-			local col = Mixer:GetColor()
-			print("Color: " .. col.r .. ",".. col.g .. ",".. col.b .. ",".. col.a)
-			RunConsoleCommand("cl_css_crosshair_color_r",col.r)
-			RunConsoleCommand("cl_css_crosshair_color_g",col.g)
-			RunConsoleCommand("cl_css_crosshair_color_b",col.b)
-			RunConsoleCommand("cl_css_crosshair_color_a",col.a)
+	local DermaTitle = {}
+	local DermaObj = {}
+	local height = 0	
+
+	for k,v in pairs(ItemTable) do
+		
+		local Num = k
+		local Table = v
+
+		DermaObj[k] = vgui.Create(Table["type"],Base1)
+		DermaObj[k]:SetPos(5, height)
+		
+		if Table["type"] == "Slider" then
+			DermaTitle[k] = vgui.Create("DLabel",Base1)
+			DermaTitle[k]:SetPos(25, height - 10)
+			DermaTitle[k]:SetFont("SliderFont")
+			DermaTitle[k]:SetColor(Color(0,0,0,255))
+			DermaTitle[k]:SetText( Table["name"] )
+			DermaTitle[k]:SizeToContents()			
+			DermaObj[k]:SetWide( Base1:GetWide() - 10 - 20 )
+			DermaObj[k]:SetValue(GetConVarNumber(Table["command"]))
+			DermaObj[k]:SetMin( Table["min"] ) -- Minimum number of the slider
+			DermaObj[k]:SetMax( Table["max"] ) -- Maximum number of the slider
+			DermaObj[k]:SetDecimals( Table["decimals"] ) -- Sets a decimal. Zero means it's a whole number
+			DermaObj[k]:SetConVar( Table["command"] ) -- Set the convar	
+		elseif Table["type"] == "DLabel" then
+			DermaObj[k]:SetFont( Table["font"])
+			DermaObj[k]:SetColor(Color(0,0,0,255))
+			DermaObj[k]:SetText( Table["text"] )
+			DermaObj[k]:SizeToContents()
+		elseif Table["type"] == "DCheckBoxLabel" then
+			DermaObj[k]:SetText( Table["text"] )
+			DermaObj[k]:SetTextColor( Color(0, 0, 0, 255) )
+			DermaObj[k]:SizeToContents()
+			DermaObj[k]:SetPos(15, height)
+			DermaObj[k]:SetConVar( Table["command"] )
+		elseif Table["type"] == "DColorMixer" then
+
+			DermaObj[k]:SetPos(15, height)
+			DermaObj[k]:SetSize(ScrH()/4,200)
+			DermaObj[k]:SetPalette( true )
+			DermaObj[k]:SetAlphaBar( true ) 
+			DermaObj[k]:SetWangs( true )
+			
+			DermaObj[k]:SetColor( Color( 
+								GetConVarNumber("cl_css_crosshair_color_r"), 
+								GetConVarNumber("cl_css_crosshair_color_g"), 
+								GetConVarNumber("cl_css_crosshair_color_b"),
+								GetConVarNumber("cl_css_crosshair_color_a") 
+								) )
+			
+			DermaObj[k]:SetConVarR("cl_css_crosshair_color_r")
+			DermaObj[k]:SetConVarG("cl_css_crosshair_color_g")
+			DermaObj[k]:SetConVarB("cl_css_crosshair_color_b")
+			DermaObj[k]:SetConVarA("cl_css_crosshair_color_a")
+		
+		
+		
 		end
 		
-	--[[
-	local mat = vgui.Create( "DImage", Base1 )
-		mat:SetPos( 20 + 250, 160 )
-		mat:SetSize( 64*3, 64*3 )
-		mat:SetImage( "vgui/gfx/vgui/crosshair" )	-- Path to material VMT
-	--]]
-	
-	local CrossStyleTitle = vgui.Create("DLabel", Base1)
-		CrossStyleTitle:SetPos(25, 160 + 250 + 30 + 10 )
-		CrossStyleTitle:SetFont("SliderFont")
-		CrossStyleTitle:SetColor(Color(0,0,0,255))
-		CrossStyleTitle:SetText( "Crosshair Style" )
-		CrossStyleTitle:SizeToContents()
-	
-	local CrossStyle = vgui.Create( "Slider", Base1 )
-		CrossStyle:SetPos( 5, 160 + 250 + 30 + 10 + 10 )
-		CrossStyle:SetWide( Base1:GetWide() - 10 - 20 )
-		CrossStyle:SetMin( 0 ) -- Minimum number of the slider
-		CrossStyle:SetMax( 5 ) -- Maximum number of the slider
-		CrossStyle:SetDecimals( 0 ) -- Sets a decimal. Zero means it's a whole number
-		CrossStyle:SetConVar( "cl_css_crosshair_style" ) -- Set the convar
-	
-	local LengthSliderTitle = vgui.Create("DLabel", Base1)
-		LengthSliderTitle:SetPos(25, 160 + 250 + 30 + 10 + 40 )
-		LengthSliderTitle:SetFont("SliderFont")
-		LengthSliderTitle:SetColor(Color(0,0,0,255))
-		LengthSliderTitle:SetText( "Crosshair Length" )
-		LengthSliderTitle:SizeToContents()
-	
-	local LengthSlider = vgui.Create( "Slider", Base1 )
-		LengthSlider:SetPos( 5, 160 + 250 + 30 + 10 + 10 + 40 )
-		LengthSlider:SetWide( Base1:GetWide() - 10 - 20 )
-		LengthSlider:SetMin( 1 ) -- Minimum number of the slider
-		LengthSlider:SetMax( 30 ) -- Maximum number of the slider
-		LengthSlider:SetDecimals( 0 ) -- Sets a decimal. Zero means it's a whole number
-		LengthSlider:SetConVar( "cl_css_crosshair_length" ) -- Set the convar
-		
-	local WidthSliderTitle = vgui.Create("DLabel", Base1)
-		WidthSliderTitle:SetPos(25, 160 + 250 + 30 + 10 + 40 + 40)
-		WidthSliderTitle:SetFont("SliderFont")
-		WidthSliderTitle:SetColor(Color(0,0,0,255))
-		WidthSliderTitle:SetText( "Crosshair Width" )
-		WidthSliderTitle:SizeToContents()
-		
-	
-	local WidthSlider = vgui.Create( "Slider", Base1 )
-		WidthSlider:SetPos( 5, 160 + 250 + 30 + 10 + 10 + 40 + 40 )
-		WidthSlider:SetWide( Base1:GetWide() - 10 - 20 )
-		WidthSlider:SetMin( 1 ) -- Minimum number of the slider
-		WidthSlider:SetMax( 30 ) -- Maximum number of the slider
-		WidthSlider:SetDecimals( 0 ) -- Sets a decimal. Zero means it's a whole number
-		WidthSlider:SetConVar( "cl_css_crosshair_width" ) -- Set the convar
-		
-	local DynamicCrosshairsCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
-		DynamicCrosshairsCheckBox:SetText( "Enable Dynamic Crosshairs" )
-		DynamicCrosshairsCheckBox:SetTextColor( Color(0, 0, 0, 255) )
-		DynamicCrosshairsCheckBox:SizeToContents()
-		DynamicCrosshairsCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40)
-		DynamicCrosshairsCheckBox:SetConVar( "cl_css_crosshair_dynamic" ) 
-		
-	local DotCrosshairsCheckBox = vgui.Create( "DCheckBoxLabel", Base1 )
-		DotCrosshairsCheckBox:SetText( "Enable Crosshair Dot" )
-		DotCrosshairsCheckBox:SetTextColor( Color(0, 0, 0, 255) )
-		DotCrosshairsCheckBox:SizeToContents()
-		DotCrosshairsCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20)
-		DotCrosshairsCheckBox:SetConVar( "cl_css_crosshair_dot" ) 	
-
-	local QuickThrowCheckBox = vgui.Create("DCheckBoxLabel", Base1)
-		QuickThrowCheckBox:SetText( "Enable QuickThrow (LeftClick + E)" )
-		QuickThrowCheckBox:SetTextColor( Color(0, 0, 0, 255) )
-		QuickThrowCheckBox:SizeToContents()
-		QuickThrowCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20 + 20)
-		QuickThrowCheckBox:SetConVar( "cl_css_quick" )
-		
-	local CustomSlotsCheckBox = vgui.Create("DCheckBoxLabel", Base1)
-		CustomSlotsCheckBox:SetText( "Enable Custom slots (Primary in slot 3, secondary in slot 2)" )
-		CustomSlotsCheckBox:SetTextColor( Color(0, 0, 0, 255) )
-		CustomSlotsCheckBox:SizeToContents()
-		CustomSlotsCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20 + 20 + 20)
-		CustomSlotsCheckBox:SetConVar( "cl_css_customslots" )
-	
-		
-	
-	
-	if not game.SinglePlayer() then
-
-		local WModelCheckBox = vgui.Create("DCheckBoxLabel", Base1)
-			WModelCheckBox:SetText( "Draw Thirdperson/Firstperson Mag drops (Requires Additional Addon)" )
-			WModelCheckBox:SetTextColor( Color(0, 0, 0, 255) )
-			WModelCheckBox:SizeToContents()
-			WModelCheckBox:SetPos(15, 160 + 250 + 30 + 10 + 10 + 40 + 40 + 40 + 20 + 20 + 20 + 20)
-			WModelCheckBox:SetConVar( "cl_css_mags" )	
+		height = height + Table["height"]
 
 	end
-	
-	
-	
-	
+
+
 	
 end
 

@@ -24,7 +24,7 @@ SWEP.HoldType				= "ar2"
 
 SWEP.Primary.Damage			= 33
 SWEP.Primary.NumShots		= 1
-SWEP.Primary.Sound			= Sound("weapons/m4a1/m4a1_unsil-1.wav")
+SWEP.Primary.Sound			= Sound("Weapon_M4A1.Single")
 SWEP.Primary.Cone			= 0.005
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
@@ -34,12 +34,12 @@ SWEP.Primary.Automatic 		= true
 
 SWEP.WorldModel1			= "models/weapons/w_rif_m4a1.mdl"
 SWEP.WorldModel2 			= "models/weapons/w_rif_m4a1_silencer.mdl"
-SWEP.Secondary.Sound		= Sound("weapons/m4a1/m4a1-1.wav")
+SWEP.Secondary.Sound		= Sound("Weapon_M4A1.Silenced")
 
 SWEP.RecoilMul				= 0.75
 SWEP.SideRecoilMul			= 0.5
-SWEP.VelConeMul				= 1.5
-SWEP.HeatMul				= 1.25
+SWEP.VelConeMul				= 1.25
+SWEP.HeatMul				= 0.75
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1

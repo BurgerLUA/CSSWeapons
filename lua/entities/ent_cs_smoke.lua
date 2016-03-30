@@ -6,6 +6,9 @@ ENT.Information = ""
 ENT.Spawnable = false
 ENT.AdminSpawnable = false 
 
+ENT.BounceSound = Sound("SmokeGrenade.Bounce")
+ENT.ExplodeSound = Sound("BaseSmokeEffect.Sound")
+
 AddCSLuaFile()
 
 function ENT:Initialize()
@@ -35,7 +38,7 @@ function ENT:PhysicsCollide(data, physobj)
 		self.HitN = data.HitNormal
 
 		if self:GetVelocity():Length() > 50 then
-			self:EmitSound("weapons/smokegrenade/grenade_hit1.wav",100,100)
+			self:EmitSound(self.BounceSound)
 		end
 		
 		if self:GetVelocity():Length() < 5 then
@@ -103,9 +106,8 @@ function ENT:Detonate(self,pos)
 			effectdata:SetEntity(self)
 		--util.Effect( "SMOKE", effectdata )	
 		
-		self:EmitSound("weapons/smokegrenade/sg_explode.wav",100,100)
+		self:EmitSound(self.ExplodeSound)
 
-		
 		SafeRemoveEntityDelayed(self,10)
 	end
 end

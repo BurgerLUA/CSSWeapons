@@ -24,7 +24,7 @@ SWEP.HoldType				= "ar2"
 
 SWEP.Primary.Damage			= 33
 SWEP.Primary.NumShots		= 1
-SWEP.Primary.Sound			= Sound("weapons/sg552/sg552-1.wav")
+SWEP.Primary.Sound			= Sound("Weapon_SG552.Single")
 SWEP.Primary.Cone			= 0.006
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90

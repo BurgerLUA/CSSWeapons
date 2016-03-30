@@ -24,7 +24,7 @@ SWEP.HoldType				= "pistol"
 
 SWEP.Primary.Damage			= 29
 SWEP.Primary.NumShots		= 1
-SWEP.Primary.Sound			= Sound("weapons/mac10/mac10-1.wav")
+SWEP.Primary.Sound			= Sound("Weapon_MAC10.Single")
 SWEP.Primary.Cone			= 0.03
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 100

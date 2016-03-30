@@ -223,6 +223,8 @@ SWEP.EnableTracer			= true
 
 SWEP.DisableReloadUntilEmpty = false
 
+SWEP.HasMagIn				= true
+
 if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleUp = Angle(0,0,0)
 	SWEP.PunchAngleDown = Angle(0,0,0)
@@ -377,8 +379,10 @@ function SWEP:Deploy()
 			end
 		end
 		
-		self.GetMagModel = string.Replace( self.WorldModel,"/w_" , "/unloaded/" )
-		self.GetMagModel = string.Replace( self.GetMagModel , ".mdl" , "_mag.mdl")
+		if not self.GetMagModel then
+			self.GetMagModel = string.Replace( self.WorldModel,"/w_" , "/unloaded/" )
+			self.GetMagModel = string.Replace( self.GetMagModel , ".mdl" , "_mag.mdl")
+		end
 		
 	end
 
@@ -427,7 +431,8 @@ end
 
 
 function SWEP:Holster()
-	if self:IsBusy() then return false end
+	if not self.CanHolster then return false end
+	self:CancelReload()
 	self:SetZoomed(false)
 	return true
 end
@@ -469,8 +474,12 @@ end
 
 function SWEP:PrimaryAttack()
 	
-	if self:GetIsReloading() and self:GetIsShotgunReload() then
-		self:FinishShotgunReload()
+	if self:GetIsReloading() then
+		if self:GetIsShotgunReload() then
+			self:FinishShotgunReload()
+		else
+			--self:CancelReload()
+		end
 	end
 
 	if not self:CanPrimaryAttack() then	return end
@@ -515,13 +524,6 @@ function SWEP:CanShoot()
 	if self:IsUsing() then return false end
 	if self.WeaponType == "Throwable" then self:PreThrowObject() return false end
 	return true
-end
-
-function SWEP:HandleReloadCancel()
-	if self:GetIsShotgunReload() then
-		self:SetIsReloading(false)
-		self:SetIsShotgunReload(false)
-	end
 end
 
 function SWEP:AfterPump()
@@ -961,6 +963,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	bullet.Spread	= Vector(Cone, Cone, 0)
 	bullet.Src		= Source
 	bullet.Dir		= Direction
+	bullet.AmmoType = "ar2"
 	--bullet.Distance	= self.Primary.Range
 	bullet.HullSize = 0
 	
@@ -1082,6 +1085,8 @@ function SWEP:EmitGunSound(GunSound,Level)
 	--self.Owner:EmitSound(GunSound, 100 , 100, 1, CHAN_WEAPON )
 	
 	self.Weapon:EmitSound(GunSound)
+	
+	--self.Owner:EmitSound(GunSound,SNDLVL_NONE,100,1,CHAN_WEAPON)
 		
 	--[[
 	elseif SERVER then
@@ -1191,6 +1196,7 @@ function SWEP:Reload()
 	else
 		self:SetReloadFinish(CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate()))
 		self:SetIsNormalReload(true)
+		self:SetIsReloading(true)
 	end
 	
 	self.Owner:SetAnimation(PLAYER_RELOAD)
@@ -1203,7 +1209,10 @@ function SWEP:Reload()
 	if SERVER then
 		if GetConVarNumber("sv_css_enable_mags") == 1 then
 			timer.Simple(0.75, function()
-				if self.GetMagModel then
+				if self.GetMagModel and self.HasMagIn then
+				
+					self.HasMagIn = false
+				
 					if file.Exists(self.GetMagModel,"GAME") then
 						local mag = ents.Create("ent_cs_debris")
 						mag:SetPos(self.Owner:GetShootPos() + self.Owner:GetUp()*-12 + self.Owner:GetRight()*3)
@@ -1211,7 +1220,18 @@ function SWEP:Reload()
 						mag:SetAngles(self.Owner:EyeAngles())
 						mag:Spawn()
 						mag:Activate()
-						SafeRemoveEntityDelayed(mag,10)
+						SafeRemoveEntityDelayed(mag,30)
+						
+						if self.HasDual then
+							local mag = ents.Create("ent_cs_debris")
+							mag:SetPos(self.Owner:GetShootPos() + self.Owner:GetUp()*-12 + self.Owner:GetRight()*-3)
+							mag:SetModel(self.GetMagModel)
+							mag:SetAngles(self.Owner:EyeAngles() + Angle(1,1,1) )
+							mag:Spawn()
+							mag:Activate()
+							SafeRemoveEntityDelayed(mag,30)
+						end
+						
 					end
 				end
 			end)
@@ -1328,6 +1348,8 @@ function SWEP:Think()
 	self:HandleBurstFireShoot() -- don't predict, ever
 	self:HandleReloadThink() -- don't predict, ever
 	
+	self:SpareThink()
+	
 	if (CLIENT or game.SinglePlayer()) then
 	
 		local FOVMOD = math.max(90 - self.Owner:GetFOV(),GetConVarNumber("cl_css_viewmodel_fov") + self.AddFOV)
@@ -1348,6 +1370,11 @@ function SWEP:Think()
 	
 end
 
+function SWEP:SpareThink()
+
+
+end
+
 function SWEP:HandleBurstFireShoot()
 	if self.HasBurstFire then
 		if self:GetNextBulletDelay() <= CurTime() and self:GetBulletQueue() > 0 then
@@ -1355,7 +1382,7 @@ function SWEP:HandleBurstFireShoot()
 			self:SetNextBulletDelay(CurTime() + self:GetBurstMath())
 			self:SetBulletQueue(self:GetBulletQueue() - 1)
 
-			if self:Clip1() > 0 then
+			if (self:Clip1() > 0) or self:Clip1() == -1 and self:Ammo1() >= 1 then
 			
 				self:TakePrimaryAmmo(1)
 				self:WeaponAnimation(self:Clip1(),ACT_VM_PRIMARYATTACK)
@@ -1378,16 +1405,18 @@ function SWEP:HandleReloadThink()
 
 	if self:GetIsNormalReload() then
 	
-		self:SetIsReloading(true)
+		--self:SetIsReloading(true)
 
-		if self:GetReloadFinish() <= CurTime() then
+		if self:GetReloadFinish() <= CurTime() and self:GetIsReloading() then
 
 			if self.Owner:GetAmmoCount( self.Primary.Ammo ) >= self.Primary.ClipSize then
 				self:SetClip1(self.Primary.ClipSize)
 				self.Owner:RemoveAmmo(self.Primary.ClipSize,self.Primary.Ammo)
+				self.HasMagIn = true
 			else
 				self:SetClip1(self.Owner:GetAmmoCount(self.Primary.Ammo))
 				self.Owner:RemoveAmmo(self.Owner:GetAmmoCount(self.Primary.Ammo),self.Primary.Ammo)
+				self.HasMagIn = true
 			end
 
 			--self:SendWeaponAnim(ACT_VM_IDLE)
@@ -1426,6 +1455,12 @@ function SWEP:FinishShotgunReload()
 	self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
 	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 	self:SetIsShotgunReload(false)
+	self:SetIsReloading(false)
+end
+
+function SWEP:CancelReload()
+	self:SendWeaponAnim( ACT_VM_IDLE )
+	self:SetNextPrimaryFire(CurTime() + 0.1)
 	self:SetIsReloading(false)
 end
 
@@ -1651,7 +1686,7 @@ end
 
 function SWEP:DrawNormalCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,width,r,g,b,a)
 
-	if !self:GetZoomed() or self.EnableIronCross or GetConVarNumber("cl_css_crosshair_neversights") == 1 then
+	if !self:GetZoomed() or self.EnableIronCross or ( GetConVarNumber("cl_css_crosshair_neversights") == 1 and not self.HasScope) then
 
 		if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
 
@@ -1698,7 +1733,7 @@ function SWEP:DrawNormalCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,widt
 		
 	end
 	
-	if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
+	if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 and not self:GetZoomed() then
 	
 		local Offset = 0
 	
@@ -1722,7 +1757,7 @@ end
 
 function SWEP:DrawShadowCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,width,r,g,b,a)
 
-	if (!self:GetZoomed() or self.EnableIronCross or GetConVarNumber("cl_css_crosshair_neversights") == 1) and GetConVarNumber("cl_css_crosshair_shadow") >= 1 and WRound == 0 then
+	if (!self:GetZoomed() or self.EnableIronCross or ( GetConVarNumber("cl_css_crosshair_neversights") == 1 and not self.HasScope) ) and GetConVarNumber("cl_css_crosshair_shadow") >= 1 and WRound == 0 then
 	
 		local x1 = XRound + FinalCone + LRound*2
 		local x2 = XRound - FinalCone - LRound*2
@@ -1824,7 +1859,16 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 	
 		local Damage = math.floor(self.Primary.NumShots * self.Primary.Damage * GetConVarNumber("sv_css_damage_scale"))
 		local Delay = math.floor((self.Primary.Delay^-1)*60)
-		local DPS = math.floor((self.Primary.Delay^-1) * Damage )
+		
+		local ClipSize =  self.Primary.ClipSize
+		
+		if ClipSize == -1 then
+			ClipSize = 250
+		end
+		
+		local ClipDamage = Damage * ClipSize
+
+		local DPS = math.min(ClipDamage,math.floor(( 1 / self.Primary.Delay) * Damage ))
 		local Cone = math.Round((self.Primary.Cone * GetConVarNumber("sv_css_cone_scale")) * (360/1),2)
 		local Recoil = math.Round(self:GetRecoilMath() * 0.25,2)
 		local KillTime = math.Round((math.ceil(100/Damage) - 1) * (self.Primary.Delay),2)
@@ -2037,7 +2081,7 @@ function SWEP:Swing(damage)
 				
 					local angle = math.abs(Angle01.y - Angle02.y)
 					
-					print(math.floor(Angle01.y),math.floor(Angle02.y),math.floor(angle))
+					--print(math.floor(Angle01.y),math.floor(Angle02.y),math.floor(angle))
 					
 					if angle < 45 or angle > (360-45) then
 						damage = damage * 10

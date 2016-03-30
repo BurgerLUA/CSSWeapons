@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "9MM MP5"
+SWEP.PrintName				= "9MM MP5 NAVY"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -24,7 +24,7 @@ SWEP.HoldType				= "smg"
 
 SWEP.Primary.Damage			= 26
 SWEP.Primary.NumShots		= 1
-SWEP.Primary.Sound			= Sound("weapons/mp5navy/mp5-1.wav")
+SWEP.Primary.Sound			= Sound("Weapon_MP5Navy.Single")
 SWEP.Primary.Cone			= 0.008
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 120

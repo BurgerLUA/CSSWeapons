@@ -24,7 +24,7 @@ SWEP.HoldType				= "revolver"
 
 SWEP.Primary.Damage			= 54
 SWEP.Primary.NumShots		= 1
-SWEP.Primary.Sound			= Sound("weapons/deagle/deagle-1.wav")
+SWEP.Primary.Sound			= Sound("Weapon_DEagle.Single")
 SWEP.Primary.Cone			= 0.003
 SWEP.Primary.ClipSize		= 7
 SWEP.Primary.SpareClip		= 35

@@ -24,7 +24,7 @@ SWEP.HoldType				= "ar2"
 
 SWEP.Primary.Damage			= 30
 SWEP.Primary.NumShots		= 1
-SWEP.Primary.Sound			= Sound("weapons/famas/famas-1.wav")
+SWEP.Primary.Sound			= Sound("Weapon_FAMAS.Single")
 SWEP.Primary.Cone			= 0.0033
 SWEP.Primary.ClipSize		= 25
 SWEP.Primary.SpareClip		= 90

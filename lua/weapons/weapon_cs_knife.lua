@@ -51,6 +51,11 @@ SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= false
 
+-- Weapon_Knife.Hit
+-- Weapon_Knife.HitWall
+-- Weapon_Knife.Slash
+-- Weapon_Knife.Stab
+
 function SWEP:PrimaryAttack()
 	if self:IsUsing() then return end
 	self.Owner:SetAnimation(PLAYER_ATTACK1)

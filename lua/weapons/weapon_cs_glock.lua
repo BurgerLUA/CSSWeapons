@@ -24,7 +24,7 @@ SWEP.HoldType				= "revolver"
 
 SWEP.Primary.Damage			= 25
 SWEP.Primary.NumShots		= 1
-SWEP.Primary.Sound			= Sound("weapons/glock/glock18-1.wav")
+SWEP.Primary.Sound			= Sound("Weapon_Glock.Single")
 SWEP.Primary.Cone			= 0.003
 SWEP.Primary.ClipSize		= 20
 SWEP.Primary.SpareClip		= 120

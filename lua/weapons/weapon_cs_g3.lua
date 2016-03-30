@@ -24,7 +24,7 @@ SWEP.HoldType				= "ar2"
 
 SWEP.Primary.Damage			= 80
 SWEP.Primary.NumShots		= 1
-SWEP.Primary.Sound			= Sound("weapons/g3sg1/g3sg1-1.wav")
+SWEP.Primary.Sound			= Sound("Weapon_G3SG1.Single")
 SWEP.Primary.Cone			= 0.00125
 SWEP.Primary.ClipSize		= 20
 SWEP.Primary.SpareClip		= 90

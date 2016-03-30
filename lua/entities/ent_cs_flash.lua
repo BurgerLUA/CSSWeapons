@@ -6,6 +6,9 @@ ENT.Information = ""
 ENT.Spawnable = false
 ENT.AdminSpawnable = false 
 
+ENT.BounceSound = Sound("Flashbang.Bounce")
+ENT.ExplodeSound = Sound("Flashbang.Explode")
+
 AddCSLuaFile()
 
 function ENT:Initialize()
@@ -35,7 +38,7 @@ function ENT:PhysicsCollide(data, physobj)
 		self.HitN = data.HitNormal
 		
 		if self:GetVelocity():Length() > 50 then
-			self:EmitSound("weapons/flashbang/grenade_hit1.wav",100,100)
+			self:EmitSound(self.BounceSound)
 		end
 	end
 end
@@ -70,7 +73,7 @@ function ENT:Detonate(self,pos)
 
 	if CLIENT then
 	
-		self:EmitSound("weapons/flashbang/flashbang_explode2.wav",100,100)
+		self:EmitSound(self.ExplodeSound)
 	
 		local effectdata = EffectData()
 			effectdata:SetStart( pos + Vector(0,0,100)) // not sure if we need a start and origin (endpoint) for this effect, but whatever
@@ -78,73 +81,40 @@ function ENT:Detonate(self,pos)
 			effectdata:SetScale( 100 )
 			effectdata:SetRadius( 5000 )
 		util.Effect( "HelicopterMegaBomb", effectdata )	
+		
+		local Players = player.GetAll()
 	
-		if table.Count(ents.FindInSphere(self:GetPos(),maxdistance)) > 0 then
-		
-			print("Did not find any entities")
-		
-			for k,v in pairs(ents.FindInSphere(self:GetPos(),maxdistance)) do
-			
-				--print(v)
-			
-				if v:IsPlayer() then
-				
-					--[[
-					local td = {}
-					td.start = v:EyePos() + LerpVector(0.1,self:GetPos(),v:EyePos())
-					td.endpos = self:GetPos() + self:OBBCenter()
-					td.filter = self
-					
-					local Trace = util.TraceLine(td)
-					
-					print(Trace.Entity)
-					--]]
-					
-					--if Trace.Entity == v then
-					
-						local distancecount = maxdistance/100 - self:GetPos():Distance(v:GetPos())/100
-						
-						print(distancecount)
+		if table.Count(Players) > 0 then
 
-						if distancecount > 0 and distancecount < 8 then 
-							
-							for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),maxdistance,120)) do
-								if f == self.Entity then
-									self:BlindEffects(v,distancecount)
-								end
-							end
-							
-						elseif distancecount >= 8 then
-						
+			for k,v in pairs(Players) do
+					
+				local distancecount = maxdistance/100 - self:GetPos():Distance(v:GetPos())/100
+
+				if distancecount > 0 and distancecount < 8 then 
+					for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),maxdistance,90)) do
+						if f == self.Entity then
 							self:BlindEffects(v,distancecount)
-							
 						end
-						
-					--else
-					
-						--v:SetDSP( 37, false )
-
-					--end
-
+					end
+				elseif distancecount >= 8 then
+					self:BlindEffects(v,distancecount)
 				end
+
 			end
 		end
 		
 	end
-		
 
 	if SERVER then
-	SafeRemoveEntity(self)
+		SafeRemoveEntity(self)
 	end
-		
-	
 	
 end
 
 
 function ENT:BlindEffects(v,distancecount)
 
-	print("BLINDED BY THE LIGHT")
+	--print("BLINDED BY THE LIGHT")
 
 	if distancecount > 1 then
 		v:SetDSP( 37, false )

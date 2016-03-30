@@ -24,7 +24,7 @@ SWEP.HoldType				= "smg"
 
 SWEP.Primary.Damage			= 30
 SWEP.Primary.NumShots		= 1
-SWEP.Primary.Sound			= Sound("weapons/ump45/ump45-1.wav")
+SWEP.Primary.Sound			= Sound("Weapon_UMP45.Single")
 SWEP.Primary.Cone			= 0.007
 SWEP.Primary.ClipSize		= 25
 SWEP.Primary.SpareClip		= 100

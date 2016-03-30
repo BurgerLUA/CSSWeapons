@@ -24,7 +24,7 @@ SWEP.HoldType				= "revolver"
 
 SWEP.Primary.Damage			= 34
 SWEP.Primary.NumShots 		= 1
-SWEP.Primary.Sound			= Sound("weapons/usp/usp_unsil-1.wav")
+SWEP.Primary.Sound			= Sound("Weapon_USP.Single")
 SWEP.Primary.Cone			= 0.005
 SWEP.Primary.ClipSize		= 12
 SWEP.Primary.SpareClip		= 100
@@ -34,7 +34,7 @@ SWEP.Primary.Automatic 		= false
 
 SWEP.WorldModel1			= "models/weapons/w_pist_usp.mdl"
 SWEP.WorldModel2 			= "models/weapons/w_pist_usp_silencer.mdl"
-SWEP.Secondary.Sound 		= Sound("weapons/usp/usp1.wav")
+SWEP.Secondary.Sound 		= Sound("Weapon_USP.SilencedShot")
 
 SWEP.RecoilMul				= 1
 SWEP.SideRecoilMul			= 1

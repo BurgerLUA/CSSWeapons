@@ -24,7 +24,7 @@ SWEP.HoldType				= "shotgun"
 
 SWEP.Primary.Damage			= 14
 SWEP.Primary.NumShots		= 9
-SWEP.Primary.Sound			= Sound("weapons/m3/m3-1.wav")
+SWEP.Primary.Sound			= Sound("Weapon_M3.Single")
 SWEP.Primary.Cone			= 0.04
 SWEP.Primary.ClipSize		= 8
 SWEP.Primary.SpareClip		= 32

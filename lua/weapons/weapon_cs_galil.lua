@@ -24,7 +24,7 @@ SWEP.HoldType				= "ar2"
 
 SWEP.Primary.Damage			= 30
 SWEP.Primary.NumShots		= 1
-SWEP.Primary.Sound			= Sound("weapons/galil/galil-1.wav")
+SWEP.Primary.Sound			= Sound("Weapon_Galil.Single")
 SWEP.Primary.Cone			= 0.0045
 SWEP.Primary.ClipSize		= 35
 SWEP.Primary.SpareClip		= 90

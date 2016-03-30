@@ -4,7 +4,11 @@ ENT.PrintName = "HE GRENADE"
 ENT.Author = ""
 ENT.Information = ""
 ENT.Spawnable = false
-ENT.AdminSpawnable = false 
+ENT.AdminSpawnable = false
+
+ENT.BounceSound = Sound("HEGrenade.Bounce")
+ENT.ExplodeSound = Sound("BaseGrenade.Explode")
+ENT.DebrisSound = Sound("BaseExplosionEffect.Sound")
 
 AddCSLuaFile()
 
@@ -34,7 +38,7 @@ function ENT:PhysicsCollide(data, physobj)
 
 		if self:GetVelocity():Length() > 50 then
 		
-			self:EmitSound("weapons/hegrenade/he_bounce-1.wav")
+			self:EmitSound(self.BounceSound)
 			
 			if self:GetVelocity():Length() > 100 then
 				if data.HitEntity and data.HitEntity:Health() then
@@ -85,7 +89,8 @@ function ENT:Detonate(self,pos)
 			util.BlastDamage(self, self.Owner, pos, 400, 98)
 		end
 		
-		self:EmitSound("weapons/hegrenade/explode"..math.random(3,5)..".wav",100,100)
+		self:EmitSound(self.ExplodeSound)
+		--self:EmitSound(self.DebrisSound)
 		
 		if IsValid(self.HitP) then
 			self.Pos1 = self.HitP + self.HitN

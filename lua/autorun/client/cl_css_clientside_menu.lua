@@ -130,6 +130,14 @@ local ItemTable = {}
 	ItemTable[count]["height"] = 25
 	count = count + 1
 	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "I AM A FOOL"
+	ItemTable[count]["command"] = "cl_css_crosshair_fool"
+	ItemTable[count]["height"] = 25
+	ItemTable[count]["special"] = true
+	count = count + 1
+	
 	
 function CSSClientsideWeaponSettings()
 
@@ -163,7 +171,10 @@ function CSSClientsideWeaponSettings()
 		
 	local DermaTitle = {}
 	local DermaObj = {}
-	local height = 0	
+	local height = 0
+	
+	local UnixApril1 = 1459468800
+	local UnixApril2 = 1459555200
 
 	for k,v in pairs(ItemTable) do
 		
@@ -171,7 +182,7 @@ function CSSClientsideWeaponSettings()
 		local Table = v
 
 		DermaObj[k] = vgui.Create(Table["type"],Base1)
-		DermaObj[k]:SetPos(5, height)
+		DermaObj[k]:SetPos(15, height)
 		
 		if Table["type"] == "Slider" then
 			DermaTitle[k] = vgui.Create("DLabel",Base1)
@@ -191,12 +202,18 @@ function CSSClientsideWeaponSettings()
 			DermaObj[k]:SetColor(Color(0,0,0,255))
 			DermaObj[k]:SetText( Table["text"] )
 			DermaObj[k]:SizeToContents()
-		elseif Table["type"] == "DCheckBoxLabel" then
+		elseif Table["type"] == "DCheckBoxLabel" and not Table["special"] then
 			DermaObj[k]:SetText( Table["text"] )
 			DermaObj[k]:SetTextColor( Color(0, 0, 0, 255) )
 			DermaObj[k]:SizeToContents()
 			DermaObj[k]:SetPos(15, height)
 			DermaObj[k]:SetConVar( Table["command"] )
+		elseif Table["type"] == "DCheckBoxLabel" and Table["special"] and os.time() >= UnixApril1 and os.time() <= UnixApril2 then
+			DermaObj[k]:SetText( Table["text"] )
+			DermaObj[k]:SetTextColor( Color(0, 0, 0, 255) )
+			DermaObj[k]:SizeToContents()
+			DermaObj[k]:SetPos(15, height)
+			DermaObj[k]:SetConVar( Table["command"] )	
 		elseif Table["type"] == "DColorMixer" then
 
 			DermaObj[k]:SetPos(15, height)

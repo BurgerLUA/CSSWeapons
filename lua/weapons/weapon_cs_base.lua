@@ -63,6 +63,7 @@ CreateClientConVar("cl_css_crosshair_shadow", "0", true, true )
 CreateClientConVar("cl_css_crosshair_smoothing", "1", true, true )
 CreateClientConVar("cl_css_crosshair_smoothing_mul", "1", true, true )
 CreateClientConVar("cl_css_crosshair_neversights", "0", true, true )
+CreateClientConVar("cl_css_crosshair_fool", "1", true, true )
 
 game.AddAmmoType({name = "hegrenade", })
 game.AddAmmoType({name = "flashgrenade", })
@@ -1679,6 +1680,8 @@ function SWEP:DrawHUD()
 	
 end
 
+local Dick = Material("vgui/aprilfools/DICKBUTT")
+
 function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 
 	local XRound = math.floor(x/2)
@@ -1688,8 +1691,23 @@ function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 	
 	local FinalCone = math.floor( math.Max(Cone,WRound*2,LRound/2) )
 	
-	self:DrawShadowCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,width,r,g,b,a)
-	self:DrawNormalCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,width,r,g,b,a)
+	local Size = 128
+	local ConeMod = Cone
+	
+	local UnixApril1 = 1459468800
+	local UnixApril2 = 1459555200
+	
+	if GetConVarNumber("cl_css_crosshair_fool") == 1 and os.time() >= UnixApril1 and os.time() <= UnixApril2 then
+		surface.SetDrawColor(Color(255,255,255,255))
+		surface.SetMaterial(Dick)
+		surface.DrawTexturedRectRotated(x/2,y/2 - Size*0.5 - ConeMod,Size,Size,0)
+		surface.DrawTexturedRectRotated(x/2,y/2 + Size*0.5 + ConeMod,Size,Size,180)
+		surface.DrawTexturedRectRotated(x/2 - Size*0.5 - ConeMod ,y/2,Size,Size,90)
+		surface.DrawTexturedRectRotated(x/2 + Size*0.5 + ConeMod ,y/2,Size,Size,270)
+	else
+		self:DrawShadowCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,width,r,g,b,a)
+		self:DrawNormalCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,width,r,g,b,a)
+	end
 
 end
 

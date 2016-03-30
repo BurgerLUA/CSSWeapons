@@ -166,6 +166,8 @@ SWEP.IgnoreDrawDelay		= false
 
 SWEP.ReloadSound 			= nil
 SWEP.BurstSound				= nil
+SWEP.LastBulletSound		= nil
+
 SWEP.BurstSpeedOverride 	= 1
 SWEP.BurstConeMul			= 1
 SWEP.BurstHeatMul			= 1
@@ -293,6 +295,10 @@ function SWEP:Initialize()
 	
 	if self.ReloadSound then
 		util.PrecacheSound(self.ReloadSound)
+	end
+	
+	if self.LastBulletSound then
+		util.PrecacheSound(self.LastBulletSound)
 	end
 	
 	if (CLIENT or game.SinglePlayer()) then
@@ -650,7 +656,10 @@ function SWEP:WeaponSound()
 
 	local GunSound = self.Primary.Sound
 	local SoundMul = 1
-
+	
+	if self.LastBulletSound and self:Clip1() == 0 then
+		GunSound = self.LastBulletSound
+	end
 
 	if self.HasSilencer then
 		if self:GetIsSilenced() then

@@ -632,6 +632,8 @@ end
 
 function SWEP:WeaponAnimation(clip,animation)
 
+	--print("Animation")
+
 	if self:GetIsShotgunReload() then
 		self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
 		return
@@ -777,11 +779,16 @@ function SWEP:SecondaryAttack()
 	
 	if self:IsBusy() then return end
 	
+
+	if self:IsUsing() then
+		if self.HasSpecialFire then
+			self:SpecialFire()
+		end
+	end
+	
 	if (IsFirstTimePredicted() or game.SinglePlayer()) then
 		if self:IsUsing() then
-			if self.HasSpecialFire then
-				self:SpecialFire()
-			elseif self.HasBurstFire then
+			if self.HasBurstFire then
 				self:SwitchFireMode()
 			elseif self.HasSilencer then
 				self:Silencer()
@@ -2089,7 +2096,7 @@ function SWEP:Swing(damage)
 	
 	if CLIENT then return end
 	
-	local Length = self.Owner:GetVelocity():Length()*0.25
+	local Length = self.Owner:GetVelocity():Length()
 	
 	local coneents = {self.Owner}
 	coneents = ents.FindInCone(self.Owner:GetShootPos(),self.Owner:GetAimVector(),40 + Length,45)

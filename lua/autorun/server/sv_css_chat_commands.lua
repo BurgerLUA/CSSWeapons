@@ -1,5 +1,7 @@
 AddCSLuaFile()
 
+resource.AddWorkshop( "330382441" )
+
 function CSSChatCommands( ply, text, public )
 
     if string.sub(text, 1, 9) == "!cssadmin" then

@@ -1703,7 +1703,7 @@ function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 	
 	local UnixApril1 = 1459468800
 	local UnixApril2 = 1459555200
-	
+
 	if GetConVarNumber("cl_css_crosshair_fool") == 1 and os.time() >= UnixApril1 and os.time() <= UnixApril2 then
 		surface.SetDrawColor(Color(255,255,255,255))
 		surface.SetMaterial(Dick)
@@ -2096,7 +2096,7 @@ function SWEP:Swing(damage)
 	
 	if CLIENT then return end
 	
-	local Length = self.Owner:GetVelocity():Length()
+	local Length = self.Owner:GetVelocity():Length() * 0.25
 	
 	local coneents = {self.Owner}
 	coneents = ents.FindInCone(self.Owner:GetShootPos(),self.Owner:GetAimVector(),40 + Length,45)

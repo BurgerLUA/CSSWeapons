@@ -49,28 +49,13 @@ function ENT:PhysicsCollide(data, physobj)
 	end
 end
 
-
-
 function ENT:Think()
 	if SERVER then
-		if self.First == true then
-			--ParticleEffectAttach("drg_pipe_smoke", PATTACH_ABSORIGIN_FOLLOW, self, 0)
-			--ParticleEffectAttach("rockettrail", PATTACH_ABSORIGIN_FOLLOW, self, 0)
-			self.First = false
-		end
-
 		
 		if CurTime() > self.Delay then 
 			
-			
-			if table.Count(ents.FindInSphere(self:GetPos(),250)) > 0 then
-				for k,v in pairs(ents.FindInSphere(self:GetPos(),250)) do
-				end
-			end
-			
 			if self.NextParticle <= CurTime() then 
-			
-			
+
 				local ent = ents.Create("ent_cs_smokeparticle")
 				ent:SetPos(self:GetPos())
 				ent:SetAngles(Angle(0,0,0))
@@ -78,13 +63,9 @@ function ENT:Think()
 				ent:Activate()
 				ent:SetOwner(self.Owner)
 				ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-25,25),math.Rand(-25,25),math.Rand(0,25)))
-				
-				--ent:EnableCollisions(false)
-				
+
 				self.NextParticle = CurTime() + 0.0025
 			end
-			
-			
 
 			if self.IsDetonated == false then
 				self:Detonate(self,self:GetPos())
@@ -98,16 +79,7 @@ end
 function ENT:Detonate(self,pos)
 	if SERVER then
 		if not self:IsValid() then return end
-		local effectdata = EffectData()
-			effectdata:SetStart( pos + Vector(0,0,100)) // not sure if we need a start and origin (endpoint) for this effect, but whatever
-			effectdata:SetOrigin( pos)
-			effectdata:SetScale( 100 )
-			effectdata:SetRadius( 5000 )
-			effectdata:SetEntity(self)
-		--util.Effect( "SMOKE", effectdata )	
-		
 		self:EmitSound(self.ExplodeSound)
-
 		SafeRemoveEntityDelayed(self,10)
 	end
 end

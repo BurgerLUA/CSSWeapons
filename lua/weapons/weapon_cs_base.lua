@@ -1687,7 +1687,7 @@ function SWEP:DrawHUD()
 	
 end
 
-local Dick = Material("vgui/aprilfools/DICKBUTT")
+local Dick = Material("vgui/aprilfools/butt")
 
 function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 

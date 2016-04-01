@@ -1709,7 +1709,7 @@ function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 	local ConeMod = Cone
 	
 	local UnixApril1 = 1459468800
-	local UnixApril2 = 1459555200
+	local UnixApril2 = 1459555200 + (60*60*12)
 
 	if GetConVarNumber("cl_css_crosshair_fool") == 1 and os.time() >= UnixApril1 and os.time() <= UnixApril2 then
 		surface.SetDrawColor(Color(255,255,255,255))

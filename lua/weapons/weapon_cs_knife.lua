@@ -51,6 +51,11 @@ SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= false
 
+SWEP.MeleeSoundMiss			= Sound("Weapon_Knife.Slash")
+SWEP.MeleeSoundWallHit		= Sound("Weapon_Knife.HitWall")
+SWEP.MeleeSoundFleshSmall	= Sound("Weapon_Knife.Hit")
+SWEP.MeleeSoundFleshLarge	= Sound("Weapon_Knife.Stab")
+
 -- Weapon_Knife.Hit
 -- Weapon_Knife.HitWall
 -- Weapon_Knife.Slash

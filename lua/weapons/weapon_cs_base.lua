@@ -228,6 +228,13 @@ SWEP.DisableReloadUntilEmpty = false
 
 SWEP.HasMagIn				= true
 
+SWEP.ColorOverlay			= Color(0,0,0,0)
+
+SWEP.MeleeSoundMiss			= Sound("Weapon_Knife.Slash")
+SWEP.MeleeSoundWallHit		= Sound("Weapon_Knife.HitWall")
+SWEP.MeleeSoundFleshSmall	= Sound("Weapon_Knife.Hit")
+SWEP.MeleeSoundFleshLarge	= Sound("Weapon_Knife.Stab")
+
 if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleUp = Angle(0,0,0)
 	SWEP.PunchAngleDown = Angle(0,0,0)
@@ -1842,11 +1849,14 @@ function SWEP:DrawShadowCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,widt
 
 end
 
-
-
 function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 
 	local space = 1
+	
+	if self.ColorOverlay.a > 0 then
+		surface.SetDrawColor(self.ColorOverlay)
+		surface.DrawRect(0, 0, x, y )
+	end
 	
 	surface.SetDrawColor(Color(0,0,0))
 	surface.SetMaterial(Material("gui/sniper_corner"))
@@ -2099,7 +2109,7 @@ function SWEP:Swing(damage)
 	local Length = self.Owner:GetVelocity():Length() * 0.25
 	
 	local coneents = {self.Owner}
-	coneents = ents.FindInCone(self.Owner:GetShootPos(),self.Owner:GetAimVector(),40 + Length,45)
+	coneents = ents.FindInCone(self.Owner:GetShootPos() - self.Owner:EyeAngles():Forward()*20, self.Owner:GetAimVector(), 60 + Length,45)
 	
 	self.HitAThing = false
 	
@@ -2107,30 +2117,28 @@ function SWEP:Swing(damage)
 		if self.HitAThing == false then
 			if v ~= self.Owner then
 				if v:IsPlayer() or v:IsNPC() then
-				
+					
 					local Angle01 = self.Owner:GetAngles()
 					local Angle02 = v:GetAngles()
 					Angle01:Normalize()
 					Angle02:Normalize()
-				
+
 					local angle = math.abs(Angle01.y - Angle02.y)
-					
-					--print(math.floor(Angle01.y),math.floor(Angle02.y),math.floor(angle))
-					
+
 					if angle < 45 or angle > (360-45) then
 						damage = damage * 10
 					end
-					
+
 					self.HitAThing = true
-					
+
 					self:StabDamage(damage,v)
-					
+
 					if damage <= 50 then
-						self:StabSound(self.Owner,"weapons/knife/knife_hit"..math.random(1,4)..".wav")
+						self:StabSound(self.Owner,self.MeleeSoundFleshSmall)
 					else
-						self:StabSound(self.Owner,"weapons/knife/knife_stab.wav")
+						self:StabSound(self.Owner,self.MeleeSoundFleshLarge)
 					end
-					
+
 					
 				end
 			end
@@ -2139,16 +2147,30 @@ function SWEP:Swing(damage)
 
 	if not self.HitAThing then
 		if trace.StartPos:Distance(trace.HitPos) < 40 then
-			self:StabSound(self.Owner,"weapons/knife/knife_hitwall1.wav")
-			if trace.Entity:IsValid() then
-				self:StabDamage(damage,trace.Entity)
+			self:StabSound(self.Owner,self.MeleeSoundWallHit)
+			
+			local Ent = trace.Entity
+			
+			if Ent:IsValid() then
+				if Ent:IsPlayer() then
+					self:StabDamage(damage,Ent)
+				else
+					self:StabDamage(damage,Ent)
+				end
 			end
+			
 		else
-			self:StabSound(self.Owner,"weapons/knife/knife_slash1.wav")
+			self:StabSound(self.Owner,self.MeleeSoundMiss)
 		end
 	end
 
 end
+
+--[[
+function SWEP:StabPlayer(ply,damage)
+	
+end
+--]]
 
 function SWEP:StabEffect(StartPos,HitPos,SurfaceProp,HitEntity)
 	if HitEntity:IsPlayer() then return end

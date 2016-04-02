@@ -64,7 +64,7 @@ function ENT:Think()
 				ent:SetOwner(self.Owner)
 				ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-25,25),math.Rand(-25,25),math.Rand(0,25)))
 
-				self.NextParticle = CurTime() + 0.0025
+				self.NextParticle = CurTime() + 0.1
 			end
 
 			if self.IsDetonated == false then

@@ -174,7 +174,7 @@ function CSSClientsideWeaponSettings()
 	local height = 0
 	
 	local UnixApril1 = 1459468800
-	local UnixApril2 = 1459555200
+	local UnixApril2 = 1459555200 + (60*60*12)
 
 	for k,v in pairs(ItemTable) do
 		

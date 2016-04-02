@@ -2106,7 +2106,7 @@ function SWEP:Swing(damage)
 	
 	if CLIENT then return end
 	
-	local Length = self.Owner:GetVelocity():Length() * 0.25
+	local Length = math.Clamp(self.Owner:GetVelocity():Length() * 0.25,1,20)
 	
 	local coneents = {self.Owner}
 	coneents = ents.FindInCone(self.Owner:GetShootPos() - self.Owner:EyeAngles():Forward()*20, self.Owner:GetAimVector(), 60 + Length,45)

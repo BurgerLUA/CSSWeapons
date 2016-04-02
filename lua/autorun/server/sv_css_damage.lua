@@ -39,6 +39,8 @@ hook.Add("EntityTakeDamage","CSS Bolt Fix",CSSBoltFix)
 
 concommand.Add( "nerfme", function( ply,cmd,args,argStr )
 
+	local PlayerHealth = 200
+
 	local AllWeapons = weapons.GetList()
 	--local AllWeapons = {weapons.GetStored("weapon_cs_fiveseven"),weapons.GetStored("weapon_ex_p90minigun")}
 	
@@ -65,7 +67,7 @@ concommand.Add( "nerfme", function( ply,cmd,args,argStr )
 			local ClipDamage = Damage * ClipSize
 
 			local DPS = math.min(ClipDamage,math.floor(( 1 / Delay) * Damage ))
-			local KillTime = math.Round((math.ceil(100/Damage) - 1) * (Delay),2)
+			local KillTime = math.Round((math.ceil(PlayerHealth/Damage) - 1) * (Delay),2)
 			
 			MyWeapons[PrintName] = {}
 			MyWeapons[PrintName].DPS = DPS

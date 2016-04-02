@@ -56,11 +56,6 @@ SWEP.MeleeSoundWallHit		= Sound("Weapon_Knife.HitWall")
 SWEP.MeleeSoundFleshSmall	= Sound("Weapon_Knife.Hit")
 SWEP.MeleeSoundFleshLarge	= Sound("Weapon_Knife.Stab")
 
--- Weapon_Knife.Hit
--- Weapon_Knife.HitWall
--- Weapon_Knife.Slash
--- Weapon_Knife.Stab
-
 function SWEP:PrimaryAttack()
 	if self:IsUsing() then return end
 	self.Owner:SetAnimation(PLAYER_ATTACK1)

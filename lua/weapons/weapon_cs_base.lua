@@ -121,6 +121,7 @@ SWEP.HoldType				= "ar2"
 SWEP.AddFOV					= 0
 
 SWEP.Primary.Damage			= 36
+SWEP.Primary.Range			= 56756
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("weapons/ak47/ak47-1.wav")
 SWEP.Primary.Cone			= 0.00125
@@ -503,18 +504,7 @@ function SWEP:PrimaryAttack()
 	self:AfterPump() -- don't predict, has animations
 	self:WeaponDelay() -- don't predict, has delay
 	self:HandleBurstDelay() -- don't predict
-	
-	if self.HasDual then
-		if self:GetIsLeftFire() then
-			self:WeaponAnimation(self:Clip1(),ACT_VM_SECONDARYATTACK)
-			self:SetIsLeftFire(false)
-		else
-			self:WeaponAnimation(self:Clip1(),ACT_VM_PRIMARYATTACK)
-			self:SetIsLeftFire(true)
-		end
-	else
-		self:WeaponAnimation(self:Clip1(),ACT_VM_PRIMARYATTACK)
-	end
+	self:HandleShootAnimations() -- don't predict, has animations
 
 	--self.Weapon:MuzzleFlash()
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
@@ -532,6 +522,21 @@ function SWEP:PrimaryAttack()
 	end
 
 end
+
+function SWEP:HandleShootAnimations()
+	if self.HasDual then
+		if self:GetIsLeftFire() then
+			self:WeaponAnimation(self:Clip1(),ACT_VM_SECONDARYATTACK)
+			self:SetIsLeftFire(false)
+		else
+			self:WeaponAnimation(self:Clip1(),ACT_VM_PRIMARYATTACK)
+			self:SetIsLeftFire(true)
+		end
+	else
+		self:WeaponAnimation(self:Clip1(),ACT_VM_PRIMARYATTACK)
+	end
+end
+
 
 function SWEP:CanShoot()
 	if self:IsBusy() then return false end
@@ -984,6 +989,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	local bullet = {}
 	bullet.Damage	= Damage * GetConVarNumber("sv_css_damage_scale")
 	bullet.Num		= Shots
+	--bullet.Range	= self.Primary.Range
 	bullet.Spread	= Vector(Cone, Cone, 0)
 	bullet.Src		= Source
 	bullet.Dir		= Direction
@@ -1409,7 +1415,7 @@ function SWEP:HandleBurstFireShoot()
 			if (self:Clip1() > 0) or self:Clip1() == -1 and self:Ammo1() >= 1 then
 			
 				self:TakePrimaryAmmo(1)
-				self:WeaponAnimation(self:Clip1(),ACT_VM_PRIMARYATTACK)
+				self:HandleShootAnimations()
 				
 				if (IsFirstTimePredicted() or game.SinglePlayer()) then
 					self:PreShootBullet()
@@ -2163,6 +2169,8 @@ function SWEP:Swing(damage)
 			self:StabSound(self.Owner,self.MeleeSoundMiss)
 		end
 	end
+	
+	return self.HitAThing
 
 end
 

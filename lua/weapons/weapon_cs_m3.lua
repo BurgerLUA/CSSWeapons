@@ -20,7 +20,7 @@ SWEP.SlotPos				= 1
 SWEP.ViewModel 				= "models/weapons/cstrike/c_shot_m3super90.mdl"
 SWEP.WorldModel				= "models/weapons/w_shot_m3super90.mdl"
 SWEP.VModelFlip 			= false
-SWEP.HoldType				= "shotgun"
+SWEP.HoldType				= "ar2"
 
 SWEP.Primary.Damage			= 14
 SWEP.Primary.NumShots		= 9

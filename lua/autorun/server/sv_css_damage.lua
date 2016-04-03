@@ -39,7 +39,7 @@ hook.Add("EntityTakeDamage","CSS Bolt Fix",CSSBoltFix)
 
 concommand.Add( "nerfme", function( ply,cmd,args,argStr )
 
-	local PlayerHealth = 200
+	local PlayerHealth = 100
 
 	local AllWeapons = weapons.GetList()
 	--local AllWeapons = {weapons.GetStored("weapon_cs_fiveseven"),weapons.GetStored("weapon_ex_p90minigun")}

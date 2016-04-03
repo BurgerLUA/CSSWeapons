@@ -26,7 +26,7 @@ SWEP.Primary.Damage			= 20
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.ClipSize		= -1
 SWEP.Primary.SpareClip		= -1
-SWEP.Primary.Delay			= 0.75
+SWEP.Primary.Delay			= 0.5
 SWEP.Primary.Ammo			= "none"
 SWEP.Primary.Automatic 		= true 
 
@@ -65,7 +65,6 @@ function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
 	self:Swing(self.Primary.Damage)
-	
 end
 
 function SWEP:SecondaryAttack()
@@ -83,7 +82,7 @@ end
 
 function SWEP:Deploy()
 
-	self:EmitSound("weapons/knife/knife_deploy1.wav",100,100)
+	self:EmitGunSound("weapons/knife/knife_deploy1.wav")
 	self.Owner:DrawViewModel(true)
 	self:SendWeaponAnim(ACT_VM_DRAW)
 	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())	

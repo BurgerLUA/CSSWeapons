@@ -20,7 +20,7 @@ SWEP.SlotPos				= 1
 SWEP.ViewModel 				= "models/weapons/cstrike/c_shot_xm1014.mdl"
 SWEP.WorldModel				= "models/weapons/w_shot_xm1014.mdl"
 SWEP.VModelFlip 			= false
-SWEP.HoldType				= "shotgun"
+SWEP.HoldType				= "ar2"
 
 SWEP.Primary.Damage			= 18
 SWEP.Primary.NumShots		= 6

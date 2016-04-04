@@ -22,7 +22,7 @@ SWEP.WorldModel				= "models/weapons/w_pist_glock18.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "revolver"
 
-SWEP.Primary.Damage			= 25
+SWEP.Primary.Damage			= 26
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("Weapon_Glock.Single")
 SWEP.Primary.Cone			= 0.003

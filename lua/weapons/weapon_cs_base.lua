@@ -63,6 +63,7 @@ CreateClientConVar("cl_css_crosshair_shadow", "0", true, true )
 CreateClientConVar("cl_css_crosshair_smoothing", "1", true, true )
 CreateClientConVar("cl_css_crosshair_smoothing_mul", "1", true, true )
 CreateClientConVar("cl_css_crosshair_neversights", "0", true, true )
+CreateClientConVar("cl_css_crosshair_offset", "0", true, true )
 CreateClientConVar("cl_css_crosshair_fool", "1", true, true )
 
 game.AddAmmoType({name = "hegrenade", })
@@ -969,7 +970,7 @@ function SWEP:AddHeat(Damage,Shots)
 	local CoolDown = DamageMod*ConeMod*WeightMod*GetConVarNumber("sv_css_heat_scale")*BurstMod
 	local CoolTime = CurTime() + (self.Primary.Delay + 0.1)*GetConVarNumber("sv_css_cooltime_scale")
 	
-	self:SetCoolDown( self:GetCoolDown() + CoolDown )
+	self:SetCoolDown( math.Clamp(self:GetCoolDown() + CoolDown,0,10) )
 	self:SetCoolTime( CoolTime )
 	
 	if CLIENT then
@@ -1652,9 +1653,9 @@ function SWEP:DrawHUD()
 	local VelCone = self.Owner:GetVelocity():Length()*0.0001
 	
 	if GetConVarNumber("cl_css_crosshair_dynamic") == 0 then
-		Cone = math.Clamp(self.Primary.Cone*900,0,1000)
+		Cone = math.Clamp(self.Primary.Cone*900,0,x/2)
 	else
-		Cone = math.Clamp(self:HandleCone(self.Primary.Cone,true) * 900,0,1000)*fovbonus
+		Cone = math.Clamp(self:HandleCone(self.Primary.Cone,true) * 900,0,x/2)*fovbonus
 	end
 	
 	local ConeToSend = Cone
@@ -1685,6 +1686,7 @@ function SWEP:DrawHUD()
 
 	if self.HasScope then
 		if self:GetZoomed() then
+		
 			if LocalPlayer():ShouldDrawLocalPlayer() then
 				self:DrawCustomCrosshair(x,y,ConeToSend,length,width,r,g,b,a)
 			else
@@ -1708,8 +1710,10 @@ function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 	local WRound = math.floor(width/2)
 	local LRound = math.floor(length/2)
 	
-	local FinalCone = math.floor( math.Max(Cone,WRound*2,LRound/2) )
+	local SizeOffset = GetConVarNumber("cl_css_crosshair_offset")
 	
+	local FinalCone = math.floor( math.Max(Cone,WRound*2,LRound/2) + SizeOffset )
+
 	local Size = 128
 	local ConeMod = Cone
 	
@@ -1735,7 +1739,7 @@ function SWEP:DrawNormalCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,widt
 	if !self:GetZoomed() or self.EnableIronCross or ( GetConVarNumber("cl_css_crosshair_neversights") == 1 and not self.HasScope) then
 
 		if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
-
+			
 			if width > 1 then
 			
 				local x1 = XRound - WRound 
@@ -1776,28 +1780,28 @@ function SWEP:DrawNormalCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,widt
 			surface.SetDrawColor(r,g,b,a)
 			surface.DrawRect( XRound - WRound, YRound - WRound , Max, Max )
 		end
+
+		if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 then
 		
-	end
-	
-	if GetConVarNumber("cl_css_crosshair_style") >= 2 and GetConVarNumber("cl_css_crosshair_style") <= 5 and not self:GetZoomed() then
-	
-		local Offset = 0
-	
-		if GetConVarNumber("cl_css_crosshair_style") == 4 then
-			Offset = LRound*2
-		elseif GetConVarNumber("cl_css_crosshair_style") == 3 then
-			Offset = LRound
-		else
-			Offset = 0
-		end
+			local Offset = 0
 		
-		surface.DrawCircle(XRound,YRound, FinalCone + Offset, Color(r,g,b,a))
-		
-		if WRound*2 > 1 then
+			if GetConVarNumber("cl_css_crosshair_style") == 4 then
+				Offset = LRound*2
+			elseif GetConVarNumber("cl_css_crosshair_style") == 3 then
+				Offset = LRound
+			else
+				Offset = 0
+			end
+			
+			surface.DrawCircle(XRound,YRound, FinalCone + Offset, Color(r,g,b,a))
+			
+			if WRound*2 > 1 then
 				surface.DrawCircle(XRound,YRound, FinalCone + Offset + 1, Color(r,g,b,a))
+			end
+			
 		end
 		
-	end
+	end	
 
 end
 
@@ -1805,20 +1809,22 @@ function SWEP:DrawShadowCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,widt
 
 	if (!self:GetZoomed() or self.EnableIronCross or ( GetConVarNumber("cl_css_crosshair_neversights") == 1 and not self.HasScope) ) and GetConVarNumber("cl_css_crosshair_shadow") >= 1 and WRound == 0 then
 	
-		local x1 = XRound + FinalCone + LRound*2
-		local x2 = XRound - FinalCone - LRound*2
-		local y3 = YRound + FinalCone + LRound*2
-		local y4 = YRound - FinalCone - LRound*2
+		if GetConVarNumber("cl_css_crosshair_style") >= 1 and GetConVarNumber("cl_css_crosshair_style") <= 4 then
+			local x1 = XRound + FinalCone + LRound*2
+			local x2 = XRound - FinalCone - LRound*2
+			local y3 = YRound + FinalCone + LRound*2
+			local y4 = YRound - FinalCone - LRound*2
 
-		local Offset = 1
-		local ShadowWidth = 3
-		local ShadowLength = LRound*2 + Offset*3
+			local Offset = 1
+			local ShadowWidth = 3
+			local ShadowLength = LRound*2 + Offset*3
 
-		surface.SetDrawColor(Color(0,0,0,255))
-		surface.DrawRect( x1 - LRound*2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
-		surface.DrawRect( x2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
-		surface.DrawRect( XRound - Offset, y3 - LRound*2 - 1 , ShadowWidth, ShadowLength )
-		surface.DrawRect( XRound - Offset, y4 - 1 , ShadowWidth, ShadowLength )
+			surface.SetDrawColor(Color(0,0,0,255))
+			surface.DrawRect( x1 - LRound*2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
+			surface.DrawRect( x2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
+			surface.DrawRect( XRound - Offset, y3 - LRound*2 - 1 , ShadowWidth, ShadowLength )
+			surface.DrawRect( XRound - Offset, y4 - 1 , ShadowWidth, ShadowLength )
+		end
 		
 		if GetConVarNumber("cl_css_crosshair_dot") >= 1 then
 	

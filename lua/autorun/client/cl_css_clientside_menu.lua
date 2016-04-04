@@ -70,6 +70,16 @@ local ItemTable = {}
 	ItemTable[count]["decimals"] = 0
 	ItemTable[count]["height"] = 40
 	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["name"] = "Crosshair Size Offset"
+	ItemTable[count]["command"] = "cl_css_crosshair_offset"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 20
+	ItemTable[count]["decimals"] = 0
+	ItemTable[count]["height"] = 40
+	count = count + 1
 
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "DCheckBoxLabel"

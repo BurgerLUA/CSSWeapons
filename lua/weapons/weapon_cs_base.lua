@@ -407,8 +407,6 @@ function SWEP:Deploy()
 	
 	self.Owner:DrawViewModel(true)
 
-	--print(self.IgnoreDrawDelay)
-	
 	if not self.IgnoreDrawDelay then
 		if self.HasSilencer then
 			if self:GetIsSilenced() then
@@ -422,7 +420,6 @@ function SWEP:Deploy()
 			self:SendWeaponAnim(ACT_VM_DRAW)
 		end
 	end
-
 	
 	if self.WeaponType ~= "Throwable" then
 		if not self.IgnoreDrawDelay then
@@ -719,7 +716,7 @@ function SWEP:HandleCone(Cone,IsCrosshair)
 
 	Cone = Cone * GetConVarNumber("sv_css_cone_scale")
 	
-	if IsCrosshair then
+	if IsCrosshair and not game.SinglePlayer() then
 		Cone = Cone + (self.ClientCoolDown*self.HeatMul*0.01)
 	else
 		Cone = Cone + (self:GetCoolDown()*self.HeatMul*0.01)
@@ -1489,7 +1486,7 @@ function SWEP:FinishShotgunReload()
 end
 
 function SWEP:CancelReload()
-	self:SendWeaponAnim( ACT_VM_IDLE )
+	--self:SendWeaponAnim( ACT_VM_IDLE )
 	self:SetNextPrimaryFire(CurTime() + 0.1)
 	self:SetIsReloading(false)
 end
@@ -1662,24 +1659,26 @@ function SWEP:DrawHUD()
 	
 	local ConeToSend = Cone
 	
-	if GetConVarNumber("cl_css_crosshair_smoothing") == 1 then
-	
-		if not self.StoredCrosshair then
-			self.StoredCrosshair = Cone
-		end
+	if not game.SinglePlayer() then
+		if GetConVarNumber("cl_css_crosshair_smoothing") == 1 then
 		
-		local SmoothingMul = GetConVarNumber("cl_css_crosshair_smoothing_mul") * FrameTime() * fovbonus
-		
-		if Cone > self.StoredCrosshair then
-			self.StoredCrosshair = math.min(Cone,self.StoredCrosshair + 500 * SmoothingMul )
-		elseif Cone < self.StoredCrosshair then
-			self.StoredCrosshair = math.max(Cone,self.StoredCrosshair - 300 * SmoothingMul )
-		end
-		
-		ConeToSend = self.StoredCrosshair
+			if not self.StoredCrosshair then
+				self.StoredCrosshair = Cone
+			end
+			
+			local SmoothingMul = GetConVarNumber("cl_css_crosshair_smoothing_mul") * FrameTime() * fovbonus
+			
+			if Cone > self.StoredCrosshair then
+				self.StoredCrosshair = math.min(Cone,self.StoredCrosshair + 500 * SmoothingMul )
+			elseif Cone < self.StoredCrosshair then
+				self.StoredCrosshair = math.max(Cone,self.StoredCrosshair - 300 * SmoothingMul )
+			end
+			
+			ConeToSend = self.StoredCrosshair
 
+		end
 	end
-	
+		
 	if self.HasCrosshair or (self.Owner:IsPlayer() and self.Owner:IsBot()) then
 		self:DrawCustomCrosshair(x,y,ConeToSend,length,width,r,g,b,a)
 	end

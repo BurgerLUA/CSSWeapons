@@ -33,9 +33,9 @@ SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1
-SWEP.SideRecoilMul			= 1
+SWEP.SideRecoilMul			= 0.75
 SWEP.VelConeMul				= 0.5
-SWEP.HeatMul				= 1
+SWEP.HeatMul				= 0.8
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.5

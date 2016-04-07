@@ -33,7 +33,7 @@ SWEP.Primary.Ammo			= "Buckshot"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 1
-SWEP.SideRecoilMul			= 1
+SWEP.SideRecoilMul			= 0.1
 SWEP.VelConeMul				= 2
 SWEP.HeatMul				= 1
 

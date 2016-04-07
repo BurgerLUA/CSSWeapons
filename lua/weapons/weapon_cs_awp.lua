@@ -33,7 +33,7 @@ SWEP.Primary.Ammo			= "SniperRound"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 0.1
-SWEP.SideRecoilMul			= 1
+SWEP.SideRecoilMul			= 0.5
 SWEP.VelConeMul				= 10
 SWEP.HeatMul				= 1
 
@@ -47,7 +47,7 @@ SWEP.HasBoltAction 			= true
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
-SWEP.HasSideRecoil			= false
+SWEP.HasSideRecoil			= true
 SWEP.HasDownRecoil			= false
 
 SWEP.HasIronSights 			= false

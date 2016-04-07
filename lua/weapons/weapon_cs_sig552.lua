@@ -25,7 +25,7 @@ SWEP.HoldType				= "ar2"
 SWEP.Primary.Damage			= 33
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("Weapon_SG552.Single")
-SWEP.Primary.Cone			= 0.006
+SWEP.Primary.Cone			= 0.004
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.09 --1/(666/60)
@@ -33,7 +33,7 @@ SWEP.Primary.Ammo			= "AirboatGun"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1.25
-SWEP.SideRecoilMul			= 1
+SWEP.SideRecoilMul			= 0.75
 SWEP.VelConeMul				= 1.5
 SWEP.HeatMul				= 0.9
 
@@ -57,4 +57,4 @@ SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(-8, -10, -1)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
 
-SWEP.DamageFalloff			= 1500
+SWEP.DamageFalloff			= 2000

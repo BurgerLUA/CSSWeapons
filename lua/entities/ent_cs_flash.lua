@@ -27,7 +27,7 @@ function ENT:Initialize()
 
 	end
 	
-	self.Delay = CurTime() + 3
+	self.Delay = CurTime() + 2
 	self.First = true
 	
 end
@@ -88,7 +88,7 @@ function ENT:Detonate(self,pos)
 
 			for k,v in pairs(Players) do
 					
-				local distancecount = maxdistance/100 - self:GetPos():Distance(v:GetPos())/100
+				local distancecount = (maxdistance/100 - self:GetPos():Distance(v:GetPos())/100) + 4
 
 				if distancecount > 0 and distancecount < 8 then 
 					for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),maxdistance,90)) do

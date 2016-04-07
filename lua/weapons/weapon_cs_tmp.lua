@@ -25,7 +25,7 @@ SWEP.HoldType				= "smg"
 SWEP.Primary.Damage			= 26
 SWEP.Primary.NumShots 		= 1
 SWEP.Primary.Sound			= Sound("Weapon_TMP.Single")
-SWEP.Primary.Cone			= 0.027
+SWEP.Primary.Cone			= 0.024
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 120
 SWEP.Primary.Delay			= 0.07 --1/(857/60)
@@ -33,7 +33,7 @@ SWEP.Primary.Ammo			= "Battery"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1.1
-SWEP.SideRecoilMul			= 1
+SWEP.SideRecoilMul			= 0.75
 SWEP.VelConeMul				= 0.5
 SWEP.HeatMul				= 1
 

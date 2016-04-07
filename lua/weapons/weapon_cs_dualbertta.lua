@@ -25,7 +25,7 @@ SWEP.HoldType				= "duel"
 SWEP.Primary.Damage			= 45
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("Weapon_ELITE.Single")
-SWEP.Primary.Cone			= 0.0075
+SWEP.Primary.Cone			= 0.005
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 120
 SWEP.Primary.Delay			= 0.12 --1/(750/60)
@@ -58,7 +58,7 @@ SWEP.IronSightTime			= 0.125
 SWEP.IronSightsPos 			= Vector(0, 20, 3)
 SWEP.IronSightsAng 			= Vector(0, 0, 0)
 
-SWEP.DamageFalloff			= 2000
+SWEP.DamageFalloff			= 1000
 
 SWEP.GetMagModel			= "models/weapons/unloaded/pist_fiveseven_mag.mdl"
 

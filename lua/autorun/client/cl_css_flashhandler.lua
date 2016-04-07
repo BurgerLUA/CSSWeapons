@@ -14,8 +14,6 @@ function CSSFlashEffect()
 				DrawMaterialOverlay( "effects/flashbang", Mod )
 			end
 			
-			
-			
 			DrawMotionBlur( 0.1, math.Clamp(ply.BlindAmount / 3,0,1) , 100 )
 			
 			ply.BlindAmount = ply.BlindAmount - FrameTime()

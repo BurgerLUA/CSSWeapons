@@ -35,7 +35,7 @@ SWEP.Primary.Automatic 		= true
 SWEP.RecoilMul				= 0.75
 SWEP.SideRecoilMul			= 0.6
 SWEP.VelConeMul				= 2
-SWEP.HeatMul				= 0.9
+SWEP.HeatMul				= 0.25
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.5

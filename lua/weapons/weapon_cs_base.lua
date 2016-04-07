@@ -420,6 +420,9 @@ function SWEP:Deploy()
 		else
 			self:SendWeaponAnim(ACT_VM_DRAW)
 		end
+	else
+		self:SendWeaponAnim(ACT_VM_RELOAD)
+		self:EmitGunSound(self.ReloadSound)
 	end
 	
 	if self.WeaponType ~= "Throwable" then
@@ -737,44 +740,6 @@ function SWEP:HandleCone(Cone,IsCrosshair)
 
 end
 
-function SWEP:GetRecoilMath()
-	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*self.Primary.Delay*1.875*GetConVarNumber("sv_css_recoil_scale")
-end
-
-function SWEP:AddRecoil()
- 
-	local UpPunch = -self:GetRecoilMath()
-	local SidePunch = 0
-	
-	if self.HasBurstFire and self:GetIsBurst() then
-		UpPunch = UpPunch*self.BurstRecoilMul
-	end
-	
-
-	local Math = math.abs(self.PunchAngleUp.p*3)
-	
-	if self.HasSideRecoil then
-		if math.max(Math*self.SideRecoilMul,Math) > 1 then
-			SidePunch = UpPunch*math.random(-1,1)*self.SideRecoilMul
-		end
-	end
-	
-	if self.HasDownRecoil then
-		if Math > 2 then
-			UpPunch = UpPunch*math.random(-1,1)
-		end
-	end
-	
-	if self.HasScope and self.ZoomAmount > 4 and self:GetZoomed() then
-		UpPunch = UpPunch*0.5
-		SidePunch = SidePunch*0.5
-	end
-
-	self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0)
-	self.PunchAngleDown = self.PunchAngleDown + Angle(UpPunch,SidePunch,0)
-	
-end
-
 function SWEP:SecondaryAttack()
 	
 	if CLIENT then
@@ -956,25 +921,83 @@ if CLIENT then
 	SWEP.ClientCoolTime = 0
 end
 
-function SWEP:AddHeat(Damage,Shots)
+function SWEP:GetRecoilMath()
+	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*self.Primary.Delay*1.875*GetConVarNumber("sv_css_recoil_scale")
+end
+
+function SWEP:AddRecoil()
+ 
+	local UpPunch = -self:GetRecoilMath()
+	local SidePunch = 0
+	
+	if self.HasBurstFire and self:GetIsBurst() then
+		UpPunch = UpPunch*self.BurstRecoilMul
+	end
+	
+	local PredictedUpPunch = -UpPunch + -self.PunchAngleUp.p
+	
+	local AvgBulletsShot = self.ClientCoolDown / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
+	
+	local DelayMul = 1
+	
+	if self.Primary.Delay >= 0.5 then
+		DelayMul = 0
+	end
+	
+	if self.HasSideRecoil then
+		if DelayMul == 1 then
+			if AvgBulletsShot > 3*DelayMul then
+				SidePunch = UpPunch*math.random(-1,1)*self.SideRecoilMul
+			end
+		else
+			SidePunch = UpPunch*math.Rand(0,1)*self.SideRecoilMul
+		end
+	end
+	
+	if self.HasDownRecoil then
+		if AvgBulletsShot > 1*DelayMul then
+			UpPunch = UpPunch*math.random(-1,1)*0.5
+		end
+	end
+	
+	if self.HasScope and self.ZoomAmount > 4 and self:GetZoomed() then
+		UpPunch = UpPunch*0.5
+		SidePunch = SidePunch*0.5
+	end
+
+	self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0)
+	self.PunchAngleDown = self.PunchAngleDown + Angle(UpPunch,SidePunch,0)
+	
+end
+
+function SWEP:GetHeatMath(Damage,Shots)
 
 	local DamageMod = Damage*Shots*0.01
 	local ConeMod = (math.max(0.001,self.Primary.Cone)^-0.1)
 	local WeightMod = (self.MoveSpeed / 250 )
 	local BurstMod = 1
-	
+
 	if self.HasBurstFire and self:GetIsBurst() then
 		BurstMod = self.BurstHeatMul
 	end
 	
 	local CoolDown = DamageMod*ConeMod*WeightMod*GetConVarNumber("sv_css_heat_scale")*BurstMod
+	
+	return CoolDown
+	
+end
+
+function SWEP:AddHeat(Damage,Shots)
+	
+	
+	local CoolDown = self:GetHeatMath(Damage,Shots)
 	local CoolTime = CurTime() + (self.Primary.Delay + 0.1)*GetConVarNumber("sv_css_cooltime_scale")
 	
 	self:SetCoolDown( math.Clamp(self:GetCoolDown() + CoolDown,0,10) )
 	self:SetCoolTime( CoolTime )
 	
 	if CLIENT then
-		self.ClientCoolDown = self.ClientCoolDown + CoolDown
+		self.ClientCoolDown = math.Clamp(self.ClientCoolDown + CoolDown,0,10)
 		self.ClientCoolTime = CoolTime
 	end
 	
@@ -1625,7 +1648,7 @@ if CLIENT then
 	SWEP.StoredCrosshair = nil
 end
 
-function SWEP:DrawHUD()
+function SWEP:DrawHUDBackground()
 
 	local x = ScrW()
 	local y = ScrH()
@@ -1860,6 +1883,8 @@ function SWEP:DrawShadowCrosshair(x,y,XRound,YRound,WRound,LRound,FinalCone,widt
 
 end
 
+SWEP.CustomScope = nil
+
 function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 
 	local space = 1
@@ -1870,28 +1895,44 @@ function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 	end
 	
 	surface.SetDrawColor(Color(0,0,0))
-	surface.SetMaterial(Material("gui/sniper_corner"))
-	surface.DrawTexturedRectRotated(x/2 - y/4,y/2 - y/4,y/2 + space,y/2 + space,0-180-180)
-	surface.DrawTexturedRectRotated(x/2 - y/4,y/2 + y/4,y/2 + space,y/2 + space,90-180-180)
-	surface.DrawTexturedRectRotated(x/2 + y/4,y/2 + y/4,y/2 + space,y/2 + space,180-180-180)
-	surface.DrawTexturedRectRotated(x/2 + y/4,y/2 - y/4,y/2 + space,y/2 + space,270-180-180)
+	
+	if self.CustomScope == nil then
+		surface.SetMaterial(Material("gui/sniper_corner"))
+		surface.DrawTexturedRectRotated(x/2 - y/4,y/2 - y/4,y/2 + space,y/2 + space,0-180-180)
+		surface.DrawTexturedRectRotated(x/2 - y/4,y/2 + y/4,y/2 + space,y/2 + space,90-180-180)
+		surface.DrawTexturedRectRotated(x/2 + y/4,y/2 + y/4,y/2 + space,y/2 + space,180-180-180)
+		surface.DrawTexturedRectRotated(x/2 + y/4,y/2 - y/4,y/2 + space,y/2 + space,270-180-180)
 
-	if self.ZoomAmount > 6 then
-		surface.DrawLine(x/2,0,x/2,y)
-		surface.DrawLine(0,y/2,x,y/2)
+		if self.ZoomAmount > 6 then
+			surface.DrawLine(x/2,0,x/2,y)
+			surface.DrawLine(0,y/2,x,y/2)
+			
+			local size = math.Clamp(Cone,6,x/2*0.33)
+			
+			if size > 6 then
+				surface.DrawCircle( x/2, y/2, math.Clamp(Cone,3,x/2*0.33), Color(r,g,b,a) )
+			end	
+			
+		else
+			surface.DrawCircle( x/2, y/2, 6, Color(255,0,0,50))
+			
+			local size = math.Clamp(Cone,6,x/2*0.33)
+			
+			surface.DrawCircle( x/2, y/2, size, Color(r,g,b,255) )
+		end
+	else
+		surface.SetMaterial(self.CustomScope)
+		surface.DrawTexturedRectRotated(x/2,y/2,y,y,0)
+		surface.SetMaterial(Material("vgui/scope_lens"))
+		surface.DrawTexturedRectRotated(x/2,y/2,y,y,0)
 		
+		--[[
 		local size = math.Clamp(Cone,6,x/2*0.33)
-		
+			
 		if size > 6 then
 			surface.DrawCircle( x/2, y/2, math.Clamp(Cone,3,x/2*0.33), Color(r,g,b,a) )
 		end	
-		
-	else
-		surface.DrawCircle( x/2, y/2, 6, Color(255,0,0,50))
-		
-		local size = math.Clamp(Cone,6,x/2*0.33)
-		
-		surface.DrawCircle( x/2, y/2, size, Color(r,g,b,255) )
+		--]]
 	end
 
 	surface.SetDrawColor(Color(0,0,0))

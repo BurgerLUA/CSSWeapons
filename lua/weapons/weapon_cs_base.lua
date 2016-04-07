@@ -237,6 +237,8 @@ SWEP.MeleeSoundWallHit		= Sound("Weapon_Knife.HitWall")
 SWEP.MeleeSoundFleshSmall	= Sound("Weapon_Knife.Hit")
 SWEP.MeleeSoundFleshLarge	= Sound("Weapon_Knife.Stab")
 
+SWEP.IgnoreScopeHide		= false
+
 if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleUp = Angle(0,0,0)
 	SWEP.PunchAngleDown = Angle(0,0,0)
@@ -1715,8 +1717,9 @@ function SWEP:DrawHUDBackground()
 			else
 				self:DrawCustomScope(x,y,ConeToSend,r,g,b,a)
 			end
-			
+
 			self.Owner:DrawViewModel(false)	
+
 		else
 			self.Owner:DrawViewModel(true)
 		end

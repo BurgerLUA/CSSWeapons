@@ -163,6 +163,8 @@ SWEP.DamageFalloff			= 1000000
 
 SWEP.IgnoreDrawDelay		= false
 
+
+SWEP.HasBuildUp				= false
 -- End of base stats
 
 --Special stuff
@@ -264,6 +266,8 @@ function SWEP:SetupDataTables( )
 	self:SetBoltDelay(0)
 	self:NetworkVar("Float",8,"NextBulletDelay")
 	self:SetNextBulletDelay(0)
+	self:NetworkVar("Float",8,"BuildUp")
+	self:SetBuildUp(0)
 	
 	--self:NetworkVar("Float",9,"ZoomMod")
 	--self:SetZoomMod(0)
@@ -579,7 +583,11 @@ end
 
 function SWEP:WeaponDelay()
 	
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+	if self.HasBuildUp then
+		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + (self.Primary.Delay*5) * (100 - self:GetBuildUp())/100 )
+	else
+		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+	end
 	
 	if self.HasBoltAction then
 		self.BoltDelay = CurTime() + self.Primary.Delay
@@ -641,6 +649,10 @@ function SWEP:PreShootBullet() -- Should be predicted
 		end
 	end
 	
+	if self.HasBuildUp then
+		self:SetBuildUp( math.Clamp(self:GetBuildUp() + 10 - (self:GetBuildUp()/10) ,0,100 ) )
+		print(self:GetBuildUp())
+	end
 	
 	self:AddHeat(Damage,Shots)
 end
@@ -1396,10 +1408,12 @@ end
 function SWEP:Think()
 
 	self:HandleCoolDown() -- don't predict
+	self:HandleBuildUp()
 	self:HandleShotgunReloadThinkAnimations() -- don't predict
 	self:EquipThink() -- don't predict, ever
 	self:HandleBurstFireShoot() -- don't predict, ever
 	self:HandleReloadThink() -- don't predict, ever
+	
 	
 	self:SpareThink()
 	
@@ -1426,6 +1440,14 @@ end
 function SWEP:SpareThink()
 
 
+end
+
+function SWEP:HandleBuildUp()
+	if self.HasBuildUp then
+		if self:GetCoolTime() <= CurTime() - 1 then
+			self:SetBuildUp( math.Clamp(self:GetBuildUp() - FrameTime()*50,0,100) )
+		end
+	end
 end
 
 function SWEP:HandleBurstFireShoot()
@@ -2151,75 +2173,89 @@ end
 
 function SWEP:Swing(damage)
 
-	if not IsFirstTimePredicted() then return end
-	
-	local trace = self.Owner:GetEyeTrace() 
-	
-	if trace.Hit and trace.StartPos:Distance(trace.HitPos) < 40 and not (trace.Entity:IsPlayer() or trace.Entity:IsNPC()) then
-		self:StabEffect(trace.StartPos,trace.HitPos,trace.SurfaceProps,trace.Entity)
-	end
-	
-	if CLIENT then return end
-	
-	local Length = math.Clamp(self.Owner:GetVelocity():Length() * 0.25,1,20)
-	
-	local coneents = {self.Owner}
-	coneents = ents.FindInCone(self.Owner:GetShootPos() - self.Owner:EyeAngles():Forward()*20, self.Owner:GetAimVector(), 60 + Length,45)
-	
-	self.HitAThing = false
-	
-	for k,v in pairs(coneents) do
-		if self.HitAThing == false then
-			if v ~= self.Owner then
-				if v:IsPlayer() or v:IsNPC() then
-					
-					local Angle01 = self.Owner:GetAngles()
-					local Angle02 = v:GetAngles()
-					Angle01:Normalize()
-					Angle02:Normalize()
+	self.Owner:LagCompensation( true )
 
-					local angle = math.abs(Angle01.y - Angle02.y)
+	if IsFirstTimePredicted() then
+	
+		local trace = self.Owner:GetEyeTrace() 
+		
+		if trace.Hit and trace.StartPos:Distance(trace.HitPos) < 40 and not (trace.Entity:IsPlayer() or trace.Entity:IsNPC()) then
+			--self:StabEffect(trace.StartPos,trace.HitPos,trace.SurfaceProps,trace.Entity)
+		end
+		
+		if SERVER then
+		
+			local Length = math.Clamp(self.Owner:GetVelocity():Length() * 0.25,1,20)
+			
+			local coneents = {self.Owner}
+			coneents = ents.FindInCone(self.Owner:GetShootPos() - self.Owner:EyeAngles():Forward()*20, self.Owner:GetAimVector(), 60 + Length,45)
+			
+			self.HitAThing = false
+			
+			for k,v in pairs(coneents) do
+				if self.HitAThing == false then
+					if v ~= self.Owner then
+						if v:IsPlayer() or v:IsNPC() then
+							
+							local Angle01 = self.Owner:GetAngles()
+							local Angle02 = v:GetAngles()
+							Angle01:Normalize()
+							Angle02:Normalize()
 
-					if angle < 45 or angle > (360-45) then
-						damage = damage * 10
+							local angle = math.abs(Angle01.y - Angle02.y)
+
+							if angle < 45 or angle > (360-45) then
+								damage = damage * 10
+							end
+
+							self.HitAThing = true
+
+							self:StabDamage(damage,v)
+
+							if damage <= 50 then
+								self:StabSound(v,self.MeleeSoundFleshSmall)
+								print("FLESH SMALL")
+							else
+								self:StabSound(v,self.MeleeSoundFleshLarge)
+								print("FLESH LARGE")
+							end
+
+							
+						end
 					end
-
-					self.HitAThing = true
-
-					self:StabDamage(damage,v)
-
-					if damage <= 50 then
-						self:StabSound(self.Owner,self.MeleeSoundFleshSmall)
-					else
-						self:StabSound(self.Owner,self.MeleeSoundFleshLarge)
-					end
-
-					
 				end
 			end
-		end
-	end
 
-	if not self.HitAThing then
-		if trace.StartPos:Distance(trace.HitPos) < 40 then
-			self:StabSound(self.Owner,self.MeleeSoundWallHit)
-			
-			local Ent = trace.Entity
-			
-			if Ent:IsValid() then
-				if Ent:IsPlayer() then
-					self:StabDamage(damage,Ent)
+			if not self.HitAThing then
+				if trace.StartPos:Distance(trace.HitPos) < 40 then
+					self:StabSound(nil,self.MeleeSoundWallHit)
+					print("WALL HIT")
+					
+					local v = trace.Entity
+					
+					if v:IsValid() then
+						if v:IsPlayer() then
+							self:StabDamage(damage,v)
+							self:StabSound(v,self.MeleeSoundFleshLarge)
+						else
+							self:StabDamage(damage,v)
+							self:StabSound(v,self.MeleeSoundFleshLarge)
+						end
+					end
+					
 				else
-					self:StabDamage(damage,Ent)
+					self:StabSound(nil,self.MeleeSoundMiss)
+					print("MISS")
 				end
 			end
 			
-		else
-			self:StabSound(self.Owner,self.MeleeSoundMiss)
+			return self.HitAThing
+			
 		end
+		
 	end
 	
-	return self.HitAThing
+	self.Owner:LagCompensation( false )
 
 end
 
@@ -2229,13 +2265,20 @@ function SWEP:StabPlayer(ply,damage)
 end
 --]]
 
-function SWEP:StabEffect(StartPos,HitPos,SurfaceProp,HitEntity)
-	if HitEntity:IsPlayer() then return end
+function CSS_StabEffect(StartPos,HitPos,Angles,SurfaceProp,HitEntity,Owner)
+
+	--if HitEntity:IsPlayer() then return end
+	
+	local NormalShit = (StartPos - HitPos):GetNormalized()
 	
 	local effect = EffectData()
 		effect:SetOrigin(HitPos)
 		effect:SetStart(StartPos)
-		effect:SetSurfaceProp(SurfaceProp)
+		effect:SetNormal(NormalShit)
+		effect:SetFlags(3)
+		effect:SetScale(6)
+		effect:SetColor(0)
+		--effect:SetSurfaceProp(SurfaceProp)
 		effect:SetDamageType(DMG_SLASH)
 		
 	if CLIENT then
@@ -2243,12 +2286,19 @@ function SWEP:StabEffect(StartPos,HitPos,SurfaceProp,HitEntity)
 	else
 		effect:SetEntIndex(HitEntity:EntIndex())
 	end
-		
-	util.Effect("Impact", effect)
+	
+	util.Effect("bloodspray", effect)
+	util.Effect("BloodImpact", effect)
+
+	util.Decal( "Blood", HitEntity:GetPos(), HitEntity:GetPos())	
+	util.Decal( "Blood", StartPos, StartPos + Angles:Forward()*100)
+	
+	
 end
 
 function SWEP:StabSound(ent,sound)
 	net.Start("CSS_SendSoundDelay")
+		net.WriteEntity(self.Owner)
 		net.WriteEntity(ent)
 		net.WriteString(sound)
 	net.Broadcast()
@@ -2260,9 +2310,17 @@ end
 
 if CLIENT then
 	net.Receive("CSS_SendSoundDelay", function(len)
+	
+		local Owner = net.ReadEntity()
 		local GetEntity = net.ReadEntity()
 		local GetSound = Sound(net.ReadString())
-		GetEntity:EmitSound(GetSound)
+		
+		Owner:EmitSound(GetSound)
+		
+		if GetEntity and GetEntity:IsValid() and (GetEntity:IsPlayer() or GetEntity:IsNPC()) then
+			CSS_StabEffect(Owner:EyePos(),GetEntity:GetPos() + GetEntity:OBBCenter(),Owner:EyeAngles(),1,GetEntity,Owner)
+		end
+		
 	end)
 end
 
@@ -2272,7 +2330,7 @@ function SWEP:StabDamage(damage, entity)
 		dmginfo:SetDamageType( DMG_SLASH )
 		dmginfo:SetAttacker( self.Owner )
 		dmginfo:SetInflictor( self )
-		dmginfo:SetDamageForce( self.Owner:GetForward()*100 )
+		dmginfo:SetDamageForce( self.Owner:GetForward() )
 	if SERVER then
 		entity:TakeDamageInfo( dmginfo )
 	end

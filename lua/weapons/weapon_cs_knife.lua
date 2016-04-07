@@ -64,6 +64,7 @@ function SWEP:PrimaryAttack()
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
+	self:SetHoldType("knife")
 	self:Swing(self.Primary.Damage)
 end
 
@@ -73,6 +74,7 @@ function SWEP:SecondaryAttack()
 	self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
 	self:SetNextPrimaryFire(CurTime() + self.Secondary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Secondary.Delay)
+	self:SetHoldType("melee2")
 	self:Swing(self.Primary.Damage * (65/25) )	
 end
 

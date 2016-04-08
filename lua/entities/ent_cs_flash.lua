@@ -120,7 +120,7 @@ function ENT:BlindEffects(v,distancecount)
 		v:SetDSP( 37, false )
 	end
 	
-	v.BlindAmount = distancecount
+	v.BlindAmount = math.Clamp(distancecount,0,5)
 	v.IsBlinded = true
 	
 end

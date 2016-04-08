@@ -27,6 +27,7 @@ function ENT:Initialize()
 		
 		self.Delay = CurTime() + 2
 		self.NextParticle = 0
+		self.ParticleCount = 0
 		self.First = true
 		self.IsDetonated = false
 	end
@@ -54,14 +55,17 @@ function ENT:Think()
 		if CurTime() > self.Delay then 
 			
 			if self.NextParticle <= CurTime() then 
-
-				local ent = ents.Create("ent_cs_smokeparticle")
-				ent:SetPos(self:GetPos())
-				ent:SetAngles(Angle(0,0,0))
-				ent:Spawn()
-				ent:Activate()
-				ent:SetOwner(self.Owner)
-				ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-25,25),math.Rand(-25,25),math.Rand(0,25)))
+			
+				if self.ParticleCount < 100 then
+					local ent = ents.Create("ent_cs_smokeparticle")
+					ent:SetPos(self:GetPos())
+					ent:SetAngles(Angle(0,0,0))
+					ent:Spawn()
+					ent:Activate()
+					ent:SetOwner(self.Owner)
+					ent:GetPhysicsObject():SetVelocity(Vector(math.Rand(-25,25),math.Rand(-25,25),math.Rand(0,25)))
+					self.ParticleCount = self.ParticleCount + 1
+				end
 
 				self.NextParticle = CurTime() + 0.1
 			end
@@ -78,8 +82,9 @@ end
 function ENT:Detonate(self,pos)
 	if SERVER then
 		if not self:IsValid() then return end
+		self:SetNWBool("IsDetonated",true)
 		self:EmitSound(self.ExplodeSound)
-		SafeRemoveEntityDelayed(self,10)
+		SafeRemoveEntityDelayed(self,30)
 	end
 end
 

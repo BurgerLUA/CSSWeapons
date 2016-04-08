@@ -12,19 +12,39 @@ function NadeKeyPress(ply,key)
 			if not Weapon:IsScripted() then return end	
 			if Weapon.Base ~= "weapon_cs_base" then return end	
 			if Weapon:IsBusy() == true then return end
-			if not ply:HasWeapon("weapon_cs_he") then return end
-			if Weapon:GetClass() == "weapon_cs_he" then return end	
-		
+			
 			if CLIENT then return end
+			
+			if CSS_ThrowCheck(ply,Weapon,"weapon_cs_he") then
+			
+			elseif CSS_ThrowCheck(ply,Weapon,"weapon_ex_gas") then
+			
+			elseif CSS_ThrowCheck(ply,Weapon,"weapon_cs_flash") then
 		
-			ply:SelectWeapon("weapon_cs_he")
-			ply:GetActiveWeapon():QuickThrow()
+			elseif CSS_ThrowCheck(ply,Weapon,"weapon_cs_smoke") then
+			
+			else
+				return
+			end
+			
+			Weapon = ply:GetActiveWeapon()
+			Weapon:QuickThrow()
 			
 		end
 	end
 
 end
 
+function CSS_ThrowCheck(ply,Weapon,class)
+
+	if not ply:HasWeapon(class) then return false end
+	if Weapon:GetClass() == class then return false end	
+	ply:SelectWeapon(class)
+
+	return true
+
+end
+
+
 hook.Add("KeyPress","Quick Grenade",NadeKeyPress)
 
-print("QuickThrow")

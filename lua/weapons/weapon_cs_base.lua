@@ -241,6 +241,11 @@ SWEP.MeleeSoundFleshLarge	= Sound("Weapon_Knife.Stab")
 
 SWEP.IgnoreScopeHide		= false
 
+SWEP.TracerName				= "Tracer"
+
+SWEP.CustomScopeSOverride	= nil
+SWEP.CustomScopeCOverride	= Color(0,0,0,255)
+
 if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleUp = Angle(0,0,0)
 	SWEP.PunchAngleDown = Angle(0,0,0)
@@ -440,17 +445,6 @@ function SWEP:Deploy()
 	return true
 	
 end
-
-function SWEP:SetDeploySpeed(speed)
-
-	if self.IgnoreDrawDelay then
-		speed = speed * 10
-	end
-	
-	return speed
-
-end
-
 
 function SWEP:Holster()
 	if not self.CanHolster then return false end
@@ -950,7 +944,13 @@ function SWEP:AddRecoil()
 	
 	local PredictedUpPunch = -UpPunch + -self.PunchAngleUp.p
 	
-	local AvgBulletsShot = self.ClientCoolDown / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
+	local AvgBulletsShot = 0
+	
+	if game.SinglePlayer() then
+		AvgBulletsShot = self:GetCoolDown() / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
+	else
+		AvgBulletsShot = self.ClientCoolDown / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
+	end
 	
 	local DelayMul = 1
 	
@@ -1041,7 +1041,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	if self.Primary.Ammo == "ar2" then
 		bullet.TracerName = "AR2Tracer"
 	else
-		bullet.TracerName = "Tracer"
+		bullet.TracerName = self.TracerName
 	end
 	
 	bullet.Force	= nil
@@ -1421,7 +1421,7 @@ function SWEP:Think()
 	
 		local FOVMOD = math.max(90 - self.Owner:GetFOV(),GetConVarNumber("cl_css_viewmodel_fov") + self.AddFOV)
 		
-		if self.HasScope and self:GetZoomed() then
+		if self.HasScope and self:GetZoomed() and not self.IgnoreScopeHide then
 			FOVMOD = 100
 		end
 	
@@ -1739,8 +1739,10 @@ function SWEP:DrawHUDBackground()
 			else
 				self:DrawCustomScope(x,y,ConeToSend,r,g,b,a)
 			end
-
-			self.Owner:DrawViewModel(false)	
+			
+			if not self.IgnoreScopeHide then
+				self.Owner:DrawViewModel(false)	
+			end
 
 		else
 			self.Owner:DrawViewModel(true)
@@ -1946,8 +1948,21 @@ function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 			surface.DrawCircle( x/2, y/2, size, Color(r,g,b,255) )
 		end
 	else
+	
+		local Size = y/2
+		
+		if self.CustomScopeSOverride then
+			Size = self.CustomScopeSOverride
+		end
+		
+		--print(Multiplier)
+	
+		surface.SetDrawColor(self.CustomScopeCOverride)
 		surface.SetMaterial(self.CustomScope)
-		surface.DrawTexturedRectRotated(x/2,y/2,y,y,0)
+		surface.DrawTexturedRectRotated(x/2,y/2,Size,Size,0)
+		
+		
+		surface.SetDrawColor(Color(0,0,0,255))
 		surface.SetMaterial(Material("vgui/scope_lens"))
 		surface.DrawTexturedRectRotated(x/2,y/2,y,y,0)
 		
@@ -2156,8 +2171,11 @@ function SWEP:ThrowObject(object,force)
 	ent:SetOwner(self.Owner)
 	
 	if ent:GetPhysicsObject():IsValid() then
-		ent:GetPhysicsObject():SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force + EA:Up()*50)
-		--ent:GetPhysicsObject():AddAngleVelocity(Vector(1000,1000,1000))
+		if object == "ent_cs_gasparticle" then
+			ent:GetPhysicsObject():SetVelocity( EA:Forward()*force + EA:Right()*math.random(-20,20) + EA:Up()*math.random(-20,20) + Vector(0,0,-10) )
+		else
+			ent:GetPhysicsObject():SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force + EA:Up()*50)
+		end
 	else
 		ent:SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force)
 	end
@@ -2172,8 +2190,6 @@ function SWEP:QuickKnife()
 end
 
 function SWEP:Swing(damage)
-
-	self.Owner:LagCompensation( true )
 
 	if IsFirstTimePredicted() then
 	
@@ -2210,16 +2226,11 @@ function SWEP:Swing(damage)
 
 							self.HitAThing = true
 
-							self:StabDamage(damage,v)
-
-							if damage <= 50 then
-								self:StabSound(v,self.MeleeSoundFleshSmall)
-								print("FLESH SMALL")
+							if damage <= self.Primary.Damage then
+								self:SendHitEvent(v,damage,self.MeleeSoundFleshSmall)
 							else
-								self:StabSound(v,self.MeleeSoundFleshLarge)
-								print("FLESH LARGE")
+								self:SendHitEvent(v,damage,self.MeleeSoundFleshLarge)
 							end
-
 							
 						end
 					end
@@ -2227,25 +2238,13 @@ function SWEP:Swing(damage)
 			end
 
 			if not self.HitAThing then
-				if trace.StartPos:Distance(trace.HitPos) < 40 then
-					self:StabSound(nil,self.MeleeSoundWallHit)
-					print("WALL HIT")
-					
+				if trace.StartPos:Distance(trace.HitPos) < 40 and not trace.Entity:IsWorld() then
 					local v = trace.Entity
-					
 					if v:IsValid() then
-						if v:IsPlayer() then
-							self:StabDamage(damage,v)
-							self:StabSound(v,self.MeleeSoundFleshLarge)
-						else
-							self:StabDamage(damage,v)
-							self:StabSound(v,self.MeleeSoundFleshLarge)
-						end
+						self:SendHitEvent(v,damage,self.MeleeSoundFleshSmall)
 					end
-					
 				else
-					self:StabSound(nil,self.MeleeSoundMiss)
-					print("MISS")
+					self:SendHitEvent(nil,nil,self.MeleeSoundMiss)
 				end
 			end
 			
@@ -2255,8 +2254,55 @@ function SWEP:Swing(damage)
 		
 	end
 	
-	self.Owner:LagCompensation( false )
+	--self.Owner:LagCompensation( false )
 
+end
+
+function SWEP:SendHitEvent(victim,damage,sound)
+
+	local VictimWeapon = nil
+
+	if victim and victim:IsPlayer() then
+		VictimWeapon = victim:GetActiveWeapon()
+		
+		if VictimWeapon and VictimWeapon ~= NULL then
+			if VictimWeapon:GetClass() == "weapon_smod_katana" then
+				if victim:KeyDown(IN_RELOAD) then
+				
+					local VictimAngles = victim:GetAngles() + Angle(0,180,0)
+					local AttackerAngles = self.Owner:GetAngles()
+					
+					VictimAngles:Normalize()
+					AttackerAngles:Normalize()
+					
+					local NewAngles = VictimAngles - AttackerAngles
+					
+					NewAngles:Normalize()
+					
+					local Yaw = math.abs(NewAngles.y)
+					
+					if Yaw < 30 then
+						VictimWeapon:BlockDamage(damage)
+						self:StabSound(victim,Sound("weapons/samurai/tf_katana_impact_object_02.wav"),false)
+						return
+					end
+					
+				end
+			end
+		end
+		
+	end
+
+	if damage and victim then
+		self:StabDamage(damage,victim)
+	end
+
+	if victim and sound then
+		self:StabSound(victim,sound,true)
+	elseif sound then
+		self:StabSound(self.Owner,sound,false)
+	end
+	
 end
 
 --[[
@@ -2296,11 +2342,12 @@ function CSS_StabEffect(StartPos,HitPos,Angles,SurfaceProp,HitEntity,Owner)
 	
 end
 
-function SWEP:StabSound(ent,sound)
+function SWEP:StabSound(ent,sound,shouldblood)
 	net.Start("CSS_SendSoundDelay")
 		net.WriteEntity(self.Owner)
 		net.WriteEntity(ent)
 		net.WriteString(sound)
+		net.WriteBool(shouldblood)
 	net.Broadcast()
 end
 
@@ -2314,10 +2361,11 @@ if CLIENT then
 		local Owner = net.ReadEntity()
 		local GetEntity = net.ReadEntity()
 		local GetSound = Sound(net.ReadString())
+		local ShouldBlood = net.ReadBool()
 		
 		Owner:EmitSound(GetSound)
 		
-		if GetEntity and GetEntity:IsValid() and (GetEntity:IsPlayer() or GetEntity:IsNPC()) then
+		if ShouldBlood and GetEntity and GetEntity:IsValid() and (GetEntity:IsPlayer() or GetEntity:IsNPC()) then
 			CSS_StabEffect(Owner:EyePos(),GetEntity:GetPos() + GetEntity:OBBCenter(),Owner:EyeAngles(),1,GetEntity,Owner)
 		end
 		

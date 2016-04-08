@@ -1,3 +1,6 @@
+local SmokeMat = Material("skybox/italydn")
+
+
 function CSSFlashEffect()
 
 	local ply = LocalPlayer()
@@ -27,20 +30,28 @@ function CSSFlashEffect()
 
 	end
 	
-	--[[
+	
 	local IsInSmoke = false
+	
+	local SmokeAmount = 0
 	
 	for k,v in pairs(ents.FindByClass("ent_cs_smoke")) do
 		local Distance = ply:GetPos():Distance(v:GetPos())
-		if Distance < 100 then
+		if Distance <= 125 and v:GetNWBool("IsDetonated",false) then
 			IsInSmoke = true
+			SmokeAmount = SmokeAmount + (125 - Distance)*2
 		end
 	end
 	
 	if IsInSmoke then
-		DrawMotionBlur( 0.1, 0.5  , 0.025 )
+	
+		local ModAmount = math.Clamp(SmokeAmount / 100,0,1)
+	
+		surface.SetDrawColor( Color(200,200,200,ModAmount*255) )
+		surface.DrawTexturedRect( 0, 0, ScrW(), ScrH() )
+
 	end
-	--]]
+
 	
 end
 

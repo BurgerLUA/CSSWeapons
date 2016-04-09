@@ -2218,11 +2218,12 @@ function SWEP:NewSendHitEvent(victim,damage)
 		if victim and victim:IsPlayer() then
 	
 			VictimWeapon = victim:GetActiveWeapon()
-			
-			local VictimKeyDown = VictimWeapon:GetIsBlocking()
 
 			if VictimWeapon and VictimWeapon ~= NULL then
 				if VictimWeapon:GetClass() == "weapon_smod_katana" then
+				
+					local VictimKeyDown = VictimWeapon:GetIsBlocking()
+				
 					if VictimKeyDown and VictimWeapon:GetNextSecondaryFire() <= CurTime() then
 
 						local Range = 90

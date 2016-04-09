@@ -97,16 +97,18 @@ function CSS_DropAmmo(ply,weapon)
 			ply:SetAmmo( AmmoCount - AmmoCountToDrop,AmmoType)
 		end
 		
-		local dropammo = ents.Create("ent_cs_ammo_base")
-		dropammo.AmmoType = weapon:GetPrimaryAmmoType()
-		dropammo.AmmoAmount = AmmoCountToDrop
-		dropammo.AmmoModel = model
-		dropammo:SetPos( ply:GetPos() + ply:OBBCenter() )
-		dropammo:SetAngles(ply:EyeAngles() + Angle( math.Rand(1,360),math.Rand(1,360),math.Rand(1,360)) )
-		dropammo:Spawn()
-		dropammo:Activate()
-		dropammo:GetPhysicsObject():SetVelocity(ply:GetForward()*100)
-		dropammo:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+		if AmmoCountToDrop > 0 then
+			local dropammo = ents.Create("ent_cs_ammo_base")
+			dropammo.AmmoType = weapon:GetPrimaryAmmoType()
+			dropammo.AmmoAmount = AmmoCountToDrop
+			dropammo.AmmoModel = model
+			dropammo:SetPos( ply:GetPos() + ply:OBBCenter() )
+			dropammo:SetAngles(ply:EyeAngles() + Angle( math.Rand(1,360),math.Rand(1,360),math.Rand(1,360)) )
+			dropammo:Spawn()
+			dropammo:Activate()
+			dropammo:GetPhysicsObject():SetVelocity(ply:GetForward()*100)
+			dropammo:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+		end
 			
 	end
 

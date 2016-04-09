@@ -90,13 +90,13 @@ function ENT:Detonate(self,pos)
 					
 				local distancecount = (maxdistance/100 - self:GetPos():Distance(v:GetPos())/100) + 4
 
-				if distancecount > 0 and distancecount < 8 then 
+				if distancecount > 0 and distancecount < 8 then
 					for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),maxdistance,90)) do
 						if f == self.Entity then
 							self:BlindEffects(v,distancecount)
 						end
 					end
-				elseif distancecount >= 8 then
+				elseif distancecount >= 2 then
 					self:BlindEffects(v,distancecount)
 				end
 
@@ -114,14 +114,14 @@ end
 
 function ENT:BlindEffects(v,distancecount)
 
-	--print("BLINDED BY THE LIGHT")
-
-	if distancecount > 1 then
+	if distancecount > 10 then
 		v:SetDSP( 37, false )
 	end
 	
-	v.BlindAmount = math.Clamp(distancecount,0,5)
-	v.IsBlinded = true
+	if v:IsLineOfSightClear(self.Entity) then
+		v.BlindAmount = math.Clamp(distancecount,0,5)
+		v.IsBlinded = true
+	end
 	
 end
 

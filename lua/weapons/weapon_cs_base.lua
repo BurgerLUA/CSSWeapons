@@ -294,6 +294,8 @@ function SWEP:SetupDataTables( )
 	self:SetIsNormalReload( false )
 	self:NetworkVar("Bool",5,"IsLeftFire")
 	self:SetIsLeftFire( false )
+	self:NetworkVar("Bool",6,"IsBlocking")
+	self:SetIsBlocking( false )
 	
 
 end
@@ -631,7 +633,7 @@ function SWEP:PreShootBullet() -- Should be predicted
 	
 	if self.HasBuildUp then
 		self:SetBuildUp( math.Clamp(self:GetBuildUp() + 10 - (self:GetBuildUp()/10) ,0,100 ) )
-		print(self:GetBuildUp())
+		--print(self:GetBuildUp())
 	end
 	
 	self:AddHeat(Damage,Shots)
@@ -928,8 +930,6 @@ function SWEP:AddRecoil()
 		UpPunch = UpPunch*self.BurstRecoilMul
 	end
 	
-	local PredictedUpPunch = -UpPunch + -self.PunchAngleUp.p
-	
 	local AvgBulletsShot = 0
 	
 	if game.SinglePlayer() then
@@ -937,6 +937,10 @@ function SWEP:AddRecoil()
 	else
 		AvgBulletsShot = self.ClientCoolDown / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
 	end
+	
+	UpPunch = UpPunch * ( 1 + AvgBulletsShot/ (1/self.Primary.Delay) )
+	
+	local PredictedUpPunch = -UpPunch + -self.PunchAngleUp.p
 	
 	local DelayMul = 1
 	
@@ -2193,7 +2197,7 @@ function SWEP:NewSendHitEvent(victim,damage)
 		local VictimAngles = victim:EyeAngles()
 		local AttackerAngles = self.Owner:EyeAngles()
 		
-		print(victim,VictimAngles,AttackerAngles)
+		--print(victim,VictimAngles,AttackerAngles)
 		
 		VictimAngles:Normalize()
 		AttackerAngles:Normalize()
@@ -2209,15 +2213,17 @@ function SWEP:NewSendHitEvent(victim,damage)
 			damage = damage * 10
 		end
 		
-		print(Yaw)
+		local ShouldDamage = true
 		
 		if victim and victim:IsPlayer() then
 	
 			VictimWeapon = victim:GetActiveWeapon()
 			
+			local VictimKeyDown = VictimWeapon:GetIsBlocking()
+
 			if VictimWeapon and VictimWeapon ~= NULL then
 				if VictimWeapon:GetClass() == "weapon_smod_katana" then
-					if victim:KeyDown(IN_ATTACK2) and VictimWeapon:GetNextSecondaryFire() <= CurTime() then
+					if VictimKeyDown and VictimWeapon:GetNextSecondaryFire() <= CurTime() then
 
 						local Range = 90
 					
@@ -2229,7 +2235,7 @@ function SWEP:NewSendHitEvent(victim,damage)
 							
 							self:EmitGunSound("weapons/samurai/tf_katana_impact_object_02.wav")
 							
-							return
+							ShouldDamage = false
 						end
 						
 					end
@@ -2237,14 +2243,13 @@ function SWEP:NewSendHitEvent(victim,damage)
 			end
 
 		end
-		
-		
-		
-		
-		self:NewStabDamage(damage, victim)
-		
-		if CLIENT then
-			self:NewStabFleshEffect(victim)
+
+		if ShouldDamage then
+			self:NewStabDamage(damage, victim)
+			
+			if CLIENT then
+				self:NewStabFleshEffect(victim)
+			end
 		end
 
 	else
@@ -2256,8 +2261,6 @@ function SWEP:NewSendHitEvent(victim,damage)
 end
 
 function SWEP:NewStabDamage(damage, victim)
-
-	--print(damage)
 
 	if damage <= self.Primary.Damage then
 		self:EmitGunSound(self.MeleeSoundFleshSmall)

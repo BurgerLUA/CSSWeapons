@@ -246,6 +246,8 @@ SWEP.TracerName				= "Tracer"
 SWEP.CustomScopeSOverride	= nil
 SWEP.CustomScopeCOverride	= Color(0,0,0,255)
 
+SWEP.EnableBlocking			= false
+
 if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleUp = Angle(0,0,0)
 	SWEP.PunchAngleDown = Angle(0,0,0)
@@ -373,15 +375,7 @@ function SWEP:Deploy()
 				if v.BurgerBase ~= nil then
 					if v ~= self then
 						if self.WeaponType == v.WeaponType and not (v.WeaponType == "Free" or v.WeaponType == "Throwable") then
-							self.Owner:StripWeapon(v:GetClass())
-							local dropped = ents.Create("ent_cs_droppedweapon")
-							dropped:SetPos(self.Owner:GetPos() + self.Owner:OBBCenter() )
-							dropped:SetAngles(self.Owner:EyeAngles() )
-							dropped:SetModel(weapons.GetStored(v:GetClass()).WorldModel)
-							dropped:Spawn()
-							dropped:Activate()
-							dropped:SetNWString("class",v:GetClass())
-							dropped:SetNWInt("clip",v:Clip1())
+							CSS_DropWeapon(self.Owner,v)
 						end
 					end
 				end
@@ -391,15 +385,7 @@ function SWEP:Deploy()
 				if v.BurgerBase ~= nil then
 					if v ~= self then
 						if self.Slot == v.Slot and not (v.WeaponType == "Free" or v.WeaponType == "Throwable") then
-							self.Owner:StripWeapon(v:GetClass())
-							local dropped = ents.Create("ent_cs_droppedweapon")
-							dropped:SetPos(self.Owner:GetPos() + self.Owner:OBBCenter() )
-							dropped:SetAngles(self.Owner:EyeAngles() )
-							dropped:SetModel(weapons.GetStored(v:GetClass()).WorldModel)
-							dropped:Spawn()
-							dropped:Activate()
-							dropped:SetNWString("class",v:GetClass())
-							dropped:SetNWInt("clip",v:Clip1())
+							CSS_DropWeapon(self.Owner,v)
 						end
 					end
 				end
@@ -1315,29 +1301,10 @@ function SWEP:GetViewModelPosition( pos, ang )
 
 	ang = LocalPlayer():EyeAngles()
 	
-	--[[
-	local CursorX, CursorY = input.GetCursorPos()
-	
-	local x = ScrW()
-	local y = ScrH()
-	
-	local CursorMulY = ( (CursorX - x/2)/x ) * 45
-	local CursorMulP = ( (CursorY - y/2)/y ) * 45
-	
-	local DesiredAngle = ang
-
-	if math.abs(CursorMulY) > 2 or math.abs(CursorMulP) > 2 then
-
-	end
-	
-	self.DesiredViewAngles = ang + Angle(CursorMulP,-CursorMulY,0)
-
-	ang = ang - self.DesiredViewAngles*FrameTime()
-	--]]
-	
 	if ( !self.IronSightsPos ) then return pos, ang end
 	
-	local bIron = self:GetZoomed() --and self.HasIronSights
+	local bIron = self:GetZoomed() or (self.EnableBlocking and self.Owner:KeyDown(IN_ATTACK2) )
+	
 	
 	if ( bIron != self.bLastIron ) then
 	
@@ -1576,13 +1543,8 @@ function SWEP:HandleCoolDown()
 				self.ClientCoolDown = math.Clamp(self.ClientCoolDown - CoolMul,0,10)
 			end
 		end
-		
-		--print("STORED:",self.ClientCoolDown)
 	end
-	
-	--print("NETWORKED:", self:GetCoolDown() )
-	
-	
+
 end
 
 function SWEP:HandleZoomMod()
@@ -2189,6 +2151,162 @@ function SWEP:QuickKnife()
 
 end
 
+function SWEP:NewSwing(damage)
+
+	if IsFirstTimePredicted() then
+	
+		local Data = {}
+
+		Data.start = self.Owner:GetShootPos()
+		Data.endpos = self.Owner:GetShootPos() + self.Owner:EyeAngles():Forward()*75
+		Data.filter = self.Owner
+		Data.mins = Vector( -8 , -8 , -8 )
+		Data.maxs = Vector( 8 , 8 , 8 )
+
+		if self.Owner:IsPlayer() then
+			self.Owner:LagCompensation( true )
+		end
+	
+		local Trace = util.TraceHull( Data )
+	
+		if self.Owner:IsPlayer() then
+			self.Owner:LagCompensation( false )
+		end
+		
+		local HasHitTarget = false
+	
+		if Trace.Hit then
+			self:NewSendHitEvent(Trace.Entity,damage)
+		else
+			self:EmitGunSound(self.MeleeSoundMiss)
+		end
+	
+	end
+
+end
+
+
+function SWEP:NewSendHitEvent(victim,damage)
+
+	if victim:IsPlayer() or victim:IsNPC() then
+							
+		local VictimAngles = victim:EyeAngles()
+		local AttackerAngles = self.Owner:EyeAngles()
+		
+		print(victim,VictimAngles,AttackerAngles)
+		
+		VictimAngles:Normalize()
+		AttackerAngles:Normalize()
+		
+		local NewAngles = VictimAngles - AttackerAngles
+		NewAngles:Normalize()
+		
+		local Yaw = math.abs(NewAngles.y)
+
+		--print(Yaw)
+		
+		if Yaw < 45 then
+			damage = damage * 10
+		end
+		
+		print(Yaw)
+		
+		if victim and victim:IsPlayer() then
+	
+			VictimWeapon = victim:GetActiveWeapon()
+			
+			if VictimWeapon and VictimWeapon ~= NULL then
+				if VictimWeapon:GetClass() == "weapon_smod_katana" then
+					if victim:KeyDown(IN_ATTACK2) and VictimWeapon:GetNextSecondaryFire() <= CurTime() then
+
+						local Range = 90
+					
+						if Yaw > 180 - Range/2 and Yaw < 180 + Range/2 then
+							VictimWeapon:BlockDamage(damage*2)
+							self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*3)
+							VictimWeapon:SetNextSecondaryFire(CurTime() + self.Primary.Delay*0.25)
+							
+							
+							self:EmitGunSound("weapons/samurai/tf_katana_impact_object_02.wav")
+							
+							return
+						end
+						
+					end
+				end
+			end
+
+		end
+		
+		
+		
+		
+		self:NewStabDamage(damage, victim)
+		
+		if CLIENT then
+			self:NewStabFleshEffect(victim)
+		end
+
+	else
+	
+		self:NewStabDamage(damage, victim)
+
+	end
+
+end
+
+function SWEP:NewStabDamage(damage, victim)
+
+	--print(damage)
+
+	if damage <= self.Primary.Damage then
+		self:EmitGunSound(self.MeleeSoundFleshSmall)
+	else
+		self:EmitGunSound(self.MeleeSoundFleshLarge)
+	end
+
+	local dmginfo = DamageInfo()
+	dmginfo:SetDamage( damage )
+	dmginfo:SetDamageType( DMG_SLASH )
+	dmginfo:SetAttacker( self.Owner )
+	dmginfo:SetInflictor( self )
+	dmginfo:SetDamageForce( self.Owner:GetForward() )
+		
+	if SERVER then
+		victim:TakeDamageInfo( dmginfo )
+	end
+	
+end
+
+function SWEP:NewStabFleshEffect(victim)
+
+	local StartPos = self.Owner:EyePos()
+	local HitPos = victim:GetPos() + victim:OBBCenter()
+	local NormalShit = (StartPos - HitPos):GetNormalized()
+	
+	local effect = EffectData()
+	effect:SetOrigin(HitPos)
+	effect:SetStart(StartPos)
+	effect:SetNormal(NormalShit)
+	effect:SetFlags(3)
+	effect:SetScale(6)
+	effect:SetColor(0)
+	effect:SetDamageType(DMG_SLASH)
+		
+	if CLIENT then
+		effect:SetEntity(victim)
+	else
+		effect:SetEntIndex(victim:EntIndex())
+	end
+	
+	util.Effect("bloodspray", effect)
+	util.Effect("BloodImpact", effect)
+
+	util.Decal( "Blood", StartPos, StartPos + NormalShit*100)
+	util.Decal( "Blood", victim:GetPos(), victim:GetPos())	
+	
+end
+
 function SWEP:Swing(damage)
 
 	if IsFirstTimePredicted() then
@@ -2258,11 +2376,13 @@ function SWEP:Swing(damage)
 
 end
 
+
 function SWEP:SendHitEvent(victim,damage,sound)
 
 	local VictimWeapon = nil
 
 	if victim and victim:IsPlayer() then
+	
 		VictimWeapon = victim:GetActiveWeapon()
 		
 		if VictimWeapon and VictimWeapon ~= NULL then
@@ -2304,6 +2424,7 @@ function SWEP:SendHitEvent(victim,damage,sound)
 	end
 	
 end
+
 
 --[[
 function SWEP:StabPlayer(ply,damage)

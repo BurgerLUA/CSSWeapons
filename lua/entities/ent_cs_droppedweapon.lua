@@ -59,9 +59,13 @@ function ENT:Use(activator,caller,useType,value)
 			
 		if hasweapon == true then
 		
-			if weapons.GetStored(self:GetNWString("class")).WeaponType == "Throwable" then
+			local Weapon = weapons.GetStored(self:GetNWString("class"))
 			
-				activator:GiveAmmo(1, weapons.GetStored(self:GetNWString("class")).Primary.Ammo )
+			if self:GetNWString("class") == "weapon_smod_katana" then return end
+			
+			if Weapon.WeaponType == "Throwable" then
+			
+				activator:GiveAmmo(1, Weapon.Primary.Ammo )
 				
 				self:Remove()
 		
@@ -70,19 +74,18 @@ function ENT:Use(activator,caller,useType,value)
 				local clipcount = self:GetNWInt("clip")
 			
 				if clipcount > 0 then
-					activator:GiveAmmo(clipcount, weapons.GetStored(self:GetNWString("class")).Primary.Ammo )
+					activator:GiveAmmo(clipcount, Weapon.Primary.Ammo )
 					activator:ChatPrint("You took " .. clipcount .. " rounds from the weapon's clip.")
 				else
 					activator:ChatPrint("There are no rounds to take from the weapon's clip.")
 				end
 
 				self:SetNWInt("clip",0)
-			
-				hasweapon = false
 				
 			end
 			
-		return end
+			return
+		end
 
 		local givenweapon = activator:Give(self:GetNWString("class"))
 		givenweapon.AlreadyGiven = true

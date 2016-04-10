@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "9MM DUAL BERTTAS"
+SWEP.PrintName				= "DUAL ELITES"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Secondary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.005
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 120
 SWEP.Primary.Delay			= 0.12 --1/(750/60)
-SWEP.Primary.Ammo			= "Battery"
+SWEP.Primary.Ammo			= "css_9mm"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul 				= 1

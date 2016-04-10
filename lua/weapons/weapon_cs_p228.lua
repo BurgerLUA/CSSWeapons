@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= ".357SIG P228"
+SWEP.PrintName				= "P228"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Secondary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.005
 SWEP.Primary.ClipSize		= 13
 SWEP.Primary.SpareClip		= 52
 SWEP.Primary.Delay			= 0.15 --1/(400/60)
-SWEP.Primary.Ammo			= "GaussEnergy"
+SWEP.Primary.Ammo			= "css_357sig"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 1

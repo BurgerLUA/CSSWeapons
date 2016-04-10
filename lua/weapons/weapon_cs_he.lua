@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= -1
 SWEP.Primary.SpareClip		= 1
 SWEP.Primary.Delay			= 1
-SWEP.Primary.Ammo			= "hegrenade"
+SWEP.Primary.Ammo			= "css_hegrenade"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 1

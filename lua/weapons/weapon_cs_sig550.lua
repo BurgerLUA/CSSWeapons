@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "5.56MM SIG550"
+SWEP.PrintName				= "SIG550"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.00125
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.25 --1/(240/60)
-SWEP.Primary.Ammo			= "AirboatGun"
+SWEP.Primary.Ammo			= "css_556mm"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1

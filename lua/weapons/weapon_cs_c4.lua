@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "C4 EXPLOSIVE"
+SWEP.PrintName				= "C4"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Free"
 

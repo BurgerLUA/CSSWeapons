@@ -4,10 +4,9 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "5.56MM GALIL"
+SWEP.PrintName				= "GALIL"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
-
 SWEP.Cost					= 2000
 SWEP.MoveSpeed				= 210
 
@@ -29,7 +28,7 @@ SWEP.Primary.Cone			= 0.0045
 SWEP.Primary.ClipSize		= 35
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.09 --1/(666/60)
-SWEP.Primary.Ammo			= "AirboatGun"
+SWEP.Primary.Ammo			= "css_556mm"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 0.8

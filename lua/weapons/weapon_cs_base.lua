@@ -66,33 +66,103 @@ CreateClientConVar("cl_css_crosshair_neversights", "0", true, true )
 CreateClientConVar("cl_css_crosshair_offset", "0", true, true )
 CreateClientConVar("cl_css_crosshair_fool", "1", true, true )
 
-game.AddAmmoType({name = "hegrenade", })
-game.AddAmmoType({name = "flashgrenade", })
-game.AddAmmoType({name = "smokegrenade",})
+game.AddAmmoType({
+	name = "css_12gauge",
+	dmgtype = DMG_BULLET,
+	tracer = TRACER_LINE_AND_WHIZ
+})
+
+game.AddAmmoType({
+	name = "css_57mm",
+	dmgtype = DMG_BULLET,
+	tracer = TRACER_LINE_AND_WHIZ
+})
+
+game.AddAmmoType({
+	name = "css_45acp",
+	dmgtype = DMG_BULLET,
+	tracer = TRACER_LINE_AND_WHIZ
+})
+
+game.AddAmmoType({
+	name = "css_9mm",
+	dmgtype = DMG_BULLET,
+	tracer = TRACER_LINE_AND_WHIZ
+})
+
+game.AddAmmoType({
+	name = "css_50ae",
+	dmgtype = DMG_BULLET,
+	tracer = TRACER_LINE_AND_WHIZ
+})
+
+game.AddAmmoType({
+	name = "css_556mm",
+	dmgtype = DMG_BULLET,
+	tracer = TRACER_LINE_AND_WHIZ
+})
+
+game.AddAmmoType({
+	name = "css_762mm",
+	dmgtype = DMG_BULLET,
+	tracer = TRACER_LINE_AND_WHIZ
+})
+
+game.AddAmmoType({
+	name = "css_338",
+	dmgtype = DMG_BULLET,
+	tracer = TRACER_LINE_AND_WHIZ
+})
+
+game.AddAmmoType({
+	name = "css_357sig",
+	dmgtype = DMG_BULLET,
+	tracer = TRACER_LINE_AND_WHIZ
+})
+
+game.AddAmmoType({
+	name = "css_hegrenade",
+	dmgtype = DMG_BLAST,
+	tracer = TRACER_NONE
+})
+
+game.AddAmmoType({
+	name = "css_flashgrenade",
+	dmgtype = DMG_BLAST,
+	tracer = TRACER_NONE
+})
+
+game.AddAmmoType({
+	name = "css_smokegrenade",
+	dmgtype = DMG_BLAST,
+	tracer = TRACER_NONE
+})
+
 
 if SERVER then
 	util.AddNetworkString("CSSCustomSound")
 end
 
 if CLIENT then
-	
+
+	--[[
 	net.Receive( "CSSCustomSound", function( len )
 		local ply = LocalPlayer()
 	end )
-
-	language.Add("AlyxGun_ammo","5.7mm")
-	language.Add("SniperPenetratedRound_ammo",".45 ACP")
-	language.Add("Gravity_ammo","4.6mm")
-	language.Add("Battery_ammo","9mm")
-	language.Add("CombineCannon_ammo",".50 AE")
-	language.Add("AirboatGun_ammo","5.56MM")
-	language.Add("StriderMinigun_ammo","7.62mm")
-	language.Add("SniperRound_ammo",".338")
-	language.Add("GaussEnergy_ammo",".357 SIG")
+	--]]
 	
-	language.Add("hegrenade_ammo","HE Grenade")
-	language.Add("flashgrenade_ammo","Flash Grenade")
-	language.Add("smokegrenade_ammo","Smoke Grenade")
+	language.Add("css_57mm_ammo","5.7mm")
+	language.Add("css_45acp_ammo",".45 ACP")
+	language.Add("css_9mm_ammo","9mm")
+	language.Add("css_50ae_ammo",".50 AE")
+	language.Add("css_556mm_ammo","5.56MM")
+	language.Add("css_762mm_ammo","7.62mm")
+	language.Add("css_338_ammo",".338")
+	language.Add("css_357sig_ammo",".357 SIG")
+	
+	language.Add("css_hegrenade_ammo","HE Grenade")
+	language.Add("css_flashgrenade_ammo","Flash Grenade")
+	language.Add("css_smokegrenade_ammo","Smoke Grenade")
 
 	surface.CreateFont( "csd",{font = "csd",size = 64,weight = 0})
 end
@@ -129,7 +199,7 @@ SWEP.Primary.Cone			= 0.00125
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.1
-SWEP.Primary.Ammo			= "StriderMinigun"
+SWEP.Primary.Ammo			= "css_762mm"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1.5
@@ -163,6 +233,7 @@ SWEP.DamageFalloff			= 1000000
 
 SWEP.IgnoreDrawDelay		= false
 
+SWEP.FuckBots				= false
 
 SWEP.HasBuildUp				= false
 -- End of base stats
@@ -227,6 +298,7 @@ SWEP.CSMuzzleX				= false
 
 SWEP.TracerOverride			= 1
 SWEP.EnableTracer			= true
+SWEP.BuildUpAmount			= 10
 
 SWEP.DisableReloadUntilEmpty = false
 
@@ -425,9 +497,7 @@ function SWEP:Deploy()
 	end
 	
 	if self.WeaponType ~= "Throwable" then
-		if not self.IgnoreDrawDelay then
-			self:SetNextPrimaryFire(CurTime() + math.Clamp(self.Owner:GetViewModel():SequenceDuration(),0.1,1) )
-		end
+		self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration() )
 	end
 	
 	return true
@@ -632,7 +702,7 @@ function SWEP:PreShootBullet() -- Should be predicted
 	end
 	
 	if self.HasBuildUp then
-		self:SetBuildUp( math.Clamp(self:GetBuildUp() + 10 - (self:GetBuildUp()/10) ,0,100 ) )
+		self:SetBuildUp( math.Clamp(self:GetBuildUp() + self.BuildUpAmount - (self:GetBuildUp()/10) ,0,100 ) )
 		--print(self:GetBuildUp())
 	end
 	
@@ -1018,7 +1088,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	bullet.Spread	= Vector(Cone, Cone, 0)
 	bullet.Src		= Source
 	bullet.Dir		= Direction
-	bullet.AmmoType = "ar2"
+	bullet.AmmoType = self.Primary.Ammo
 	--bullet.Distance	= self.Primary.Range
 	bullet.HullSize = 0
 	
@@ -1915,7 +1985,7 @@ function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 		end
 	else
 	
-		local Size = y/2
+		local Size = y
 		
 		if self.CustomScopeSOverride then
 			Size = self.CustomScopeSOverride
@@ -1959,6 +2029,8 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 
 	if (self.InfoMarkup == nil ) then
 	
+		local Ammo = language.GetPhrase( self.Primary.Ammo .. "_ammo" )
+	
 		local Damage = math.floor(self.Primary.NumShots * self.Primary.Damage * GetConVarNumber("sv_css_damage_scale"))
 		local Delay = math.floor((self.Primary.Delay^-1)*60)
 		
@@ -1969,7 +2041,6 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 		end
 		
 		local ClipDamage = Damage * ClipSize
-
 		local DPS = math.min(ClipDamage,math.floor(( 1 / self.Primary.Delay) * Damage ))
 		local Cone = math.Round((self.Primary.Cone * GetConVarNumber("sv_css_cone_scale")) * (360/1),2)
 		local Recoil = math.Round(self:GetRecoilMath() * 0.25,2)
@@ -1982,6 +2053,7 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 		local text_color = "<color=255,150,150,255>"
 		
 		str = "<font=HudSelectionText>"
+		str = str .. title_color .. "Ammo:</color> "..text_color..Ammo.."</color>\n" 
 		str = str .. title_color .. "Damage:</color> "..text_color..Damage.."</color>\n" 
 		str = str .. title_color .. "Max Range:</color> "..text_color..DamageFalloff.. " meters" .."</color>\n" 
 		str = str .. title_color .. "Firerate:</color> "..text_color.. Delay .. " RPM" .."</color>\n"

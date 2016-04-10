@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "5.56MM M4A1"
+SWEP.PrintName				= "M4A1"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.005
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.09 --1/(666/60)
-SWEP.Primary.Ammo			= "AirboatGun"
+SWEP.Primary.Ammo			= "css_556mm"
 SWEP.Primary.Automatic 		= true
 
 SWEP.WorldModel1			= "models/weapons/w_rif_m4a1.mdl"

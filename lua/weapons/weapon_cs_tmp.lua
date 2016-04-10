@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "9MM TMP"
+SWEP.PrintName				= "TMP"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.024
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 120
 SWEP.Primary.Delay			= 0.07 --1/(857/60)
-SWEP.Primary.Ammo			= "Battery"
+SWEP.Primary.Ammo			= "css_9mm"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1.1

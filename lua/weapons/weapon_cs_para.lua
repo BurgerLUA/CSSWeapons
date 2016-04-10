@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "5.56MM M249 PARA"
+SWEP.PrintName				= "M249 PARA"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.015
 SWEP.Primary.ClipSize		= 100
 SWEP.Primary.SpareClip		= 200
 SWEP.Primary.Delay			= 0.08 --1/(750/60)
-SWEP.Primary.Ammo			= "AirboatGun"
+SWEP.Primary.Ammo			= "css_556mm"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 0.75

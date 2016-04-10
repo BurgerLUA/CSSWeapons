@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "5.7MM FIVESEVEN"
+SWEP.PrintName				= "FIVESEVEN"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Secondary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.003
 SWEP.Primary.ClipSize		= 20
 SWEP.Primary.SpareClip		= 100
 SWEP.Primary.Delay			= 0.15 --1/(400/60)
-SWEP.Primary.Ammo			= "AlyxGun"
+SWEP.Primary.Ammo			= "css_57mm"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul 				= 0.5

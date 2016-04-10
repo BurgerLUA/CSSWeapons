@@ -91,6 +91,10 @@ function CSS_DropAmmo(ply,weapon)
 		local AmmoCount = ply:GetAmmoCount(AmmoType)
 		local ClipCount = weapon:GetMaxClip1()
 		
+		if ClipCount == -1 and weapon.Primary.SpareClip then
+			ClipCount = math.floor(weapon.Primary.SpareClip * 0.1)
+		end
+		
 		local AmmoCountToDrop = math.min(AmmoCount,ClipCount)
 		
 		if ply:Alive() then

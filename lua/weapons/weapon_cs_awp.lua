@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= ".338 AWP"
+SWEP.PrintName				= "AWP"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= 10
 SWEP.Primary.SpareClip		= 30
 SWEP.Primary.Delay			= 1.5
-SWEP.Primary.Ammo			= "SniperRound"
+SWEP.Primary.Ammo			= "css_338"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 0.1

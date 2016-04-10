@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "5.7MM P90"
+SWEP.PrintName				= "P90"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.0045
 SWEP.Primary.ClipSize		= 50
 SWEP.Primary.SpareClip		= 100
 SWEP.Primary.Delay			= 0.07 --1/(857/60)
-SWEP.Primary.Ammo			= "AlyxGun"
+SWEP.Primary.Ammo			= "css_57mm"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1.1

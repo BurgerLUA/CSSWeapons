@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "12 GAUGE M3SUPER90"
+SWEP.PrintName				= "M3SUPER90"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.04
 SWEP.Primary.ClipSize		= 8
 SWEP.Primary.SpareClip		= 32
 SWEP.Primary.Delay			= 0.88 --1/(68/60)
-SWEP.Primary.Ammo			= "Buckshot"
+SWEP.Primary.Ammo			= "css_12gauge"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 0.5

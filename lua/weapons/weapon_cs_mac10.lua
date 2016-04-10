@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= ".45ACP MAC10"
+SWEP.PrintName				= "MAC10"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.02
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 100
 SWEP.Primary.Delay			= 0.075 --1/(800/60)
-SWEP.Primary.Ammo			= "SniperPenetratedRound"
+SWEP.Primary.Ammo			= "css_45acp"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1.1

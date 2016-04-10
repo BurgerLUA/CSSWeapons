@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "7.62MM AK47"
+SWEP.PrintName				= "AK-47"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.0025
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.1
-SWEP.Primary.Ammo			= "StriderMinigun"
+SWEP.Primary.Ammo			= "css_762mm"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1

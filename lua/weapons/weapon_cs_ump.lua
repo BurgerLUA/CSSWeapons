@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= ".45 UMP"
+SWEP.PrintName				= "UMP"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.007
 SWEP.Primary.ClipSize		= 25
 SWEP.Primary.SpareClip		= 100
 SWEP.Primary.Delay			= 0.09 --1/(666/60)
-SWEP.Primary.Ammo			= "SniperPenetratedRound"
+SWEP.Primary.Ammo			= "css_45acp"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 0.9

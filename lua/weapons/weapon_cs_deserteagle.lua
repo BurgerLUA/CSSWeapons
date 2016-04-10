@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= ".50AE DESERT EAGLE"
+SWEP.PrintName				= "DESERT EAGLE"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Secondary"
 
@@ -29,7 +29,7 @@ SWEP.Primary.Cone			= 0.003
 SWEP.Primary.ClipSize		= 7
 SWEP.Primary.SpareClip		= 35
 SWEP.Primary.Delay			= 0.225
-SWEP.Primary.Ammo			= "CombineCannon"
+SWEP.Primary.Ammo			= "css_50ae"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul 				= 3

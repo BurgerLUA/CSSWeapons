@@ -2296,7 +2296,7 @@ function SWEP:NewSendHitEvent(victim,damage)
 			VictimWeapon = victim:GetActiveWeapon()
 
 			if VictimWeapon and VictimWeapon ~= NULL then
-				if VictimWeapon.HasBlock then
+				if VictimWeapon.EnableBlocking then
 				
 					local VictimKeyDown = VictimWeapon:GetIsBlocking()
 				

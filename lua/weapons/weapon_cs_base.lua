@@ -2252,10 +2252,14 @@ function SWEP:NewSwing(damage)
 		local HasHitTarget = false
 	
 		if Trace.Hit then
+			HasHitTarget = true
 			self:NewSendHitEvent(Trace.Entity,damage)
 		else
 			self:EmitGunSound(self.MeleeSoundMiss)
+			HasHitTarget = false
 		end
+		
+		return HasHitTarget
 	
 	end
 
@@ -2292,7 +2296,7 @@ function SWEP:NewSendHitEvent(victim,damage)
 			VictimWeapon = victim:GetActiveWeapon()
 
 			if VictimWeapon and VictimWeapon ~= NULL then
-				if VictimWeapon:GetClass() == "weapon_smod_katana" then
+				if VictimWeapon.HasBlock then
 				
 					local VictimKeyDown = VictimWeapon:GetIsBlocking()
 				
@@ -2304,7 +2308,6 @@ function SWEP:NewSendHitEvent(victim,damage)
 							VictimWeapon:BlockDamage(damage*2)
 							self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*3)
 							VictimWeapon:SetNextSecondaryFire(CurTime() + self.Primary.Delay*0.25)
-							
 							
 							self:EmitGunSound("weapons/samurai/tf_katana_impact_object_02.wav")
 							

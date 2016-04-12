@@ -151,6 +151,7 @@ if CLIENT then
 	end )
 	--]]
 	
+	language.Add("css_12gauge_ammo","12 Gauge")
 	language.Add("css_57mm_ammo","5.7mm")
 	language.Add("css_45acp_ammo",".45 ACP")
 	language.Add("css_9mm_ammo","9mm")
@@ -2196,6 +2197,7 @@ function SWEP:PreThrowObject()
 end
 
 function SWEP:ThrowObject(object,force)
+
 	if (CLIENT) then return end
 	local EA =  self.Owner:EyeAngles()
 	local pos = self.Owner:GetShootPos() + EA:Right() * 5 - EA:Up() * 4 + EA:Forward() * 8	

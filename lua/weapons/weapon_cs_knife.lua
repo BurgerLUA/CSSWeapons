@@ -92,17 +92,7 @@ function SWEP:Deploy()
 	return true
 end
 
-function GetActivities( ent )
-  local k, v, t
 
-  t = { }
-
-  for k, v in ipairs( ent:GetSequenceList( ) ) do
-    table.insert( t, { id = k, act = ent:GetSequenceActivity( k ), actname = ent:GetSequenceActivityName( k ) } )
-  end
-
-  return t
-end
 
 
 

@@ -254,9 +254,6 @@ SWEP.BurstOverride			= 3
 
 SWEP.PenetrationLossScale	= 1
 
---Deprecated?
-SWEP.IgnoreZoomSlow			= false
-
 -- I know what this is
 SWEP.DrawAmmo				= true
 SWEP.DrawCrosshair			= false
@@ -312,6 +309,8 @@ SWEP.MeleeSoundWallHit		= Sound("Weapon_Knife.HitWall")
 SWEP.MeleeSoundFleshSmall	= Sound("Weapon_Knife.Hit")
 SWEP.MeleeSoundFleshLarge	= Sound("Weapon_Knife.Stab")
 
+SWEP.PumpSound				= nil
+
 SWEP.IgnoreScopeHide		= false
 
 SWEP.TracerName				= "Tracer"
@@ -320,6 +319,7 @@ SWEP.CustomScopeSOverride	= nil
 SWEP.CustomScopeCOverride	= Color(0,0,0,255)
 
 SWEP.EnableBlocking			= false
+SWEP.HasHL2Pump				= false
 
 if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleUp = Angle(0,0,0)
@@ -344,13 +344,12 @@ function SWEP:SetupDataTables( )
 	self:SetAttachDelay(0)
 	self:NetworkVar("Float",6,"BoltDelay")
 	self:SetBoltDelay(0)
-	self:NetworkVar("Float",8,"NextBulletDelay")
+	self:NetworkVar("Float",7,"NextBulletDelay")
 	self:SetNextBulletDelay(0)
 	self:NetworkVar("Float",8,"BuildUp")
 	self:SetBuildUp(0)
-	
-	--self:NetworkVar("Float",9,"ZoomMod")
-	--self:SetZoomMod(0)
+	self:NetworkVar("Float",9,"NextHL2Pump")
+	self:SetNextHL2Pump(0)
 	
 	self:NetworkVar("Int",0,"BulletQueue")
 	self:SetBulletQueue(0)
@@ -369,7 +368,8 @@ function SWEP:SetupDataTables( )
 	self:SetIsLeftFire( false )
 	self:NetworkVar("Bool",6,"IsBlocking")
 	self:SetIsBlocking( false )
-	
+	self:NetworkVar("Bool",7,"NeedsHL2Pump")
+	self:SetNeedsHL2Pump( false )
 
 end
 
@@ -393,6 +393,10 @@ function SWEP:Initialize()
 	
 	if self.ReloadSound then
 		util.PrecacheSound(self.ReloadSound)
+	end
+	
+	if self.PumpSound then
+		util.PrecacheSound(self.PumpSound)
 	end
 	
 	if self.LastBulletSound then
@@ -561,8 +565,8 @@ function SWEP:PrimaryAttack()
 	if not self:CanShoot() then return end
 	self:TakePrimaryAmmo(1)
 	
-	self:AfterPump() -- don't predict, has animations
 	self:WeaponDelay() -- don't predict, has delay
+	self:AfterPump() -- don't predict, has animations
 	self:HandleBurstDelay() -- don't predict
 	self:HandleShootAnimations() -- don't predict, has animations
 
@@ -606,6 +610,13 @@ function SWEP:CanShoot()
 end
 
 function SWEP:AfterPump()
+
+	if self.HasPumpAction and self.HasHL2Pump then
+		self:SetNextPrimaryFire(CurTime() + 10)
+		self:SetNeedsHL2Pump(true)
+		self:SetNextHL2Pump(CurTime() + self.Primary.Delay)
+	end
+
 	if self:GetIsShotgunReload() then
 		self:SetIsShotgunReload(false)
 		self:SetIsReloading(false)
@@ -672,6 +683,7 @@ function SWEP:AfterZoom()
 end
 
 function SWEP:PreShootBullet() -- Should be predicted
+
 	local Damage = self.Primary.Damage
 	local Shots = self.Primary.NumShots
 	local Cone = self:HandleCone(self.Primary.Cone,false)
@@ -1021,7 +1033,7 @@ function SWEP:AddRecoil()
 	
 	if self.HasSideRecoil then
 		if DelayMul == 1 then
-			if AvgBulletsShot > 3*DelayMul then
+			if AvgBulletsShot > 2*DelayMul then
 				SidePunch = UpPunch*math.random(-1,1)*self.SideRecoilMul
 			end
 		else
@@ -1030,7 +1042,7 @@ function SWEP:AddRecoil()
 	end
 	
 	if self.HasDownRecoil then
-		if AvgBulletsShot > 1*DelayMul then
+		if AvgBulletsShot > 3*DelayMul then
 			UpPunch = UpPunch*math.random(-1,1)*0.5
 		end
 	end
@@ -1063,7 +1075,10 @@ function SWEP:GetHeatMath(Damage,Shots)
 end
 
 function SWEP:AddHeat(Damage,Shots)
-	
+
+	if self.Owner and self.Owner:IsBot() then
+		Damage = Damage*2
+	end
 	
 	local CoolDown = self:GetHeatMath(Damage,Shots)
 	local CoolTime = CurTime() + (self.Primary.Delay + 0.1)*GetConVarNumber("sv_css_cooltime_scale")
@@ -1317,12 +1332,12 @@ function SWEP:Reload()
 	end
 
 	if self.HasPumpAction then
-		self.NextShell = 0.5
+		self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
+		self:SetNextShell(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 		self:SetIsShotgunReload(true)
 	else
 		self:SetReloadFinish(CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate()))
 		self:SetIsNormalReload(true)
-		self:SetIsReloading(true)
 	end
 	
 	self.Owner:SetAnimation(PLAYER_RELOAD)
@@ -1363,7 +1378,7 @@ function SWEP:Reload()
 			end)
 		end
 	end
-
+	
 	self:SetIsReloading(true)
 	
 end
@@ -1552,7 +1567,7 @@ function SWEP:HandleReloadThink()
 				self:SendWeaponAnim(ACT_VM_RELOAD)
 				self:SetClip1(self:Clip1()+1)
 				self.Owner:RemoveAmmo(1,self.Primary.Ammo)
-				self:SetNextShell(CurTime()+0.5)
+				self:SetNextShell(CurTime()+self.Owner:GetViewModel():SequenceDuration())
 
 				if (CLIENT or game.SinglePlayer()) then
 					if self.ReloadSound then
@@ -1582,6 +1597,18 @@ function SWEP:CancelReload()
 end
 
 function SWEP:HandleShotgunReloadThinkAnimations()
+
+	if self.HasPumpAction and self.HasHL2Pump then
+		if self:GetNeedsHL2Pump() and self:GetNextHL2Pump() <= CurTime() then
+			self:SendWeaponAnim( ACT_SHOTGUN_PUMP )
+			self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration() )
+			if self.PumpSound then
+				self:EmitGunSound(self.PumpSound)
+			end
+			self:SetNeedsHL2Pump(false)
+		end
+	end
+
 	if self:GetIsShotgunReload() then
 		if self:GetNextShell() <= CurTime() then
 			if self.Owner:GetAmmoCount( self.Primary.Ammo ) > 0 and self:Clip1() < self.Primary.ClipSize then 
@@ -1595,7 +1622,7 @@ function SWEP:HandleShotgunReloadThinkAnimations()
 				
 			else
 				self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
-				self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+				self:SetNextPrimaryFire( CurTime() + self.Owner:GetViewModel():SequenceDuration() )
 			end
 		end
 	end
@@ -2585,6 +2612,23 @@ function SWEP:StabDamage(damage, entity)
 		entity:TakeDamageInfo( dmginfo )
 	end
 end
+
+function SWEP:GetActivities()
+
+	local ent = self
+
+	local k, v, t
+
+	t = { }
+
+	for k, v in ipairs( ent:GetSequenceList( ) ) do
+		table.insert( t, { id = k, act = ent:GetSequenceActivity( k ), actname = ent:GetSequenceActivityName( k ) } )
+	end
+
+	PrintTable(t)
+  
+end
+
 
 AccessorFunc(SWEP,"fNPCMinBurst","NPCMinBurst")
 AccessorFunc(SWEP,"fNPCMaxBurst","NPCMaxBurst")

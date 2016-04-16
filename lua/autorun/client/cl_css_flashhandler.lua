@@ -1,25 +1,47 @@
 local SmokeMat = Material("skybox/italydn")
 
-
 function CSSFlashEffect()
 
 	local ply = LocalPlayer()
 	
+	
+
 	if ply.IsBlinded == true then
+	
 
 		if ply.BlindAmount > 0 then
 		
-			local Mod = math.Clamp(ply.BlindAmount / 3,0,1)
+			local Mod = math.Clamp(ply.BlindAmount,0,1)
 			
-			if Mod >= 1 then
+			--[[
+			if Mod >= 0.5 then
 				DrawMaterialOverlay( "effects/flashbang_white", 1 )
-			else
-				DrawMaterialOverlay( "effects/flashbang", Mod )
 			end
 			
-			DrawMotionBlur( 0.1, math.Clamp(ply.BlindAmount / 3,0,1) , 100 )
+			DrawMotionBlur( 0.1, Mod , 100 )
+			--]]
 			
-			ply.BlindAmount = ply.BlindAmount - FrameTime()
+			--surface.SetDrawColor( Color(255,255,255,255*Mod) )
+			--surface.DrawRect( 0, 0, ScrW(), ScrH() )
+			
+			
+			local Settings = {
+				[ "$pp_colour_brightness" ] = Mod,
+				[ "$pp_colour_contrast" ] = 1,
+				[ "$pp_colour_colour" ] = 1,
+				[ "$pp_colour_addr" ] = 0,
+				[ "$pp_colour_addg" ] = 0,
+				[ "$pp_colour_addb" ] = 0,
+				[ "$pp_colour_mulr" ] = 0,
+				[ "$pp_colour_mulg" ] = 0,
+				[ "$pp_colour_mulb" ] = 0
+			}
+			
+			DrawColorModify( Settings )
+			
+			--print(Mod)
+			
+			ply.BlindAmount = ply.BlindAmount - FrameTime()*0.5
 
 		else
 		

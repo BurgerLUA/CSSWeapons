@@ -11,9 +11,13 @@ CreateConVar("sv_css_cooltime_scale", "1", AllFCVar , "This is the value that th
 CreateConVar("sv_css_cooldown_scale", "1", AllFCVar , "This is the value that the cooldown amount from CSS weapons is multiplied by. Default is 1." )
 CreateConVar("sv_css_damagefalloff_scale", "0.5", AllFCVar , "This is the value that the damage falloff amount from CSS weapons is multiplied by. Default is 0.5." )
 
+CreateConVar("sv_css_flashbang_dur", "1", AllFCVar , "This is the value that the flashbang duration effect is multiplied. Default is 1." )
+CreateConVar("sv_css_smoke_dur", "10", AllFCVar , "This is the value that the smoke duration effect is multiplied. Default is 1." )
+CreateConVar("sv_css_he_damage", "98", AllFCVar , "Damage dealt by CSS HE Grenades. Default is 98." )
+CreateConVar("sv_css_he_radius", "400", AllFCVar , "Radius of CSS HE Grenade explosions. Default is 400." )
+
 CreateConVar("sv_css_enable_penetration", "1", AllFCVar , "1 enable penetration through objects, 0 disables. Default is 1." )
 CreateConVar("sv_css_penetration_scale", "1", AllFCVar , "Base damage lost per unit of penetration. Default is 1." )
-
 
 CreateConVar("sv_css_ammo_loaded", "1", AllFCVar , "1 enables giving weapons already loaded. Default is 1." )
 CreateConVar("sv_css_ammo_givespare", "1", AllFCVar , "1 enables giving spare ammo to players upon pickup. Default is 1." )
@@ -1602,8 +1606,10 @@ function SWEP:HandleShotgunReloadThinkAnimations()
 		if self:GetNeedsHL2Pump() and self:GetNextHL2Pump() <= CurTime() then
 			self:SendWeaponAnim( ACT_SHOTGUN_PUMP )
 			self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration() )
-			if self.PumpSound then
-				self:EmitGunSound(self.PumpSound)
+			if CLIENT then
+				if self.PumpSound then
+					self.Owner:EmitSound(self.PumpSound)
+				end
 			end
 			self:SetNeedsHL2Pump(false)
 		end

@@ -33,9 +33,6 @@ function ENT:PhysicsCollide(data, physobj)
 
 	if SERVER then
 	
-		self.HitP = data.HitPos
-		self.HitN = data.HitNormal
-
 		if self:GetVelocity():Length() > 50 then
 		
 			self:EmitSound(self.BounceSound)
@@ -52,14 +49,9 @@ function ENT:PhysicsCollide(data, physobj)
 				
 					data.HitEntity:TakeDamageInfo(dmginfo)
 					
-					if data.HitEntity:IsPlayer() then
-						data.HitEntity:EmitSound("vo/npc/male01/ow01.wav")
-					end
-					
 				end
-				
 			end
-			
+
 		end
 
 	end
@@ -86,11 +78,10 @@ function ENT:Detonate(self,pos)
 		util.Effect( "Explosion", effectdata)
 
 		if self.Owner then
-			util.BlastDamage(self, self.Owner, pos, 400, 98)
+			util.BlastDamage(self, self.Owner, pos, math.floor( GetConVar("sv_css_he_radius"):GetFloat() ), math.floor( GetConVar("sv_css_he_damage"):GetFloat() ) )
 		end
 		
 		self:EmitSound(self.ExplodeSound)
-		--self:EmitSound(self.DebrisSound)
 		
 		if IsValid(self.HitP) then
 			self.Pos1 = self.HitP + self.HitN

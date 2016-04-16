@@ -16,40 +16,137 @@ end
 	
 hook.Add("DoPlayerDeath", "CSS: Death Weapon Dropping", CSSDropWeaponAmmo )
 
+local NextThink = 0
+
+
+local AssociatedWeapons = {
+	css_hegrenade = "weapon_cs_he",
+	css_flashgrenade = "weapon_cs_flash",
+	css_smokegrenade = "weapon_cs_smokegrenade",
+	ex_gasgrenade = "weapon_ex_gas"
+}
+
+function CSS_DropWeaponBecauseNone()
+
+	if NextThink <= CurTime() then
+	
+		for k,v in pairs(player.GetAll()) do
+			
+			for ammo,weapon in pairs(AssociatedWeapons) do
+			
+				if not v:HasWeapon(weapon) then
+					if v:GetAmmoCount(ammo) > 0 then
+						local NewWeapon = v:Give(weapon)
+						NewWeapon.AlreadyGiven = true
+					end
+				end
+				
+			end
+			
+			local Weapons = v:GetWeapons()
+			
+			if v:Alive() and #Weapons > 0 then
+				for l,b in pairs(Weapons) do
+					if b:IsScripted() then
+						if b.Base == "weapon_cs_base" or b.BurgerBase == true then
+							if b.WeaponType == "Throwable" and b.Primary.ClipSize == -1 and b.IsThrowing == false then
+								if v:GetAmmoCount(b.Primary.Ammo) < 1 then
+									v:StripWeapon(b:GetClass())
+								end
+							end
+						end
+					end
+				end
+			end
+			
+		end
+	
+
+		NextThink = CurTime() + 1
+	end
+
+end
+
+
+hook.Add("Think","CSS_DropWeaponBecauseNone",CSS_DropWeaponBecauseNone)
+
+
+
 function CSS_DropWeapon(ply,weapon)
 
 	if weapon:IsScripted() == true then
 		if weapon.BurgerBase ~= nil or weapon.Base == "weapon_cs_base" then
 		
 			local StoredWeapon =  weapons.GetStored(weapon:GetClass())
-
+			
 			local model = StoredWeapon.WorldModel
+			local Ammo = weapon:Ammo1()
 
-			if model ~= "" then				
+			if model ~= "" then		
+
+				local dropped = ents.Create("ent_cs_droppedweapon")
+				dropped:SetPos(ply:GetPos() + ply:OBBCenter())
+				dropped:SetAngles(ply:EyeAngles())
+				dropped:SetModel(model)
+				dropped:SetNWString("class",weapon:GetClass())
+				dropped:SetCustomCollisionCheck( true )
+			
 				if not (StoredWeapon.WeaponType == "Throwable" and weapon:Clip1() ~= 0) then
-					local dropped = ents.Create("ent_cs_droppedweapon")
-					dropped:SetPos(ply:GetPos() + ply:OBBCenter())
-					dropped:SetAngles(ply:EyeAngles())
-					dropped:SetModel(model)
-					dropped:Spawn()
-					dropped:Activate()
-					dropped:GetPhysicsObject():SetVelocity(ply:GetForward()*100)
-					dropped:SetNWString("class",weapon:GetClass())
-					dropped:SetNWInt("clip",weapon:Clip1())
-					dropped:SetNWInt("spare",weapon:Ammo1())
+					
+					dropped:SetNWFloat("clip",weapon:Clip1())
+					
+					if ply:Alive() then
+						ply:StripWeapon(weapon:GetClass())
+					end
+					
+				elseif StoredWeapon.WeaponType == "Throwable" then
+					
+					if Ammo < 10 then
+					
+						dropped:SetNWFloat("clip",weapon:Clip1())
+						
+						if ply:Alive() then
+						
+							ply:SetAmmo( math.Clamp(Ammo - 1,0,9999), weapon:GetPrimaryAmmoType() )
+							
+							Ammo = weapon:Ammo1()
+							
+							if Ammo == 0 then
+								ply:StripWeapon(weapon:GetClass())
+							end
+							
+						end
+						
+					else
+					
+						CSS_DropAmmo(ply,weapon,Ammo)
+						
+						if ply:Alive() then
+							ply:StripWeapon(weapon:GetClass())
+						end
+					
+						dropped:Remove()
+					
+						return
+						
+					end
+				
 				end
+
+				dropped:Spawn()
+				dropped:Activate()
+				dropped:GetPhysicsObject():SetVelocity(ply:GetForward()*100)
+
 			end
 			
-			if ply:Alive() then
-				ply:StripWeapon(weapon:GetClass())
-			end
+
 			
 		end
 	end
 	
 end
 
-function CSS_DropAmmo(ply,weapon)
+function CSS_DropAmmo(ply,weapon,amount)
 
 	if weapon == "all" then
 		local AllAmmoTable = {}
@@ -65,10 +162,10 @@ function CSS_DropAmmo(ply,weapon)
 			dropammo.AmmoModel = "models/weapons/w_defuser.mdl"
 			dropammo:SetPos( ply:GetPos() + ply:OBBCenter() )
 			dropammo:SetAngles(ply:EyeAngles() + Angle( math.Rand(1,360),math.Rand(1,360),math.Rand(1,360)) )
+			dropammo:SetCustomCollisionCheck( true )
 			dropammo:Spawn()
 			dropammo:Activate()
 			dropammo:GetPhysicsObject():SetVelocity(ply:GetForward()*100)
-			dropammo:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 		
 			if GetConVar("sv_css_timed_drops"):GetInt() == 1 then
 				SafeRemoveEntityDelayed(dropammo,GetConVar("sv_css_drop_timer"):GetInt())
@@ -80,7 +177,9 @@ function CSS_DropAmmo(ply,weapon)
 		local model = "models/weapons/w_defuser.mdl"
 	
 		if weapon:IsScripted() and (weapon.BurgerBase or weapon.Base == "weapon_cs_base") then
-			if weapon.GetMagModel then
+			if weapon.WeaponType == "Throwable" and weapon.Primary.ClipSize == -1 then
+				model = weapon.WorldModel
+			elseif weapon.GetMagModel then
 				if file.Exists(weapon.GetMagModel,"GAME") then
 					model = weapon.GetMagModel
 				end
@@ -92,16 +191,21 @@ function CSS_DropAmmo(ply,weapon)
 		local ClipCount = weapon:GetMaxClip1()
 		
 		if ClipCount == -1 and weapon.Primary.SpareClip then
-			ClipCount = math.floor(weapon.Primary.SpareClip * 0.1)
+			ClipCount = math.Clamp(math.ceil(weapon.Primary.SpareClip * 0.1),-1,9999)
 		end
-		
+
 		local AmmoCountToDrop = math.min(AmmoCount,ClipCount)
 		
+		if amount then
+			AmmoCountToDrop = amount
+		end
+		
 		if ply:Alive() then
-			ply:SetAmmo( AmmoCount - AmmoCountToDrop,AmmoType)
+			ply:SetAmmo( math.Clamp(AmmoCount - AmmoCountToDrop,0,9999) , AmmoType)
 		end
 		
 		if AmmoCountToDrop > 0 then
+		
 			local dropammo = ents.Create("ent_cs_ammo_base")
 			dropammo.AmmoType = weapon:GetPrimaryAmmoType()
 			dropammo.AmmoAmount = AmmoCountToDrop
@@ -111,7 +215,11 @@ function CSS_DropAmmo(ply,weapon)
 			dropammo:Spawn()
 			dropammo:Activate()
 			dropammo:GetPhysicsObject():SetVelocity(ply:GetForward()*100)
-			dropammo:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+			
+			if ply:GetAmmoCount(AmmoType) <= 0 then
+				ply:StripWeapon(weapon:GetClass())
+			end
+	
 		end
 			
 	end
@@ -129,8 +237,6 @@ function CSS_Drops(ply,cmd,args,argStr)
 			CSS_DropAmmo(ply,Weapon)
 		end
 	end
-
-	
 
 end
 

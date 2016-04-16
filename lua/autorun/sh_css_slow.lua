@@ -99,3 +99,17 @@ function CSSSpeedModMovement(ply,mv,cmd)
 end
 
 hook.Add("SetupMove","CSS: SpeedMod Movement",CSSSpeedModMovement)
+
+
+function CSS_ShouldCollide(ent1,ent2)
+
+	if ent1:GetClass() == "ent_cs_ammo_base" or ent1:GetClass() == "ent_cs_droppedweapon" then
+		if ent1:GetClass() == ent2:GetClass() then
+			return false
+		end
+	end
+
+end
+
+hook.Add("ShouldCollide","CSS_ShouldCollide",CSS_ShouldCollide)
+

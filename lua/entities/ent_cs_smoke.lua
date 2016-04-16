@@ -53,10 +53,12 @@ function ENT:Think()
 	if SERVER then
 		
 		if CurTime() > self.Delay then 
+		
+			local ConVar = math.floor(GetConVar("sv_css_smoke_dur"):GetFloat())
 			
 			if self.NextParticle <= CurTime() then 
 			
-				if self.ParticleCount < 100 then
+				if self.ParticleCount < 100 * (ConVar/10) then
 					local ent = ents.Create("ent_cs_smokeparticle")
 					ent:SetPos(self:GetPos())
 					ent:SetAngles(Angle(0,0,0))
@@ -84,7 +86,8 @@ function ENT:Detonate(self,pos)
 		if not self:IsValid() then return end
 		self:SetNWBool("IsDetonated",true)
 		self:EmitSound(self.ExplodeSound)
-		SafeRemoveEntityDelayed(self,30)
+		local ConVar = math.floor(GetConVar("sv_css_smoke_dur"):GetFloat())
+		SafeRemoveEntityDelayed(self,30 * (ConVar/10) )
 	end
 end
 

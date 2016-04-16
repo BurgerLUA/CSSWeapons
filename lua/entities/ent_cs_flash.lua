@@ -88,15 +88,9 @@ function ENT:Detonate(self,pos)
 
 			for k,v in pairs(Players) do
 					
-				local distancecount = (maxdistance/100 - self:GetPos():Distance(v:GetPos())/100) + 4
+				local distancecount = (maxdistance/100 - self:GetPos():Distance(v:GetPos())/100)
 
-				if distancecount > 0 and distancecount < 8 then
-					for n,f in pairs(ents.FindInCone(v:GetShootPos(), v:GetAimVector(),maxdistance,90)) do
-						if f == self.Entity then
-							self:BlindEffects(v,distancecount)
-						end
-					end
-				elseif distancecount >= 2 then
+				if distancecount > 0 then
 					self:BlindEffects(v,distancecount)
 				end
 
@@ -112,18 +106,47 @@ function ENT:Detonate(self,pos)
 end
 
 
-function ENT:BlindEffects(v,distancecount)
+function ENT:BlindEffects(ply,distancecount)
 
-	if distancecount > 10 then
-		v:SetDSP( 37, false )
-	end
+	if ply:IsLineOfSightClear(self.Entity) then
+
+		ply:SetDSP( 37, true )
 	
-	if v:IsLineOfSightClear(self.Entity) then
-		v.BlindAmount = math.Clamp(distancecount,0,5)
-		v.IsBlinded = true
+		if not self:IsPlayerLookingAtSelf(ply) then
+			distancecount = 0.5
+		end
+		
+		ply.BlindAmount = math.Clamp(distancecount,0,2.5) * (GetConVar("sv_css_flashbang_dur"):GetFloat()/5)
+		ply.IsBlinded = true
+
 	end
 	
 end
+
+function ENT:IsPlayerLookingAtSelf(ply)
+
+	local FOV = 90
+	
+	local PlyPos = ply:EyePos()
+	local SelfPos = self:GetPos() + self:OBBCenter()
+	
+	local Angle01 = (SelfPos - PlyPos):Angle()
+	local Angle02 = ply:EyeAngles()
+	Angle01:Normalize()
+	Angle02:Normalize()
+
+	local MathY = math.abs( Angle01.y - Angle02.y )
+	local MathP = math.abs( Angle01.p - Angle02.p )
+	
+	if MathP <= FOV and MathY <= FOV then
+		return true
+	else
+		return false
+	end
+
+end
+
+
 
 function ENT:Draw()
 	if CLIENT then

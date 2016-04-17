@@ -1,6 +1,6 @@
 function NadeKeyPress(ply,key)
 
-	if GetConVarNumber("cl_css_quick") == 0 then return end
+	if GetConVarNumber("sv_css_quick") == 0 then return end
 	
 	if ply:KeyDown(IN_USE) then
 		if key == IN_ATTACK then

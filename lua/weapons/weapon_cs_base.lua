@@ -44,7 +44,7 @@ CreateConVar("sv_css_enable_deathsounds", "0", AllFCVar , "1 enables death sound
 
 --CreateConVar("sv_css_enable_speedmod", "0", AllFCVar , "1 enables speed mod, 0 disables. Default is 1." ) -LOCATED IN SH_CSS_SLOW.LUA
 
-CreateConVar("cl_css_quick", "0", AllFCVar , "1 enables quick grenades, 0 disables. Default is 1." )
+CreateConVar("sv_css_quick", "0", AllFCVar , "1 enables quick grenades, 0 disables. Default is 1." )
 CreateConVar("sv_css_enable_mags", "0", AllFCVar , "1 enables cosmetic magazine drops. Requires separate addon. Default is 0." )
 
 

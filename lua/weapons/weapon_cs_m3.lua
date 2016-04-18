@@ -22,7 +22,7 @@ SWEP.WorldModel				= "models/weapons/w_shot_m3super90.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
 
-SWEP.Primary.Damage			= 14
+SWEP.Primary.Damage			= 26*0.8
 SWEP.Primary.NumShots		= 9
 SWEP.Primary.Sound			= Sound("Weapon_M3.Single")
 SWEP.Primary.Cone			= 0.04
@@ -32,10 +32,11 @@ SWEP.Primary.Delay			= 0.88 --1/(68/60)
 SWEP.Primary.Ammo			= "css_12gauge"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul				= 0.5
-SWEP.SideRecoilMul			= 1
+SWEP.RecoilMul				= 0.25
+SWEP.SideRecoilMul			= 0.25
 SWEP.VelConeMul				= 1.5
-SWEP.HeatMul				= 1
+SWEP.HeatMul				= 2
+SWEP.CoolMul				= 0.5
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.25
@@ -47,7 +48,7 @@ SWEP.HasBoltAction 			= false
 SWEP.HasBurstFire 			= false
 SWEP.HasSilencer 			= false
 SWEP.HasDoubleZoom			= false
-SWEP.HasSideRecoil			= false
+SWEP.HasSideRecoil			= true
 SWEP.HasDownRecoil			= false
 
 SWEP.HasIronSights 			= true

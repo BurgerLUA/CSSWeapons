@@ -8,7 +8,7 @@ SWEP.PrintName				= "GALIL"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 SWEP.Cost					= 2000
-SWEP.MoveSpeed				= 210
+SWEP.MoveSpeed				= 215
 
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
@@ -24,7 +24,7 @@ SWEP.HoldType				= "ar2"
 SWEP.Primary.Damage			= 30
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("Weapon_Galil.Single")
-SWEP.Primary.Cone			= 0.0045
+SWEP.Primary.Cone			= 0.0065
 SWEP.Primary.ClipSize		= 35
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.09 --1/(666/60)
@@ -35,6 +35,7 @@ SWEP.RecoilMul				= 0.8
 SWEP.SideRecoilMul			= 0.5
 SWEP.VelConeMul				= 1.5
 SWEP.HeatMul				= 0.9
+SWEP.CoolMul				= 0.5
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1

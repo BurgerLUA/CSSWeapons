@@ -25,17 +25,18 @@ SWEP.HoldType				= "smg"
 SWEP.Primary.Damage			= 26
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("Weapon_MP5Navy.Single")
-SWEP.Primary.Cone			= 0.008
+SWEP.Primary.Cone			= 0.006
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 120
 SWEP.Primary.Delay			= 0.08 --1/(750/60)
 SWEP.Primary.Ammo			= "css_9mm"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 0.5
 SWEP.SideRecoilMul			= 0.75
 SWEP.VelConeMul				= 0.5
 SWEP.HeatMul				= 0.8
+SWEP.CoolMul				= 0.75
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.5

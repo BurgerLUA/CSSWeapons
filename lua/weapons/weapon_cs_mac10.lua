@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "MAC10"
+SWEP.PrintName				= "MAC-10"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -33,9 +33,10 @@ SWEP.Primary.Ammo			= "css_45acp"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul				= 1.1
-SWEP.SideRecoilMul			= 0.75
+SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 0.5
 SWEP.HeatMul				= 0.75
+SWEP.CoolMul				= 0.5
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.5

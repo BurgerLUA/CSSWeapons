@@ -25,7 +25,7 @@ SWEP.HoldType				= "revolver"
 SWEP.Primary.Damage			= 25
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("Weapon_FiveSeven.Single")
-SWEP.Primary.Cone			= 0.003
+SWEP.Primary.Cone			= 0.006
 SWEP.Primary.ClipSize		= 20
 SWEP.Primary.SpareClip		= 100
 SWEP.Primary.Delay			= 0.15 --1/(400/60)
@@ -36,6 +36,7 @@ SWEP.RecoilMul 				= 0.5
 SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 0.25
 SWEP.HeatMul				= 0.75
+SWEP.CoolMul				= 0.75
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.75

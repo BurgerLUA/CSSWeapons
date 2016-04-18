@@ -4,7 +4,7 @@ if CLIENT then
 end
 
 SWEP.Category				= "Counter-Strike"
-SWEP.PrintName				= "M4A1"
+SWEP.PrintName				= "M4A1 Carbine"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 
@@ -40,6 +40,7 @@ SWEP.RecoilMul				= 0.75
 SWEP.SideRecoilMul			= 0.25
 SWEP.VelConeMul				= 1.25
 SWEP.HeatMul				= 0.75
+SWEP.CoolMul				= 0.8
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1

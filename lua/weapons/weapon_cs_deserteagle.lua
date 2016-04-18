@@ -36,6 +36,7 @@ SWEP.RecoilMul 				= 3
 SWEP.SideRecoilMul			= 0.25
 SWEP.VelConeMul				= 0.5
 SWEP.HeatMul				= 3
+SWEP.CoolMul				= 1.25
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.75

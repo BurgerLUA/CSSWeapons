@@ -25,7 +25,7 @@ SWEP.HoldType				= "smg"
 SWEP.Primary.Damage			= 32
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("Weapon_AUG.Single")
-SWEP.Primary.Cone			= 0.003
+SWEP.Primary.Cone			= 0
 SWEP.Primary.ClipSize		= 30
 SWEP.Primary.SpareClip		= 90
 SWEP.Primary.Delay			= 0.09
@@ -33,9 +33,10 @@ SWEP.Primary.Ammo			= "css_556mm"
 SWEP.Primary.Automatic 		= true
 
 SWEP.RecoilMul 				= 1.25
-SWEP.SideRecoilMul			= 0.5
+SWEP.SideRecoilMul			= 0.4
 SWEP.VelConeMul				= 1.5
-SWEP.HeatMul				= 1.25
+SWEP.HeatMul				= 1
+SWEP.CoolMul				= 1
 
 SWEP.HasScope 				= true
 SWEP.ZoomAmount				= 3

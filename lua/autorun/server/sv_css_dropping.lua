@@ -42,7 +42,7 @@ function CSS_DropWeaponBecauseNone()
 				end
 				
 			end
-			
+			--[[
 			local Weapons = v:GetWeapons()
 			
 			if v:Alive() and #Weapons > 0 then
@@ -58,7 +58,7 @@ function CSS_DropWeaponBecauseNone()
 					end
 				end
 			end
-			
+			--]]
 		end
 	
 

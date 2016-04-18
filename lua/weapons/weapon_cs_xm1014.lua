@@ -22,7 +22,7 @@ SWEP.WorldModel				= "models/weapons/w_shot_xm1014.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
 
-SWEP.Primary.Damage			= 18
+SWEP.Primary.Damage			= 22 * 0.8
 SWEP.Primary.NumShots		= 6
 SWEP.Primary.Sound			= Sound("Weapon_XM1014.Single")
 SWEP.Primary.Cone			= 0.0325
@@ -32,7 +32,7 @@ SWEP.Primary.Delay			= 0.25 --1/(240/60)
 SWEP.Primary.Ammo			= "css_12gauge"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul				= 1
+SWEP.RecoilMul				= 1.25
 SWEP.SideRecoilMul			= 0.1
 SWEP.VelConeMul				= 2
 SWEP.HeatMul				= 1

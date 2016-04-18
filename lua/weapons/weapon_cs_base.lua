@@ -207,10 +207,11 @@ SWEP.Primary.Delay			= 0.1
 SWEP.Primary.Ammo			= "css_762mm"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1.5
-SWEP.SideRecoilMul			= 0.1
-SWEP.VelConeMul				= 1.75
-SWEP.HeatMul				= 0.75
+SWEP.RecoilMul				= 1
+SWEP.SideRecoilMul			= 0.5
+SWEP.VelConeMul				= 1
+SWEP.HeatMul				= 1
+SWEP.CoolMul				= 1
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
@@ -577,6 +578,11 @@ function SWEP:PrimaryAttack()
 	--self.Weapon:MuzzleFlash()
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	
+	self:ShootGun()
+
+end
+
+function SWEP:ShootGun()
 	if (IsFirstTimePredicted() or game.SinglePlayer()) then
 	
 		self:AfterZoom() -- Predict
@@ -588,8 +594,8 @@ function SWEP:PrimaryAttack()
 		end
 		
 	end
-
 end
+
 
 function SWEP:HandleShootAnimations()
 	if self.HasDual then
@@ -650,11 +656,11 @@ function SWEP:GetBurstMath()
 end
 
 function SWEP:WeaponDelay()
+
+	local FinalDelay =  self.Primary.Delay
 	
 	if self.HasBuildUp then
-		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + (self.Primary.Delay*5) * (100 - self:GetBuildUp())/100 )
-	else
-		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+		FinalDelay = FinalDelay + ( (self.Primary.Delay*5) * (100 - self:GetBuildUp()) * 0.01 )
 	end
 	
 	if self.HasBoltAction then
@@ -663,14 +669,11 @@ function SWEP:WeaponDelay()
 
 	if self.HasBurstFire then
 		if self:GetIsBurst() then
-			local Delay = self.BurstSpeedOverride * self.Primary.Delay
-			if self.BurstOverride >= self:Clip1() then
-				self:SetNextPrimaryFire(CurTime() + Delay*2)
-			else
-				self:SetNextPrimaryFire(CurTime() + Delay*self.BurstOverride*2)
-			end
+			FinalDelay = FinalDelay * (self.BurstOverride*2)
 		end
 	end
+	
+	self:SetNextPrimaryFire(CurTime() + FinalDelay)
 	
 end
 
@@ -770,7 +773,7 @@ function SWEP:WeaponSound()
 	if self.HasBurstFire then
 		if self.BurstSound != nil then
 			if self:GetIsBurst() then
-				GunSound = nil
+				GunSound = self.BurstSound
 			end
 		end
 	end
@@ -1080,12 +1083,12 @@ end
 
 function SWEP:AddHeat(Damage,Shots)
 
-	if self.Owner and self.Owner:IsBot() then
+	if self.Owner and self.Owner:IsPlayer() and self.Owner:IsBot() then
 		Damage = Damage*2
 	end
 	
 	local CoolDown = self:GetHeatMath(Damage,Shots)
-	local CoolTime = CurTime() + (self.Primary.Delay + 0.1)*GetConVarNumber("sv_css_cooltime_scale")
+	local CoolTime = CurTime() + (self.Primary.Delay + 0.1)*GetConVarNumber("sv_css_cooltime_scale")*self.CoolMul
 	
 	self:SetCoolDown( math.Clamp(self:GetCoolDown() + CoolDown,0,10) )
 	self:SetCoolTime( CoolTime )
@@ -1117,12 +1120,8 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 	else
 		bullet.Tracer = 0
 	end
-	
-	if self.Primary.Ammo == "ar2" then
-		bullet.TracerName = "AR2Tracer"
-	else
-		bullet.TracerName = self.TracerName
-	end
+
+	bullet.TracerName = self.TracerName
 	
 	bullet.Force	= nil
 	bullet.Callback = function( attacker, tr, dmginfo)
@@ -1152,6 +1151,29 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
 				end
 			end
 			
+			if Weapon.TracerName == "AR2Tracer" then
+			
+				local Data = EffectData()
+				Data:SetAngles(Angle(0,0,0))
+				Data:SetColor(1)
+				Data:SetDamageType(DMG_BULLET)
+				if SERVER then
+					Data:SetEntIndex(tr.Entity:EntIndex())
+				end
+				Data:SetEntity(tr.Entity)
+				Data:SetFlags(3)
+				Data:SetMagnitude(100)
+				Data:SetNormal(tr.HitNormal)
+				Data:SetOrigin(tr.HitPos)
+				Data:SetRadius(128)
+				Data:SetScale(1)
+				Data:SetStart(tr.HitPos)
+				Data:SetSurfaceProp(tr.SurfaceProps)
+				
+				util.Effect("AR2Impact",Data)
+				
+			end
+
 		end
 	end
 	
@@ -1517,12 +1539,18 @@ function SWEP:HandleBurstFireShoot()
 		
 			self:SetNextBulletDelay(CurTime() + self:GetBurstMath())
 			self:SetBulletQueue(self:GetBulletQueue() - 1)
+			
+			--print(self:GetBulletQueue())
 
 			if (self:Clip1() > 0) or self:Clip1() == -1 and self:Ammo1() >= 1 then
 			
 				self:TakePrimaryAmmo(1)
 				self:HandleShootAnimations()
 				
+				
+				self:ShootGun()
+				
+				--[[
 				if (IsFirstTimePredicted() or game.SinglePlayer()) then
 					self:PreShootBullet()
 					self:WeaponSound()
@@ -1530,7 +1558,7 @@ function SWEP:HandleBurstFireShoot()
 						self:AddRecoil()
 					end
 				end
-				
+				--]]
 			end
 			
 		end
@@ -1606,7 +1634,7 @@ function SWEP:HandleShotgunReloadThinkAnimations()
 		if self:GetNeedsHL2Pump() and self:GetNextHL2Pump() <= CurTime() then
 			self:SendWeaponAnim( ACT_SHOTGUN_PUMP )
 			self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration() )
-			if CLIENT then
+			if CLIENT and IsFirstTimePredicted() then
 				if self.PumpSound then
 					self.Owner:EmitSound(self.PumpSound)
 				end
@@ -2266,6 +2294,8 @@ function SWEP:NewSwing(damage)
 
 	if IsFirstTimePredicted() then
 	
+		print("AAA")
+	
 		local Data = {}
 
 		Data.start = self.Owner:GetShootPos()
@@ -2290,6 +2320,7 @@ function SWEP:NewSwing(damage)
 			HasHitTarget = true
 			self:NewSendHitEvent(Trace.Entity,damage)
 		else
+			print("AAA")
 			self:EmitGunSound(self.MeleeSoundMiss)
 			HasHitTarget = false
 		end

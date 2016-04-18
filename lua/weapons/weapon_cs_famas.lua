@@ -36,6 +36,7 @@ SWEP.RecoilMul 				= 1
 SWEP.SideRecoilMul			= 1
 SWEP.VelConeMul				= 1.5
 SWEP.HeatMul				= 1
+SWEP.CoolMul				= 2
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
@@ -50,9 +51,9 @@ SWEP.HasDoubleZoom			= false
 SWEP.HasSideRecoil			= true
 SWEP.HasDownRecoil			= false
 
-SWEP.BurstConeMul			= 0.75
+SWEP.BurstConeMul			= 1.5
 SWEP.BurstHeatMul			= 0.1
-SWEP.BurstRecoilMul			= 0.5
+SWEP.BurstRecoilMul			= 0.75
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true

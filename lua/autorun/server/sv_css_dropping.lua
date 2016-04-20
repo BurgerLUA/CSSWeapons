@@ -22,7 +22,7 @@ local NextThink = 0
 local AssociatedWeapons = {
 	css_hegrenade = "weapon_cs_he",
 	css_flashgrenade = "weapon_cs_flash",
-	css_smokegrenade = "weapon_cs_smokegrenade",
+	css_smokegrenade = "weapon_cs_smoke",
 	ex_gasgrenade = "weapon_ex_gas"
 }
 

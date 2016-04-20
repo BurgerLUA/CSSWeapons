@@ -2294,7 +2294,7 @@ function SWEP:NewSwing(damage)
 
 	if IsFirstTimePredicted() then
 	
-		print("AAA")
+		--print("AAA")
 	
 		local Data = {}
 
@@ -2320,7 +2320,7 @@ function SWEP:NewSwing(damage)
 			HasHitTarget = true
 			self:NewSendHitEvent(Trace.Entity,damage)
 		else
-			print("AAA")
+			--print("AAA")
 			self:EmitGunSound(self.MeleeSoundMiss)
 			HasHitTarget = false
 		end

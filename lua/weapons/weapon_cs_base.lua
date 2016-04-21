@@ -326,6 +326,9 @@ SWEP.CustomScopeCOverride	= Color(0,0,0,255)
 SWEP.EnableBlocking			= false
 SWEP.HasHL2Pump				= false
 
+SWEP.BulletEnt				= nil
+SWEP.SourceOverride 		= Vector(0,0,0)
+
 if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleUp = Angle(0,0,0)
 	SWEP.PunchAngleDown = Angle(0,0,0)
@@ -702,7 +705,7 @@ function SWEP:PreShootBullet() -- Should be predicted
 	end
 	
 	if Shots == 1 then
-		self:ShootBullet(Damage,Shots,Cone,Source,Direction,self.EnableTracer)
+		self:ShootBullet(Damage,Shots,Cone,Source,Direction,self.EnableTracer,self.Owner)
 	else
 		for i=1, Shots do
 		
@@ -716,7 +719,7 @@ function SWEP:PreShootBullet() -- Should be predicted
 			local UselessVector, UsefulAngle = WorldToLocal(Vector(0,0,0), self.Owner:EyeAngles() , Vector(0,0,0), RandAngle )
 			local NewDirection = ( UsefulAngle + self.Owner:GetPunchAngle() ):Forward()
 
-			self:ShootBullet(Damage,1,0,Source,NewDirection,self.EnableTracer)
+			self:ShootBullet(Damage,1,0,Source,NewDirection,self.EnableTracer,self.Owner)
 			
 		end
 	end
@@ -1100,106 +1103,116 @@ function SWEP:AddHeat(Damage,Shots)
 	
 end
 
-function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer)
+function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,LastEntity)
 	
 	if not IsFirstTimePredicted( ) then return end
 	
-	local bullet = {}
-	bullet.Damage	= Damage * GetConVarNumber("sv_css_damage_scale")
-	bullet.Num		= Shots
-	--bullet.Range	= self.Primary.Range
-	bullet.Spread	= Vector(Cone, Cone, 0)
-	bullet.Src		= Source
-	bullet.Dir		= Direction
-	bullet.AmmoType = self.Primary.Ammo
-	--bullet.Distance	= self.Primary.Range
-	bullet.HullSize = 0
+	if self and self.BulletEnt then
 	
-	if EnableTracer then
-		bullet.Tracer = self.TracerOverride
-	else
-		bullet.Tracer = 0
-	end
-
-	bullet.TracerName = self.TracerName
-	
-	bullet.Force	= nil
-	bullet.Callback = function( attacker, tr, dmginfo)
-	
-		if attacker:IsPlayer() then
-		
-			local Weapon = attacker:GetActiveWeapon()
-
-			if Weapon and Weapon.DamageFalloff then
-				if Weapon.DamageFalloff > 0 then
-					local Distance = tr.StartPos:Distance(tr.HitPos)
-					local DamageMul = math.Clamp(GetConVarNumber("sv_css_damagefalloff_scale"),0,1)
-					local DFMod = (1 - DamageMul) + math.min(1, ( (Weapon.DamageFalloff) / Distance ))*DamageMul
-					dmginfo:ScaleDamage(DFMod)
-				end
-			end
-
-			if GetConVarNumber("sv_css_enable_penetration") == 1 then
-				self:WorldBulletSolution(tr.HitPos,Direction,Damage)
-			end
+		if SERVER then
 			
-			if SERVER then
-				if tr.Entity:GetClass() == "prop_vehicle_prisoner_pod" or tr.Entity:IsVehicle() then
-					if tr.Entity:GetDriver() ~= NULL then
-						tr.Entity:GetDriver():TakeDamageInfo(dmginfo)
+			local EyeTrace = self.Owner:GetEyeTrace()
+			
+			local HitPos = EyeTrace.HitPos
+			
+			local Dir = (HitPos - Source)
+			Dir:Normalize()
+			
+			Source = Source + self.Owner:GetForward()*self.SourceOverride.y + self.Owner:GetRight()*self.SourceOverride.x + self.Owner:GetUp()*self.SourceOverride.z
+
+			local Bullet = ents.Create(self.BulletEnt)	
+			if Bullet:IsValid() then
+				Bullet:SetPos(Source)
+				Bullet:SetAngles( Dir:Angle() + Angle(math.Rand(-Cone,Cone),math.Rand(-Cone,Cone),0)*45 )
+				Bullet:SetOwner(self.Owner)
+				Bullet:Spawn()
+				Bullet:Activate()
+				Bullet.Damage = 100
+			else
+				SafeRemoveEntity(Bullet)
+			end
+		end
+	
+	else
+	
+		local bullet = {}
+		bullet.Damage	= Damage * GetConVarNumber("sv_css_damage_scale")
+		bullet.Num		= Shots
+		--bullet.Range	= self.Primary.Range
+		bullet.Spread	= Vector(Cone, Cone, 0)
+		bullet.Src		= Source
+		bullet.Dir		= Direction
+		bullet.AmmoType = self.Primary.Ammo
+		--bullet.Distance	= self.Primary.Range
+		bullet.HullSize = 0
+		
+		if EnableTracer then
+			bullet.Tracer = self.TracerOverride
+		else
+			bullet.Tracer = 0
+		end
+
+		bullet.TracerName = self.TracerName
+		
+		bullet.Force	= nil
+		bullet.Callback = function( attacker, tr, dmginfo)
+		
+			if attacker:IsPlayer() then
+			
+				local Weapon = attacker:GetActiveWeapon()
+
+				if Weapon and Weapon.DamageFalloff then
+					if Weapon.DamageFalloff > 0 then
+						local Distance = tr.StartPos:Distance(tr.HitPos)
+						local DamageMul = math.Clamp(GetConVarNumber("sv_css_damagefalloff_scale"),0,1)
+						local DFMod = (1 - DamageMul) + math.min(1, ( (Weapon.DamageFalloff) / Distance ))*DamageMul
+						dmginfo:ScaleDamage(DFMod)
 					end
 				end
-			end
-			
-			if Weapon.TracerName == "AR2Tracer" then
-			
-				local Data = EffectData()
-				Data:SetAngles(Angle(0,0,0))
-				Data:SetColor(1)
-				Data:SetDamageType(DMG_BULLET)
-				if SERVER then
-					Data:SetEntIndex(tr.Entity:EntIndex())
-				end
-				Data:SetEntity(tr.Entity)
-				Data:SetFlags(3)
-				Data:SetMagnitude(100)
-				Data:SetNormal(tr.HitNormal)
-				Data:SetOrigin(tr.HitPos)
-				Data:SetRadius(128)
-				Data:SetScale(1)
-				Data:SetStart(tr.HitPos)
-				Data:SetSurfaceProp(tr.SurfaceProps)
-				
-				util.Effect("AR2Impact",Data)
-				
-			end
 
-		end
-	end
-	
-	--[[
-	if SERVER then
-	
-		for i=1,Shots do
-	
-			local PhysBullet = ents.Create("ent_cs_bullet")
-			PhysBullet:SetPos(Source)
-			
-			--print( self.Owner:EyeAngles() )
-			
-			PhysBullet:SetAngles( self.Owner:EyeAngles() + Angle(math.Rand(-Cone,Cone)*45,math.Rand(-Cone,Cone)*45,0) )
-			PhysBullet:Spawn()
-			PhysBullet:SetNWFloat("Damage",Damage)
-			PhysBullet:SetOwner(self.Owner)
-			
-			--print(PhysBullet:GetAngles())
-			
+				if GetConVarNumber("sv_css_enable_penetration") == 1 then
+					if LastEntity ~= tr.Entity then
+						self:WorldBulletSolution(tr.HitPos,Direction,Damage)
+					end
+				end
+				
+				if SERVER then
+					if tr.Entity:GetClass() == "prop_vehicle_prisoner_pod" or tr.Entity:IsVehicle() then
+						if tr.Entity:GetDriver() ~= NULL then
+							tr.Entity:GetDriver():TakeDamageInfo(dmginfo)
+						end
+					end
+				end
+				
+				if Weapon.TracerName == "AR2Tracer" then
+				
+					local Data = EffectData()
+					Data:SetAngles(Angle(0,0,0))
+					Data:SetColor(1)
+					Data:SetDamageType(DMG_BULLET)
+					if SERVER then
+						Data:SetEntIndex(tr.Entity:EntIndex())
+					end
+					Data:SetEntity(tr.Entity)
+					Data:SetFlags(3)
+					Data:SetMagnitude(100)
+					Data:SetNormal(tr.HitNormal)
+					Data:SetOrigin(tr.HitPos)
+					Data:SetRadius(128)
+					Data:SetScale(1)
+					Data:SetStart(tr.HitPos)
+					Data:SetSurfaceProp(tr.SurfaceProps)
+					
+					util.Effect("AR2Impact",Data)
+					
+				end
+
+			end
 		end
 		
+		self.Owner:FireBullets(bullet)
+		
 	end
-	--]]
-	
-	self.Owner:FireBullets(bullet)
 	
 end
 
@@ -1238,7 +1251,7 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 		if trace.StartSolid then
 			self:WorldBulletSolution(data.endpos,Direction,DamageMath)
 		else
-			self:ShootBullet(DamageMath, 1, 0, data.endpos,Direction,false)
+			self:ShootBullet(DamageMath, 1, 0, data.endpos,Direction,false,HitEnt)
 		end
 	end
 

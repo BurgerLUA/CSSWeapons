@@ -328,6 +328,7 @@ SWEP.HasHL2Pump				= false
 
 SWEP.BulletEnt				= nil
 SWEP.SourceOverride 		= Vector(0,0,0)
+SWEP.BuildUpCoolAmount 		= 50
 
 if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleUp = Angle(0,0,0)
@@ -358,6 +359,8 @@ function SWEP:SetupDataTables( )
 	self:SetBuildUp(0)
 	self:NetworkVar("Float",9,"NextHL2Pump")
 	self:SetNextHL2Pump(0)
+	self:NetworkVar("Float",10,"SpecialFloat")
+	self:SetSpecialFloat(0)
 	
 	self:NetworkVar("Int",0,"BulletQueue")
 	self:SetBulletQueue(0)
@@ -637,6 +640,7 @@ function SWEP:AfterPump()
 		self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
 		return 
 	end
+	
 end
 
 function SWEP:HandleBurstDelay()
@@ -724,13 +728,24 @@ function SWEP:PreShootBullet() -- Should be predicted
 		end
 	end
 	
-	if self.HasBuildUp then
+	--if self.HasBuildUp then
 		self:SetBuildUp( math.Clamp(self:GetBuildUp() + self.BuildUpAmount - (self:GetBuildUp()/10) ,0,100 ) )
-		--print(self:GetBuildUp())
-	end
+	--end
 	
 	self:AddHeat(Damage,Shots)
+	
+	self:PostPrimaryFire()
+	
+	
 end
+
+function SWEP:PostPrimaryFire()
+
+
+
+
+end
+
 
 function SWEP:WeaponAnimation(clip,animation)
 
@@ -1107,6 +1122,19 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,La
 	
 	if not IsFirstTimePredicted( ) then return end
 	
+	--[[
+	
+	local BulletTable = {
+		pos = Source,
+		speed = Direction*1000,
+		energy = 1,
+		owner = self.Owner
+	}
+	
+	table.Add(CSS_AllBullets,{BulletTable})
+	
+	--]]
+	
 	if self and self.BulletEnt then
 	
 		if SERVER then
@@ -1127,7 +1155,6 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,La
 				Bullet:SetOwner(self.Owner)
 				Bullet:Spawn()
 				Bullet:Activate()
-				Bullet.Damage = 100
 			else
 				SafeRemoveEntity(Bullet)
 			end
@@ -1539,11 +1566,11 @@ function SWEP:SpareThink()
 end
 
 function SWEP:HandleBuildUp()
-	if self.HasBuildUp then
-		if self:GetCoolTime() <= CurTime() - 1 then
-			self:SetBuildUp( math.Clamp(self:GetBuildUp() - FrameTime()*50,0,100) )
+	--if self.HasBuildUp then
+		if self:GetCoolTime() <= CurTime() then
+			self:SetBuildUp( math.Clamp(self:GetBuildUp() - FrameTime()*self.BuildUpCoolAmount,0,100) )
 		end
-	end
+	--end
 end
 
 function SWEP:HandleBurstFireShoot()
@@ -2678,7 +2705,6 @@ function SWEP:GetActivities()
 	PrintTable(t)
   
 end
-
 
 AccessorFunc(SWEP,"fNPCMinBurst","NPCMinBurst")
 AccessorFunc(SWEP,"fNPCMaxBurst","NPCMaxBurst")

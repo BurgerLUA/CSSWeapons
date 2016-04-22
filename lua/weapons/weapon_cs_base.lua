@@ -2335,7 +2335,11 @@ function SWEP:NewSwing(damage)
 	--if IsFirstTimePredicted() then
 	
 		--print("AAA")
-	
+		
+		if self.Owner:IsPlayer() then
+			self.Owner:LagCompensation( true )
+		end
+		
 		local Data = {}
 
 		Data.start = self.Owner:GetShootPos()
@@ -2343,16 +2347,8 @@ function SWEP:NewSwing(damage)
 		Data.filter = self.Owner
 		Data.mins = Vector( -8 , -8 , -8 )
 		Data.maxs = Vector( 8 , 8 , 8 )
-
-		if self.Owner:IsPlayer() then
-			self.Owner:LagCompensation( true )
-		end
 	
 		local Trace = util.TraceHull( Data )
-	
-		if self.Owner:IsPlayer() then
-			self.Owner:LagCompensation( false )
-		end
 		
 		local HasHitTarget = false
 	
@@ -2360,9 +2356,12 @@ function SWEP:NewSwing(damage)
 			HasHitTarget = true
 			self:NewSendHitEvent(Trace.Entity,damage)
 		else
-			--print("AAA")
 			self:EmitGunSound(self.MeleeSoundMiss)
 			HasHitTarget = false
+		end
+		
+		if self.Owner:IsPlayer() then
+			self.Owner:LagCompensation( false )
 		end
 		
 		return HasHitTarget

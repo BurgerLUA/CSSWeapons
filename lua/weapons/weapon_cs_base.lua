@@ -2332,7 +2332,7 @@ end
 
 function SWEP:NewSwing(damage)
 
-	if IsFirstTimePredicted() then
+	--if IsFirstTimePredicted() then
 	
 		--print("AAA")
 	
@@ -2367,7 +2367,7 @@ function SWEP:NewSwing(damage)
 		
 		return HasHitTarget
 	
-	end
+	--end
 
 end
 

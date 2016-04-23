@@ -2585,7 +2585,7 @@ function SWEP:SendHitEvent(victim,damage,sound)
 					
 					local Yaw = math.abs(NewAngles.y)
 					
-					if Yaw < 30 then
+					if Yaw < 90 then
 						VictimWeapon:BlockDamage(damage)
 						self:StabSound(victim,Sound("weapons/samurai/tf_katana_impact_object_02.wav"),false)
 						return

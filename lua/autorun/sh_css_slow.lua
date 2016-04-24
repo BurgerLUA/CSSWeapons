@@ -23,36 +23,11 @@ end
 
 hook.Add("Think","CSS: SpeedMod ConVars",CSSUpdateConvars)
 
-function CSSSlowDamage(ply,attacker)
-
-	if not ply.GetSlow then
-		ply.GetSlow = 0
-	end
-
-	if not ply:IsBot() then
-		if SlowEnable then
-			if ply.GetSlow then
-				ply.GetSlow = math.Clamp(ply.GetSlow + 80,0,99)
-			end
-		end
-	end
-	
-end
-
-hook.Add("PlayerShouldTakeDamage","CSS: Slow Damage",CSSSlowDamage)
-
-
 function CSSSpeedModMovement(ply,mv,cmd)
 
 	--if not ply:IsBot() then
 
 		if SlowEnable then
-		
-			--if ( not IsFirstTimePredicted() ) then return end
-
-			if not ply.GetSlow then
-				ply.GetSlow = 0
-			end
 			
 			local CurrentWeapon = ply:GetActiveWeapon()
 			
@@ -62,9 +37,7 @@ function CSSSpeedModMovement(ply,mv,cmd)
 			
 					local WeaponSpeed = CurrentWeapon.MoveSpeed
 					
-					local SpeedMod = ( WeaponSpeed * (100 - ply.GetSlow)/100 ) / 270
-
-					ply.GetSlow = math.Clamp(ply.GetSlow - 1000*engine.TickInterval(),0,99)
+					local SpeedMod = (WeaponSpeed / 270)
 
 					local WalkMul = 1
 					local BaseSpeed = ply:GetWalkSpeed()

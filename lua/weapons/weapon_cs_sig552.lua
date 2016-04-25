@@ -32,10 +32,10 @@ SWEP.Primary.Delay			= 0.09 --1/(666/60)
 SWEP.Primary.Ammo			= "css_556mm"
 SWEP.Primary.Automatic 		= true
 
-SWEP.RecoilMul				= 1.25
+SWEP.RecoilMul				= 1
 SWEP.SideRecoilMul			= 0.5
-SWEP.VelConeMul				= 1.5
-SWEP.HeatMul				= 0.75
+SWEP.VelConeMul				= 1.25
+SWEP.HeatMul				= 1.125
 SWEP.CoolMul				= 0.75
 
 SWEP.HasScope 				= true

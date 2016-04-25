@@ -36,10 +36,11 @@ SWEP.WorldModel1			= "models/weapons/w_pist_usp.mdl"
 SWEP.WorldModel2 			= "models/weapons/w_pist_usp_silencer.mdl"
 SWEP.Secondary.Sound 		= Sound("Weapon_USP.SilencedShot")
 
-SWEP.RecoilMul				= 1.2
-SWEP.SideRecoilMul			= 1
-SWEP.VelConeMul				= 0.25
+SWEP.RecoilMul				= 1
+SWEP.SideRecoilMul			= 0.25
+SWEP.VelConeMul				= 1
 SWEP.HeatMul				= 1
+SWEP.CoolMul				= 1
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 0.75

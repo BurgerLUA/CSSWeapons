@@ -70,6 +70,8 @@ function ENT:Detonate(self,pos)
 	local maxdistance = 1000
 
 	if not self:IsValid() then return end
+	
+	util.BlastDamage( self, self.Owner, self:GetPos(), maxdistance, 10 )
 
 	if CLIENT then
 	

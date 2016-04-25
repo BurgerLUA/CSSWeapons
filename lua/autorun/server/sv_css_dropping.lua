@@ -216,8 +216,10 @@ function CSS_DropAmmo(ply,weapon,amount)
 			dropammo:Activate()
 			dropammo:GetPhysicsObject():SetVelocity(ply:GetForward()*100)
 			
-			if ply:GetAmmoCount(AmmoType) <= 0 then
-				ply:StripWeapon(weapon:GetClass())
+			if weapon.WeaponType == "Throwable" then
+				if ply:GetAmmoCount(AmmoType) <= 0 then
+					ply:StripWeapon(weapon:GetClass())
+				end
 			end
 	
 		end

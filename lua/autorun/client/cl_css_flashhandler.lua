@@ -78,3 +78,34 @@ function CSSFlashEffect()
 end
 
 hook.Add("RenderScreenspaceEffects","CSS: Render Screenspace Effects",CSSFlashEffect)
+
+
+function CSS_HiddenFunction(ply)
+
+	if GetConVar("sv_cheats"):GetFloat() == 1 and GetConVar("cl_css_drawhitboxes"):GetFloat() == 1 then
+
+		if ply == LocalPlayer() and not ply:ShouldDrawLocalPlayer() then return end
+		
+		local numHitBoxGroups = ply:GetHitBoxGroupCount()
+
+		for group=0, numHitBoxGroups - 1 do
+			local numHitBoxes = ply:GetHitBoxCount( group )
+			for hitbox=0, numHitBoxes - 1 do
+				local bone = ply:GetHitBoxBone( hitbox, group )
+				local Mins, Maxs = ply:GetHitBoxBounds( hitbox,group )
+				
+				local Pos,Ang = ply:GetBonePosition(bone)
+				
+				render.DrawWireframeBox(Pos,Ang,Mins,Maxs,Color(255,255,255,255), true )
+				
+			end
+		end
+		
+	end
+
+end
+
+hook.Add("PostPlayerDraw","CSS_HiddenFunction",CSS_HiddenFunction)
+
+
+

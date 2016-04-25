@@ -33,10 +33,10 @@ SWEP.Primary.Ammo			= "css_338"
 SWEP.Primary.Automatic 		= false
 
 SWEP.RecoilMul				= 0.1
-SWEP.SideRecoilMul			= 0.5
-SWEP.VelConeMul				= 10
+SWEP.SideRecoilMul			= 0.25
+SWEP.VelConeMul				= 2
 SWEP.HeatMul				= 1
-SWEP.CoolMul				= 0.9
+SWEP.CoolMul				= 1.05
 
 SWEP.HasScope 				= true
 SWEP.ZoomAmount 			= 9

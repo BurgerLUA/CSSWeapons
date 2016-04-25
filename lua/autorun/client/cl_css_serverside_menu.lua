@@ -248,10 +248,57 @@ local ItemTable = {}
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "DLabel"
 	ItemTable[count]["font"] = "TitleFont"
-	ItemTable[count]["text"] = "Advanced Damage Settings and Sounds"
+	ItemTable[count]["text"] = "Advanced Damage Settings"
+	ItemTable[count]["height"] = 30
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable Custom Damage (Affects ALL weapons, Overrides Default Sandbox's Damage Scale)"
+	ItemTable[count]["command"] = "sv_css_enable_customdamage"
+	ItemTable[count]["height"] = 10
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DNumSlider"
+	ItemTable[count]["name"] = "Headshot Damage Multiplier"
+	ItemTable[count]["command"] = "sv_css_damage_headscale"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 2
 	ItemTable[count]["height"] = 20
 	count = count + 1
 	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DNumSlider"
+	ItemTable[count]["name"] = "Bodyshot Damage Multiplier"
+	ItemTable[count]["command"] = "sv_css_damage_bodyscale"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 2
+	ItemTable[count]["height"] = 20
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DNumSlider"
+	ItemTable[count]["name"] = "Armshot Damage Multiplier"
+	ItemTable[count]["command"] = "sv_css_damage_armscale"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 2
+	ItemTable[count]["height"] = 20
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DNumSlider"
+	ItemTable[count]["name"] = "Legshot Damage Multiplier"
+	ItemTable[count]["command"] = "sv_css_damage_legscale"
+	ItemTable[count]["min"] = 0
+	ItemTable[count]["max"] = 10
+	ItemTable[count]["decimals"] = 2
+	ItemTable[count]["height"] = 20
+	count = count + 1
+
 	ItemTable[count] = {}
 	ItemTable[count]["type"] = "DNumSlider"
 	ItemTable[count]["name"] = "HE Grenade Damage"

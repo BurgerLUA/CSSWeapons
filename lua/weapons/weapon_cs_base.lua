@@ -44,10 +44,17 @@ CreateConVar("sv_css_enable_deathsounds", "0", AllFCVar , "1 enables death sound
 
 --CreateConVar("sv_css_enable_speedmod", "0", AllFCVar , "1 enables speed mod, 0 disables. Default is 1." ) -LOCATED IN SH_CSS_SLOW.LUA
 
+CreateConVar("sv_css_enable_customdamage", "0", AllFCVar , "1 enables custom damage. 0 disables. Default is 0." )
+
+CreateConVar("sv_css_damage_bodyscale", "1", AllFCVar , "Scales bodyshot damage by this amount. Default is 1." )
+CreateConVar("sv_css_damage_legscale", "0.75", AllFCVar , "Scales legshot damage by this amount. Default is 0.75." )
+CreateConVar("sv_css_damage_armscale", "1", AllFCVar , "Scales armshot damage by this amount. Default is 1." )
+CreateConVar("sv_css_damage_headscale", "4", AllFCVar , "Scales headshot damage by this amount. Default is 4." )
+
+CreateConVar("sv_css_enable_customrecoil", "1", AllFCVar , "1 enables custom recoil, 0 disables." ) -- HIDDEN
+
 CreateConVar("sv_css_quick", "0", AllFCVar , "1 enables quick grenades, 0 disables. Default is 1." )
 CreateConVar("sv_css_enable_mags", "0", AllFCVar , "1 enables cosmetic magazine drops. Requires separate addon. Default is 0." )
-
-
 
 CreateClientConVar("cl_css_customslots", "0", true, true )
 CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
@@ -69,6 +76,8 @@ CreateClientConVar("cl_css_crosshair_smoothing_mul", "1", true, true )
 CreateClientConVar("cl_css_crosshair_neversights", "0", true, true )
 CreateClientConVar("cl_css_crosshair_offset", "0", true, true )
 CreateClientConVar("cl_css_crosshair_fool", "1", true, true )
+
+CreateClientConVar("cl_css_drawhitboxes", "0", true, true )
 
 game.AddAmmoType({
 	name = "css_12gauge",
@@ -272,6 +281,7 @@ SWEP.UseHands				= true
 
 SWEP.Primary.DefaultClip	= 0
 SWEP.Secondary.Ammo 		= "none"
+SWEP.Secondary.SpareClip	= 0
 SWEP.Secondary.ClipSize 	= -1
 SWEP.Secondary.DefaultClip 	= -1
 SWEP.Secondary.Automatic	= false
@@ -595,9 +605,9 @@ function SWEP:ShootGun()
 		self:PreShootBullet() -- Predict
 		self:WeaponSound() -- Predict
 		
-		if (CLIENT or game.SinglePlayer()) then 
+		--if (CLIENT or game.SinglePlayer()) then 
 			self:AddRecoil() -- Predict
-		end
+		--end
 		
 	end
 end
@@ -738,6 +748,7 @@ function SWEP:PreShootBullet() -- Should be predicted
 	
 	
 end
+
 
 function SWEP:PostPrimaryFire()
 
@@ -1031,6 +1042,19 @@ end
 
 function SWEP:AddRecoil()
  
+	if GetConVar("sv_css_enable_customrecoil"):GetFloat() == 1 then
+		self:CustomRecoil()
+	else
+		self:ViewPunchRecoil()
+
+	end
+	
+end
+
+function SWEP:CustomRecoil()
+
+	if SERVER then return end
+
 	local UpPunch = -self:GetRecoilMath()
 	local SidePunch = 0
 	
@@ -1079,8 +1103,60 @@ function SWEP:AddRecoil()
 
 	self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0)
 	self.PunchAngleDown = self.PunchAngleDown + Angle(UpPunch,SidePunch,0)
+
+end
+
+
+function SWEP:ViewPunchRecoil()
+
+	local CurrentPunch = self.Owner:GetViewPunchAngles()
+	
+	local UpPunch = -self:GetRecoilMath() * 0.05
+	local SidePunch = 0
+	
+	if self.HasBurstFire and self:GetIsBurst() then
+		UpPunch = UpPunch*self.BurstRecoilMul
+	end
+
+	local AvgBulletsShot = self:GetCoolDown() / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
+	
+	UpPunch = UpPunch * ( 1 + AvgBulletsShot/ (1/self.Primary.Delay) )
+	
+	local PredictedViewPunch = -UpPunch + -CurrentPunch.p 
+	
+	local DelayMul = 1
+	
+	if self.Primary.Delay >= 0.5 then
+		DelayMul = 0
+	end
+	
+	if self.HasSideRecoil then
+		if DelayMul == 1 then
+			if AvgBulletsShot > 2*DelayMul then
+				SidePunch = UpPunch*math.random(-1,1)*self.SideRecoilMul
+			end
+		else
+			SidePunch = UpPunch*math.Rand(0,1)*self.SideRecoilMul
+		end
+	end
+	
+	if self.HasDownRecoil then
+		if AvgBulletsShot > 3*DelayMul then
+			UpPunch = UpPunch*math.random(-1,1)*0.5
+		end
+	end
+	
+	if self.HasScope and self.ZoomAmount > 4 and self:GetZoomed() then
+		UpPunch = UpPunch*0.5
+		SidePunch = SidePunch*0.5
+	end
+	
+	self.Owner:ViewPunch(Angle(UpPunch,SidePunch,0))
+	
 	
 end
+
+
 
 function SWEP:GetHeatMath(Damage,Shots)
 
@@ -1551,7 +1627,7 @@ function SWEP:Think()
 		self.ViewModelFOV = FOVMOD
 		self:HandleBoltZoomMod()
 		self:HandleZoomMod()
-		
+
 		if IsFirstTimePredicted() then 
 			self:RemoveRecoil()
 		end
@@ -1762,7 +1838,7 @@ function SWEP:RemoveRecoil()
 	local yDown = self:HandleLimits(self.PunchAngleDown.y)
 	local rDown = self:HandleLimits(self.PunchAngleDown.r)
 
-	local FrameMul = 0.25
+	local FrameMul = FrameTime()*15
 	local UpMul = 1 * FrameMul
 	local DownMul = 0.75 * FrameMul
 	
@@ -2071,20 +2147,10 @@ function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 		if self.ZoomAmount > 6 then
 			surface.DrawLine(x/2,0,x/2,y)
 			surface.DrawLine(0,y/2,x,y/2)
-			
-			local size = math.Clamp(Cone,6,x/2*0.33)
-			
-			if size > 6 then
-				surface.DrawCircle( x/2, y/2, math.Clamp(Cone,3,x/2*0.33), Color(r,g,b,a) )
-			end	
-			
 		else
-			surface.DrawCircle( x/2, y/2, 6, Color(255,0,0,50))
-			
-			local size = math.Clamp(Cone,6,x/2*0.33)
-			
-			surface.DrawCircle( x/2, y/2, size, Color(r,g,b,255) )
+			surface.DrawCircle( x/2, y/2, 0.01 , Color(r,g,b,a) )
 		end
+		
 	else
 	
 		local Size = y
@@ -2092,25 +2158,21 @@ function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 		if self.CustomScopeSOverride then
 			Size = self.CustomScopeSOverride
 		end
-		
-		--print(Multiplier)
 	
 		surface.SetDrawColor(self.CustomScopeCOverride)
 		surface.SetMaterial(self.CustomScope)
 		surface.DrawTexturedRectRotated(x/2,y/2,Size,Size,0)
 		
-		
 		surface.SetDrawColor(Color(0,0,0,255))
 		surface.SetMaterial(Material("vgui/scope_lens"))
 		surface.DrawTexturedRectRotated(x/2,y/2,y,y,0)
 		
-		--[[
-		local size = math.Clamp(Cone,6,x/2*0.33)
+	end
+	
+	local Size = math.Clamp(Cone,3,x/2*0.33)
 			
-		if size > 6 then
-			surface.DrawCircle( x/2, y/2, math.Clamp(Cone,3,x/2*0.33), Color(r,g,b,a) )
-		end	
-		--]]
+	if Size > 6 then
+		surface.DrawCircle( x/2, y/2, Size , Color(r,g,b,a) )
 	end
 
 	surface.SetDrawColor(Color(0,0,0))
@@ -2133,21 +2195,28 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 	
 		local Ammo = language.GetPhrase( self.Primary.Ammo .. "_ammo" )
 	
-		local Damage = math.floor(self.Primary.NumShots * self.Primary.Damage * GetConVarNumber("sv_css_damage_scale"))
-		local Delay = math.floor((self.Primary.Delay^-1)*60)
+		local Damage = math.floor(self.Primary.NumShots * self.Primary.Damage * GetConVarNumber("sv_css_damage_scale"))	
 		
-		local ClipSize =  self.Primary.ClipSize
+		local Delay = self.Primary.Delay
+		
+		if self.HasHL2Pump then
+			Delay = Delay + 1
+		end
+
+		local FireRate = math.floor((Delay^-1)*60)
+
+		local ClipSize = self.Primary.ClipSize
 		
 		if ClipSize == -1 then
 			ClipSize = 250
 		end
 		
 		local ClipDamage = Damage * ClipSize
-		local DPS = math.min(ClipDamage,math.floor(( 1 / self.Primary.Delay) * Damage ))
+		local DPS = math.min(ClipDamage,math.floor(( 1 / Delay) * Damage ))
 		local Cone = math.Round((self.Primary.Cone * GetConVarNumber("sv_css_cone_scale")) * (360/1),2)
 		local Recoil = math.Round(self:GetRecoilMath() * 0.25,2)
-		local KillTime = math.Round((math.ceil(100/Damage) - 1) * (self.Primary.Delay),2)
-		local MissKillTime = math.Round( ( (math.ceil(100/Damage) - 1) * (self.Primary.Delay) ) + self.Primary.Delay,2)
+		local KillTime = math.Round((math.ceil(100/Damage) - 1) * (Delay),2)
+		local MissKillTime = math.Round( ( (math.ceil(100/Damage) - 1) * (Delay) ) + Delay,2)
 		local DamageFalloff =  math.floor( (self.DamageFalloff  / 64) * 1.22 ) * 2
 		
 		local str
@@ -2158,7 +2227,7 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 		str = str .. title_color .. "Ammo:</color> "..text_color..Ammo.."</color>\n" 
 		str = str .. title_color .. "Damage:</color> "..text_color..Damage.."</color>\n" 
 		str = str .. title_color .. "Max Range:</color> "..text_color..DamageFalloff.. " meters" .."</color>\n" 
-		str = str .. title_color .. "Firerate:</color> "..text_color.. Delay .. " RPM" .."</color>\n"
+		str = str .. title_color .. "Firerate:</color> "..text_color.. FireRate .. " RPM" .."</color>\n"
 		str = str .. title_color .. "Damage Per Second:</color> "..text_color.. DPS .. "DPS" .. "</color>\n"
 		str = str .. title_color .. "Recoil:</color> "..text_color.. Recoil .. " degrees" .."</color>\n" 
 		str = str .. title_color .. "Inaccuracy:</color> "..text_color.. Cone .. " degrees" .. "</color>\n"
@@ -2703,6 +2772,11 @@ function SWEP:GetActivities()
 
 	PrintTable(t)
   
+end
+
+function SWEP:SendSequence(anim)
+	local vm = self.Owner:GetViewModel()
+	vm:SendViewModelMatchingSequence( vm:LookupSequence( anim ) )
 end
 
 AccessorFunc(SWEP,"fNPCMinBurst","NPCMinBurst")

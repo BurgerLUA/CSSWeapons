@@ -22,7 +22,7 @@ SWEP.WorldModel				= "models/weapons/w_pist_p228.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "revolver"
 
-SWEP.Primary.Damage			= 	48
+SWEP.Primary.Damage			= 48
 SWEP.Primary.NumShots		= 1
 SWEP.Primary.Sound			= Sound("Weapon_P228.Single")
 SWEP.Primary.Cone			= 0.01
@@ -32,10 +32,10 @@ SWEP.Primary.Delay			= 0.15 --1/(400/60)
 SWEP.Primary.Ammo			= "css_357sig"
 SWEP.Primary.Automatic 		= false
 
-SWEP.RecoilMul				= 1.25
-SWEP.SideRecoilMul			= 1
-SWEP.VelConeMul				= 0.25
-SWEP.HeatMul				= 2
+SWEP.RecoilMul				= 1
+SWEP.SideRecoilMul			= 0.25
+SWEP.VelConeMul				= 0.5
+SWEP.HeatMul				= 1
 SWEP.CoolMul				= 1
 
 SWEP.HasScope 				= false

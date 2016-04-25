@@ -1,4 +1,25 @@
 function CSSDamage(ply, hitgroup, dmginfo)
+
+	if GetConVar("sv_css_enable_customdamage"):GetFloat() == 1 then
+	
+		if ( hitgroup == HITGROUP_HEAD ) then
+			dmginfo:ScaleDamage( 2 )
+		elseif ( hitgroup == HITGROUP_LEFTARM || hitgroup == HITGROUP_RIGHTARM || hitgroup == HITGROUP_LEFTLEG || hitgroup == HITGROUP_RIGHTLEG || hitgroup == HITGROUP_GEAR ) then
+			dmginfo:ScaleDamage( 4 )
+		end
+		
+		if hitgroup == HITGROUP_LEFTLEG || hitgroup == HITGROUP_RIGHTLEG then
+			dmginfo:ScaleDamage( GetConVar("sv_css_damage_legscale"):GetFloat() )
+		elseif ( hitgroup == HITGROUP_HEAD ) then
+			dmginfo:ScaleDamage( GetConVar("sv_css_damage_headscale"):GetFloat() )
+		else hitgroup == HITGROUP_LEFTARM || hitgroup == HITGROUP_RIGHTARM then
+			dmginfo:ScaleDamage( GetConVar("sv_css_damage_armscale"):GetFloat() )
+		else
+			dmginfo:ScaleDamage( GetConVar("sv_css_damage_bodyscale"):GetFloat() )
+		end
+		
+	end
+	
 	if not ply:HasGodMode() and GetConVarNumber("sbox_godmode") == 0 then
 		if GetConVarNumber("sv_css_enable_damagesounds") == 1 then
 			if hitgroup == HITGROUP_HEAD then
@@ -8,6 +29,7 @@ function CSSDamage(ply, hitgroup, dmginfo)
 			end
 		end
 	end
+	
 end
 
 hook.Add("ScalePlayerDamage","CSS: Damage Mod",CSSDamage)
@@ -52,13 +74,17 @@ concommand.Add( "nerfme", function( ply,cmd,args,argStr )
 			local PrintName = SWEP.PrintName
 			
 			local Damage = SWEP.Primary.NumShots * SWEP.Primary.Damage * GetConVarNumber("sv_css_damage_scale")
-			local Delay = math.Clamp(SWEP.Primary.Delay,0.001,10)
+			local Delay = math.Clamp(SWEP.Primary.Delay,FrameTime(),60)
 			
 			if !SWEP.Primary.Automatic and Delay < 0.1 then
 				Delay = 0.1
 			end
 			
-			local ClipSize =  SWEP.Primary.ClipSize
+			if SWEP.HasHL2Pump then
+				Delay = Delay + 1
+			end
+			
+			local ClipSize = SWEP.Primary.ClipSize
 		
 			if ClipSize == -1 then
 				ClipSize = 250

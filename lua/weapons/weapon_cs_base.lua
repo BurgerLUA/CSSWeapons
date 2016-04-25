@@ -841,15 +841,18 @@ function SWEP:HandleCone(Cone,IsCrosshair)
 		Cone = Cone + (self:GetCoolDown()*self.HeatMul*0.01)
 	end
 	
-	local VelConvar = self.VelConeMul * GetConVarNumber("sv_css_velcone_scale") * 0.0001
-	local VelCone = self.Owner:GetVelocity():Length() * VelConvar
-	local AirCone = 400 * VelConvar
+	local VelConvar = self.VelConeMul * GetConVarNumber("sv_css_velcone_scale")
 	
-	if self.Owner:IsOnGround() then
-		Cone = Cone + VelCone
-	else
-		Cone = Cone + math.max(AirCone,VelCone)
+	local Velocity = self.Owner:GetVelocity():Length() 
+	
+	if not self.Owner:IsOnGround() then
+		Velocity = 400
 	end
+	
+	
+	local VelCone = math.Clamp( ( (Velocity * VelConvar) ^ 1.75 ) * 0.000001, 0, 0.1)
+	
+	Cone = Cone + VelCone
 
 	return Cone
 

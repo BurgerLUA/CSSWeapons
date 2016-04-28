@@ -10,9 +10,9 @@ function CSSDamage(ply, hitgroup, dmginfo)
 		
 		if hitgroup == HITGROUP_LEFTLEG || hitgroup == HITGROUP_RIGHTLEG then
 			dmginfo:ScaleDamage( GetConVar("sv_css_damage_legscale"):GetFloat() )
-		elseif ( hitgroup == HITGROUP_HEAD ) then
+		elseif hitgroup == HITGROUP_HEAD then
 			dmginfo:ScaleDamage( GetConVar("sv_css_damage_headscale"):GetFloat() )
-		else hitgroup == HITGROUP_LEFTARM || hitgroup == HITGROUP_RIGHTARM then
+		elseif hitgroup == HITGROUP_LEFTARM || hitgroup == HITGROUP_RIGHTARM then
 			dmginfo:ScaleDamage( GetConVar("sv_css_damage_armscale"):GetFloat() )
 		else
 			dmginfo:ScaleDamage( GetConVar("sv_css_damage_bodyscale"):GetFloat() )
@@ -139,6 +139,7 @@ concommand.Add( "nerfme", function( ply,cmd,args,argStr )
 	end
 
 end )
+
 
 
 			--[[

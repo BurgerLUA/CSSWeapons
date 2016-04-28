@@ -221,6 +221,7 @@ SWEP.SideRecoilMul			= 0.5
 SWEP.VelConeMul				= 1
 SWEP.HeatMul				= 1
 SWEP.CoolMul				= 1
+SWEP.CoolSpeedMul			= 1
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
@@ -339,6 +340,8 @@ SWEP.HasHL2Pump				= false
 SWEP.BulletEnt				= nil
 SWEP.SourceOverride 		= Vector(0,0,0)
 SWEP.BuildUpCoolAmount 		= 50
+
+SWEP.ShootOffsetStrength	= Angle(0,0,0)
 
 if (CLIENT or game.SinglePlayer()) then
 	SWEP.PunchAngleUp = Angle(0,0,0)
@@ -1056,7 +1059,7 @@ end
 
 function SWEP:CustomRecoil()
 
-	if SERVER then return end
+	if SERVER and not game.SinglePlayer() then return end
 
 	local UpPunch = -self:GetRecoilMath()
 	local SidePunch = 0
@@ -1104,8 +1107,8 @@ function SWEP:CustomRecoil()
 		SidePunch = SidePunch*0.5
 	end
 
-	self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0)
-	self.PunchAngleDown = self.PunchAngleDown + Angle(UpPunch,SidePunch,0)
+	self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0) + Angle(self.ShootOffsetStrength.p*math.Rand(-0.5,0.5),self.ShootOffsetStrength.y*math.Rand(-0.5,0.5),0)
+	self.PunchAngleDown = self.PunchAngleDown + Angle(UpPunch,SidePunch,0) + Angle(self.ShootOffsetStrength.p*math.Rand(-0.5,0.5),self.ShootOffsetStrength.y*math.Rand(-0.5,0.5),0)
 
 end
 
@@ -1784,7 +1787,7 @@ end
 
 function SWEP:HandleCoolDown()
 
-	local CoolMul = GetConVarNumber("sv_css_cooldown_scale")*0.1
+	local CoolMul = GetConVarNumber("sv_css_cooldown_scale")*0.1*self.CoolSpeedMul
 
 	if self:GetCoolTime() <= CurTime() then
 		if self:GetCoolDown() ~= 0 then

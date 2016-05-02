@@ -343,9 +343,12 @@ SWEP.BuildUpCoolAmount 		= 50
 
 SWEP.ShootOffsetStrength	= Angle(0,0,0)
 
+SWEP.BulletAngOffset		= Angle(0,0,0)
+
+SWEP.PunchAngleUp = Angle(0,0,0)
+SWEP.PunchAngleDown = Angle(0,0,0)
+
 if (CLIENT or game.SinglePlayer()) then
-	SWEP.PunchAngleUp = Angle(0,0,0)
-	SWEP.PunchAngleDown = Angle(0,0,0)
 	SWEP.BoltDelay = 0
 	SWEP.NextZoomTime = 0
 end
@@ -939,7 +942,6 @@ function SWEP:SwitchFireMode()
 
 end
 
-
 function SWEP:Silencer()
 
 	if self:IsBusy() then return end
@@ -1037,29 +1039,18 @@ function SWEP:CanPrimaryAttack()
 	
 end
 
-if CLIENT then
-	SWEP.ClientCoolDown = 0
-	SWEP.ClientCoolTime = 0
-end
+SWEP.ClientCoolDown = 0
+SWEP.ClientCoolTime = 0
 
 function SWEP:GetRecoilMath()
 	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*self.Primary.Delay*1.875*GetConVarNumber("sv_css_recoil_scale")
 end
 
 function SWEP:AddRecoil()
- 
-	if GetConVar("sv_css_enable_customrecoil"):GetFloat() == 1 then
-		self:CustomRecoil()
-	else
-		self:ViewPunchRecoil()
-
-	end
-	
+	self:CustomRecoil()
 end
 
-function SWEP:CustomRecoil()
-
-	if SERVER and not game.SinglePlayer() then return end
+function SWEP:GetRecoilFinal()
 
 	local UpPunch = -self:GetRecoilMath()
 	local SidePunch = 0
@@ -1106,63 +1097,27 @@ function SWEP:CustomRecoil()
 		UpPunch = UpPunch*0.5
 		SidePunch = SidePunch*0.5
 	end
+	
+	return UpPunch, SidePunch
+
+end
+
+function SWEP:CustomRecoil()
+
+	if SERVER and not game.SinglePlayer() then
+		if self.Owner:IsBot() then
+			local UpPunch, SidePunch = self:GetRecoilFinal()
+			self.Owner:SetEyeAngles(self.Owner:EyeAngles() + Angle(UpPunch*0.25,SidePunch*0.25,0))
+		end
+		return 
+	end
+	
+	local UpPunch, SidePunch = self:GetRecoilFinal()
 
 	self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0) + Angle(self.ShootOffsetStrength.p*math.Rand(-0.5,0.5),self.ShootOffsetStrength.y*math.Rand(-0.5,0.5),0)
 	self.PunchAngleDown = self.PunchAngleDown + Angle(UpPunch,SidePunch,0) + Angle(self.ShootOffsetStrength.p*math.Rand(-0.5,0.5),self.ShootOffsetStrength.y*math.Rand(-0.5,0.5),0)
 
 end
-
-
-function SWEP:ViewPunchRecoil()
-
-	local CurrentPunch = self.Owner:GetViewPunchAngles()
-	
-	local UpPunch = -self:GetRecoilMath() * 0.05
-	local SidePunch = 0
-	
-	if self.HasBurstFire and self:GetIsBurst() then
-		UpPunch = UpPunch*self.BurstRecoilMul
-	end
-
-	local AvgBulletsShot = self:GetCoolDown() / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
-	
-	UpPunch = UpPunch * ( 1 + AvgBulletsShot/ (1/self.Primary.Delay) )
-	
-	local PredictedViewPunch = -UpPunch + -CurrentPunch.p 
-	
-	local DelayMul = 1
-	
-	if self.Primary.Delay >= 0.5 then
-		DelayMul = 0
-	end
-	
-	if self.HasSideRecoil then
-		if DelayMul == 1 then
-			if AvgBulletsShot > 2*DelayMul then
-				SidePunch = UpPunch*math.random(-1,1)*self.SideRecoilMul
-			end
-		else
-			SidePunch = UpPunch*math.Rand(0,1)*self.SideRecoilMul
-		end
-	end
-	
-	if self.HasDownRecoil then
-		if AvgBulletsShot > 3*DelayMul then
-			UpPunch = UpPunch*math.random(-1,1)*0.5
-		end
-	end
-	
-	if self.HasScope and self.ZoomAmount > 4 and self:GetZoomed() then
-		UpPunch = UpPunch*0.5
-		SidePunch = SidePunch*0.5
-	end
-	
-	self.Owner:ViewPunch(Angle(UpPunch,SidePunch,0))
-	
-	
-end
-
-
 
 function SWEP:GetHeatMath(Damage,Shots)
 
@@ -1183,9 +1138,11 @@ end
 
 function SWEP:AddHeat(Damage,Shots)
 
+	--[[
 	if self.Owner and self.Owner:IsPlayer() and self.Owner:IsBot() then
 		Damage = Damage*2
 	end
+	--]]
 	
 	local CoolDown = self:GetHeatMath(Damage,Shots)
 	local CoolTime = CurTime() + (self.Primary.Delay + 0.1)*GetConVarNumber("sv_css_cooltime_scale")*self.CoolMul
@@ -1193,7 +1150,7 @@ function SWEP:AddHeat(Damage,Shots)
 	self:SetCoolDown( math.Clamp(self:GetCoolDown() + CoolDown,0,10) )
 	self:SetCoolTime( CoolTime )
 	
-	if CLIENT then
+	if CLIENT and self.Owner == LocalPlayer() then
 		self.ClientCoolDown = math.Clamp(self.ClientCoolDown + CoolDown,0,10)
 		self.ClientCoolTime = CoolTime
 	end
@@ -1233,7 +1190,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,La
 			local Bullet = ents.Create(self.BulletEnt)	
 			if Bullet:IsValid() then
 				Bullet:SetPos(Source)
-				Bullet:SetAngles( Dir:Angle() + Angle(math.Rand(-Cone,Cone),math.Rand(-Cone,Cone),0)*45 )
+				Bullet:SetAngles( Dir:Angle() + self.BulletAngOffset + Angle(math.Rand(-Cone,Cone),math.Rand(-Cone,Cone),0)*45 )
 				Bullet:SetOwner(self.Owner)
 				Bullet:Spawn()
 				Bullet:Activate()
@@ -1795,7 +1752,7 @@ function SWEP:HandleCoolDown()
 		end
 	end
 	
-	if CLIENT then
+	if CLIENT and self.Owner == LocalPlayer() then
 		if self.ClientCoolTime <= CurTime() then
 			if self.ClientCoolDown ~= 0 then 
 				self.ClientCoolDown = math.Clamp(self.ClientCoolDown - CoolMul,0,10)

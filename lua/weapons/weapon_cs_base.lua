@@ -1523,9 +1523,7 @@ function SWEP:Think()
 		if self.HasScope and self:GetZoomed() and not self.IgnoreScopeHide then
 			FOVMOD = 100
 		end
-	
-		--print(self.ViewModelFOV)
-	
+
 		self.ViewModelFOV = FOVMOD
 		--self.DesiredFOV = GetConVar("fov_desired"):GetFloat()
 		
@@ -1559,8 +1557,6 @@ function SWEP:HandleBurstFireShoot()
 		
 			self:SetNextBulletDelay(CurTime() + self:GetBurstMath())
 			self:SetBulletQueue(self:GetBulletQueue() - 1)
-			
-			--print(self:GetBulletQueue())
 
 			if (self:Clip1() > 0) or self:Clip1() == -1 and self:Ammo1() >= 1 then
 			

@@ -24,7 +24,6 @@ function CSSFlashEffect()
 			--surface.SetDrawColor( Color(255,255,255,255*Mod) )
 			--surface.DrawRect( 0, 0, ScrW(), ScrH() )
 			
-			
 			local Settings = {
 				[ "$pp_colour_brightness" ] = Mod,
 				[ "$pp_colour_contrast" ] = 1,
@@ -38,8 +37,6 @@ function CSSFlashEffect()
 			}
 			
 			DrawColorModify( Settings )
-			
-			--print(Mod)
 			
 			ply.BlindAmount = ply.BlindAmount - FrameTime()*0.5
 

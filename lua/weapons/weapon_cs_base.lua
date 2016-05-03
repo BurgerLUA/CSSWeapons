@@ -2229,7 +2229,7 @@ function SWEP:ThrowObject(object,force)
 	ent:SetOwner(self.Owner)
 	
 	if ent:GetPhysicsObject():IsValid() then
-		if object == "ent_cs_gasparticle" then
+		if object == "ent_hl2_gasparticle" then
 			ent:GetPhysicsObject():SetVelocity( EA:Forward()*force + EA:Right()*math.random(-20,20) + EA:Up()*math.random(-20,20) + Vector(0,0,-10) )
 		else
 			ent:GetPhysicsObject():SetVelocity(self.Owner:GetVelocity() + EA:Forward() * force + EA:Up()*50)

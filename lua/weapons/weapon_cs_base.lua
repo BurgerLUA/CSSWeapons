@@ -1029,7 +1029,7 @@ function SWEP:GetRecoilFinal()
 	
 	local AvgBulletsShot = 0
 	
-	if game.SinglePlayer() then
+	if SERVER or game.SinglePlayer() then
 		AvgBulletsShot = self:GetCoolDown() / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
 	else
 		AvgBulletsShot = self.ClientCoolDown / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
@@ -1037,7 +1037,11 @@ function SWEP:GetRecoilFinal()
 	
 	UpPunch = UpPunch * ( 1 + AvgBulletsShot/ (1/self.Primary.Delay) )
 	
-	local PredictedUpPunch = -UpPunch + -self.PunchAngleUp.p
+	local PredictedUpPunch = -UpPunch
+	
+	if CLIENT then
+		PredictedUpPunch = -UpPunch + -self.PunchAngleUp.p
+	end
 	
 	local DelayMul = 1
 	

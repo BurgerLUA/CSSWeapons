@@ -321,8 +321,6 @@ if SERVER then
 	SWEP.HasMagIn				= true -- Data, Server
 end
 
-SWEP.SpecialThrow 			= false -- Data, Shared?
-SWEP.CanHolster 			= true -- Data, Shared?
 SWEP.ZoomMod 				= 0 -- Singleplayer Bullshit?
 
 function SWEP:SetupDataTables( )
@@ -335,19 +333,29 @@ function SWEP:SetupDataTables( )
 	self:SetNextShell(0)
 	self:NetworkVar("Float",3,"ReloadFinish")
 	self:SetReloadFinish(0)
-	self:NetworkVar("Float",4,"NextZoomTime")
-	self:SetNextZoomTime(0)
-	self:NetworkVar("Float",5,"AttachDelay")
+	self:NetworkVar("Float",4,"AttachDelay")
 	self:SetAttachDelay(0)
-	self:NetworkVar("Float",7,"NextBulletDelay")
+	self:NetworkVar("Float",5,"NextBulletDelay")
 	self:SetNextBulletDelay(0)
-	self:NetworkVar("Float",8,"BuildUp")
+	self:NetworkVar("Float",6,"BuildUp")
 	self:SetBuildUp(0)
-	self:NetworkVar("Float",9,"NextHL2Pump")
+	self:NetworkVar("Float",7,"NextHL2Pump")
 	self:SetNextHL2Pump(0)
-	self:NetworkVar("Float",10,"SpecialFloat")
+	
+	self:NetworkVar("Float",8,"ThrowAnimationTime")
+	self:SetThrowAnimationTime(0)
+	
+	self:NetworkVar("Float",9,"ThrowRemoveTime")
+	self:SetThrowRemoveTime(0)
+	
+	self:NetworkVar("Float",10,"ThrowTime")
+	self:SetThrowTime(0)
+	
+	
+	self:NetworkVar("Float",31,"SpecialFloat") -- For Special Stuff
 	self:SetSpecialFloat(0)
 	
+
 	self:NetworkVar("Int",0,"BulletQueue")
 	self:SetBulletQueue(0)
 
@@ -363,11 +371,16 @@ function SWEP:SetupDataTables( )
 	self:SetIsNormalReload( false )
 	self:NetworkVar("Bool",5,"IsLeftFire")
 	self:SetIsLeftFire( false )
-	self:NetworkVar("Bool",6,"IsBlocking")
+	self:NetworkVar("Bool",6,"IsBlocking") -- For Special Stuff
 	self:SetIsBlocking( false )
 	self:NetworkVar("Bool",7,"NeedsHL2Pump")
 	self:SetNeedsHL2Pump( false )
-
+	
+	self:NetworkVar("Bool",8,"CanHolster")
+	self:SetCanHolster( true )
+	self:NetworkVar("Bool",9,"IsThrowing")
+	self:SetIsThrowing( false )
+	
 end
 
 function SWEP:Initialize()
@@ -456,7 +469,6 @@ function SWEP:OwnerChanged()
 	end
 end
 
-
 function SWEP:Deploy()
 
 	if SERVER then
@@ -517,7 +529,7 @@ function SWEP:Deploy()
 end
 
 function SWEP:Holster()
-	if not self.CanHolster then return false end
+	if not self:GetCanHolster() then return false end
 	self:CancelReload()
 	self:SetZoomed(false)
 	return true
@@ -595,7 +607,6 @@ function SWEP:ShootGun()
 	end
 end
 
-
 function SWEP:HandleShootAnimations()
 	if self.HasDual then
 		if self:GetIsLeftFire() then
@@ -610,11 +621,13 @@ function SWEP:HandleShootAnimations()
 	end
 end
 
-
 function SWEP:CanShoot()
 	if self:IsBusy() then return false end
 	if self:IsUsing() then return false end
-	if self.WeaponType == "Throwable" then self:PreThrowObject() return false end
+	if self.WeaponType == "Throwable" then 
+		self:PreThrowObject() 
+		return false 
+	end
 	return true
 end
 
@@ -736,14 +749,12 @@ function SWEP:PreShootBullet() -- Should be predicted
 	
 end
 
-
 function SWEP:PostPrimaryFire()
 
 
 
 
 end
-
 
 function SWEP:WeaponAnimation(clip,animation)
 
@@ -1253,8 +1264,6 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,La
 	
 end
 
---PrecacheParticleSystem("Tracer")
-
 function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 
 	local Amount = 3
@@ -1321,7 +1330,7 @@ end
 
 function SWEP:IsBusy()
 
-	if not self.CanHolster then
+	if not self:GetCanHolster() then
 		return true
 	elseif self:GetIsReloading() then
 		return true
@@ -1433,6 +1442,11 @@ function SWEP:Reload()
 	
 end
 
+function SWEP:DrawWorldModel()
+	--print("HELLO?")
+	self:DrawModel()
+end
+
 function SWEP:GetViewModelPosition( pos, ang )
 
 	--ang = LocalPlayer():EyeAngles()
@@ -1509,6 +1523,9 @@ function SWEP:GetViewModelPosition( pos, ang )
 end
 
 function SWEP:Think()
+
+	--print(self:GetWeaponWorldModel())
+
 
 	self:HandleCoolDown() -- don't predict
 	self:HandleBuildUp()
@@ -2110,112 +2127,77 @@ function SWEP:EquipThink()
 
 	if self.WeaponType ~= "Throwable" then return end
 
-	if self.IsThrowing then
+	if self:GetIsThrowing() then
 	
-		if self.ThrowAnimation < CurTime() then
-			if self.HasAnimated == false then
-				self:SendWeaponAnim(ACT_VM_THROW)
-				self.Owner:SetAnimation(PLAYER_ATTACK1) 
-				self.HasAnimated = true
-			end
+		if self:GetThrowAnimationTime() <= CurTime() then
+			print("ANIMATING THROW")
+			self:SendWeaponAnim(ACT_VM_THROW)
+			self:SetThrowAnimationTime(CurTime() + 10)
 		end
 		
-		if self.Throw < CurTime() then
-			if self.HasThrown == false then
-			
-				self:ThrowObject(self.Object,1000)
-				self.HasThrown = true
-				
-				if self:Ammo1() > 0 then
-					self:TakePrimaryAmmo(1)
-				end
-				
+		if self:GetThrowTime() <= CurTime() then
+			print("THROWING OBJECT")
+			self.Owner:SetAnimation(PLAYER_ATTACK1) 
+			self:ThrowObject(self.Object,1000)
+			if self:Ammo1() > 0 then
+				self:TakePrimaryAmmo(1)
 			end
+			self:SetThrowTime(CurTime() + 10)
 		end
 		
-		if self.ThrowRemove < CurTime() then
-			if self:Ammo1() ~= 0 then
-			
-				self:SendWeaponAnim(ACT_VM_DRAW)
-				
-				self.IsThrowing = false
-				self.HasAnimated = false
-				self.HasThrown = false
-				self.CanHolster	= true
-				
-				if SERVER then
-					if self.SpecialThrow then
-						self:SwitchToPrimary()
-					end
-				end
-				
-			else
-				if SERVER then
-					self:SwitchToPrimary()
-					SafeRemoveEntity(self)
-				end
-			end
-		end
-		
-	end
-	
-	if SERVER then
-		if self.Owner.WeaponType == "Throwable" and self.ThrowRemove < CurTime() then
-			if self:Ammo1() == 0 and self:Clip1() == 0 then
-				self:Remove() 
-				self:SwitchToPrimary()
+	if self:GetThrowRemoveTime() <= CurTime() then
+		print("REMOVING OBJECT")
+		self:SetCanHolster( true )
+		self:SetIsThrowing( false )
+		if self:Ammo1() > 0 then
+			self:SendWeaponAnim(ACT_VM_DRAW)
+		else
+			self:SwitchToPrimary() -- Removing this does not change the bug
+			if SERVER then
+				self:Remove(self.Weapon)
 			end
 		end
 	end
-	
+		
+	end
 	
 end
 
 function SWEP:SwitchToPrimary()
+
 	if self.Owner:IsBot() then
 		local Weapons = self.Owner:GetWeapons()
 		self.Owner:SetActiveWeapon(Weapons[1])
 	else
 		self.Owner:ConCommand("lastinv")
 	end
+	
 end
 
 function SWEP:QuickThrow()
-
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay + 2)
-	self.CanHolster = false
-	self:SendWeaponAnim(ACT_VM_PULLPIN)
-	
-	self.IsThrowing = true
-	
-	self.ThrowAnimation = CurTime() + 0.85
-	self.Throw = CurTime() + 1
-	self.ThrowRemove = CurTime() + 2
-	self.SpecialThrow = true
-	
+	self:PreThrowObject(true)
 end
 
-function SWEP:PreThrowObject()
-	if self:IsUsing() then return end
+function SWEP:PreThrowObject(override)
+
+	if self:IsUsing() and not override then return end
 	
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	
 	if self.HasPreThrow then
 		self:SendWeaponAnim(ACT_VM_PULLPIN)
-		self.CanHolster = false
-		self.IsThrowing = true
-		self.SpecialThrow = false
-		self.ThrowAnimation = CurTime() + 0.85
-		self.Throw = CurTime() + 1
-		self.ThrowRemove = CurTime() + 2
+		self:SetThrowAnimationTime( CurTime() + 0.85 )
+		self:SetThrowTime(CurTime() + 1.1)
+		self:SetThrowRemoveTime(CurTime() + 2)
 	else			
-		self.CanHolster = false
-		self.IsThrowing = true
-		self.SpecialThrow = false
-		self.ThrowAnimation = CurTime()
-		self.Throw = CurTime() + 0.15
-		self.ThrowRemove = CurTime() + 1
+		self:SetThrowAnimationTime( 0 )
+		self:SetThrowTime(CurTime() + 0.15)
+		self:SetThrowRemoveTime(CurTime() + 1)
 	end
+	
+	self:SetCanHolster( false )
+	self:SetIsThrowing( true )
+	
 end
 
 function SWEP:ThrowObject(object,force)
@@ -2281,7 +2263,6 @@ function SWEP:NewSwing(damage)
 	return HasHitTarget
 
 end
-
 
 function SWEP:NewSendHitEvent(victim,damage)
 
@@ -2392,204 +2373,6 @@ function SWEP:NewStabFleshEffect(victim)
 	util.Decal( "Blood", victim:GetPos(), victim:GetPos())	
 	
 end
-
---[[
-function SWEP:Swing(damage)
-
-	if IsFirstTimePredicted() then
-	
-		local trace = self.Owner:GetEyeTrace() 
-		
-		if trace.Hit and trace.StartPos:Distance(trace.HitPos) < 40 and not (trace.Entity:IsPlayer() or trace.Entity:IsNPC()) then
-			--self:StabEffect(trace.StartPos,trace.HitPos,trace.SurfaceProps,trace.Entity)
-		end
-		
-		if SERVER then
-		
-			local Length = math.Clamp(self.Owner:GetVelocity():Length() * 0.25,1,20)
-			
-			local coneents = {self.Owner}
-			coneents = ents.FindInCone(self.Owner:GetShootPos() - self.Owner:EyeAngles():Forward()*20, self.Owner:GetAimVector(), 60 + Length,45)
-			
-			self.HitAThing = false
-			
-			for k,v in pairs(coneents) do
-				if self.HitAThing == false then
-					if v ~= self.Owner then
-						if v:IsPlayer() or v:IsNPC() then
-							
-							local Angle01 = self.Owner:GetAngles()
-							local Angle02 = v:GetAngles()
-							Angle01:Normalize()
-							Angle02:Normalize()
-
-							local angle = math.abs(Angle01.y - Angle02.y)
-
-							if angle < 45 or angle > (360-45) then
-								damage = damage * 10
-							end
-
-							self.HitAThing = true
-
-							if damage <= self.Primary.Damage then
-								self:SendHitEvent(v,damage,self.MeleeSoundFleshSmall)
-							else
-								self:SendHitEvent(v,damage,self.MeleeSoundFleshLarge)
-							end
-							
-						end
-					end
-				end
-			end
-
-			if not self.HitAThing then
-				if trace.StartPos:Distance(trace.HitPos) < 40 and not trace.Entity:IsWorld() then
-					local v = trace.Entity
-					if v:IsValid() then
-						self:SendHitEvent(v,damage,self.MeleeSoundFleshSmall)
-					end
-				else
-					self:SendHitEvent(nil,nil,self.MeleeSoundMiss)
-				end
-			end
-			
-			return self.HitAThing
-			
-		end
-		
-	end
-	
-	--self.Owner:LagCompensation( false )
-
-end
-
-
-function SWEP:SendHitEvent(victim,damage,sound)
-
-	local VictimWeapon = nil
-
-	if victim and victim:IsPlayer() then
-	
-		VictimWeapon = victim:GetActiveWeapon()
-		
-		if VictimWeapon and VictimWeapon ~= NULL then
-			if VictimWeapon:GetClass() == "weapon_smod_katana" then
-				if victim:KeyDown(IN_RELOAD) then
-				
-					local VictimAngles = victim:GetAngles() + Angle(0,180,0)
-					local AttackerAngles = self.Owner:GetAngles()
-					
-					VictimAngles:Normalize()
-					AttackerAngles:Normalize()
-					
-					local NewAngles = VictimAngles - AttackerAngles
-					
-					NewAngles:Normalize()
-					
-					local Yaw = math.abs(NewAngles.y)
-					
-					if Yaw < 90 then
-						VictimWeapon:BlockDamage(damage)
-						self:StabSound(victim,Sound("weapons/samurai/tf_katana_impact_object_02.wav"),false)
-						return
-					end
-					
-				end
-			end
-		end
-		
-	end
-
-	if damage and victim then
-		self:StabDamage(damage,victim)
-	end
-
-	if victim and sound then
-		self:StabSound(victim,sound,true)
-	elseif sound then
-		self:StabSound(self.Owner,sound,false)
-	end
-	
-end
-
-
-
-function CSS_StabEffect(StartPos,HitPos,Angles,SurfaceProp,HitEntity,Owner)
-
-	--if HitEntity:IsPlayer() then return end
-	
-	local NormalShit = (StartPos - HitPos):GetNormalized()
-	
-	local effect = EffectData()
-		effect:SetOrigin(HitPos)
-		effect:SetStart(StartPos)
-		effect:SetNormal(NormalShit)
-		effect:SetFlags(3)
-		effect:SetScale(6)
-		effect:SetColor(0)
-		--effect:SetSurfaceProp(SurfaceProp)
-		effect:SetDamageType(DMG_SLASH)
-		
-	if CLIENT then
-		effect:SetEntity(HitEntity)
-	else
-		effect:SetEntIndex(HitEntity:EntIndex())
-	end
-	
-	util.Effect("bloodspray", effect)
-	util.Effect("BloodImpact", effect)
-
-	util.Decal( "Blood", HitEntity:GetPos(), HitEntity:GetPos())	
-	util.Decal( "Blood", StartPos, StartPos + Angles:Forward()*100)
-	
-	
-end
-
-function SWEP:StabSound(ent,sound,shouldblood)
-	net.Start("CSS_SendSoundDelay")
-		net.WriteEntity(self.Owner)
-		net.WriteEntity(ent)
-		net.WriteString(sound)
-		net.WriteBool(shouldblood)
-	net.Broadcast()
-end
-
-if SERVER then
-	util.AddNetworkString( "CSS_SendSoundDelay" )
-end
-
-if CLIENT then
-	net.Receive("CSS_SendSoundDelay", function(len)
-	
-		local Owner = net.ReadEntity()
-		local GetEntity = net.ReadEntity()
-		local GetSound = Sound(net.ReadString())
-		local ShouldBlood = net.ReadBool()
-		
-		Owner:EmitSound(GetSound)
-		
-		if ShouldBlood and GetEntity and GetEntity:IsValid() and (GetEntity:IsPlayer() or GetEntity:IsNPC()) then
-			CSS_StabEffect(Owner:EyePos(),GetEntity:GetPos() + GetEntity:OBBCenter(),Owner:EyeAngles(),1,GetEntity,Owner)
-		end
-		
-	end)
-end
-
-
-function SWEP:StabDamage(damage, entity)
-	local dmginfo = DamageInfo()
-		dmginfo:SetDamage( damage )
-		dmginfo:SetDamageType( DMG_SLASH )
-		dmginfo:SetAttacker( self.Owner )
-		dmginfo:SetInflictor( self )
-		dmginfo:SetDamageForce( self.Owner:GetForward() )
-	if SERVER then
-		entity:TakeDamageInfo( dmginfo )
-	end
-end
-
---]]
-
 
 function SWEP:GetActivities()
 

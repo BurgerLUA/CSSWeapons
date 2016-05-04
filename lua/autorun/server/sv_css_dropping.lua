@@ -42,26 +42,8 @@ function CSS_DropWeaponBecauseNone()
 				end
 				
 			end
-			--[[
-			local Weapons = v:GetWeapons()
 			
-			if v:Alive() and #Weapons > 0 then
-				for l,b in pairs(Weapons) do
-					if b:IsScripted() then
-						if b.Base == "weapon_cs_base" or b.BurgerBase == true then
-							if b.WeaponType == "Throwable" and b.Primary.ClipSize == -1 and b.IsThrowing == false then
-								if v:GetAmmoCount(b.Primary.Ammo) < 1 then
-									v:StripWeapon(b:GetClass())
-								end
-							end
-						end
-					end
-				end
-			end
-			--]]
 		end
-	
-
 		NextThink = CurTime() + 1
 	end
 
@@ -69,8 +51,6 @@ end
 
 
 hook.Add("Think","CSS_DropWeaponBecauseNone",CSS_DropWeaponBecauseNone)
-
-
 
 function CSS_DropWeapon(ply,weapon)
 

@@ -2,7 +2,7 @@ function NadeKeyPress(ply,key)
 
 	if GetConVarNumber("sv_css_quick") == 0 then return end
 	
-	if ply:KeyDown(IN_USE) then
+	if ply:KeyDown(IN_USE) or ply:IsBot() then
 		if key == IN_ATTACK then
 			if ply:InVehicle() then return end
 		
@@ -15,17 +15,7 @@ function NadeKeyPress(ply,key)
 			
 			if CLIENT then return end
 			
-			if CSS_ThrowCheck(ply,Weapon,"weapon_cs_he") then
-			
-			elseif CSS_ThrowCheck(ply,Weapon,"weapon_ex_gas") then
-			
-			elseif CSS_ThrowCheck(ply,Weapon,"weapon_cs_flash") then
-		
-			elseif CSS_ThrowCheck(ply,Weapon,"weapon_cs_smoke") then
-			
-			else
-				return
-			end
+			if not CSS_SuperThrowCheck(ply,Weapon) then return false end
 			
 			Weapon = ply:GetActiveWeapon()
 			Weapon:QuickThrow()
@@ -34,6 +24,23 @@ function NadeKeyPress(ply,key)
 	end
 
 end
+
+function CSS_SuperThrowCheck(ply,Weapon)
+
+	if CSS_ThrowCheck(ply,Weapon,"weapon_cs_he") then
+		return true
+	elseif CSS_ThrowCheck(ply,Weapon,"weapon_ex_gas") then
+		return true
+	elseif CSS_ThrowCheck(ply,Weapon,"weapon_cs_flash") then
+		return true
+	elseif CSS_ThrowCheck(ply,Weapon,"weapon_cs_smoke") then
+		return true
+	else
+		return false
+	end
+	
+end
+
 
 function CSS_ThrowCheck(ply,Weapon,class)
 

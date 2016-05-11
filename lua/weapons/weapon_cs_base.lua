@@ -472,7 +472,7 @@ end
 function SWEP:Deploy()
 
 	if SERVER then
-	
+
 		if GetConVarNumber("sv_css_limit_equipped") == 1 then
 			for k,v in pairs (self.Owner:GetWeapons()) do
 				if v.BurgerBase ~= nil then
@@ -572,10 +572,8 @@ end
 
 function SWEP:PrimaryAttack()
 	
-	if self:GetIsShotgunReload() then
-		if self:GetIsReloading() then
-			self:FinishShotgunReload()
-		end
+	if self:GetIsShotgunReload() and self:GetIsReloading() and not self.Owner:IsBot() then
+		self:FinishShotgunReload()
 	end
 
 	if not self:CanPrimaryAttack() then	return end
@@ -833,12 +831,10 @@ function SWEP:HandleCone(Cone,IsCrosshair)
 	
 	Cone = Cone * GetConVarNumber("sv_css_cone_scale")
 	
-	if CLIENT then
-		if IsCrosshair then
-			Cone = Cone + (self.ClientCoolDown*self.HeatMul*0.01)
-		else
-			Cone = Cone + (self:GetCoolDown()*self.HeatMul*0.01)
-		end
+	if CLIENT and IsCrosshair  then
+		Cone = Cone + (self.ClientCoolDown*self.HeatMul*0.01)
+	else
+		Cone = Cone + (self:GetCoolDown()*self.HeatMul*0.01)
 	end
 	
 	local VelCone = math.Clamp( ( (Velocity * self.VelConeMul * GetConVarNumber("sv_css_velcone_scale")) ^ 1.75 ) * 0.000001, 0, 0.1)
@@ -2166,8 +2162,11 @@ end
 function SWEP:SwitchToPrimary()
 
 	if self.Owner:IsBot() then
-		local Weapons = self.Owner:GetWeapons()
-		self.Owner:SetActiveWeapon(Weapons[1])
+		if SERVER then
+			local Weapons = self.Owner:GetWeapons()
+			self.Owner:SetActiveWeapon(Weapons[1])
+			self.Owner:DrawWorldModel( true )
+		end
 	else
 		self.Owner:ConCommand("lastinv")
 	end

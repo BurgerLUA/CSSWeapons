@@ -3,7 +3,7 @@ function CSSDamage(ply, hitgroup, dmginfo)
 	if GetConVar("sv_css_enable_customdamage"):GetFloat() == 1 then
 	
 		if ( hitgroup == HITGROUP_HEAD ) then
-			dmginfo:ScaleDamage( 2 )
+			dmginfo:ScaleDamage( 0.5 )
 		elseif ( hitgroup == HITGROUP_LEFTARM || hitgroup == HITGROUP_RIGHTARM || hitgroup == HITGROUP_LEFTLEG || hitgroup == HITGROUP_RIGHTLEG || hitgroup == HITGROUP_GEAR ) then
 			dmginfo:ScaleDamage( 4 )
 		end

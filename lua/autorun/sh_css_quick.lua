@@ -3,7 +3,7 @@ function NadeKeyPress(ply,key)
 	if GetConVarNumber("sv_css_quick") == 0 then return end
 	
 	if ply:KeyDown(IN_USE) or ply:IsBot() then
-		if key == IN_ATTACK then
+		if key == IN_ATTACK or ply:IsBot() then
 			if ply:InVehicle() then return end
 		
 			local Weapon = ply:GetActiveWeapon()
@@ -45,7 +45,7 @@ end
 function CSS_ThrowCheck(ply,Weapon,class)
 
 	if not ply:HasWeapon(class) then return false end
-	if Weapon:GetClass() == class then return false end	
+	if Weapon:GetClass() == class and not ply:IsBot() then return false end	
 	ply:SelectWeapon(class)
 
 	return true

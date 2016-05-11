@@ -1883,26 +1883,28 @@ function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 	
 	if !self:GetZoomed() or self.EnableIronCross or ( GetConVarNumber("cl_css_crosshair_neversights") == 1 and not self.HasScope) then
 
-		if CrosshairShadow >= 1 and WRound == 0 then
+		if  WRound == 0 then
 	
 			if CrosshairStyle >= 1 and CrosshairStyle <= 4 then
 			
-				-- Start of Shadow Stuff
-				local x1 = XRound + FinalCone + LRound*2
-				local x2 = XRound - FinalCone - LRound*2
-				local y3 = YRound + FinalCone + LRound*2
-				local y4 = YRound - FinalCone - LRound*2
+				if CrosshairShadow >= 1 then
+					-- Start of Shadow Stuff
+					local x1 = XRound + FinalCone + LRound*2
+					local x2 = XRound - FinalCone - LRound*2
+					local y3 = YRound + FinalCone + LRound*2
+					local y4 = YRound - FinalCone - LRound*2
 
-				local Offset = 1
-				local ShadowWidth = 3
-				local ShadowLength = LRound*2 + Offset*3
+					local Offset = 1
+					local ShadowWidth = 3
+					local ShadowLength = LRound*2 + Offset*3
 
-				surface.SetDrawColor(Color(0,0,0,255))
-				surface.DrawRect( x1 - LRound*2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
-				surface.DrawRect( x2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
-				surface.DrawRect( XRound - Offset, y3 - LRound*2 - 1 , ShadowWidth, ShadowLength )
-				surface.DrawRect( XRound - Offset, y4 - 1 , ShadowWidth, ShadowLength )
-				-- End of Shadow Stuff
+					surface.SetDrawColor(Color(0,0,0,255))
+					surface.DrawRect( x1 - LRound*2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
+					surface.DrawRect( x2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
+					surface.DrawRect( XRound - Offset, y3 - LRound*2 - 1 , ShadowWidth, ShadowLength )
+					surface.DrawRect( XRound - Offset, y4 - 1 , ShadowWidth, ShadowLength )
+					-- End of Shadow Stuff
+				end
 				
 				-- Start of Normal Stuff
 				if width > 1 then

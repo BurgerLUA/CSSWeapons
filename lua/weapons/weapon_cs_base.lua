@@ -2128,13 +2128,13 @@ function SWEP:EquipThink()
 	if self:GetIsThrowing() then
 	
 		if self:GetThrowAnimationTime() <= CurTime() then
-			print("ANIMATING THROW")
+			--print("ANIMATING THROW")
 			self:SendWeaponAnim(ACT_VM_THROW)
 			self:SetThrowAnimationTime(CurTime() + 10)
 		end
 		
 		if self:GetThrowTime() <= CurTime() then
-			print("THROWING OBJECT")
+			--print("THROWING OBJECT")
 			self.Owner:SetAnimation(PLAYER_ATTACK1) 
 			self:ThrowObject(self.Object,1000)
 			if self:Ammo1() > 0 then
@@ -2144,7 +2144,7 @@ function SWEP:EquipThink()
 		end
 		
 	if self:GetThrowRemoveTime() <= CurTime() then
-		print("REMOVING OBJECT")
+		--print("REMOVING OBJECT")
 		self:SetCanHolster( true )
 		self:SetIsThrowing( false )
 		if self:Ammo1() > 0 then
@@ -2166,8 +2166,17 @@ function SWEP:SwitchToPrimary()
 	if self.Owner:IsBot() then
 		if SERVER then
 			local Weapons = self.Owner:GetWeapons()
-			self.Owner:SetActiveWeapon(Weapons[1])
-			self.Owner:DrawWorldModel( true )
+			
+			local WeaponFound = false
+			
+			for k,v in pairs(Weapons) do
+				if not WeaponFound and self.Owner:HasWeapon(v:GetClass()) and v.Category == "Counter-Strike" then
+					self.Owner:SetActiveWeapon(v)
+					self.Owner:DrawWorldModel( true )
+					WeaponFound = true
+				end
+			end
+			
 		end
 	else
 		self.Owner:ConCommand("lastinv")

@@ -823,7 +823,7 @@ function SWEP:HandleCone(Cone,IsCrosshair)
 
 	local Velocity = self.Owner:GetVelocity():Length() 
 	
-	if not self.Owner:IsOnGround() then
+	if (!self.Owner:IsOnGround() and !(self.Owner:WaterLevel() > 0)) then
 		Velocity = 400
 	elseif self.Owner:IsPlayer() and self.Owner:Crouching() then
 		Cone = Cone * 0.75
@@ -1082,7 +1082,8 @@ function SWEP:GetRecoilFinal()
 end
 
 function SWEP:AddRecoil()
-
+	
+	--[[
 	if SERVER then
 		if self.Owner:IsBot() then
 			local UpPunch, SidePunch = self:GetRecoilFinal()
@@ -1090,6 +1091,7 @@ function SWEP:AddRecoil()
 		end
 		return 
 	end
+	--]]
 	
 	if CLIENT then
 		local UpPunch, SidePunch = self:GetRecoilFinal()
@@ -1300,9 +1302,65 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 
 end
 
-function SWEP:EmitGunSound(GunSound,Level)
-	self.Weapon:EmitSound(GunSound)	
+if SERVER then
+	util.AddNetworkString("CSS_GunSounds")
 end
+
+function SWEP:EmitGunSound(GunSound,Level)
+
+	self.Weapon:EmitSound(GunSound)	
+
+	--[[
+	if SERVER then
+	
+		local Position = self.Owner:GetPos()
+	
+		if IsFirstTimePredicted() then
+			net.Start("CSS_GunSounds")
+				net.WriteFloat(self.Weapon:EntIndex())
+			net.Broadcast()
+		end
+		
+	end
+	--]]
+	
+end
+
+if CLIENT then
+	net.Receive("CSS_GunSounds", function(len)
+	
+		local ply = LocalPlayer()
+	
+		local ID = net.ReadFloat()
+		
+		local Gun = Entity(ID)
+		
+		if Gun.Owner == ply then return end
+		
+		local GunSound = Gun.Primary.Sound
+		
+		local RealSoundTable = sound.GetProperties(GunSound)
+		local RealDistance = ply:GetPos():Distance(Gun:GetPos())
+		
+		local Range = (Gun.Primary.Damage * Gun.Primary.NumShots)*500
+
+		local VolumeMod = math.Clamp( 1 - (RealDistance/Range),0,1)
+
+		local FakePos = ply:GetPos() + (- Gun:GetPos() + ply:GetPos() ):Angle():Forward()*100
+	
+		
+		EmitSound(RealSoundTable.sound,FakePos,ID,CHAN_WEAPON,VolumeMod,140,0,80)
+		
+		
+		--print(RealSoundTable.sound)
+
+	end)
+
+
+
+end
+
+
 
 function SWEP:BulletEffect(HitPos,StartPos,HitEntity,SurfaceProp)
 	

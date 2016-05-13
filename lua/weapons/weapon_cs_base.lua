@@ -831,10 +831,12 @@ function SWEP:HandleCone(Cone,IsCrosshair)
 	
 	Cone = Cone * GetConVarNumber("sv_css_cone_scale")
 	
-	if CLIENT and IsCrosshair  then
+	if (CLIENT) and IsCrosshair and not game.SinglePlayer()  then
 		Cone = Cone + (self.ClientCoolDown*self.HeatMul*0.01)
+		--print("YES")
 	else
 		Cone = Cone + (self:GetCoolDown()*self.HeatMul*0.01)
+		--print("ASS")
 	end
 	
 	local VelCone = math.Clamp( ( (Velocity * self.VelConeMul * GetConVarNumber("sv_css_velcone_scale")) ^ 1.75 ) * 0.000001, 0, 0.1)
@@ -1093,7 +1095,7 @@ function SWEP:AddRecoil()
 	end
 	--]]
 	
-	if CLIENT then
+	if CLIENT or game.SinglePlayer() then
 		local UpPunch, SidePunch = self:GetRecoilFinal()
 		self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0) + Angle(self.ShootOffsetStrength.p*math.Rand(-0.5,0.5),self.ShootOffsetStrength.y*math.Rand(-0.5,0.5),0)
 		self.PunchAngleDown = self.PunchAngleDown + Angle(UpPunch,SidePunch,0) + Angle(self.ShootOffsetStrength.p*math.Rand(-0.5,0.5),self.ShootOffsetStrength.y*math.Rand(-0.5,0.5),0)

@@ -170,6 +170,8 @@ if CLIENT then
 	surface.CreateFont( "csd",{font = "csd",size = 64,weight = 0})
 end
 
+local IsSingleplayer = false
+
 SWEP.Category				= "Counter-Strike"
 SWEP.PrintName				= "Counter Strike Source Weapon Base"
 SWEP.Base					= "weapon_base"
@@ -385,6 +387,10 @@ end
 
 function SWEP:Initialize()
 
+	if game.SinglePlayer() then
+		IsSingleplayer = true
+	end
+	
 	self:SetHoldType( self.HoldType )
 	
 	if SERVER then
@@ -413,7 +419,7 @@ function SWEP:Initialize()
 		util.PrecacheSound(self.LastBulletSound)
 	end
 	
-	if (CLIENT or game.SinglePlayer()) then
+	if (CLIENT or IsSingleplayer) then
 		if GetConVarNumber("cl_css_customslots") == 1 then
 			if self.WeaponType == "Primary" then
 				self.Slot = 2
@@ -537,7 +543,7 @@ end
 
 function SWEP:SetZoomed(shouldzoom)
 	if shouldzoom then
-		if game.SinglePlayer() then
+		if IsSingleplayer then
 			if self.Owner:IsPlayer() then
 			
 				local ZoomAmount = self.ZoomAmount
@@ -552,7 +558,7 @@ function SWEP:SetZoomed(shouldzoom)
 			self.IsZoomed = true
 		end
 	else
-		if game.SinglePlayer() then
+		if IsSingleplayer then
 			if self.Owner:IsPlayer() then
 				self.Owner:SetFOV( self.DesiredFOV, 0.1 )
 			end
@@ -563,7 +569,7 @@ function SWEP:SetZoomed(shouldzoom)
 end
 
 function SWEP:GetZoomed()
-	if game.SinglePlayer() then
+	if IsSingleplayer then
 		return self.Owner:GetFOV() < self.DesiredFOV
 	else
 		return self.IsZoomed
@@ -587,18 +593,20 @@ function SWEP:PrimaryAttack()
 
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	
-	self:ShootGun()
+	self:ShootGun() -- don't predict, has firebullets
 
 end
 
 function SWEP:ShootGun()
-	if (IsFirstTimePredicted() or game.SinglePlayer()) then
+
+	self:PreShootBullet() -- don't predict
+
+	if (IsFirstTimePredicted() or IsSingleplayer) then
 	
 		if CLIENT then
 			self:AfterZoom() -- Predict, Client Only
 		end
 		
-		self:PreShootBullet() -- Predict
 		self:WeaponSound() -- Predict
 		self:AddRecoil() -- Predict
 		
@@ -708,7 +716,13 @@ function SWEP:PreShootBullet() -- Should be predicted
 
 	local Damage = self.Primary.Damage
 	local Shots = self.Primary.NumShots
-	local Cone = self:HandleCone(self.Primary.Cone,false)
+	
+	local Cone = 0
+	
+	if IsFirstTimePredicted() then
+		Cone = self:HandleCone(self.Primary.Cone,false)
+	end
+	
 	local Source = self.Owner:GetShootPos()
 	local Direction = self.Owner:GetAimVector()
 	
@@ -736,11 +750,13 @@ function SWEP:PreShootBullet() -- Should be predicted
 		end
 	end
 	
-	if self.HasBuildUp or self.UsesBuildUp then
-		self:SetBuildUp( math.Clamp(self:GetBuildUp() + self.BuildUpAmount - (self:GetBuildUp()/10) ,0,100 ) )
+	if IsFirstTimePredicted() then
+		if self.HasBuildUp or self.UsesBuildUp then
+			self:SetBuildUp( math.Clamp(self:GetBuildUp() + self.BuildUpAmount - (self:GetBuildUp()/10) ,0,100 ) )
+		end
+		
+		self:AddHeat(Damage,Shots)
 	end
-	
-	self:AddHeat(Damage,Shots)
 	
 	self:PostPrimaryFire()
 	
@@ -831,7 +847,7 @@ function SWEP:HandleCone(Cone,IsCrosshair)
 	
 	Cone = Cone * GetConVarNumber("sv_css_cone_scale")
 	
-	if (CLIENT) and IsCrosshair and not game.SinglePlayer()  then
+	if (CLIENT) and IsCrosshair and not IsSingleplayer  then
 		Cone = Cone + (self.ClientCoolDown*self.HeatMul*0.01)
 		--print("YES")
 	else
@@ -868,7 +884,7 @@ function SWEP:SecondaryAttack()
 		end
 	end
 	
-	if (IsFirstTimePredicted() or game.SinglePlayer()) then
+	if (IsFirstTimePredicted() or IsSingleplayer) then
 		if self:IsUsing() then
 			if self.HasBurstFire then
 				self:SwitchFireMode()
@@ -884,7 +900,7 @@ function SWEP:SecondaryAttack()
 				elseif self.HasSilencer then
 					self:Silencer()
 				end
-			elseif (CLIENT or game.SinglePlayer()) then
+			elseif (CLIENT or IsSingleplayer) then
 				if (self.HasIronSights and GetConVar("sv_css_enable_ironsights"):GetFloat() == 1) or self.HasScope then
 					self:HandleZoom(1)
 				end
@@ -901,7 +917,7 @@ end
 
 function SWEP:SwitchFireMode()
 
-	if not (IsFirstTimePredicted() or game.SinglePlayer()) then return end
+	if not (IsFirstTimePredicted() or IsSingleplayer) then return end
 	
 	local Message = "Semi-Automatic"
 
@@ -911,13 +927,13 @@ function SWEP:SwitchFireMode()
 
 	if self:GetIsBurst() then
 		self:SetIsBurst(false)
-		if (CLIENT or game.SinglePlayer()) then
+		if (CLIENT or IsSingleplayer) then
 			self:EmitGunSound("weapons/smg1/switch_single.wav",0.01)
 		end
 		self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to "..Message )
 	else
 		self:SetIsBurst(true)
-		if (CLIENT or game.SinglePlayer()) then
+		if (CLIENT or IsSingleplayer) then
 			self:EmitGunSound("weapons/smg1/switch_burst.wav",0.01)
 		end
 		self.Owner:PrintMessage( HUD_PRINTCENTER, "Switched to Burst Fire Mode" )
@@ -931,12 +947,12 @@ function SWEP:Silencer()
 		
 	if self:GetIsSilenced() then
 		self:SendWeaponAnim(ACT_VM_DETACH_SILENCER)
-		if not (IsFirstTimePredicted() or game.SinglePlayer()) then return end
+		if not (IsFirstTimePredicted() or IsSingleplayer) then return end
 		self.WorldModel = self.WorldModel1
 		self:SetIsSilenced(false)
 	else
 		self:SendWeaponAnim(ACT_VM_ATTACH_SILENCER)
-		if not (IsFirstTimePredicted() or game.SinglePlayer()) then return end
+		if not (IsFirstTimePredicted() or IsSingleplayer) then return end
 		self.WorldModel = self.WorldModel2
 		self:SetIsSilenced(true)
 	end
@@ -947,7 +963,7 @@ end
 
 function SWEP:HandleZoom(delay)
 
-	if not (IsFirstTimePredicted() or game.SinglePlayer()) then return end
+	if not (IsFirstTimePredicted() or IsSingleplayer) then return end
 	if not self:CanBoltZoom() then return end
 	--if self:IsBusy() then return end
 	
@@ -983,7 +999,7 @@ end
 
 function SWEP:TranslateFOV(fov)
 
-	if not game.SinglePlayer() then
+	if not IsSingleplayer then
 	
 		local ZoomAmount = self.ZoomAmount
 	
@@ -1011,7 +1027,7 @@ function SWEP:CanPrimaryAttack()
 		end
 	elseif self:Clip1() <= 0 then
 	
-		if (IsFirstTimePredicted() or game.SinglePlayer()) then
+		if (IsFirstTimePredicted() or IsSingleplayer) then
 			self.Owner:EmitSound("weapons/clipempty_pistol.wav")
 		end
 
@@ -1038,7 +1054,7 @@ function SWEP:GetRecoilFinal()
 	
 	local AvgBulletsShot = 0
 	
-	if SERVER or game.SinglePlayer() then
+	if SERVER or IsSingleplayer then
 		AvgBulletsShot = self:GetCoolDown() / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
 	else
 		AvgBulletsShot = self.ClientCoolDown / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
@@ -1095,7 +1111,7 @@ function SWEP:AddRecoil()
 	end
 	--]]
 	
-	if CLIENT or game.SinglePlayer() then
+	if CLIENT or IsSingleplayer then
 		local UpPunch, SidePunch = self:GetRecoilFinal()
 		self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0) + Angle(self.ShootOffsetStrength.p*math.Rand(-0.5,0.5),self.ShootOffsetStrength.y*math.Rand(-0.5,0.5),0)
 		self.PunchAngleDown = self.PunchAngleDown + Angle(UpPunch,SidePunch,0) + Angle(self.ShootOffsetStrength.p*math.Rand(-0.5,0.5),self.ShootOffsetStrength.y*math.Rand(-0.5,0.5),0)
@@ -1143,20 +1159,9 @@ end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,LastEntity)
 	
-	if not IsFirstTimePredicted( ) then return end
+	--if not IsFirstTimePredicted( ) then return end
 	
-	--[[
-	
-	local BulletTable = {
-		pos = Source,
-		speed = Direction*1000,
-		energy = 1,
-		owner = self.Owner
-	}
-	
-	table.Add(CSS_AllBullets,{BulletTable})
-	
-	--]]
+	print("TEST")
 	
 	if self and self.BulletEnt then
 	
@@ -1374,7 +1379,7 @@ function SWEP:BulletEffect(HitPos,StartPos,HitEntity,SurfaceProp)
 	effect:SetSurfaceProp(SurfaceProp)
 	effect:SetDamageType(DMG_BULLET)
 	
-	if (CLIENT or game.SinglePlayer()) then
+	if (CLIENT or IsSingleplayer) then
 		effect:SetEntity(HitEntity)
 	else
 		effect:SetEntIndex(HitEntity:EntIndex())
@@ -1440,7 +1445,7 @@ function SWEP:Reload()
 		self:SendWeaponAnim(ACT_VM_RELOAD)
 	end
 	
-	if (CLIENT or game.SinglePlayer()) then
+	if (CLIENT or IsSingleplayer) then
 		if self.ReloadSound then
 			if not self.HasPumpAction then
 				self:EmitGunSound(self.ReloadSound)
@@ -1551,7 +1556,7 @@ function SWEP:GetViewModelPosition( pos, ang )
 	end
 	
 	--[[
-	if game.SinglePlayer() then
+	if IsSingleplayer then
 		Offset = Offset - Vector(0,Offset.y,0)
 	end
 -	-]]
@@ -1593,7 +1598,7 @@ function SWEP:Think()
 	
 	self:SpareThink()
 	
-	if (CLIENT or game.SinglePlayer()) then
+	if (CLIENT or IsSingleplayer) then
 	
 		local FOVMOD = math.max(90 - self.Owner:GetFOV(),GetConVarNumber("cl_css_viewmodel_fov") + self.AddFOV)
 		
@@ -1639,7 +1644,7 @@ function SWEP:HandleBurstFireShoot()
 			
 				self:TakePrimaryAmmo(1)
 				self:HandleShootAnimations()
-				self:ShootGun()
+				self:ShootGun() -- don't predict
 				
 			end
 			
@@ -1683,7 +1688,7 @@ function SWEP:HandleReloadThink()
 				self.Owner:RemoveAmmo(1,self.Primary.Ammo)
 				self:SetNextShell(CurTime()+self.Owner:GetViewModel():SequenceDuration())
 
-				if (CLIENT or game.SinglePlayer()) then
+				if (CLIENT or IsSingleplayer) then
 					if self.ReloadSound then
 						self:EmitGunSound(self.ReloadSound)
 					end
@@ -1730,7 +1735,7 @@ function SWEP:HandleShotgunReloadThinkAnimations()
 			if self.Owner:GetAmmoCount( self.Primary.Ammo ) > 0 and self:Clip1() < self.Primary.ClipSize then 
 				self:SendWeaponAnim(ACT_VM_RELOAD)
 
-				if (CLIENT or game.SinglePlayer()) then
+				if (CLIENT or IsSingleplayer) then
 					if self.ReloadSound then
 						self:EmitGunSound(self.ReloadSound)
 					end
@@ -1766,7 +1771,7 @@ function SWEP:HandleCoolDown()
 end
 
 function SWEP:HandleZoomMod()
-	if not game.SinglePlayer() then
+	if not IsSingleplayer then
 		if self:GetZoomed() then
 			if self.HasIronSights then
 				self.ZoomMod = math.min(self.ZoomMod + 0.015*6,1)
@@ -1883,7 +1888,7 @@ function SWEP:DrawHUDBackground()
 	
 	local ConeToSend = Cone
 	
-	if not game.SinglePlayer() then
+	if not IsSingleplayer then
 		if GetConVarNumber("cl_css_crosshair_smoothing") == 1 then
 		
 			if not self.StoredCrosshair then

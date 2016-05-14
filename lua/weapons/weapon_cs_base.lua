@@ -1161,7 +1161,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,La
 	
 	--if not IsFirstTimePredicted( ) then return end
 	
-	print("TEST")
+	--print("TEST")
 	
 	if self and self.BulletEnt then
 	

@@ -18,7 +18,7 @@ end)
 
 function CSSSpeedModMovement(ply,mv,cmd)
 
-	if GetGlobalBool("css_slowenable",true) then
+	if GetGlobalBool("css_slowenable",0) == 1 then
 
 		local WeaponSpeed = ply:GetNWFloat("CSS_Speed",-1)
 		

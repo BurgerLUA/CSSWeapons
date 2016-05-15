@@ -7,7 +7,9 @@ if SERVER then
 end
 
 function CSS_PostGamemodeLoaded()
-	SetGlobalBool("css_slowenable", GetConVar("sv_css_enable_speedmod"):GetFloat() == 1)
+	if SERVER then
+		SetGlobalBool("css_slowenable", GetConVar("sv_css_enable_speedmod"):GetFloat() == 1)
+	end
 end
 
 hook.Add("PostGamemodeLoaded","CSS_PostGamemodeLoaded",CSS_PostGamemodeLoaded)

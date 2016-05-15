@@ -607,8 +607,9 @@ function SWEP:ShootGun()
 			self:AfterZoom() -- Predict, Client Only
 		end
 		
-		self:WeaponSound() -- Predict
 		self:AddRecoil() -- Predict
+		self:WeaponSound() -- Predict
+		
 		
 	end
 end
@@ -1099,14 +1100,18 @@ function SWEP:GetRecoilFinal()
 
 end
 
+--[[
+if SERVER then
+	SWEP.BotPunch = Angle(0,0,0)
+end
+--]]
+
 function SWEP:AddRecoil()
-	
+
 	--[[
-	if SERVER then
-		if self.Owner:IsBot() then
-			local UpPunch, SidePunch = self:GetRecoilFinal()
-			self.Owner:SetEyeAngles(self.Owner:EyeAngles() + Angle(UpPunch*0.25,SidePunch*0.25,0))
-		end
+	if SERVER and self.Owner:IsBot() then
+		local UpPunch, SidePunch = self:GetRecoilFinal()
+		self.BotPunch = self.BotPunch + Angle(UpPunch,SidePunch,0) + Angle(self.ShootOffsetStrength.p*math.Rand(-0.5,0.5),self.ShootOffsetStrength.y*math.Rand(-0.5,0.5),0)
 		return 
 	end
 	--]]
@@ -1616,6 +1621,13 @@ function SWEP:Think()
 			self:RemoveRecoil()
 		end
 		
+	--[[
+	elseif SERVER and self.Owner:IsBot() then
+		if IsFirstTimePredicted() then 
+			self:RemoveRecoil()
+		end
+	--]]
+	
 	end
 	
 end
@@ -1800,6 +1812,15 @@ function SWEP:HandleBoltZoomMod()
 end
 
 function SWEP:RemoveRecoil()
+
+	--[[
+	if SERVER and self.Owner:IsBot() then
+		local Math = self.BotPunch - self.BotPunch*FrameTime()*10
+		self.BotPunch = Math
+		--print("REMOVING")
+		return
+	end
+	--]]
 
 	local pUp = self:HandleLimits(self.PunchAngleUp.p)
 	local yUp = self:HandleLimits(self.PunchAngleUp.y)

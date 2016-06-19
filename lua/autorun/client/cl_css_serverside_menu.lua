@@ -395,6 +395,20 @@ local ItemTable = {}
 	ItemTable[count]["height"] = 20
 	count = count + 1
 	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "Enable CSS Speed Modification."
+	ItemTable[count]["command"] = "sv_css_enable_speedmod"
+	ItemTable[count]["height"] = 20
+	count = count + 1
+	
+	ItemTable[count] = {}
+	ItemTable[count]["type"] = "DCheckBoxLabel"
+	ItemTable[count]["text"] = "CSS-Like Speed (Disables Sprint, generally faster movement.)"
+	ItemTable[count]["command"] = "sv_css_enable_sprintmod"
+	ItemTable[count]["height"] = 20
+	count = count + 1
+	
 
 function CSSServersideWeaponSettings()
 	

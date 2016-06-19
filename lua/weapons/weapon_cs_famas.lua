@@ -36,7 +36,7 @@ SWEP.RecoilMul				= 1
 SWEP.SideRecoilMul			= 0.25
 SWEP.VelConeMul				= 1
 SWEP.HeatMul				= 1
-SWEP.CoolMul				= 1
+SWEP.CoolMul				= 0.5
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
@@ -52,7 +52,7 @@ SWEP.HasSideRecoil			= true
 SWEP.HasDownRecoil			= false
 
 SWEP.BurstConeMul			= 1.5
-SWEP.BurstHeatMul			= 0.1
+SWEP.BurstHeatMul			= 0.5
 SWEP.BurstRecoilMul			= 0.75
 SWEP.BurstSpeedOverride		= 1.25
 

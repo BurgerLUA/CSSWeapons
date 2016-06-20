@@ -46,11 +46,12 @@ hook.Add("PlayerDeathSound","CSS Death Sound Override",function() return true en
 
 function CSSBoltFix(victim,dmginfo)
 
-	local Attacker = dmginfo:GetAttacker()
 	local Inflictor = dmginfo:GetInflictor()
 	
-	if Inflictor:GetClass() == "crossbow_bolt" and dmginfo:GetDamage() <= 1 then
-		dmginfo:SetDamage(100)
+	if Inflictor then
+		if Inflictor:GetClass() == "crossbow_bolt" and dmginfo:GetDamage() <= 1 then
+			dmginfo:SetDamage(100)
+		end
 	end
 
 end

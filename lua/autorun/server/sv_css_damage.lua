@@ -48,7 +48,7 @@ function CSSBoltFix(victim,dmginfo)
 
 	local Inflictor = dmginfo:GetInflictor()
 	
-	if Inflictor then
+	if Inflictor and Inflictor ~= NULL then
 		if Inflictor:GetClass() == "crossbow_bolt" and dmginfo:GetDamage() <= 1 then
 			dmginfo:SetDamage(100)
 		end

@@ -40,26 +40,24 @@ function CSSSpeedModMovement(ply,mv)
 		
 			local SpeedMod = (WeaponSpeed / 250)
 			local BaseSpeed = ply:GetWalkSpeed()
-
+			
 			if EnableSprintmod then
 				BaseSpeed = WeaponSpeed
 				SpeedMod = 1
-				
-				if mv:KeyPressed(IN_JUMP) and ply:IsOnGround() then
-					SpeedMod = SpeedMod*0.5
-				end
-				
-				if mv:KeyDown(IN_DUCK) then
-					SpeedMod = SpeedMod * 0.5
-				end
-				
-				if mv:KeyDown(IN_WALK) then
-					SpeedMod = SpeedMod * 0.5
-				end
-				
-			elseif mv:KeyDown(IN_SPEED) then
+			elseif mv:KeyDown(IN_SPEED) and not mv:KeyDown(IN_DUCK) then
 				BaseSpeed = ply:GetRunSpeed()
 			end
+			
+			
+			if mv:KeyDown(IN_DUCK) then
+				SpeedMod = SpeedMod * 0.5
+			end
+				
+			if mv:KeyDown(IN_WALK) then
+				SpeedMod = SpeedMod * 0.5
+			end
+
+
 
 			mv:SetMaxSpeed( BaseSpeed * SpeedMod )
 			mv:SetMaxClientSpeed( BaseSpeed * SpeedMod )

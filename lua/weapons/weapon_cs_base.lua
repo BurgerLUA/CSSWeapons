@@ -1319,8 +1319,10 @@ if SERVER then
 end
 
 function SWEP:EmitGunSound(GunSound,Level)
-
-	self.Weapon:EmitSound(GunSound)	
+	
+	if GunSound then
+		self.Weapon:EmitSound(GunSound)	
+	end
 
 	--[[
 	if SERVER then

@@ -13,6 +13,7 @@ local NextThink = CurTime() + 5
 function CSSSpeedModThink()
 	if NextThink <= CurTime() then
 		CSS_SpeedModCheck()
+		NextThink = CurTime() + 5
 	end
 end
 
@@ -20,20 +21,14 @@ hook.Add("Think","CSS Speedmod Think",CSSSpeedModThink)
 
 function CSSSpeedModMovement(ply,mv)
 	
-	if EnableSpeedmod then
+	if EnableSpeedmod then -- Handled Somewhere else, stored var that updates every time a convar is changed.
 	
 		local ActiveWeapon = ply:GetActiveWeapon()
 		
 		local WeaponSpeed = 250
 		
-		if ActiveWeapon and ActiveWeapon ~= NULL then
-			if ActiveWeapon.MoveSpeed then
-				WeaponSpeed = ActiveWeapon.MoveSpeed
-			else
-				WeaponSpeed = 250
-			end
-		else
-			WeaponSpeed = 250
+		if ActiveWeapon and ActiveWeapon ~= NULL and ActiveWeapon.MoveSpeed then
+			WeaponSpeed = ActiveWeapon.MoveSpeed
 		end
 
 		if WeaponSpeed ~= -1 then
@@ -41,13 +36,12 @@ function CSSSpeedModMovement(ply,mv)
 			local SpeedMod = (WeaponSpeed / 250)
 			local BaseSpeed = ply:GetWalkSpeed()
 			
-			if EnableSprintmod then
+			if EnableSprintmod then -- Handled Somewhere else, stored var that updates every time a convar is changed.
 				BaseSpeed = WeaponSpeed
 				SpeedMod = 1
 			elseif mv:KeyDown(IN_SPEED) and not mv:KeyDown(IN_DUCK) then
 				BaseSpeed = ply:GetRunSpeed()
 			end
-			
 			
 			if mv:KeyDown(IN_DUCK) then
 				SpeedMod = SpeedMod * 0.5
@@ -56,9 +50,7 @@ function CSSSpeedModMovement(ply,mv)
 			if mv:KeyDown(IN_WALK) then
 				SpeedMod = SpeedMod * 0.5
 			end
-
-
-
+			
 			mv:SetMaxSpeed( BaseSpeed * SpeedMod )
 			mv:SetMaxClientSpeed( BaseSpeed * SpeedMod )
 
@@ -71,13 +63,11 @@ end
 hook.Add("Move","CSS: SpeedMod Movement",CSSSpeedModMovement)
 
 function CSS_ShouldCollide(ent1,ent2)
-
 	if ent1:GetClass() == "ent_cs_ammo_base" or ent1:GetClass() == "ent_cs_droppedweapon" then
 		if ent1:GetClass() == ent2:GetClass() then
 			return false
 		end
 	end
-
 end
 
 hook.Add("ShouldCollide","CSS_ShouldCollide",CSS_ShouldCollide)
@@ -86,6 +76,7 @@ hook.Add("ShouldCollide","CSS_ShouldCollide",CSS_ShouldCollide)
 function CSS_SpeedModCheck()
 	EnableSpeedmod = GetConVar("sv_css_enable_speedmod"):GetFloat() == 1
 	EnableSprintmod = GetConVar("sv_css_enable_sprintmod"):GetFloat() == 1
+	print(EnableSpeedmod,EnableSprintmod)
 end
 
 CSS_SpeedModCheck()

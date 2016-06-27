@@ -76,7 +76,7 @@ hook.Add("ShouldCollide","CSS_ShouldCollide",CSS_ShouldCollide)
 function CSS_SpeedModCheck()
 	EnableSpeedmod = GetConVar("sv_css_enable_speedmod"):GetFloat() == 1
 	EnableSprintmod = GetConVar("sv_css_enable_sprintmod"):GetFloat() == 1
-	print(EnableSpeedmod,EnableSprintmod)
+	--print(EnableSpeedmod,EnableSprintmod)
 end
 
 CSS_SpeedModCheck()

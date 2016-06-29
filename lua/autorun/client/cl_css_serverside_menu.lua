@@ -361,13 +361,6 @@ local ItemTable = {}
 	count = count + 1
 	
 	ItemTable[count] = {}
-	ItemTable[count]["type"] = "DCheckBoxLabel"
-	ItemTable[count]["text"] = "Enable CSS Speed Modifications"
-	ItemTable[count]["command"] = "sv_css_enable_speedmod"
-	ItemTable[count]["height"] = 20
-	count = count + 1
-	
-	ItemTable[count] = {}
 	ItemTable[count]["type"] = "DLabel"
 	ItemTable[count]["font"] = "TitleFont"
 	ItemTable[count]["text"] = "Other Settings"

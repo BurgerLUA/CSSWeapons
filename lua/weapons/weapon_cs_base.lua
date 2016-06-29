@@ -61,7 +61,6 @@ CreateClientConVar("cl_css_viewmodel_fov", "45", true, true )
 
 CreateClientConVar("cl_css_crosshair_style", "1", true, true )
 CreateClientConVar("cl_css_crosshair_length", "15", true, true )
-CreateClientConVar("cl_css_crosshair_width", "1", true, true )
 
 CreateClientConVar("cl_css_crosshair_color_r", "50", true, true )
 CreateClientConVar("cl_css_crosshair_color_g", "255", true, true )
@@ -179,7 +178,7 @@ SWEP.BurgerBase				= true
 SWEP.WeaponType				= "Primary"
 
 SWEP.Cost					= 0
-SWEP.MoveSpeed				= 250
+SWEP.CSSMoveSpeed				= 250
 
 SWEP.Spawnable				= false
 SWEP.AdminOnly 				= false
@@ -1128,7 +1127,7 @@ function SWEP:GetHeatMath(Damage,Shots)
 
 	local DamageMod = Damage*Shots*0.01
 	local ConeMod = (math.max(0.001,self.Primary.Cone)^-0.1)
-	local WeightMod = (self.MoveSpeed / 250 )
+	local WeightMod = (self.CSSMoveSpeed / 250 )
 	local BurstMod = 1
 
 	if self.HasBurstFire and self:GetIsBurst() then
@@ -1892,7 +1891,7 @@ function SWEP:DrawHUDBackground()
 	end
 	
 	local length = GetConVarNumber("cl_css_crosshair_length")
-	local width = GetConVarNumber("cl_css_crosshair_width")
+	local width = 1
 	
 	local fovbonus = self.DesiredFOV / self.Owner:GetFOV()
 
@@ -1968,10 +1967,32 @@ function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 	local CrosshairStyle = GetConVarNumber("cl_css_crosshair_style")
 	local CrosshairDot = GetConVarNumber("cl_css_crosshair_dot")
 	
-	
 	if !self:GetZoomed() or self.EnableIronCross or ( GetConVarNumber("cl_css_crosshair_neversights") == 1 and not self.HasScope) then
 
 		if  WRound == 0 then
+		
+			if CrosshairStyle >= 2 and CrosshairStyle <= 5 then
+				
+				local Offset = 0
+		
+				if CrosshairStyle == 4 then
+					Offset = LRound*2
+				elseif CrosshairStyle == 3 then
+					Offset = LRound
+				else
+					Offset = 0
+				end
+			
+				if CrosshairShadow >= 1 then
+					-- Start of Shadow Stuff
+					surface.DrawCircle(x/2,y/2, FinalCone + Offset - 1, Color(0,0,0,a))
+					surface.DrawCircle(x/2,y/2, FinalCone + Offset + 1, Color(0,0,0,a))
+					-- End of Shadow Stuff
+				end
+				
+			end
+		
+		
 	
 			if CrosshairStyle >= 1 and CrosshairStyle <= 4 then
 			
@@ -1984,12 +2005,12 @@ function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 
 					local Offset = 1
 					local ShadowWidth = 3
-					local ShadowLength = LRound*2 + Offset*3
+					local ShadowLength = LRound*2 + Offset*3 - 1
 
 					surface.SetDrawColor(Color(0,0,0,255))
-					surface.DrawRect( x1 - LRound*2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
+					surface.DrawRect( x1 - LRound*2, YRound - Offset , ShadowLength, ShadowWidth )
 					surface.DrawRect( x2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
-					surface.DrawRect( XRound - Offset, y3 - LRound*2 - 1 , ShadowWidth, ShadowLength )
+					surface.DrawRect( XRound - Offset, y3 - LRound*2 , ShadowWidth, ShadowLength )
 					surface.DrawRect( XRound - Offset, y4 - 1 , ShadowWidth, ShadowLength )
 					-- End of Shadow Stuff
 				end
@@ -2035,12 +2056,14 @@ function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 		
 				local Max = math.max(1,width)
 				
-				--Start of Shadow Stuff
-				if width <= 1 then
-					surface.SetDrawColor(Color(0,0,0,255))
-					surface.DrawRect( XRound - WRound - 1, YRound - WRound - 1 , Max + 2, Max + 2 )
+				if CrosshairShadow >= 1 then
+					--Start of Shadow Stuff
+					if width <= 1 then
+						surface.SetDrawColor(Color(0,0,0,255))
+						surface.DrawRect( XRound - WRound - 1, YRound - WRound - 1 , Max + 2, Max + 2 )
+					end
+					-- End of Shadow Stuff
 				end
-				-- End of Shadow Stuff
 				
 				-- Start of Normal Stuff
 				surface.SetDrawColor(r,g,b,a)
@@ -2060,18 +2083,9 @@ function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 				else
 					Offset = 0
 				end
-			
-				-- Start of Shadow Stuff
-				surface.DrawCircle(x/2,y/2, FinalCone + Offset - 1, Color(0,0,0,a))
-				surface.DrawCircle(x/2,y/2, FinalCone + Offset + 1, Color(0,0,0,a))
-				-- End of Shadow Stuff
 				
 				-- Start of Normal Stuff
 				surface.DrawCircle(XRound,YRound, FinalCone + Offset, Color(r,g,b,a))
-			
-				if width > 1 then
-					surface.DrawCircle(XRound,YRound, FinalCone + Offset + 1, Color(r,g,b,a))
-				end
 				-- End of Normal Stuff
 				
 			end

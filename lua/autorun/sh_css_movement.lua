@@ -27,8 +27,8 @@ function CSSSpeedModMovement(ply,mv)
 		
 		local WeaponSpeed = 250
 		
-		if ActiveWeapon and ActiveWeapon ~= NULL and ActiveWeapon.MoveSpeed then
-			WeaponSpeed = ActiveWeapon.MoveSpeed
+		if ActiveWeapon and ActiveWeapon ~= NULL and ActiveWeapon.CSSMoveSpeed then
+			WeaponSpeed = ActiveWeapon.CSSMoveSpeed
 		end
 
 		if WeaponSpeed ~= -1 then

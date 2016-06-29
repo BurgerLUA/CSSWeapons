@@ -13,7 +13,7 @@ local ItemTable = {}
 	count = count + 1
 	
 	ItemTable[count] = {}
-	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["type"] = "DNumSlider"
 	ItemTable[count]["name"] = "Viewmodel FOV"
 	ItemTable[count]["command"] = "cl_css_viewmodel_fov"
 	ItemTable[count]["min"] = 30
@@ -42,7 +42,7 @@ local ItemTable = {}
 	count = count + 1
 	
 	ItemTable[count] = {}
-	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["type"] = "DNumSlider"
 	ItemTable[count]["name"] = "Crosshair Style"
 	ItemTable[count]["command"] = "cl_css_crosshair_style"
 	ItemTable[count]["min"] = 0
@@ -52,7 +52,7 @@ local ItemTable = {}
 	count = count + 1
 	
 	ItemTable[count] = {}
-	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["type"] = "DNumSlider"
 	ItemTable[count]["name"] = "Crosshair Length"
 	ItemTable[count]["command"] = "cl_css_crosshair_length"
 	ItemTable[count]["min"] = 1
@@ -62,17 +62,7 @@ local ItemTable = {}
 	count = count + 1
 	
 	ItemTable[count] = {}
-	ItemTable[count]["type"] = "Slider"
-	ItemTable[count]["name"] = "Crosshair width"
-	ItemTable[count]["command"] = "cl_css_crosshair_width"
-	ItemTable[count]["min"] = 1
-	ItemTable[count]["max"] = 2
-	ItemTable[count]["decimals"] = 0
-	ItemTable[count]["height"] = 40
-	count = count + 1
-	
-	ItemTable[count] = {}
-	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["type"] = "DNumSlider"
 	ItemTable[count]["name"] = "Crosshair Size Offset"
 	ItemTable[count]["command"] = "cl_css_crosshair_offset"
 	ItemTable[count]["min"] = 0
@@ -110,7 +100,7 @@ local ItemTable = {}
 	count = count + 1
 	
 	ItemTable[count] = {}
-	ItemTable[count]["type"] = "Slider"
+	ItemTable[count]["type"] = "DNumSlider"
 	ItemTable[count]["name"] = "Smoothing speed multiplier (Requires Crosshair Smoothing)"
 	ItemTable[count]["command"] = "cl_css_crosshair_smoothing_mul"
 	ItemTable[count]["min"] = 0.01
@@ -194,7 +184,7 @@ function CSSClientsideWeaponSettings()
 		DermaObj[k] = vgui.Create(Table["type"],Base1)
 		DermaObj[k]:SetPos(15, height)
 		
-		if Table["type"] == "Slider" then
+		if Table["type"] == "DNumSlider" then
 			DermaTitle[k] = vgui.Create("DLabel",Base1)
 			DermaTitle[k]:SetPos(25, height - 10)
 			DermaTitle[k]:SetFont("SliderFont")

@@ -8,7 +8,7 @@ SWEP.PrintName				= "GALIL"
 SWEP.Base					= "weapon_cs_base"
 SWEP.WeaponType				= "Primary"
 SWEP.Cost					= 2000
-SWEP.MoveSpeed				= 215
+SWEP.CSSMoveSpeed				= 215
 
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false

@@ -3,7 +3,9 @@ function CSSDamage(ply, hitgroup, dmginfo)
 	local Inflictor = dmginfo:GetInflictor()
 	
 	if Inflictor ~= NULL and Inflictor ~= nil then
-		Weapon = Inflictor:GetActiveWeapon()
+		if Inflictor:IsPlayer() then
+			Weapon = Inflictor:GetActiveWeapon()
+		end
 	end
 	
 	--print(Weapon)

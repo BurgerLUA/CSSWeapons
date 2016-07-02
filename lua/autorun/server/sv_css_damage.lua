@@ -1,5 +1,23 @@
 function CSSDamage(ply, hitgroup, dmginfo)
 
+	local Inflictor = dmginfo:GetInflictor()
+	
+	if Inflictor ~= NULL and Inflictor ~= nil then
+		Weapon = Inflictor:GetActiveWeapon()
+	end
+	
+	--print(Weapon)
+	
+	
+	if Weapon ~= NULL and Weapon ~= nil then
+		if Weapon.FatalHeadshot and hitgroup == HITGROUP_HEAD then
+			local Damage = math.max(dmginfo:GetDamage(),ply:Health())
+			--print(Damage)
+			dmginfo:SetDamage(Damage)
+			--print("FATAL HEADSHOT!")
+		end
+	end
+
 	if GetConVar("sv_css_enable_customdamage"):GetFloat() == 1 then
 	
 		if ( hitgroup == HITGROUP_HEAD ) then
@@ -20,7 +38,7 @@ function CSSDamage(ply, hitgroup, dmginfo)
 		
 	end
 	
-	if not ply:HasGodMode() and GetConVarNumber("sbox_godmode") == 0 then
+	if ply:IsPlayer() and not ply:HasGodMode() and GetConVarNumber("sbox_godmode") == 0 then
 		if GetConVarNumber("sv_css_enable_damagesounds") == 1 then
 			if hitgroup == HITGROUP_HEAD then
 				ply:EmitSound("player/headshot"..math.random(1,2)..".wav",SNDLVL_TALKING,100,1,CHAN_BODY)
@@ -33,6 +51,13 @@ function CSSDamage(ply, hitgroup, dmginfo)
 end
 
 hook.Add("ScalePlayerDamage","CSS: Damage Mod",CSSDamage)
+
+
+function CSSScaleNPCDamage(ply, hitgroup, dmginfo)
+	CSSDamage(ply, hitgroup, dmginfo)
+end
+
+hook.Add("ScaleNPCDamage","CSSScaleNPCDamage",CSSScaleNPCDamage)
 
 
 function CSSDeath( victim, inflictor, attacker )

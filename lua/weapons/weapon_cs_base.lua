@@ -210,6 +210,8 @@ SWEP.Primary.Automatic 		= true
 
 SWEP.DamageFalloff			= 10000
 
+SWEP.FatalHeadshot			= false
+
 SWEP.ReloadSound 			= nil
 SWEP.BurstSound				= nil
 SWEP.LastBulletSound		= nil
@@ -268,9 +270,16 @@ SWEP.CustomScopeSOverride	= nil
 SWEP.CustomScopeCOverride	= Color(0,0,0,255)
 SWEP.ColorOverlay			= Color(0,0,0,0) -- Color Overlay when Zoomed
 
+SWEP.ZoomInSound			= Sound("weapons/zoom.wav")
+SWEP.ZoomOutSound			= Sound("weapons/zoom.wav")
+
+SWEP.CrosshairOverrideMat	= nil
+SWEP.CrosshairOverrideSize	= nil
+
 SWEP.TracerOverride			= 1
 SWEP.EnableTracer			= true
 SWEP.TracerName				= "Tracer"
+SWEP.TracerNames			= nil
 
 SWEP.BulletEnt				= nil -- Bullet Entity that is Spawned
 SWEP.SourceOverride 		= Vector(0,0,0) -- Projectile Spawn Offset
@@ -280,6 +289,10 @@ SWEP.ShootOffsetStrength	= Angle(0,0,0) -- Recoil for OP Snipers
 SWEP.DisableReloadUntilEmpty = false
 SWEP.IgnoreDrawDelay		= false -- Does this even work?
 SWEP.EnableBlocking			= false -- Melee
+
+SWEP.MagDelayMod			= 0.75
+SWEP.MagMoveMod 			= Vector(0,0,0)
+SWEP.MagAngMod				= Angle(0,0,0)
 
 -- I know what this is
 SWEP.DrawAmmo				= true
@@ -299,6 +312,8 @@ SWEP.Author					= "Burger"
 SWEP.Contact				= ""
 SWEP.Purpose				= ""
 SWEP.Instructions			= ""
+
+SWEP.EnableDefaultScope		= true
 
 --WTF IS THIS
 SWEP.CSMuzzleFlashes 		= true
@@ -398,7 +413,7 @@ function SWEP:Initialize()
 		end
 	end
 
-	if self.Primary.Sound then
+	if self.Primary.Sound and self.Primary.Sound ~= NULL then
 		util.PrecacheSound(self.Primary.Sound)
 	end
 	
@@ -442,6 +457,8 @@ function SWEP:Initialize()
 		end
 		
 	end
+	
+	self:SCK_Initialize()
 	
 end
 
@@ -537,6 +554,7 @@ function SWEP:Holster()
 	if not self:GetCanHolster() then return false end
 	self:CancelReload()
 	self:SetZoomed(false)
+	self:SCK_Holster()
 	return true
 end
 
@@ -678,7 +696,7 @@ function SWEP:WeaponDelay()
 
 	local FinalDelay =  self.Primary.Delay
 	
-	if self.HasBuildUp or self.UsesBuildUp then
+	if self.HasBuildUp then
 		FinalDelay = FinalDelay + ( (self.Primary.Delay*5) * (100 - self:GetBuildUp()) * 0.01 )
 	end
 	
@@ -967,13 +985,17 @@ function SWEP:HandleZoom(delay)
 	if not self:CanBoltZoom() then return end
 	--if self:IsBusy() then return end
 	
-	if self.HasScope then
-		self.Owner:EmitSound("weapons/zoom.wav",0.01)
-	end
+
 
 	if self:GetZoomed() then
-		self:SetZoomed(false)
+		self:SetZoomed(false)		
+		if self.HasScope then
+			self.Owner:EmitSound(self.ZoomOutSound,0.01)
+		end
 	else
+		if self.HasScope then
+			self.Owner:EmitSound(self.ZoomInSound,0.01)
+		end
 		self:SetZoomed(true)
 	end
 
@@ -1209,10 +1231,34 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,La
 			bullet.Tracer = 0
 		end
 
-		bullet.TracerName = self.TracerName
+		if not self.TracerNames then
+			bullet.TracerName = self.TracerName
+		else
+			bullet.TracerName = "none"
+		end
 		
 		bullet.Force	= nil
 		bullet.Callback = function( attacker, tr, dmginfo)
+		
+			if self.TracerNames then
+				if IsFirstTimePredicted() then
+					local effectdata = EffectData()
+					effectdata:SetOrigin( tr.HitPos )
+					effectdata:SetStart( self.Owner:GetShootPos() )
+					effectdata:SetAttachment( 1 )
+					effectdata:SetEntity( self.Weapon )
+					
+					for k,v in pairs(self.TracerNames) do
+						util.Effect( v, effectdata )
+					end
+						--util.Effect( "h2_aniversary_carbine_beam", effectdata )
+						--util.Effect( "h2_aniversary_carbine_muzzle", effectdata )
+						--util.Effect( "h2_aniversary_carbine_muzzle_2", effectdata )
+						--util.Effect( "carbine_beam_effect", effectdata )
+				end
+			end
+		
+		
 		
 			if attacker:IsPlayer() then
 			
@@ -1319,7 +1365,7 @@ end
 
 function SWEP:EmitGunSound(GunSound,Level)
 	
-	if GunSound then
+	if GunSound and GunSound ~= NULL then
 		self.Weapon:EmitSound(GunSound)	
 	end
 
@@ -1477,24 +1523,33 @@ function SWEP:Reload()
 	
 	if SERVER then
 		if GetConVarNumber("sv_css_enable_mags") == 1 then
-			timer.Simple(0.75, function()
+			timer.Simple(self.MagDelayMod, function()
 				if self.GetMagModel and self.HasMagIn then
 				
 					self.HasMagIn = false
 
+					local EyeAngle = self.Owner:EyeAngles()
+					
 					local mag = ents.Create("ent_cs_debris")
 					mag:SetPos(self.Owner:GetShootPos() + self.Owner:GetUp()*-12 + self.Owner:GetRight()*3)
 					mag:SetModel(self.GetMagModel)
-					mag:SetAngles(self.Owner:EyeAngles())
+					mag:SetAngles(EyeAngle + self.MagAngMod)			
 					mag:Spawn()
 					mag:Activate()
+					if not self.HasDual then	
+						local Phys = mag:GetPhysicsObject()
+						if Phys ~= nil and Phys ~= NULL  then
+							Phys:SetVelocity(self.MagMoveMod.x*EyeAngle:Right() + self.MagMoveMod.y*EyeAngle:Forward() + self.MagMoveMod.z*EyeAngle:Up())
+							--print(self.MagMoveMod)
+						end
+					end
 					SafeRemoveEntityDelayed(mag,30)
 					
 					if self.HasDual then
 						local mag = ents.Create("ent_cs_debris")
 						mag:SetPos(self.Owner:GetShootPos() + self.Owner:GetUp()*-12 + self.Owner:GetRight()*-3)
 						mag:SetModel(self.GetMagModel)
-						mag:SetAngles(self.Owner:EyeAngles() + Angle(1,1,1) )
+						mag:SetAngles(EyeAngle + Angle(1,1,1) + self.MagAngMod )
 						mag:Spawn()
 						mag:Activate()
 						SafeRemoveEntityDelayed(mag,30)
@@ -1507,11 +1562,6 @@ function SWEP:Reload()
 	
 	self:SetIsReloading(true)
 	
-end
-
-function SWEP:DrawWorldModel()
-	--print("HELLO?")
-	self:DrawModel()
 end
 
 function SWEP:GetViewModelPosition( pos, ang )
@@ -1929,18 +1979,22 @@ function SWEP:DrawHUDBackground()
 
 		end
 	end
-		
-	if self.HasCrosshair or (self.Owner:IsPlayer() and self.Owner:IsBot()) then
-		self:DrawCustomCrosshair(x,y,ConeToSend,length,width,r,g,b,a)
-	end
-
+	
 	if self.HasScope then
 		if self:GetZoomed() then
 		
 			if LocalPlayer():ShouldDrawLocalPlayer() then
 				self:DrawCustomCrosshair(x,y,ConeToSend,length,width,r,g,b,a)
 			else
-				self:DrawCustomScope(x,y,ConeToSend,r,g,b,a)
+				--[[
+				if self.HasIronSights and self.HasScope then
+					if self.Owner:GetFOV() ~= self.DesiredFOV then
+						self:DrawCustomScope(x,y,ConeToSend,r,g,b,a)
+					end
+				else
+				--]]
+					self:DrawCustomScope(x,y,ConeToSend,r,g,b,a)
+				--end
 			end
 			
 			if not self.IgnoreScopeHide then
@@ -1951,6 +2005,12 @@ function SWEP:DrawHUDBackground()
 			self.Owner:DrawViewModel(true)
 		end
 	end
+		
+	if self.HasCrosshair or (self.Owner:IsPlayer() and self.Owner:IsBot()) then
+		self:DrawCustomCrosshair(x,y,ConeToSend,length,width,r,g,b,a)
+	end
+
+	self:DrawSpecial(ConeToSend)
 	
 end
 
@@ -1960,140 +2020,150 @@ function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 	local YRound = math.floor(y/2)
 	local WRound = math.floor(width/2)
 	local LRound = math.floor(length/2)
-	local SizeOffset = GetConVarNumber("cl_css_crosshair_offset")
-	local FinalCone = math.floor( math.Max(Cone,WRound*2,LRound/2) + SizeOffset )
 	
-	local CrosshairShadow = GetConVarNumber("cl_css_crosshair_shadow")
-	local CrosshairStyle = GetConVarNumber("cl_css_crosshair_style")
-	local CrosshairDot = GetConVarNumber("cl_css_crosshair_dot")
+	if self.CrosshairOverrideMat then
+		surface.SetDrawColor(Color(255,255,255,255))
+		surface.SetMaterial(self.CrosshairOverrideMat)
+		surface.DrawTexturedRectRotated(XRound,YRound,self.CrosshairOverrideSize,self.CrosshairOverrideSize,0)
+	else
 	
-	if !self:GetZoomed() or self.EnableIronCross or ( GetConVarNumber("cl_css_crosshair_neversights") == 1 and not self.HasScope) then
+		local SizeOffset = GetConVarNumber("cl_css_crosshair_offset")
+		local FinalCone = math.floor( math.Max(Cone,WRound*2,LRound/2) + SizeOffset )
+		
+		local CrosshairShadow = GetConVarNumber("cl_css_crosshair_shadow")
+		local CrosshairStyle = GetConVarNumber("cl_css_crosshair_style")
+		local CrosshairDot = GetConVarNumber("cl_css_crosshair_dot")
+		
+		if !self:GetZoomed() or self.EnableIronCross or ( GetConVarNumber("cl_css_crosshair_neversights") == 1 and not self.HasScope) then
 
-		if  WRound == 0 then
-		
-			if CrosshairStyle >= 2 and CrosshairStyle <= 5 then
-				
-				local Offset = 0
-		
-				if CrosshairStyle == 4 then
-					Offset = LRound*2
-				elseif CrosshairStyle == 3 then
-					Offset = LRound
-				else
-					Offset = 0
-				end
+			if  WRound == 0 then
 			
-				if CrosshairShadow >= 1 then
-					-- Start of Shadow Stuff
-					surface.DrawCircle(x/2,y/2, FinalCone + Offset - 1, Color(0,0,0,a))
-					surface.DrawCircle(x/2,y/2, FinalCone + Offset + 1, Color(0,0,0,a))
-					-- End of Shadow Stuff
-				end
-				
-			end
-		
-		
-	
-			if CrosshairStyle >= 1 and CrosshairStyle <= 4 then
-			
-				if CrosshairShadow >= 1 then
-					-- Start of Shadow Stuff
-					local x1 = XRound + FinalCone + LRound*2
-					local x2 = XRound - FinalCone - LRound*2
-					local y3 = YRound + FinalCone + LRound*2
-					local y4 = YRound - FinalCone - LRound*2
-
-					local Offset = 1
-					local ShadowWidth = 3
-					local ShadowLength = LRound*2 + Offset*3 - 1
-
-					surface.SetDrawColor(Color(0,0,0,255))
-					surface.DrawRect( x1 - LRound*2, YRound - Offset , ShadowLength, ShadowWidth )
-					surface.DrawRect( x2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
-					surface.DrawRect( XRound - Offset, y3 - LRound*2 , ShadowWidth, ShadowLength )
-					surface.DrawRect( XRound - Offset, y4 - 1 , ShadowWidth, ShadowLength )
-					-- End of Shadow Stuff
-				end
-				
-				-- Start of Normal Stuff
-				if width > 1 then
-			
-					local x1 = XRound - WRound 
-					local x2 = XRound - WRound
-					local y3 = YRound - WRound
-					local y4 = YRound - WRound
+				if CrosshairStyle >= 2 and CrosshairStyle <= 5 then
 					
-					local y1 = YRound + math.max(FinalCone,0)
-					local y2 = YRound - (LRound*2) - math.max(FinalCone,0)
-					local x3 = XRound + math.max(FinalCone,0)
-					local x4 = XRound - (LRound*2) - math.max(FinalCone,0)
-
-					surface.SetDrawColor(r,g,b,a)
-					surface.DrawRect( x1, y1, WRound*2, LRound*2 )
-					surface.DrawRect( x2, y2, WRound*2, LRound*2 )
-					surface.DrawRect( x3, y3, LRound*2, WRound*2 )
-					surface.DrawRect( x4, y4, LRound*2, WRound*2 )
+					local Offset = 0
 			
-				else
-				
-					local x1 = XRound + FinalCone + LRound*2
-					local x2 = XRound - FinalCone - LRound*2
-					local y3 = YRound + FinalCone + LRound*2
-					local y4 = YRound - FinalCone - LRound*2
-					
-					surface.SetDrawColor(r,g,b,a)
-					surface.DrawLine( x1, YRound, XRound+FinalCone, YRound )
-					surface.DrawLine( x2, YRound, XRound-FinalCone, YRound )		
-					surface.DrawLine( XRound, y3, XRound, YRound+FinalCone )		
-					surface.DrawLine( XRound, y4, XRound, YRound-FinalCone )
-
-				end
-				-- End of Normal Stuff
-
-			end
-			
-			if CrosshairDot >= 1 then
-		
-				local Max = math.max(1,width)
-				
-				if CrosshairShadow >= 1 then
-					--Start of Shadow Stuff
-					if width <= 1 then
-						surface.SetDrawColor(Color(0,0,0,255))
-						surface.DrawRect( XRound - WRound - 1, YRound - WRound - 1 , Max + 2, Max + 2 )
+					if CrosshairStyle == 4 then
+						Offset = LRound*2
+					elseif CrosshairStyle == 3 then
+						Offset = LRound
+					else
+						Offset = 0
 					end
-					-- End of Shadow Stuff
-				end
 				
-				-- Start of Normal Stuff
-				surface.SetDrawColor(r,g,b,a)
-				surface.DrawRect( XRound - WRound, YRound - WRound , Max, Max )
-				-- End of Shadow Stuff
+					if CrosshairShadow >= 1 then
+						surface.DrawCircle(x/2,y/2, FinalCone + Offset - 1, Color(0,0,0,a))
+						surface.DrawCircle(x/2,y/2, FinalCone + Offset + 1, Color(0,0,0,a))
+					end
+					
+				end
 
-			end
-			
-			if CrosshairStyle >= 2 and CrosshairStyle <= 5 then
+				if CrosshairStyle >= 1 and CrosshairStyle <= 4 then
 				
-				local Offset = 0
-		
-				if CrosshairStyle == 4 then
-					Offset = LRound*2
-				elseif CrosshairStyle == 3 then
-					Offset = LRound
-				else
-					Offset = 0
+					if CrosshairShadow >= 1 then
+						-- Start of Shadow Stuff
+						local x1 = XRound + FinalCone + LRound*2
+						local x2 = XRound - FinalCone - LRound*2
+						local y3 = YRound + FinalCone + LRound*2
+						local y4 = YRound - FinalCone - LRound*2
+
+						local Offset = 1
+						local ShadowWidth = 3
+						local ShadowLength = LRound*2 + Offset*3 - 1
+
+						surface.SetDrawColor(Color(0,0,0,255))
+						surface.DrawRect( x1 - LRound*2, YRound - Offset , ShadowLength, ShadowWidth )
+						surface.DrawRect( x2 - 1, YRound - Offset , ShadowLength, ShadowWidth )
+						surface.DrawRect( XRound - Offset, y3 - LRound*2 , ShadowWidth, ShadowLength )
+						surface.DrawRect( XRound - Offset, y4 - 1 , ShadowWidth, ShadowLength )
+						-- End of Shadow Stuff
+					end
+					
+					-- Start of Normal Stuff
+					if width > 1 then
+				
+						local x1 = XRound - WRound 
+						local x2 = XRound - WRound
+						local y3 = YRound - WRound
+						local y4 = YRound - WRound
+						
+						local y1 = YRound + math.max(FinalCone,0)
+						local y2 = YRound - (LRound*2) - math.max(FinalCone,0)
+						local x3 = XRound + math.max(FinalCone,0)
+						local x4 = XRound - (LRound*2) - math.max(FinalCone,0)
+
+						surface.SetDrawColor(r,g,b,a)
+						surface.DrawRect( x1, y1, WRound*2, LRound*2 )
+						surface.DrawRect( x2, y2, WRound*2, LRound*2 )
+						surface.DrawRect( x3, y3, LRound*2, WRound*2 )
+						surface.DrawRect( x4, y4, LRound*2, WRound*2 )
+				
+					else
+					
+						local x1 = XRound + FinalCone + LRound*2
+						local x2 = XRound - FinalCone - LRound*2
+						local y3 = YRound + FinalCone + LRound*2
+						local y4 = YRound - FinalCone - LRound*2
+						
+						surface.SetDrawColor(r,g,b,a)
+						surface.DrawLine( x1, YRound, XRound+FinalCone, YRound )
+						surface.DrawLine( x2, YRound, XRound-FinalCone, YRound )		
+						surface.DrawLine( XRound, y3, XRound, YRound+FinalCone )		
+						surface.DrawLine( XRound, y4, XRound, YRound-FinalCone )
+
+					end
+					-- End of Normal Stuff
+
 				end
 				
-				-- Start of Normal Stuff
-				surface.DrawCircle(XRound,YRound, FinalCone + Offset, Color(r,g,b,a))
-				-- End of Normal Stuff
+				if CrosshairDot >= 1 then
+			
+					local Max = math.max(1,width)
+					
+					if CrosshairShadow >= 1 then
+						--Start of Shadow Stuff
+						if width <= 1 then
+							surface.SetDrawColor(Color(0,0,0,255))
+							surface.DrawRect( XRound - WRound - 1, YRound - WRound - 1 , Max + 2, Max + 2 )
+						end
+						-- End of Shadow Stuff
+					end
+					
+					-- Start of Normal Stuff
+					surface.SetDrawColor(r,g,b,a)
+					surface.DrawRect( XRound - WRound, YRound - WRound , Max, Max )
+					-- End of Shadow Stuff
+
+				end
+				
+				if CrosshairStyle >= 2 and CrosshairStyle <= 5 then
+					
+					local Offset = 0
+			
+					if CrosshairStyle == 4 then
+						Offset = LRound*2
+					elseif CrosshairStyle == 3 then
+						Offset = LRound
+					else
+						Offset = 0
+					end
+					
+					-- Start of Normal Stuff
+					surface.DrawCircle(XRound,YRound, FinalCone + Offset, Color(r,g,b,a))
+					-- End of Normal Stuff
+					
+				end
 				
 			end
 			
-		end
+		end	
 		
-	end	
+	end
 	
+end
+
+function SWEP:DrawSpecial(ConeToSend)
+
+
 end
 
 function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
@@ -2105,20 +2175,27 @@ function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 		surface.DrawRect(0, 0, x, y )
 	end
 	
-	surface.SetDrawColor(Color(0,0,0))
+	
 	
 	if self.CustomScope == nil then
-		surface.SetMaterial(Material("gui/sniper_corner"))
-		surface.DrawTexturedRectRotated(x/2 - y/4,y/2 - y/4,y/2 + space,y/2 + space,0-180-180)
-		surface.DrawTexturedRectRotated(x/2 - y/4,y/2 + y/4,y/2 + space,y/2 + space,90-180-180)
-		surface.DrawTexturedRectRotated(x/2 + y/4,y/2 + y/4,y/2 + space,y/2 + space,180-180-180)
-		surface.DrawTexturedRectRotated(x/2 + y/4,y/2 - y/4,y/2 + space,y/2 + space,270-180-180)
-
+	
+		if self.EnableDefaultScope then
+			surface.SetDrawColor(Color(0,0,0))
+			surface.SetMaterial(Material("gui/sniper_corner"))
+			surface.DrawTexturedRectRotated(x/2 - y/4,y/2 - y/4,y/2 + space,y/2 + space,0-180-180)
+			surface.DrawTexturedRectRotated(x/2 - y/4,y/2 + y/4,y/2 + space,y/2 + space,90-180-180)
+			surface.DrawTexturedRectRotated(x/2 + y/4,y/2 + y/4,y/2 + space,y/2 + space,180-180-180)
+			surface.DrawTexturedRectRotated(x/2 + y/4,y/2 - y/4,y/2 + space,y/2 + space,270-180-180)
+		end
+		
 		if self.ZoomAmount > 6 then
+			surface.SetDrawColor(Color(0,0,0))
 			surface.DrawLine(x/2,0,x/2,y)
 			surface.DrawLine(0,y/2,x,y/2)
 		else
-			surface.DrawCircle( x/2, y/2, 0.01 , Color(r,g,b,a) )
+			if !self.EnableIronCross then
+				surface.DrawCircle( x/2, y/2, 1 , Color(r,g,b,a) )
+			end
 		end
 		
 	else
@@ -2133,22 +2210,28 @@ function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 		surface.SetMaterial(self.CustomScope)
 		surface.DrawTexturedRectRotated(x/2,y/2,Size,Size,0)
 		
-		surface.SetDrawColor(Color(0,0,0,255))
-		surface.SetMaterial(Material("vgui/scope_lens"))
-		surface.DrawTexturedRectRotated(x/2,y/2,y,y,0)
+		if self.EnableDefaultScope then
+			surface.SetDrawColor(Color(0,0,0,255))
+			surface.SetMaterial(Material("vgui/scope_lens"))
+			surface.DrawTexturedRectRotated(x/2,y/2,y,y,0)
+		end
 		
 	end
 	
-	local Size = math.Clamp(Cone,3,x/2*0.33)
-			
-	if Size > 6 then
-		surface.DrawCircle( x/2, y/2, Size , Color(r,g,b,a) )
+	if !self.EnableIronCross then
+		local Size = math.Clamp(Cone,3,x/2*0.33)
+				
+		if Size > 6 then
+			surface.DrawCircle( x/2, y/2, Size , Color(r,g,b,a) )
+		end
 	end
 
-	surface.SetDrawColor(Color(0,0,0))
-	surface.SetMaterial(Material("vgui/gfx/vgui/solid_background"))
-	surface.DrawTexturedRectRotated(x/4 - y/4,y/2,x/2 - y/2,y,0)
-	surface.DrawTexturedRectRotated(x - x/4 + y/4,y/2,x/2 - y/2,y,0)
+	if self.EnableDefaultScope then
+		surface.SetDrawColor(Color(0,0,0))
+		surface.SetMaterial(Material("vgui/gfx/vgui/solid_background"))
+		surface.DrawTexturedRectRotated(x/4 - y/4,y/2,x/2 - y/2,y,0)
+		surface.DrawTexturedRectRotated(x - x/4 + y/4,y/2,x/2 - y/2,y,0)
+	end
 	
 end
 
@@ -2507,8 +2590,475 @@ function SWEP:SendSequence(anim)
 	vm:SendViewModelMatchingSequence( vm:LookupSequence( anim ) )
 end
 
+function SWEP:SCK_OnRemove()
+	self:SCK_Holster()
+end
+
+function SWEP:DrawWorldModel()
+	self:SCK_DrawWorldModel()
+end
+
+function SWEP:ViewModelDrawn()
+	self:SCK_ViewModelDrawn()
+end
+
+function SWEP:OnRemove()
+	self:SCK_OnRemove()
+end
+
 AccessorFunc(SWEP,"fNPCMinBurst","NPCMinBurst")
 AccessorFunc(SWEP,"fNPCMaxBurst","NPCMaxBurst")
 AccessorFunc(SWEP,"fNPCFireRate","NPCFireRate")
 AccessorFunc(SWEP,"fNPCMinRestTime","NPCMinRest")
 AccessorFunc(SWEP,"fNPCMaxRestTime","NPCMaxRest")
+
+--------------------------------
+--SWEP CONTSTRUCTION KIT STUFF--
+--------------------------------
+
+function SWEP:SCK_Initialize()
+	// other initialize code goes here
+	if CLIENT then
+	
+		// Create a new table for every weapon instance
+		self.VElements = table.FullCopy( self.VElements )
+		self.WElements = table.FullCopy( self.WElements )
+		self.ViewModelBoneMods = table.FullCopy( self.ViewModelBoneMods )
+		self:SCK_CreateModels(self.VElements) // create viewmodels
+		self:SCK_CreateModels(self.WElements) // create worldmodels
+		
+		// init view model bone build function
+		if IsValid(self.Owner) then
+			local vm = self.Owner:GetViewModel()
+			if IsValid(vm) then
+				self:SCK_ResetBonePositions(vm)
+				
+				// Init viewmodel visibility
+				if (self.ShowViewModel == nil or self.ShowViewModel) then
+					vm:SetColor(Color(255,255,255,255))
+				else
+					// we set the alpha to 1 instead of 0 because else ViewModelDrawn stops being called
+					vm:SetColor(Color(255,255,255,1))
+					// ^ stopped working in GMod 13 because you have to do Entity:SetRenderMode(1) for translucency to kick in
+					// however for some reason the view model resets to render mode 0 every frame so we just apply a debug material to prevent it from drawing
+					vm:SetMaterial("Debug/hsv")			
+				end
+			end
+		end
+		
+	end
+end
+
+function SWEP:SCK_Holster()
+	
+	if CLIENT and IsValid(self.Owner) then
+		local vm = self.Owner:GetViewModel()
+		if IsValid(vm) then
+			self:SCK_ResetBonePositions(vm)
+		end
+	end
+	
+	return true
+end
+
+if CLIENT then
+	SWEP.vRenderOrder = nil
+	function SWEP:SCK_ViewModelDrawn()
+		
+		local vm = self.Owner:GetViewModel()
+		if !IsValid(vm) then return end
+		
+		if (!self.VElements) then return end
+		
+		self:SCK_UpdateBonePositions(vm)
+		if (!self.vRenderOrder) then
+			
+			// we build a render order because sprites need to be drawn after models
+			self.vRenderOrder = {}
+			for k, v in pairs( self.VElements ) do
+				if (v.type == "Model") then
+					table.insert(self.vRenderOrder, 1, k)
+				elseif (v.type == "Sprite" or v.type == "Quad") then
+					table.insert(self.vRenderOrder, k)
+				end
+			end
+			
+		end
+		for k, name in ipairs( self.vRenderOrder ) do
+		
+			local v = self.VElements[name]
+			if (!v) then self.vRenderOrder = nil break end
+			if (v.hide) then continue end
+			
+			local model = v.modelEnt
+			local sprite = v.spriteMaterial
+			
+			if (!v.bone) then continue end
+			
+			local pos, ang = self:SCK_GetBoneOrientation( self.VElements, v, vm )
+			
+			if (!pos) then continue end
+			
+			if (v.type == "Model" and IsValid(model)) then
+				model:SetPos(pos + ang:Forward() * v.pos.x + ang:Right() * v.pos.y + ang:Up() * v.pos.z )
+				ang:RotateAroundAxis(ang:Up(), v.angle.y)
+				ang:RotateAroundAxis(ang:Right(), v.angle.p)
+				ang:RotateAroundAxis(ang:Forward(), v.angle.r)
+				model:SetAngles(ang)
+				//model:SetModelScale(v.size)
+				local matrix = Matrix()
+				matrix:Scale(v.size)
+				model:EnableMatrix( "RenderMultiply", matrix )
+				
+				if (v.material == "") then
+					model:SetMaterial("")
+				elseif (model:GetMaterial() != v.material) then
+					model:SetMaterial( v.material )
+				end
+				
+				if (v.skin and v.skin != model:GetSkin()) then
+					model:SetSkin(v.skin)
+				end
+				
+				if (v.bodygroup) then
+					for k, v in pairs( v.bodygroup ) do
+						if (model:GetBodygroup(k) != v) then
+							model:SetBodygroup(k, v)
+						end
+					end
+				end
+				
+				if (v.surpresslightning) then
+					render.SuppressEngineLighting(true)
+				end
+				
+				render.SetColorModulation(v.color.r/255, v.color.g/255, v.color.b/255)
+				render.SetBlend(v.color.a/255)
+				model:DrawModel()
+				render.SetBlend(1)
+				render.SetColorModulation(1, 1, 1)
+				
+				if (v.surpresslightning) then
+					render.SuppressEngineLighting(false)
+				end
+				
+			elseif (v.type == "Sprite" and sprite) then
+				
+				local drawpos = pos + ang:Forward() * v.pos.x + ang:Right() * v.pos.y + ang:Up() * v.pos.z
+				render.SetMaterial(sprite)
+				render.DrawSprite(drawpos, v.size.x, v.size.y, v.color)
+				
+			elseif (v.type == "Quad" and v.draw_func) then
+				
+				local drawpos = pos + ang:Forward() * v.pos.x + ang:Right() * v.pos.y + ang:Up() * v.pos.z
+				ang:RotateAroundAxis(ang:Up(), v.angle.y)
+				ang:RotateAroundAxis(ang:Right(), v.angle.p)
+				ang:RotateAroundAxis(ang:Forward(), v.angle.r)
+				
+				cam.Start3D2D(drawpos, ang, v.size)
+					v.draw_func( self )
+				cam.End3D2D()
+			end
+			
+		end
+		
+	end
+	SWEP.wRenderOrder = nil
+
+	function SWEP:SCK_DrawWorldModel()
+		
+		if (self.ShowWorldModel == nil or self.ShowWorldModel) then
+			self:DrawModel()
+		end
+		
+		if (!self.WElements) then return end
+		
+		if (!self.wRenderOrder) then
+			self.wRenderOrder = {}
+			for k, v in pairs( self.WElements ) do
+				if (v.type == "Model") then
+					table.insert(self.wRenderOrder, 1, k)
+				elseif (v.type == "Sprite" or v.type == "Quad") then
+					table.insert(self.wRenderOrder, k)
+				end
+			end
+		end
+		
+		if (IsValid(self.Owner)) then
+			bone_ent = self.Owner
+		else
+			// when the weapon is dropped
+			bone_ent = self
+		end
+		
+		for k, name in pairs( self.wRenderOrder ) do
+		
+			local v = self.WElements[name]
+			if (!v) then self.wRenderOrder = nil break end
+			if (v.hide) then continue end
+			
+			local pos, ang
+			
+			if (v.bone) then
+				pos, ang = self:SCK_GetBoneOrientation( self.WElements, v, bone_ent )
+			else
+				pos, ang = self:SCK_GetBoneOrientation( self.WElements, v, bone_ent, "ValveBiped.Bip01_R_Hand" )
+			end
+			
+			if (!pos) then continue end
+			
+			local model = v.modelEnt
+			local sprite = v.spriteMaterial
+			
+			if (v.type == "Model" and IsValid(model)) then
+				model:SetPos(pos + ang:Forward() * v.pos.x + ang:Right() * v.pos.y + ang:Up() * v.pos.z )
+				ang:RotateAroundAxis(ang:Up(), v.angle.y)
+				ang:RotateAroundAxis(ang:Right(), v.angle.p)
+				ang:RotateAroundAxis(ang:Forward(), v.angle.r)
+				model:SetAngles(ang)
+				//model:SetModelScale(v.size)
+				local matrix = Matrix()
+				matrix:Scale(v.size)
+				model:EnableMatrix( "RenderMultiply", matrix )
+				
+				if (v.material == "") then
+					model:SetMaterial("")
+				elseif (model:GetMaterial() != v.material) then
+					model:SetMaterial( v.material )
+				end
+				
+				if (v.skin and v.skin != model:GetSkin()) then
+					model:SetSkin(v.skin)
+				end
+				
+				if (v.bodygroup) then
+					for k, v in pairs( v.bodygroup ) do
+						if (model:GetBodygroup(k) != v) then
+							model:SetBodygroup(k, v)
+						end
+					end
+				end
+				
+				if (v.surpresslightning) then
+					render.SuppressEngineLighting(true)
+				end
+				
+				render.SetColorModulation(v.color.r/255, v.color.g/255, v.color.b/255)
+				render.SetBlend(v.color.a/255)
+				model:DrawModel()
+				render.SetBlend(1)
+				render.SetColorModulation(1, 1, 1)
+				
+				if (v.surpresslightning) then
+					render.SuppressEngineLighting(false)
+				end
+				
+			elseif (v.type == "Sprite" and sprite) then
+				
+				local drawpos = pos + ang:Forward() * v.pos.x + ang:Right() * v.pos.y + ang:Up() * v.pos.z
+				render.SetMaterial(sprite)
+				render.DrawSprite(drawpos, v.size.x, v.size.y, v.color)
+				
+			elseif (v.type == "Quad" and v.draw_func) then
+				
+				local drawpos = pos + ang:Forward() * v.pos.x + ang:Right() * v.pos.y + ang:Up() * v.pos.z
+				ang:RotateAroundAxis(ang:Up(), v.angle.y)
+				ang:RotateAroundAxis(ang:Right(), v.angle.p)
+				ang:RotateAroundAxis(ang:Forward(), v.angle.r)
+				
+				cam.Start3D2D(drawpos, ang, v.size)
+					v.draw_func( self )
+				cam.End3D2D()
+			end
+			
+		end
+		
+	end
+	function SWEP:SCK_GetBoneOrientation( basetab, tab, ent, bone_override )
+		
+		local bone, pos, ang
+		if (tab.rel and tab.rel != "") then
+			
+			local v = basetab[tab.rel]
+			
+			if (!v) then return end
+			
+			// Technically, if there exists an element with the same name as a bone
+			// you can get in an infinite loop. Let's just hope nobody's that stupid.
+			pos, ang = self:SCK_GetBoneOrientation( basetab, v, ent )
+			
+			if (!pos) then return end
+			
+			pos = pos + ang:Forward() * v.pos.x + ang:Right() * v.pos.y + ang:Up() * v.pos.z
+			ang:RotateAroundAxis(ang:Up(), v.angle.y)
+			ang:RotateAroundAxis(ang:Right(), v.angle.p)
+			ang:RotateAroundAxis(ang:Forward(), v.angle.r)
+				
+		else
+		
+			bone = ent:LookupBone(bone_override or tab.bone)
+			if (!bone) then return end
+			
+			pos, ang = Vector(0,0,0), Angle(0,0,0)
+			local m = ent:GetBoneMatrix(bone)
+			if (m) then
+				pos, ang = m:GetTranslation(), m:GetAngles()
+			end
+			
+			if (IsValid(self.Owner) and self.Owner:IsPlayer() and 
+				ent == self.Owner:GetViewModel() and self.ViewModelFlip) then
+				ang.r = -ang.r // Fixes mirrored models
+			end
+		
+		end
+		
+		return pos, ang
+	end
+	function SWEP:SCK_CreateModels( tab )
+		if (!tab) then return end
+		// Create the clientside models here because Garry says we can't do it in the render hook
+		for k, v in pairs( tab ) do
+			if (v.type == "Model" and v.model and v.model != "" and (!IsValid(v.modelEnt) or v.createdModel != v.model) and 
+					string.find(v.model, ".mdl") and file.Exists (v.model, "GAME") ) then
+				
+				v.modelEnt = ClientsideModel(v.model, RENDER_GROUP_VIEW_MODEL_OPAQUE)
+				if (IsValid(v.modelEnt)) then
+					v.modelEnt:SetPos(self:GetPos())
+					v.modelEnt:SetAngles(self:GetAngles())
+					v.modelEnt:SetParent(self)
+					v.modelEnt:SetNoDraw(true)
+					v.createdModel = v.model
+				else
+					v.modelEnt = nil
+				end
+				
+			elseif (v.type == "Sprite" and v.sprite and v.sprite != "" and (!v.spriteMaterial or v.createdSprite != v.sprite) 
+				and file.Exists ("materials/"..v.sprite..".vmt", "GAME")) then
+				
+				local name = v.sprite.."-"
+				local params = { ["$basetexture"] = v.sprite }
+				// make sure we create a unique name based on the selected options
+				local tocheck = { "nocull", "additive", "vertexalpha", "vertexcolor", "ignorez" }
+				for i, j in pairs( tocheck ) do
+					if (v[j]) then
+						params["$"..j] = 1
+						name = name.."1"
+					else
+						name = name.."0"
+					end
+				end
+
+				v.createdSprite = v.sprite
+				v.spriteMaterial = CreateMaterial(name,"UnlitGeneric",params)
+				
+			end
+		end
+		
+	end
+	
+	local allbones
+	local hasGarryFixedBoneScalingYet = false
+
+	function SWEP:SCK_UpdateBonePositions(vm)
+		
+		if self.ViewModelBoneMods then
+			
+			if (!vm:GetBoneCount()) then return end
+			
+			// !! WORKAROUND !! //
+			// We need to check all model names :/
+			local loopthrough = self.ViewModelBoneMods
+			if (!hasGarryFixedBoneScalingYet) then
+				allbones = {}
+				for i=0, vm:GetBoneCount() do
+					local bonename = vm:GetBoneName(i)
+					if (self.ViewModelBoneMods[bonename]) then 
+						allbones[bonename] = self.ViewModelBoneMods[bonename]
+					else
+						allbones[bonename] = { 
+							scale = Vector(1,1,1),
+							pos = Vector(0,0,0),
+							angle = Angle(0,0,0)
+						}
+					end
+				end
+				
+				loopthrough = allbones
+			end
+			// !! ----------- !! //
+			
+			for k, v in pairs( loopthrough ) do
+				local bone = vm:LookupBone(k)
+				if (!bone) then continue end
+				
+				// !! WORKAROUND !! //
+				local s = Vector(v.scale.x,v.scale.y,v.scale.z)
+				local p = Vector(v.pos.x,v.pos.y,v.pos.z)
+				local ms = Vector(1,1,1)
+				if (!hasGarryFixedBoneScalingYet) then
+					local cur = vm:GetBoneParent(bone)
+					while(cur >= 0) do
+						local pscale = loopthrough[vm:GetBoneName(cur)].scale
+						ms = ms * pscale
+						cur = vm:GetBoneParent(cur)
+					end
+				end
+				
+				s = s * ms
+				// !! ----------- !! //
+				
+				if vm:GetManipulateBoneScale(bone) != s then
+					vm:ManipulateBoneScale( bone, s )
+				end
+				if vm:GetManipulateBoneAngles(bone) != v.angle then
+					vm:ManipulateBoneAngles( bone, v.angle )
+				end
+				if vm:GetManipulateBonePosition(bone) != p then
+					vm:ManipulateBonePosition( bone, p )
+				end
+			end
+		else
+			self:SCK_ResetBonePositions(vm)
+		end
+		   
+	end
+	 
+	function SWEP:SCK_ResetBonePositions(vm)
+		
+		if (!vm:GetBoneCount()) then return end
+		for i=0, vm:GetBoneCount() do
+			vm:ManipulateBoneScale( i, Vector(1, 1, 1) )
+			vm:ManipulateBoneAngles( i, Angle(0, 0, 0) )
+			vm:ManipulateBonePosition( i, Vector(0, 0, 0) )
+		end
+		
+	end
+
+	/**************************
+		Global utility code
+	**************************/
+
+	// Fully copies the table, meaning all tables inside this table are copied too and so on (normal table.Copy copies only their reference).
+	// Does not copy entities of course, only copies their reference.
+	// WARNING: do not use on tables that contain themselves somewhere down the line or you'll get an infinite loop
+	function table.FullCopy( tab )
+		if (!tab) then return nil end
+		
+		local res = {}
+		for k, v in pairs( tab ) do
+			if (type(v) == "table") then
+				res[k] = table.FullCopy(v) // recursion ho!
+			elseif (type(v) == "Vector") then
+				res[k] = Vector(v.x, v.y, v.z)
+			elseif (type(v) == "Angle") then
+				res[k] = Angle(v.p, v.y, v.r)
+			else
+				res[k] = v
+			end
+		end
+		
+		return res
+		
+	end
+	
+end

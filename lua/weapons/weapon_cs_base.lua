@@ -229,6 +229,8 @@ SWEP.CoolMul				= 1
 SWEP.CoolSpeedMul			= 1
 SWEP.PenetrationLossMul		= 1
 
+SWEP.ReloadTimeAdd			= 0
+
 SWEP.BurstSpeedOverride 	= 1
 SWEP.BurstConeMul			= 1
 SWEP.BurstHeatMul			= 1
@@ -667,7 +669,7 @@ function SWEP:AfterPump()
 		self:SetIsShotgunReload(false)
 		self:SetIsReloading(false)
 		self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
-		self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+		self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration() + self.ReloadTimeAdd)
 		return 
 	end
 	
@@ -1507,10 +1509,10 @@ function SWEP:Reload()
 
 	if self.HasPumpAction then
 		self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
-		self:SetNextShell(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+		self:SetNextShell(CurTime() + self.Owner:GetViewModel():SequenceDuration() + self.ReloadTimeAdd)
 		self:SetIsShotgunReload(true)
 	else
-		self:SetReloadFinish(CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate()))
+		self:SetReloadFinish(CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate()) + self.ReloadTimeAdd )
 		self:SetIsNormalReload(true)
 	end
 	
@@ -1518,7 +1520,7 @@ function SWEP:Reload()
 	
 	if self.HasScope then
 		self:SetZoomed(false)
-		self.NextZoomTime = CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate())
+		self.NextZoomTime = CurTime() + self.Owner:GetViewModel():SequenceDuration() * (1/self.Owner:GetViewModel():GetPlaybackRate() + self.ReloadTimeAdd)
 	end
 	
 	if SERVER then
@@ -1749,7 +1751,7 @@ function SWEP:HandleReloadThink()
 				self:SendWeaponAnim(ACT_VM_RELOAD)
 				self:SetClip1(self:Clip1()+1)
 				self.Owner:RemoveAmmo(1,self.Primary.Ammo)
-				self:SetNextShell(CurTime()+self.Owner:GetViewModel():SequenceDuration())
+				self:SetNextShell(CurTime()+self.Owner:GetViewModel():SequenceDuration() + self.ReloadTimeAdd)
 
 				if (CLIENT or IsSingleplayer) then
 					if self.ReloadSound then
@@ -1767,7 +1769,7 @@ end
 
 function SWEP:FinishShotgunReload()
 	self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
-	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration() + self.ReloadTimeAdd)
 	self:SetIsShotgunReload(false)
 	self:SetIsReloading(false)
 end
@@ -1783,7 +1785,7 @@ function SWEP:HandleShotgunReloadThinkAnimations()
 	if self.HasPumpAction and self.HasHL2Pump then
 		if self:GetNeedsHL2Pump() and self:GetNextHL2Pump() <= CurTime() then
 			self:SendWeaponAnim( ACT_SHOTGUN_PUMP )
-			self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration() )
+			self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration() + self.ReloadTimeAdd)
 			if CLIENT and IsFirstTimePredicted() then
 				if self.PumpSound then
 					self.Owner:EmitSound(self.PumpSound)
@@ -1806,7 +1808,7 @@ function SWEP:HandleShotgunReloadThinkAnimations()
 				
 			else
 				self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
-				self:SetNextPrimaryFire( CurTime() + self.Owner:GetViewModel():SequenceDuration() )
+				self:SetNextPrimaryFire( CurTime() + self.Owner:GetViewModel():SequenceDuration() + self.ReloadTimeAdd )
 			end
 		end
 	end

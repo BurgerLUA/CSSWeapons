@@ -10,6 +10,6 @@ ENT.Category			= "CS:S Ammo"
 
 AddCSLuaFile()
 
-ENT.AmmoType 			= "CombineCannon"
+ENT.AmmoType 			= "css_50ae"
 ENT.AmmoAmount 			= 15
 ENT.AmmoModel			= "models/Items/BoxSRounds.mdl"

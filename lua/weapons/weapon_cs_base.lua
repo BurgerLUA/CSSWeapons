@@ -196,6 +196,7 @@ SWEP.IgnoreScopeHide		= false
 SWEP.WorldModel				= "models/weapons/w_rif_ak47.mdl"
 SWEP.VModelFlip 			= false
 SWEP.HoldType				= "ar2"
+SWEP.UseThisWorldModel		= nil
 
 SWEP.Primary.Damage			= 36
 SWEP.Primary.NumShots		= 1
@@ -237,6 +238,8 @@ SWEP.BurstHeatMul			= 1
 SWEP.BurstZoomMul			= 1
 SWEP.BurstRecoilMul			= 1
 SWEP.BurstOverride			= 3
+SWEP.BurstSpeedAbs			= nil
+SWEP.BurstAnimationOverride = nil
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
@@ -295,6 +298,8 @@ SWEP.EnableBlocking			= false -- Melee
 SWEP.MagDelayMod			= 0.75
 SWEP.MagMoveMod 			= Vector(0,0,0)
 SWEP.MagAngMod				= Angle(0,0,0)
+
+SWEP.AlwaysBurst			= false
 
 -- I know what this is
 SWEP.DrawAmmo				= true
@@ -369,10 +374,8 @@ function SWEP:SetupDataTables( )
 	self:NetworkVar("Float",10,"ThrowTime")
 	self:SetThrowTime(0)
 	
-	
 	self:NetworkVar("Float",31,"SpecialFloat") -- For Special Stuff
 	self:SetSpecialFloat(0)
-	
 
 	self:NetworkVar("Int",0,"BulletQueue")
 	self:SetBulletQueue(0)
@@ -380,7 +383,13 @@ function SWEP:SetupDataTables( )
 	self:NetworkVar("Bool",0,"IsReloading")
 	self:SetIsReloading( false )
 	self:NetworkVar( "Bool",1,"IsBurst" )
-	self:SetIsBurst( false )
+	
+	if self.AlwaysBurst then 
+		self:SetIsBurst( true )
+	else
+		self:SetIsBurst( false )
+	end
+
 	self:NetworkVar("Bool",2,"IsShotgunReload")
 	self:SetIsShotgunReload( false )
 	self:NetworkVar("Bool",3,"IsSilenced")
@@ -461,7 +470,13 @@ function SWEP:Initialize()
 	end
 	
 	self:SCK_Initialize()
+	self:SpecialInitialize()
 	
+end
+
+function SWEP:SpecialInitialize()
+
+
 end
 
 function SWEP:EquipAmmo(ply)
@@ -567,7 +582,7 @@ function SWEP:SetZoomed(shouldzoom)
 			
 				local ZoomAmount = self.ZoomAmount
 				
-				if self.HasBurstFire and self:GetIsBurst() then
+				if (self.HasBurstFire or AlwaysBurst) and self:GetIsBurst() then
 					ZoomAmount = ZoomAmount * self.BurstZoomMul
 				end
 			
@@ -634,7 +649,10 @@ function SWEP:ShootGun()
 end
 
 function SWEP:HandleShootAnimations()
-	if self.HasDual then
+
+	if self.BurstAnimationOverride and self:GetIsBurst() then
+		self:WeaponAnimation(self:Clip1(),self.BurstAnimationOverride)
+	elseif self.HasDual then
 		if self:GetIsLeftFire() then
 			self:WeaponAnimation(self:Clip1(),ACT_VM_SECONDARYATTACK)
 			self:SetIsLeftFire(false)
@@ -676,7 +694,7 @@ function SWEP:AfterPump()
 end
 
 function SWEP:HandleBurstDelay()
-	if self.HasBurstFire then
+	if self.HasBurstFire or self.AlwaysBurst then
 		if self:GetIsBurst() then
 			if self:GetBulletQueue() == 0 then
 
@@ -708,9 +726,13 @@ function SWEP:WeaponDelay()
 		end
 	end
 
-	if self.HasBurstFire then
+	if self.HasBurstFire or self.AlwaysBurst then
 		if self:GetIsBurst() then
-			FinalDelay = FinalDelay * (self.BurstOverride*2)
+			if self.BurstSpeedAbs then
+				FinalDelay = self.BurstSpeedAbs
+			else
+				FinalDelay = FinalDelay * (self.BurstOverride*2)
+			end
 		end
 	end
 	
@@ -831,7 +853,7 @@ function SWEP:WeaponSound()
 		end
 	end
 
-	if self.HasBurstFire then
+	if self.HasBurstFire or self.AlwaysBurst then
 		if self.BurstSound != nil then
 			if self:GetIsBurst() then
 				GunSound = self.BurstSound
@@ -847,7 +869,7 @@ end
 
 function SWEP:HandleCone(Cone,IsCrosshair)
 
-	if self.HasBurstFire then
+	if (self.HasBurstFire or self.AlwaysBurst) then
 		if self:GetIsBurst() then
 			Cone = Cone * self.BurstConeMul
 		end
@@ -869,10 +891,8 @@ function SWEP:HandleCone(Cone,IsCrosshair)
 	
 	if (CLIENT) and IsCrosshair and not IsSingleplayer  then
 		Cone = Cone + (self.ClientCoolDown*self.HeatMul*0.01)
-		--print("YES")
 	else
 		Cone = Cone + (self:GetCoolDown()*self.HeatMul*0.01)
-		--print("ASS")
 	end
 	
 	local VelCone = math.Clamp( ( (Velocity * self.VelConeMul * GetConVarNumber("sv_css_velcone_scale")) ^ 1.75 ) * 0.000001, 0, 0.1)
@@ -1027,7 +1047,7 @@ function SWEP:TranslateFOV(fov)
 	
 		local ZoomAmount = self.ZoomAmount
 	
-		if self.HasBurstFire and self:GetIsBurst() then
+		if (self.HasBurstFire or self.AlwaysBurst) and self:GetIsBurst() then
 			ZoomAmount = ZoomAmount*self.BurstZoomMul
 		end
 		
@@ -1072,7 +1092,7 @@ function SWEP:GetRecoilFinal()
 	local UpPunch = -self:GetRecoilMath()
 	local SidePunch = 0
 	
-	if self.HasBurstFire and self:GetIsBurst() then
+	if (self.HasBurstFire or self.AlwaysBurst) and self:GetIsBurst() then
 		UpPunch = UpPunch*self.BurstRecoilMul
 	end
 	
@@ -1154,7 +1174,7 @@ function SWEP:GetHeatMath(Damage,Shots)
 	local WeightMod = (self.CSSMoveSpeed / 250 )
 	local BurstMod = 1
 
-	if self.HasBurstFire and self:GetIsBurst() then
+	if (self.HasBurstFire or self.AlwaysBurst) and self:GetIsBurst() then
 		BurstMod = self.BurstHeatMul
 	end
 	
@@ -1214,6 +1234,21 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,La
 			else
 				SafeRemoveEntity(Bullet)
 			end
+			
+			if self.TracerNames then
+				if IsFirstTimePredicted() then
+					local effectdata = EffectData()
+					effectdata:SetOrigin( self.Owner:EyeAngles():Forward()*100 )
+					effectdata:SetStart( self.Owner:GetShootPos() )
+					effectdata:SetAttachment( 1 )
+					effectdata:SetEntity( self.Weapon )
+					
+					for k,v in pairs(self.TracerNames) do
+						util.Effect( v, effectdata )
+					end
+				end
+			end
+			
 		end
 	
 	else
@@ -1253,10 +1288,6 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,La
 					for k,v in pairs(self.TracerNames) do
 						util.Effect( v, effectdata )
 					end
-						--util.Effect( "h2_aniversary_carbine_beam", effectdata )
-						--util.Effect( "h2_aniversary_carbine_muzzle", effectdata )
-						--util.Effect( "h2_aniversary_carbine_muzzle_2", effectdata )
-						--util.Effect( "carbine_beam_effect", effectdata )
 				end
 			end
 		
@@ -1699,7 +1730,7 @@ function SWEP:HandleBuildUp()
 end
 
 function SWEP:HandleBurstFireShoot()
-	if self.HasBurstFire then
+	if self.HasBurstFire or self.AlwaysBurst then
 		if self:GetNextBulletDelay() <= CurTime() and self:GetBulletQueue() > 0 then
 		
 			self:SetNextBulletDelay(CurTime() + self:GetBurstMath())
@@ -2427,37 +2458,43 @@ function SWEP:QuickKnife()
 
 end
 
-function SWEP:NewSwing(damage)
+function SWEP:NewSwing(damage,entoverride)
 
 	if self.Owner:IsPlayer() then
 		self.Owner:LagCompensation( true )
 	end
 	
-	local Data = {}
-
-	Data.start = self.Owner:GetShootPos()
-	Data.endpos = self.Owner:GetShootPos() + self.Owner:EyeAngles():Forward()*75
-	Data.filter = self.Owner
-	Data.mins = Vector( -8 , -8 , -8 )
-	Data.maxs = Vector( 8 , 8 , 8 )
-
-	local Trace = util.TraceHull( Data )
-	
-	local HasHitTarget = false
-
-	if Trace.Hit then
-		HasHitTarget = true
-		self:NewSendHitEvent(Trace.Entity,damage)
+	if entoverride then
+		self:NewSendHitEvent(entoverride,damage)
+		return entoverride
 	else
-		self:EmitGunSound(self.MeleeSoundMiss)
-		HasHitTarget = false
-	end
 	
-	if self.Owner:IsPlayer() then
-		self.Owner:LagCompensation( false )
+		local Data = {}
+
+		Data.start = self.Owner:GetShootPos()
+		Data.endpos = self.Owner:GetShootPos() + self.Owner:EyeAngles():Forward()*75
+		Data.filter = self.Owner
+		Data.mins = Vector( -8 , -8 , -8 )
+		Data.maxs = Vector( 8 , 8 , 8 )
+
+		local Trace = util.TraceHull( Data )
+		
+		local HasHitTarget = nil
+
+		if Trace.Hit then
+			HasHitTarget = Trace.Entity
+			self:NewSendHitEvent(Trace.Entity,damage)
+		else
+			self:EmitGunSound(self.MeleeSoundMiss)
+			HasHitTarget = nil
+		end
+		
+		if self.Owner:IsPlayer() then
+			self.Owner:LagCompensation( false )
+		end
+		
+		return HasHitTarget
 	end
-	
-	return HasHitTarget
 
 end
 

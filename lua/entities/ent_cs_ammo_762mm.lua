@@ -10,6 +10,6 @@ ENT.Category			= "CS:S Ammo"
 
 AddCSLuaFile()
 
-ENT.AmmoType 			= "StriderMinigun"
+ENT.AmmoType 			= "css_762mm"
 ENT.AmmoAmount 			= 200
 ENT.AmmoModel			= "models/Items/BoxMRounds.mdl"

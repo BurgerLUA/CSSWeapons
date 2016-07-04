@@ -43,7 +43,8 @@ function CSSSpeedModMovement(ply,mv)
 				BaseSpeed = ply:GetRunSpeed()
 			end
 			
-			if mv:KeyDown(IN_DUCK) then
+			--if mv:KeyDown(IN_DUCK) then
+			if ply:Crouching() then
 				SpeedMod = SpeedMod * 0.5
 			end
 				

@@ -10,6 +10,6 @@ ENT.Category			= "CS:S Ammo"
 
 AddCSLuaFile()
 
-ENT.AmmoType 			= "AlyxGun"
+ENT.AmmoType 			= "css_57mm"
 ENT.AmmoAmount 			= 25
 ENT.AmmoModel			= "models/Items/BoxSRounds.mdl"

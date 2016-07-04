@@ -60,6 +60,11 @@ function CSS_DropWeapon(ply,weapon)
 			local StoredWeapon =  weapons.GetStored(weapon:GetClass())
 			
 			local model = StoredWeapon.WorldModel
+			
+			if StoredWeapon.UseThisWorldModel then
+				model = StoredWeapon.UseThisWorldModel
+			end
+			
 			local Ammo = weapon:Ammo1()
 
 			if model ~= "" then		

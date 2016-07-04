@@ -10,6 +10,6 @@ ENT.Category			= "CS:S Ammo"
 
 AddCSLuaFile()
 
-ENT.AmmoType 			= "GaussEnergy"
+ENT.AmmoType 			= "css_357sig"
 ENT.AmmoAmount 			= 12
 ENT.AmmoModel			= "models/Items/357ammo.mdl"

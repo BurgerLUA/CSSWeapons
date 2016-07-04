@@ -10,6 +10,6 @@ ENT.Category			= "CS:S Ammo"
 
 AddCSLuaFile()
 
-ENT.AmmoType 			= "SniperRound"
+ENT.AmmoType 			= "css_338"
 ENT.AmmoAmount 			= 40
 ENT.AmmoModel			= "models/Items/BoxMRounds.mdl"

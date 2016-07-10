@@ -17,8 +17,18 @@ function NadeKeyPress(ply,key)
 			
 			if not CSS_SuperThrowCheck(ply,Weapon) then return false end
 			
-			Weapon = ply:GetActiveWeapon()
-			Weapon:QuickThrow()
+			if Weapon.HasHolster then
+				local ThrowDelay = Weapon.Owner:GetViewModel():SequenceDuration()
+				timer.Simple(ThrowDelay + FrameTime(), function()
+					Weapon = ply:GetActiveWeapon()
+					if Weapon and Weapon ~= NULL then
+						Weapon:QuickThrow()
+					end
+				end)
+			else
+				Weapon = ply:GetActiveWeapon()
+				Weapon:QuickThrow()
+			end
 			
 		end
 	end

@@ -7,16 +7,11 @@ function CSSDamage(ply, hitgroup, dmginfo)
 			Weapon = Inflictor:GetActiveWeapon()
 		end
 	end
-	
-	--print(Weapon)
-	
-	
+
 	if Weapon ~= NULL and Weapon ~= nil then
 		if Weapon.FatalHeadshot and hitgroup == HITGROUP_HEAD then
 			local Damage = math.max(dmginfo:GetDamage(),ply:Health())
-			--print(Damage)
 			dmginfo:SetDamage(Damage)
-			--print("FATAL HEADSHOT!")
 		end
 	end
 

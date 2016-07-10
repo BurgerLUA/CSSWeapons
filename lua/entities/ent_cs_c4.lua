@@ -74,10 +74,8 @@ function ENT:Use(activator,caller,useType,value)
 			self.Using = true
 		end
 
-	self:SetNWInt("defusecount",self.Progress)	
+		self:SetNWInt("defusecount",self.Progress)	
 		
-	else
-		--print("WHAT ARE YOU")
 	end
  
 end
@@ -92,7 +90,6 @@ function ENT:Think()
 			if self.SendMessage == true then
 				if GetConVar("sv_css_c4_notifyplayers"):GetInt() == 1 then
 					for n,p in pairs(player.GetAll()) do
-						--print(p:Nick())
 				
 						p:PrintMessage(HUD_PRINTCENTER,"Bomb has been defused")
 						p:SendLua("LocalPlayer():EmitSound(\"radio/bombdef.wav\")")
@@ -192,7 +189,6 @@ function ENT:Detonate(self,pos)
 		if SERVER then
 			if GetConVar("sv_css_c4_notifyplayers"):GetInt() == 1 then
 				for n,p in pairs(player.GetAll()) do
-					--print(p:Nick())
 					p:PrintMessage(HUD_PRINTCENTER,"Terrorists Win")
 					p:SendLua("LocalPlayer():EmitSound(\"radio/terwin.wav\")")
 				end
@@ -274,7 +270,7 @@ function ENT:Draw()
 				render.SetMaterial( mat )
 				render.DrawSprite( self:GetPos() + self:GetUp()*10, 32, 32, Color(255,0,0,255))
 			cam.End3D()
-			--print("beep")
+
 		end
 	end
 end

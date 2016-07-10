@@ -32,8 +32,6 @@ function ENT:Initialize()
 			self:Remove()
 		end
 		
-		--print(self:GetNWFloat("clip"))
-		
 		if GetConVar("sv_css_timed_drops"):GetInt() == 1 then
 			SafeRemoveEntityDelayed(self,GetConVar("sv_css_drop_timer"):GetInt())
 		end
@@ -43,8 +41,6 @@ end
 
 function ENT:Use(activator,caller,useType,value)
 
-	--print(self:GetNWFloat("clip"))
-	
 	if ( activator:IsPlayer() ) then
 	
 		local ActiveWeapon = activator:GetActiveWeapon()

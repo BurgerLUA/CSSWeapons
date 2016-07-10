@@ -230,6 +230,8 @@ SWEP.CoolMul				= 1
 SWEP.CoolSpeedMul			= 1
 SWEP.PenetrationLossMul		= 1
 
+SWEP.SideRecoilBasedOnDual	= false
+
 SWEP.ReloadTimeAdd			= 0
 
 SWEP.BurstSpeedOverride 	= 1
@@ -258,6 +260,7 @@ SWEP.HasDryFire				= false
 SWEP.HasHL2Pump				= false -- Shotgun Pump
 SWEP.HasPreThrow			= true -- Grenade Pre-Throw
 SWEP.HasDual				= false
+SWEP.HasHolster 			= false
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true
@@ -300,6 +303,12 @@ SWEP.MagMoveMod 			= Vector(0,0,0)
 SWEP.MagAngMod				= Angle(0,0,0)
 
 SWEP.AlwaysBurst			= false
+
+SWEP.HasIdle				= false
+SWEP.IdleOffset 			= 0
+
+SWEP.DelayOverride			= false
+
 
 -- I know what this is
 SWEP.DrawAmmo				= true
@@ -364,16 +373,17 @@ function SWEP:SetupDataTables( )
 	self:SetBuildUp(0)
 	self:NetworkVar("Float",7,"NextHL2Pump")
 	self:SetNextHL2Pump(0)
-	
 	self:NetworkVar("Float",8,"ThrowAnimationTime")
 	self:SetThrowAnimationTime(0)
-	
 	self:NetworkVar("Float",9,"ThrowRemoveTime")
 	self:SetThrowRemoveTime(0)
-	
 	self:NetworkVar("Float",10,"ThrowTime")
 	self:SetThrowTime(0)
-	
+	self:NetworkVar("Float",11,"NextHolster")
+	self:SetNextHolster(-1)
+	self:NetworkVar("Float",12,"NextIdle")
+	self:SetNextIdle(0)
+
 	self:NetworkVar("Float",31,"SpecialFloat") -- For Special Stuff
 	self:SetSpecialFloat(0)
 
@@ -383,13 +393,11 @@ function SWEP:SetupDataTables( )
 	self:NetworkVar("Bool",0,"IsReloading")
 	self:SetIsReloading( false )
 	self:NetworkVar( "Bool",1,"IsBurst" )
-	
 	if self.AlwaysBurst then 
 		self:SetIsBurst( true )
 	else
 		self:SetIsBurst( false )
 	end
-
 	self:NetworkVar("Bool",2,"IsShotgunReload")
 	self:SetIsShotgunReload( false )
 	self:NetworkVar("Bool",3,"IsSilenced")
@@ -402,11 +410,22 @@ function SWEP:SetupDataTables( )
 	self:SetIsBlocking( false )
 	self:NetworkVar("Bool",7,"NeedsHL2Pump")
 	self:SetNeedsHL2Pump( false )
-	
 	self:NetworkVar("Bool",8,"CanHolster")
 	self:SetCanHolster( true )
 	self:NetworkVar("Bool",9,"IsThrowing")
 	self:SetIsThrowing( false )
+	self:NetworkVar("Bool",10,"QueueHolster")
+	self:SetQueueHolster( false )
+	self:NetworkVar("Bool",11,"ForceHolster")
+	self:SetForceHolster( false )
+	self:NetworkVar("Bool",12,"SharedZoom")
+	self:SetSharedZoom( false )
+	
+	
+	
+	
+	self:NetworkVar("Entity",1,"NextHolsterWeapon")
+	self:SetNextHolsterWeapon( nil )
 	
 end
 
@@ -417,12 +436,6 @@ function SWEP:Initialize()
 	end
 	
 	self:SetHoldType( self.HoldType )
-	
-	if SERVER then
-		if self.Owner:IsNPC() then
-			self.Owner:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_PERFECT )
-		end
-	end
 
 	if self.Primary.Sound and self.Primary.Sound ~= NULL then
 		util.PrecacheSound(self.Primary.Sound)
@@ -469,9 +482,25 @@ function SWEP:Initialize()
 		
 	end
 	
-	self:SCK_Initialize()
+	
 	self:SpecialInitialize()
 	
+	if SERVER and self.Owner:IsNPC() then
+		self:NPCInit()
+	end
+	
+	if self.Owner:IsPlayer() then
+		self:SCK_Initialize()
+	end
+	
+end
+
+function SWEP:NPCInit()
+	self.Owner:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_PERFECT )
+end
+
+function SWEP:GetCapabilities()
+	return bit.bor( CAP_WEAPON_RANGE_ATTACK1, CAP_INNATE_RANGE_ATTACK1 )
 end
 
 function SWEP:SpecialInitialize()
@@ -510,8 +539,9 @@ end
 
 function SWEP:Deploy()
 
-	if SERVER then
+	self:SetZoomed(false)
 
+	if SERVER then
 		if GetConVarNumber("sv_css_limit_equipped") == 1 then
 			for k,v in pairs (self.Owner:GetWeapons()) do
 				if v.BurgerBase ~= nil then
@@ -533,7 +563,6 @@ function SWEP:Deploy()
 				end
 			end
 		end
-		
 	end
 
 	if IsValid(self.Owner:GetHands()) then
@@ -567,15 +596,64 @@ function SWEP:Deploy()
 	
 end
 
-function SWEP:Holster()
+function SWEP:Holster(nextweapon)
+
 	if not self:GetCanHolster() then return false end
+	
 	self:CancelReload()
 	self:SetZoomed(false)
+
+	if self.HasHolster then
+	
+		if self:GetForceHolster() == true then
+			self:SCK_Holster()
+			self:SetForceHolster(false)
+			return true
+		elseif self:GetQueueHolster() == true then
+			self:SCK_Holster()
+			local NextWeapon = self:GetNextHolsterWeapon()
+			self:SetNextHolsterWeapon( nil )
+			self:SetQueueHolster( false )
+			self:SetNextHolster( -1 )
+			self:SetForceHolster(true)
+			if SERVER then
+				self.Owner:SelectWeapon( NextWeapon:GetClass() )
+			end
+			return false
+		else
+			self:SetQueueHolster( true )
+			self:SendWeaponAnim( ACT_VM_HOLSTER )
+			local ViewDur = self.Owner:GetViewModel():SequenceDuration()
+			
+			self:SetNextHolster( CurTime() + ViewDur )
+			self:SetNextPrimaryFire(CurTime() + ViewDur )
+			
+			if SERVER then
+				self:SetNextHolsterWeapon(nextweapon)
+			end
+			return false
+		end
+	end
+	
 	self:SCK_Holster()
 	return true
+	
+end
+
+function SWEP:HolsterThink()
+	if SERVER then
+		if self.HasHolster and self:GetQueueHolster() then
+			if self:GetNextHolster() <= CurTime() then
+				self:Holster(  self:GetNextHolsterWeapon() )
+			end
+		end
+	end
 end
 
 function SWEP:SetZoomed(shouldzoom)
+
+	self:SetSharedZoom(shouldzoom)
+
 	if shouldzoom then
 		if IsSingleplayer then
 			if self.Owner:IsPlayer() then
@@ -643,13 +721,12 @@ function SWEP:ShootGun()
 		
 		self:AddRecoil() -- Predict
 		self:WeaponSound() -- Predict
-		
-		
+
 	end
+	
 end
 
 function SWEP:HandleShootAnimations()
-
 	if self.BurstAnimationOverride and self:GetIsBurst() then
 		self:WeaponAnimation(self:Clip1(),self.BurstAnimationOverride)
 	elseif self.HasDual then
@@ -798,23 +875,22 @@ function SWEP:PreShootBullet() -- Should be predicted
 		end
 		
 		self:AddHeat(Damage,Shots)
+		
+		if self.HasIdle then
+			self:SetNextIdle(CurTime() + self.IdleOffset)
+		end
+		
 	end
-	
+
 	self:PostPrimaryFire()
-	
 	
 end
 
 function SWEP:PostPrimaryFire()
 
-
-
-
 end
 
 function SWEP:WeaponAnimation(clip,animation)
-
-	--print("Animation")
 
 	if self:GetIsShotgunReload() then
 		self:SendWeaponAnim( ACT_SHOTGUN_RELOAD_FINISH )
@@ -867,7 +943,14 @@ function SWEP:WeaponSound()
 
 end
 
+function SWEP:SpecialCone(Cone,IsCrosshair)
+
+	return Cone
+end
+
 function SWEP:HandleCone(Cone,IsCrosshair)
+
+	Cone = self:SpecialCone(Cone,IsCrosshair)
 
 	if (self.HasBurstFire or self.AlwaysBurst) then
 		if self:GetIsBurst() then
@@ -1050,7 +1133,7 @@ function SWEP:TranslateFOV(fov)
 		if (self.HasBurstFire or self.AlwaysBurst) and self:GetIsBurst() then
 			ZoomAmount = ZoomAmount*self.BurstZoomMul
 		end
-		
+
 		local ZoomMag = 1 + ( self.ZoomMod * ZoomAmount )
 		
 		fov = self.DesiredFOV / ZoomMag
@@ -1098,10 +1181,12 @@ function SWEP:GetRecoilFinal()
 	
 	local AvgBulletsShot = 0
 	
-	if SERVER or IsSingleplayer then
-		AvgBulletsShot = self:GetCoolDown() / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
-	else
-		AvgBulletsShot = self.ClientCoolDown / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
+	if self.Primary.Automatic == true then
+		if SERVER or IsSingleplayer then
+			AvgBulletsShot = self:GetCoolDown() / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
+		else
+			AvgBulletsShot = self.ClientCoolDown / self:GetHeatMath(self.Primary.Damage,self.Primary.NumShots)
+		end
 	end
 	
 	UpPunch = UpPunch * ( 1 + AvgBulletsShot/ (1/self.Primary.Delay) )
@@ -1114,17 +1199,24 @@ function SWEP:GetRecoilFinal()
 	
 	local DelayMul = 1
 	
-	if self.Primary.Delay >= 0.5 then
+	if self.Primary.Delay >= 0.5 and not self.DelayOverride then
 		DelayMul = 0
 	end
 	
 	if self.HasSideRecoil then
-		if DelayMul == 1 then
+	
+		if self.SideRecoilBasedOnDual then
+			if self:GetIsLeftFire() then
+				SidePunch = UpPunch*1*self.SideRecoilMul
+			else
+				SidePunch = UpPunch*-1*self.SideRecoilMul
+			end
+		elseif DelayMul == 1 then
 			if AvgBulletsShot > 2*DelayMul then
 				SidePunch = UpPunch*math.random(-1,1)*self.SideRecoilMul
 			end
 		else
-			SidePunch = UpPunch*math.Rand(0,1)*self.SideRecoilMul
+			SidePunch = UpPunch*self.SideRecoilMul
 		end
 	end
 	
@@ -1150,15 +1242,6 @@ end
 --]]
 
 function SWEP:AddRecoil()
-
-	--[[
-	if SERVER and self.Owner:IsBot() then
-		local UpPunch, SidePunch = self:GetRecoilFinal()
-		self.BotPunch = self.BotPunch + Angle(UpPunch,SidePunch,0) + Angle(self.ShootOffsetStrength.p*math.Rand(-0.5,0.5),self.ShootOffsetStrength.y*math.Rand(-0.5,0.5),0)
-		return 
-	end
-	--]]
-	
 	if CLIENT or IsSingleplayer then
 		local UpPunch, SidePunch = self:GetRecoilFinal()
 		self.PunchAngleUp = self.PunchAngleUp + Angle(UpPunch,SidePunch,0) + Angle(self.ShootOffsetStrength.p*math.Rand(-0.5,0.5),self.ShootOffsetStrength.y*math.Rand(-0.5,0.5),0)
@@ -1206,10 +1289,6 @@ function SWEP:AddHeat(Damage,Shots)
 end
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,LastEntity)
-	
-	--if not IsFirstTimePredicted( ) then return end
-	
-	--print("TEST")
 	
 	if self and self.BulletEnt then
 	
@@ -1442,9 +1521,6 @@ if CLIENT then
 	
 		
 		EmitSound(RealSoundTable.sound,FakePos,ID,CHAN_WEAPON,VolumeMod,140,0,80)
-		
-		
-		--print(RealSoundTable.sound)
 
 	end)
 
@@ -1573,7 +1649,6 @@ function SWEP:Reload()
 						local Phys = mag:GetPhysicsObject()
 						if Phys ~= nil and Phys ~= NULL  then
 							Phys:SetVelocity(self.MagMoveMod.x*EyeAngle:Right() + self.MagMoveMod.y*EyeAngle:Forward() + self.MagMoveMod.z*EyeAngle:Up())
-							--print(self.MagMoveMod)
 						end
 					end
 					SafeRemoveEntityDelayed(mag,30)
@@ -1603,7 +1678,7 @@ function SWEP:GetViewModelPosition( pos, ang )
 	
 	if ( !self.IronSightsPos ) then return pos, ang end
 	
-	local bIron = self:GetZoomed() or (self.EnableBlocking and self.Owner:KeyDown(IN_ATTACK2) )
+	local bIron = self:GetZoomed() or (self.EnableBlocking and self.Owner:KeyDown(IN_ATTACK2) ) or self:GetSharedZoom()
 	
 	if ( bIron != self.bLastIron ) then
 	
@@ -1674,18 +1749,15 @@ end
 
 function SWEP:Think()
 
-	--print(self:GetWeaponWorldModel())
-
-
 	self:HandleCoolDown() -- don't predict
 	self:HandleBuildUp()
 	self:HandleShotgunReloadThinkAnimations() -- don't predict
 	self:EquipThink() -- don't predict, ever
 	self:HandleBurstFireShoot() -- don't predict, ever
 	self:HandleReloadThink() -- don't predict, ever
-	
-	
 	self:SpareThink()
+	self:HolsterThink()
+	self:IdleThink()
 	
 	if (CLIENT or IsSingleplayer) then
 	
@@ -1696,7 +1768,6 @@ function SWEP:Think()
 		end
 
 		self.ViewModelFOV = FOVMOD
-		--self.DesiredFOV = GetConVar("fov_desired"):GetFloat()
 		
 		self:HandleBoltZoomMod()
 		self:HandleZoomMod()
@@ -1704,16 +1775,20 @@ function SWEP:Think()
 		if IsFirstTimePredicted() then 
 			self:RemoveRecoil()
 		end
-		
-	--[[
-	elseif SERVER and self.Owner:IsBot() then
-		if IsFirstTimePredicted() then 
-			self:RemoveRecoil()
-		end
-	--]]
 	
 	end
 	
+end
+
+function SWEP:IdleThink()
+	if self.HasIdle then
+		if self:GetNextIdle() <= CurTime() and self:GetNextPrimaryFire() <= CurTime() then
+			if not self:IsBusy() then
+				self:SendWeaponAnim(ACT_VM_IDLE)
+				self:SetNextIdle(CurTime() + self.Owner:GetViewModel():SequenceDuration())
+			end
+		end
+	end
 end
 
 function SWEP:SpareThink()
@@ -1740,7 +1815,7 @@ function SWEP:HandleBurstFireShoot()
 			
 				self:TakePrimaryAmmo(1)
 				self:HandleShootAnimations()
-				self:ShootGun() -- don't predict
+				self:ShootGun()
 				
 			end
 			
@@ -1811,8 +1886,7 @@ function SWEP:CancelReload()
 	self:SetIsReloading(false)
 end
 
-function SWEP:HandleShotgunReloadThinkAnimations()
-
+function SWEP:HL2Pump()
 	if self.HasPumpAction and self.HasHL2Pump then
 		if self:GetNeedsHL2Pump() and self:GetNextHL2Pump() <= CurTime() then
 			self:SendWeaponAnim( ACT_SHOTGUN_PUMP )
@@ -1825,6 +1899,11 @@ function SWEP:HandleShotgunReloadThinkAnimations()
 			self:SetNeedsHL2Pump(false)
 		end
 	end
+end
+
+function SWEP:HandleShotgunReloadThinkAnimations()
+
+	self:HL2Pump()
 
 	if self:GetIsShotgunReload() then
 		if self:GetNextShell() <= CurTime() then
@@ -1901,7 +1980,6 @@ function SWEP:RemoveRecoil()
 	if SERVER and self.Owner:IsBot() then
 		local Math = self.BotPunch - self.BotPunch*FrameTime()*10
 		self.BotPunch = Math
-		--print("REMOVING")
 		return
 	end
 	--]]
@@ -2346,13 +2424,11 @@ function SWEP:EquipThink()
 	if self:GetIsThrowing() then
 	
 		if self:GetThrowAnimationTime() <= CurTime() then
-			--print("ANIMATING THROW")
 			self:SendWeaponAnim(ACT_VM_THROW)
 			self:SetThrowAnimationTime(CurTime() + 10)
 		end
 		
 		if self:GetThrowTime() <= CurTime() then
-			--print("THROWING OBJECT")
 			self.Owner:SetAnimation(PLAYER_ATTACK1) 
 			self:ThrowObject(self.Object,1000)
 			if self:Ammo1() > 0 then
@@ -2362,7 +2438,6 @@ function SWEP:EquipThink()
 		end
 		
 	if self:GetThrowRemoveTime() <= CurTime() then
-		--print("REMOVING OBJECT")
 		self:SetCanHolster( true )
 		self:SetIsThrowing( false )
 		if self:Ammo1() > 0 then
@@ -2644,12 +2719,6 @@ end
 function SWEP:OnRemove()
 	self:SCK_OnRemove()
 end
-
-AccessorFunc(SWEP,"fNPCMinBurst","NPCMinBurst")
-AccessorFunc(SWEP,"fNPCMaxBurst","NPCMaxBurst")
-AccessorFunc(SWEP,"fNPCFireRate","NPCFireRate")
-AccessorFunc(SWEP,"fNPCMinRestTime","NPCMinRest")
-AccessorFunc(SWEP,"fNPCMaxRestTime","NPCMaxRest")
 
 --------------------------------
 --SWEP CONTSTRUCTION KIT STUFF--

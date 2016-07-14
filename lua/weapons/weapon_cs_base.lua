@@ -187,6 +187,11 @@ SWEP.FuckBots				= false -- Bots don't spawn with this weapon
 SWEP.Slot					= 3
 SWEP.SlotPos				= 1
 
+SWEP.Weight					= 0
+SWEP.AutoSwitchTo			= false
+SWEP.AutoSwitchFrom			= false
+
+
 SWEP.ViewModel 				= "models/weapons/cstrike/c_rif_ak47.mdl"
 SWEP.ViewModelFOV			= 45
 SWEP.UseHands				= true
@@ -240,6 +245,7 @@ SWEP.BurstHeatMul			= 1
 SWEP.BurstZoomMul			= 1
 SWEP.BurstRecoilMul			= 1
 SWEP.BurstOverride			= 3
+SWEP.BurstCoolMul			= 1
 SWEP.BurstSpeedAbs			= nil
 SWEP.BurstAnimationOverride = nil
 
@@ -436,6 +442,8 @@ function SWEP:Initialize()
 	end
 	
 	self:SetHoldType( self.HoldType )
+	
+	--[[
 
 	if self.Primary.Sound and self.Primary.Sound ~= NULL then
 		util.PrecacheSound(self.Primary.Sound)
@@ -456,6 +464,14 @@ function SWEP:Initialize()
 	if self.LastBulletSound then
 		util.PrecacheSound(self.LastBulletSound)
 	end
+	
+	if self.ViewModel then
+		util.PrecacheModel(self.ViewModel)
+	end
+	
+	--]]
+	
+	
 	
 	if (CLIENT or IsSingleplayer) then
 		if GetConVarNumber("cl_css_customslots") == 1 then
@@ -621,16 +637,23 @@ function SWEP:Holster(nextweapon)
 			end
 			return false
 		else
+		
+		
 			self:SetQueueHolster( true )
 			self:SendWeaponAnim( ACT_VM_HOLSTER )
-			local ViewDur = self.Owner:GetViewModel():SequenceDuration()
 			
-			self:SetNextHolster( CurTime() + ViewDur )
-			self:SetNextPrimaryFire(CurTime() + ViewDur )
+			if self.Owner and self.Owner ~= NULL and self.Owner:GetViewModel() and self.Owner:GetViewModel() ~= NULL then
+				local ViewDur = self.Owner:GetViewModel():SequenceDuration()
+				
+				self:SetNextHolster( CurTime() + ViewDur )
+				self:SetNextPrimaryFire(CurTime() + ViewDur )
+			end
 			
 			if SERVER then
 				self:SetNextHolsterWeapon(nextweapon)
 			end
+			
+			
 			return false
 		end
 	end
@@ -944,7 +967,6 @@ function SWEP:WeaponSound()
 end
 
 function SWEP:SpecialCone(Cone,IsCrosshair)
-
 	return Cone
 end
 
@@ -999,7 +1021,6 @@ function SWEP:SecondaryAttack()
 	end
 	
 	if self:IsBusy() then return end
-	
 
 	if self:IsUsing() then
 		if self.HasSpecialFire then
@@ -1136,7 +1157,7 @@ function SWEP:TranslateFOV(fov)
 
 		local ZoomMag = 1 + ( self.ZoomMod * ZoomAmount )
 		
-		fov = self.DesiredFOV / ZoomMag
+		fov = fov / ZoomMag
 		
 	end
 	
@@ -1276,14 +1297,18 @@ function SWEP:AddHeat(Damage,Shots)
 	--]]
 	
 	local CoolDown = self:GetHeatMath(Damage,Shots)
-	local CoolTime = CurTime() + (self.Primary.Delay + 0.1)*GetConVarNumber("sv_css_cooltime_scale")*self.CoolMul
+	local CoolTime = (self.Primary.Delay + 0.1)*GetConVarNumber("sv_css_cooltime_scale")*self.CoolMul
+	
+	if self.HasBurstFire and self:GetIsBurst() then
+		CoolTime = CoolTime * self.BurstCoolMul
+	end
 	
 	self:SetCoolDown( math.Clamp(self:GetCoolDown() + CoolDown,0,10) )
-	self:SetCoolTime( CoolTime )
+	self:SetCoolTime( CurTime() + CoolTime )
 	
 	if CLIENT and self.Owner == LocalPlayer() then
 		self.ClientCoolDown = math.Clamp(self.ClientCoolDown + CoolDown,0,10)
-		self.ClientCoolTime = CoolTime
+		self.ClientCoolTime = CurTime() + CoolTime
 	end
 	
 end
@@ -1295,18 +1320,26 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,La
 		if SERVER then
 			
 			local EyeTrace = self.Owner:GetEyeTrace()
+			local TheEyePos = self.Owner:EyePos()
 			
 			local HitPos = EyeTrace.HitPos
 			
-			local Dir = (HitPos - Source)
+			Source = Source + self.Owner:GetForward()*self.SourceOverride.y + self.Owner:GetRight()*self.SourceOverride.x + self.Owner:GetUp()*self.SourceOverride.z
+			
+			local Dir = (HitPos - TheEyePos)
 			Dir:Normalize()
 			
-			Source = Source + self.Owner:GetForward()*self.SourceOverride.y + self.Owner:GetRight()*self.SourceOverride.x + self.Owner:GetUp()*self.SourceOverride.z
+			--print(Dir:Angle())
+			
+			local FinalAngles = Dir:Angle() + self.BulletAngOffset + Angle(math.Rand(-Cone,Cone),math.Rand(-Cone,Cone),0)*45
+			FinalAngles:Normalize()
+			
+			print(FinalAngles)
 
 			local Bullet = ents.Create(self.BulletEnt)	
 			if Bullet:IsValid() then
 				Bullet:SetPos(Source)
-				Bullet:SetAngles( Dir:Angle() + self.BulletAngOffset + Angle(math.Rand(-Cone,Cone),math.Rand(-Cone,Cone),0)*45 )
+				Bullet:SetAngles( FinalAngles )
 				Bullet:SetOwner(self.Owner)
 				Bullet:Spawn()
 				Bullet:Activate()
@@ -1386,9 +1419,9 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,La
 				end
 
 				if GetConVarNumber("sv_css_enable_penetration") == 1 then
-					if LastEntity ~= tr.Entity then
+					--if LastEntity ~= tr.Entity and not LastEntity:IsPlayer() then
 						self:WorldBulletSolution(tr.HitPos,Direction,Damage)
-					end
+					--end
 				end
 				
 				if SERVER then
@@ -1761,12 +1794,30 @@ function SWEP:Think()
 	
 	if (CLIENT or IsSingleplayer) then
 	
-		local FOVMOD = math.max(90 - self.Owner:GetFOV(),GetConVarNumber("cl_css_viewmodel_fov") + self.AddFOV)
+		--local FOVMOD = math.max(30,90 - self.Owner:GetFOV(),GetConVarNumber("cl_css_viewmodel_fov") + self.AddFOV)
 		
+		--[[
+		if self.Owner:SteamID() == "STEAM_0:0:15446066" then
+			--FOVMOD = math.max(30,self.Owner:GetFOV(),GetConVarNumber("cl_css_viewmodel_fov") + self.AddFOV)
+			FOVMOD = self.Owner:GetFOV()
+		end
+		--]]
+		--[[
 		if self.HasScope and self:GetZoomed() and not self.IgnoreScopeHide then
 			FOVMOD = 100
 		end
-
+		--]]
+		
+		local FOVMOD = ( (90 + GetConVarNumber("cl_css_viewmodel_fov"))/2 + self.AddFOV) * 0.75
+		
+		if self.HasScope and self:GetZoomed() and not self.IgnoreScopeHide then
+			FOVMOD = 120
+		end
+		
+		
+		
+		
+		
 		self.ViewModelFOV = FOVMOD
 		
 		self:HandleBoltZoomMod()
@@ -1928,7 +1979,7 @@ end
 function SWEP:HandleCoolDown()
 
 	local CoolMul = GetConVarNumber("sv_css_cooldown_scale")*0.1*self.CoolSpeedMul
-
+	
 	if self:GetCoolTime() <= CurTime() then
 		if self:GetCoolDown() ~= 0 then
 			self:SetCoolDown(math.Clamp(self:GetCoolDown() - CoolMul,0,10))
@@ -2097,15 +2148,7 @@ function SWEP:DrawHUDBackground()
 			if LocalPlayer():ShouldDrawLocalPlayer() then
 				self:DrawCustomCrosshair(x,y,ConeToSend,length,width,r,g,b,a)
 			else
-				--[[
-				if self.HasIronSights and self.HasScope then
-					if self.Owner:GetFOV() ~= self.DesiredFOV then
-						self:DrawCustomScope(x,y,ConeToSend,r,g,b,a)
-					end
-				else
-				--]]
-					self:DrawCustomScope(x,y,ConeToSend,r,g,b,a)
-				--end
+				self:DrawCustomScope(x,y,ConeToSend,r,g,b,a)
 			end
 			
 			if not self.IgnoreScopeHide then
@@ -2541,6 +2584,11 @@ function SWEP:NewSwing(damage,entoverride)
 	
 	if entoverride then
 		self:NewSendHitEvent(entoverride,damage)
+		
+		if self.Owner:IsPlayer() then
+			self.Owner:LagCompensation( false )
+		end
+		
 		return entoverride
 	else
 	

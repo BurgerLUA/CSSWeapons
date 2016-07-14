@@ -1,5 +1,8 @@
 local SmokeMat = Material("skybox/italydn")
 
+local ActualSmokeAmount = 0
+
+
 function CSSFlashEffect()
 
 	local ply = LocalPlayer()
@@ -12,17 +15,6 @@ function CSSFlashEffect()
 		if ply.BlindAmount > 0 then
 		
 			local Mod = math.Clamp(ply.BlindAmount,0,1)
-			
-			--[[
-			if Mod >= 0.5 then
-				DrawMaterialOverlay( "effects/flashbang_white", 1 )
-			end
-			
-			DrawMotionBlur( 0.1, Mod , 100 )
-			--]]
-			
-			--surface.SetDrawColor( Color(255,255,255,255*Mod) )
-			--surface.DrawRect( 0, 0, ScrW(), ScrH() )
 			
 			local Settings = {
 				[ "$pp_colour_brightness" ] = Mod,
@@ -53,21 +45,35 @@ function CSSFlashEffect()
 	local IsInSmoke = false
 	
 	local SmokeAmount = 0
+	local Range = 125
 	
 	for k,v in pairs(ents.FindByClass("ent_cs_smoke")) do
 		local Distance = ply:GetPos():Distance(v:GetPos())
-		if Distance <= 125 and v:GetNWBool("IsDetonated",false) then
+		if Distance <= Range and v:GetNWBool("IsDetonated",false) then
 			IsInSmoke = true
-			SmokeAmount = SmokeAmount + (125 - Distance)*2
+			SmokeAmount = SmokeAmount + math.Clamp(Range - Distance,0,Range) / Range
 		end
 	end
 	
-	if IsInSmoke then
+	--print(SmokeAmount)
 	
-		local ModAmount = math.Clamp(SmokeAmount / 100,0,1)
 	
-		surface.SetDrawColor( Color(200,200,200,ModAmount*255) )
-		surface.DrawTexturedRect( 0, 0, ScrW(), ScrH() )
+	if IsInSmoke or ActualSmokeAmount ~= 0 then
+	
+		local DesiredModAmount = math.Clamp(SmokeAmount*2,0,1)
+		
+		if ActualSmokeAmount < DesiredModAmount then -- Is less than
+			ActualSmokeAmount = math.min(DesiredModAmount,ActualSmokeAmount + FrameTime())
+		elseif ActualSmokeAmount > DesiredModAmount then -- Is greater than
+			ActualSmokeAmount = math.max(DesiredModAmount,ActualSmokeAmount - FrameTime())
+		end
+		
+		
+	
+		surface.SetMaterial(SmokeMat)
+		surface.SetDrawColor( Color(200,200,200,ActualSmokeAmount*255) )
+		--surface.DrawTexturedRect( 0, 0, ScrW(), ScrH() )
+		surface.DrawRect( 0, 0, ScrW(), ScrH() )
 
 	end
 

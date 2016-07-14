@@ -54,3 +54,8 @@ function CSSPlayerJoinMessage( ply )
 end
 
 hook.Add( "PlayerInitialSpawn", "CSS: Player Join (Message)", CSSPlayerJoinMessage )
+
+
+
+
+

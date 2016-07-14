@@ -118,7 +118,7 @@ function ENT:BlindEffects(ply,distancecount)
 			distancecount = 0.5
 		end
 		
-		ply.BlindAmount = math.Clamp(distancecount,0,2.5) * (GetConVar("sv_css_flashbang_dur"):GetFloat()/5)
+		ply.BlindAmount = math.Clamp(distancecount,0,2.5) * ((GetConVar("sv_css_flashbang_dur"):GetFloat() + 1)/5)
 		ply.IsBlinded = true
 
 	end

@@ -248,6 +248,7 @@ SWEP.BurstOverride			= 3
 SWEP.BurstCoolMul			= 1
 SWEP.BurstSpeedAbs			= nil
 SWEP.BurstAnimationOverride = nil
+SWEP.BurstAnimationOnce		= false
 
 SWEP.HasScope 				= false
 SWEP.ZoomAmount 			= 1
@@ -1380,12 +1381,10 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,La
 			bullet.Tracer = 0
 		end
 
-		if not self.TracerNames then
+		if bullet.TracerName then
 			bullet.TracerName = self.TracerName
-		else
-			bullet.TracerName = "none"
 		end
-		
+
 		bullet.Force	= nil
 		bullet.Callback = function( attacker, tr, dmginfo)
 		
@@ -1865,7 +1864,14 @@ function SWEP:HandleBurstFireShoot()
 			if (self:Clip1() > 0) or self:Clip1() == -1 and self:Ammo1() >= 1 then
 			
 				self:TakePrimaryAmmo(1)
-				self:HandleShootAnimations()
+				
+				
+				if not self.BurstAnimationOnce then
+					if self:GetBulletQueue() ~= self.BurstOverride - 1 then
+						self:HandleShootAnimations()
+					end
+				end
+
 				self:ShootGun()
 				
 			end

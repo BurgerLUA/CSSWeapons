@@ -52,10 +52,11 @@ SWEP.HasSideRecoil			= false
 SWEP.HasDownRecoil			= false
 
 SWEP.BurstSpeedAbs			= 0.6	
-SWEP.BurstAnimationOverride	= ACT_VM_SECONDARYATTACK
 SWEP.BurstConeMul			= 1.5
 SWEP.BurstHeatMul			= 0.5
 SWEP.BurstCoolMul			= 2
+SWEP.BurstAnimationOverride	= ACT_VM_SECONDARYATTACK
+SWEP.BurstAnimationOnce		= true
 
 SWEP.HasIronSights 			= true
 SWEP.EnableIronCross		= true

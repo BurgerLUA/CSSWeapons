@@ -59,7 +59,7 @@ function CSS_DropWeapon(ply,weapon)
 		
 			local StoredWeapon =  weapons.GetStored(weapon:GetClass())
 			
-			if StoredWeapon.EnableDropping then
+			if weapon.EnableDropping then
 			
 				local model = StoredWeapon.WorldModel
 				
@@ -225,6 +225,9 @@ function CSS_Drops(ply,cmd,args,argStr)
 		elseif cmd == "dropammo" then
 			CSS_DropAmmo(ply,Weapon)
 		end
+		
+		--Weapon:SendWeaponAnim(ACT_GMOD_GESTURE_ITEM_DROP)
+		
 	end
 
 end

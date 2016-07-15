@@ -316,6 +316,8 @@ SWEP.IdleOffset 			= 0
 
 SWEP.DelayOverride			= false
 
+SWEP.EnableDropping 		= true
+
 
 -- I know what this is
 SWEP.DrawAmmo				= true

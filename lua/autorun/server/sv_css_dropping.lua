@@ -59,72 +59,74 @@ function CSS_DropWeapon(ply,weapon)
 		
 			local StoredWeapon =  weapons.GetStored(weapon:GetClass())
 			
-			local model = StoredWeapon.WorldModel
+			if StoredWeapon.EnableDropping then
 			
-			if StoredWeapon.UseThisWorldModel then
-				model = StoredWeapon.UseThisWorldModel
-			end
-			
-			local Ammo = weapon:Ammo1()
+				local model = StoredWeapon.WorldModel
+				
+				if StoredWeapon.UseThisWorldModel then
+					model = StoredWeapon.UseThisWorldModel
+				end
+				
+				local Ammo = weapon:Ammo1()
 
-			if model ~= "" then		
+				if model ~= "" then		
 
-				local dropped = ents.Create("ent_cs_droppedweapon")
-				dropped:SetPos(ply:GetPos() + ply:OBBCenter())
-				dropped:SetAngles(ply:EyeAngles())
-				dropped:SetModel(model)
-				dropped:SetNWString("class",weapon:GetClass())
-				dropped:SetCustomCollisionCheck( true )
-			
-				if not (StoredWeapon.WeaponType == "Throwable" and weapon:Clip1() ~= 0) then
-					
-					dropped:SetNWFloat("clip",weapon:Clip1())
-					
-					if ply:Alive() then
-						ply:StripWeapon(weapon:GetClass())
-					end
-					
-				elseif StoredWeapon.WeaponType == "Throwable" then
-					
-					if Ammo < 10 then
-					
+					local dropped = ents.Create("ent_cs_droppedweapon")
+					dropped:SetPos(ply:GetPos() + ply:OBBCenter())
+					dropped:SetAngles(ply:EyeAngles())
+					dropped:SetModel(model)
+					dropped:SetNWString("class",weapon:GetClass())
+					dropped:SetCustomCollisionCheck( true )
+				
+					if not (StoredWeapon.WeaponType == "Throwable" and weapon:Clip1() ~= 0) then
+						
 						dropped:SetNWFloat("clip",weapon:Clip1())
-						
-						if ply:Alive() then
-						
-							ply:SetAmmo( math.Clamp(Ammo - 1,0,9999), weapon:GetPrimaryAmmoType() )
-							
-							Ammo = weapon:Ammo1()
-							
-							if Ammo == 0 then
-								ply:StripWeapon(weapon:GetClass())
-							end
-							
-						end
-						
-					else
-					
-						CSS_DropAmmo(ply,weapon,Ammo)
 						
 						if ply:Alive() then
 							ply:StripWeapon(weapon:GetClass())
 						end
-					
-						dropped:Remove()
-					
-						return
 						
+					elseif StoredWeapon.WeaponType == "Throwable" then
+						
+						if Ammo < 10 then
+						
+							dropped:SetNWFloat("clip",weapon:Clip1())
+							
+							if ply:Alive() then
+							
+								ply:SetAmmo( math.Clamp(Ammo - 1,0,9999), weapon:GetPrimaryAmmoType() )
+								
+								Ammo = weapon:Ammo1()
+								
+								if Ammo == 0 then
+									ply:StripWeapon(weapon:GetClass())
+								end
+								
+							end
+							
+						else
+						
+							CSS_DropAmmo(ply,weapon,Ammo)
+							
+							if ply:Alive() then
+								ply:StripWeapon(weapon:GetClass())
+							end
+						
+							dropped:Remove()
+						
+							return
+							
+						end
+					
 					end
-				
+
+					dropped:Spawn()
+					dropped:Activate()
+					dropped:GetPhysicsObject():SetVelocity(ply:GetForward()*100)
+
 				end
-
-				dropped:Spawn()
-				dropped:Activate()
-				dropped:GetPhysicsObject():SetVelocity(ply:GetForward()*100)
-
-			end
 			
-
+			end
 			
 		end
 	end

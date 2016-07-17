@@ -67,39 +67,43 @@ end
 
 function ENT:Detonate(self,pos)
 
-	local maxdistance = 1000
+	local maxdistance = 1024
 
 	if not self:IsValid() then return end
 	
 	util.BlastDamage( self, self.Owner, self:GetPos(), maxdistance, 10 )
-
-	if CLIENT then
 	
-		self:EmitSound(self.ExplodeSound)
+	local effectdata = EffectData()
+	effectdata:SetStart( pos + Vector(0,0,100)) // not sure if we need a start and origin (endpoint) for this effect, but whatever
+	effectdata:SetOrigin( pos)
+	effectdata:SetScale( 100 )
+	effectdata:SetRadius( 5000 )
+	util.Effect( "HelicopterMegaBomb", effectdata )	
 	
-		local effectdata = EffectData()
-			effectdata:SetStart( pos + Vector(0,0,100)) // not sure if we need a start and origin (endpoint) for this effect, but whatever
-			effectdata:SetOrigin( pos)
-			effectdata:SetScale( 100 )
-			effectdata:SetRadius( 5000 )
-		util.Effect( "HelicopterMegaBomb", effectdata )	
-		
-		local Players = player.GetAll()
-	
-		if table.Count(Players) > 0 then
+	self:EmitSound(self.ExplodeSound)
 
-			for k,v in pairs(Players) do
-					
-				local distancecount = (maxdistance/100 - self:GetPos():Distance(v:GetPos())/100)
+	local Players = player.GetAll()
 
-				if distancecount > 0 then
-					self:BlindEffects(v,distancecount)
+	if table.Count(Players) > 0 then
+		for k,v in pairs(Players) do
+			if v:IsBot() then
+				if SERVER then
+					local distancecount = (maxdistance - self:EyePos():Distance(v:GetPos())) / 100
+					if distancecount > 0 then
+						self:BlindEffects(v,distancecount)
+					end
 				end
-
+			else
+				if CLIENT then
+					local distancecount = (maxdistance - self:EyePos():Distance(v:GetPos())) / 100
+					if distancecount > 0 then
+						self:BlindEffects(v,distancecount)
+					end
+				end
 			end
 		end
-		
 	end
+
 
 	if SERVER then
 		SafeRemoveEntity(self)
@@ -112,13 +116,16 @@ function ENT:BlindEffects(ply,distancecount)
 
 	if ply:IsLineOfSightClear(self.Entity) then
 
-		ply:SetDSP( 37, true )
-	
 		if not self:IsPlayerLookingAtSelf(ply) then
 			distancecount = 0.5
 		end
 		
 		ply.BlindAmount = math.Clamp(distancecount,0,2.5) * ((GetConVar("sv_css_flashbang_dur"):GetFloat() + 1)/5)
+		
+		if ply.BlindAmount > 1 then
+			ply:SetDSP( 37, true )
+		end
+		
 		ply.IsBlinded = true
 
 	end

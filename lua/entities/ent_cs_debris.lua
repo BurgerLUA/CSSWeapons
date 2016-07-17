@@ -17,10 +17,11 @@ AddCSLuaFile()
 
 function ENT:Initialize()
 
+	self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
-	self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+	
 		
 	if SERVER then
 		local phys = self:GetPhysicsObject()

@@ -291,10 +291,10 @@ SWEP.ZoomOutSound			= Sound("weapons/zoom.wav")
 SWEP.CrosshairOverrideMat	= nil
 SWEP.CrosshairOverrideSize	= nil
 
-SWEP.TracerOverride			= 1
-SWEP.EnableTracer			= true
-SWEP.TracerName				= "Tracer"
-SWEP.TracerNames			= nil
+SWEP.EnableCustomTracer	= true
+SWEP.CustomTracerColor	= Color(255,255,0,255)
+
+SWEP.CustomShootEffectsTable = nil
 
 SWEP.BulletEnt				= nil -- Bullet Entity that is Spawned
 SWEP.SourceOverride 		= Vector(0,0,0) -- Projectile Spawn Offset
@@ -343,6 +343,8 @@ SWEP.EnableDefaultScope		= true
 --WTF IS THIS
 SWEP.CSMuzzleFlashes 		= true
 SWEP.CSMuzzleX				= false
+
+
 
 if (CLIENT or game.SinglePlayer()) then
 	SWEP.IsZoomed 			= false -- Data, Client
@@ -876,7 +878,7 @@ function SWEP:PreShootBullet() -- Should be predicted
 	end
 	
 	if Shots == 1 then
-		self:ShootBullet(Damage,Shots,Cone,Source,Direction,self.EnableTracer,self.Owner)
+		self:ShootBullet(Damage,1,Cone,Source,Direction,self.Owner)
 	else
 		for i=1, Shots do
 		
@@ -890,7 +892,7 @@ function SWEP:PreShootBullet() -- Should be predicted
 			local UselessVector, UsefulAngle = WorldToLocal(Vector(0,0,0), self.Owner:EyeAngles() , Vector(0,0,0), RandAngle )
 			local NewDirection = ( UsefulAngle + self.Owner:GetPunchAngle() ):Forward()
 
-			self:ShootBullet(Damage,1,0,Source,NewDirection,self.EnableTracer,self.Owner)
+			self:ShootBullet(Damage,1,0,Source,NewDirection,self.Owner)
 			
 		end
 	end
@@ -1316,58 +1318,42 @@ function SWEP:AddHeat(Damage,Shots)
 	
 end
 
-function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,LastEntity)
-	
-	if self and self.BulletEnt then
-	
-		if SERVER then
-			
-			local EyeTrace = self.Owner:GetEyeTrace()
-			local TheEyePos = self.Owner:EyePos()
-			
-			local HitPos = EyeTrace.HitPos
-			
-			Source = Source + self.Owner:GetForward()*self.SourceOverride.y + self.Owner:GetRight()*self.SourceOverride.x + self.Owner:GetUp()*self.SourceOverride.z
-			
-			local Dir = (HitPos - TheEyePos)
-			Dir:Normalize()
-			
-			--print(Dir:Angle())
-			
-			local FinalAngles = Dir:Angle() + self.BulletAngOffset + Angle(math.Rand(-Cone,Cone),math.Rand(-Cone,Cone),0)*45
-			FinalAngles:Normalize()
-			
-			print(FinalAngles)
+function SWEP:ShootPhysicalObject(Source,Cone)
 
-			local Bullet = ents.Create(self.BulletEnt)	
-			if Bullet:IsValid() then
-				Bullet:SetPos(Source)
-				Bullet:SetAngles( FinalAngles )
-				Bullet:SetOwner(self.Owner)
-				Bullet:Spawn()
-				Bullet:Activate()
-			else
-				SafeRemoveEntity(Bullet)
-			end
-			
-			if self.TracerNames then
-				if IsFirstTimePredicted() then
-					local effectdata = EffectData()
-					effectdata:SetOrigin( self.Owner:EyeAngles():Forward()*100 )
-					effectdata:SetStart( self.Owner:GetShootPos() )
-					effectdata:SetAttachment( 1 )
-					effectdata:SetEntity( self.Weapon )
-					
-					for k,v in pairs(self.TracerNames) do
-						util.Effect( v, effectdata )
-					end
-				end
-			end
-			
-		end
+	local EyeTrace = self.Owner:GetEyeTrace()
+	local TheEyePos = self.Owner:EyePos()
 	
+	local HitPos = EyeTrace.HitPos
+	
+	Source = Source + self.Owner:GetForward()*self.SourceOverride.y + self.Owner:GetRight()*self.SourceOverride.x + self.Owner:GetUp()*self.SourceOverride.z
+	
+	local Dir = (HitPos - TheEyePos)
+	Dir:Normalize()
+	local FinalAngles = Dir:Angle() + self.BulletAngOffset + Angle(math.Rand(-Cone,Cone),math.Rand(-Cone,Cone),0)*45
+	FinalAngles:Normalize()
+
+	local Bullet = ents.Create(self.BulletEnt)	
+	if Bullet:IsValid() then
+		Bullet:SetPos(Source)
+		Bullet:SetAngles( FinalAngles )
+		Bullet:SetOwner(self.Owner)
+		Bullet:Spawn()
+		Bullet:Activate()
 	else
-	
+		SafeRemoveEntity(Bullet)
+	end
+
+	self:TracerCreation(Source + Dir*100,Source,Dir,self.Owner)
+
+end
+
+
+function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastEntity)
+	if self and self.BulletEnt then
+		if SERVER then
+			self:ShootPhysicalObject(Source,Cone)
+		end
+	else
 		local bullet = {}
 		bullet.Damage	= Damage * GetConVarNumber("sv_css_damage_scale")
 		bullet.Num		= Shots
@@ -1376,93 +1362,46 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,EnableTracer,La
 		bullet.Dir		= Direction
 		bullet.AmmoType = self.Primary.Ammo
 		bullet.HullSize = 0
-		
-		if EnableTracer then
-			bullet.Tracer = self.TracerOverride
-		else
-			bullet.Tracer = 0
-		end
-
-		if bullet.TracerName then
-			bullet.TracerName = self.TracerName
-		end
-
+		bullet.Tracer = 0
 		bullet.Force	= nil
-		bullet.Callback = function( attacker, tr, dmginfo)
-		
-			if self.TracerNames then
-				if IsFirstTimePredicted() then
-					local effectdata = EffectData()
-					effectdata:SetOrigin( tr.HitPos )
-					effectdata:SetStart( self.Owner:GetShootPos() )
-					effectdata:SetAttachment( 1 )
-					effectdata:SetEntity( self.Weapon )
-					
-					for k,v in pairs(self.TracerNames) do
-						util.Effect( v, effectdata )
-					end
-				end
-			end
-		
-		
-		
-			if attacker:IsPlayer() then
-			
-				local Weapon = attacker:GetActiveWeapon()
+		bullet.Callback = function(attacker,tr,dmginfo)
+			self:BulletCallback(Damage,Direction,LastEntity,attacker,tr,dmginfo)
+		end
+		self.Owner:FireBullets(bullet)
+	end
+end
 
-				if Weapon and Weapon.DamageFalloff then
-					if Weapon.DamageFalloff > 0 then
-						local Distance = tr.StartPos:Distance(tr.HitPos)
-						local DamageMul = math.Clamp(GetConVarNumber("sv_css_damagefalloff_scale"),0,1)
-						local DFMod = (1 - DamageMul) + math.min(1, ( (Weapon.DamageFalloff) / Distance ))*DamageMul
-						dmginfo:ScaleDamage(DFMod)
-					end
-				end
+function SWEP:BulletCallback(Damage,Direction,HitEnt,attacker,tr,dmginfo)
 
-				if GetConVarNumber("sv_css_enable_penetration") == 1 then
-					--if LastEntity ~= tr.Entity and not LastEntity:IsPlayer() then
-						self:WorldBulletSolution(tr.HitPos,Direction,Damage)
-					--end
-				end
-				
-				if SERVER then
-					if tr.Entity:GetClass() == "prop_vehicle_prisoner_pod" or tr.Entity:IsVehicle() then
-						if tr.Entity:GetDriver() ~= NULL then
-							tr.Entity:GetDriver():TakeDamageInfo(dmginfo)
-						end
-					end
-				end
-				
-				if Weapon.TracerName == "AR2Tracer" then
-				
-					local Data = EffectData()
-					Data:SetAngles(Angle(0,0,0))
-					Data:SetColor(1)
-					Data:SetDamageType(DMG_BULLET)
-					if SERVER then
-						Data:SetEntIndex(tr.Entity:EntIndex())
-					end
-					Data:SetEntity(tr.Entity)
-					Data:SetFlags(3)
-					Data:SetMagnitude(100)
-					Data:SetNormal(tr.HitNormal)
-					Data:SetOrigin(tr.HitPos)
-					Data:SetRadius(128)
-					Data:SetScale(1)
-					Data:SetStart(tr.HitPos)
-					Data:SetSurfaceProp(tr.SurfaceProps)
-					
-					util.Effect("AR2Impact",Data)
-					
-				end
+	self:TracerCreation(tr.HitPos,tr.StartPos,Direction,HitEnt)
 
+	if attacker:IsPlayer() then
+	
+		local Weapon = attacker:GetActiveWeapon()
+
+		if Weapon and Weapon.DamageFalloff then
+			if Weapon.DamageFalloff > 0 then
+				local Distance = tr.StartPos:Distance(tr.HitPos)
+				local DamageMul = math.Clamp(GetConVarNumber("sv_css_damagefalloff_scale"),0,1)
+				local DFMod = (1 - DamageMul) + math.min(1, ( (Weapon.DamageFalloff) / Distance ))*DamageMul
+				dmginfo:ScaleDamage(DFMod)
 			end
 		end
+
+		if GetConVarNumber("sv_css_enable_penetration") == 1 then
+			self:WorldBulletSolution(tr.HitPos,Direction,Damage)
+		end
 		
-		self.Owner:FireBullets(bullet)
+		if SERVER then
+			if tr.Entity:GetClass() == "prop_vehicle_prisoner_pod" or tr.Entity:IsVehicle() then
+				if tr.Entity:GetDriver() ~= NULL then
+					tr.Entity:GetDriver():TakeDamageInfo(dmginfo)
+				end
+			end
+		end
 		
 	end
-	
+
 end
 
 function SWEP:WorldBulletSolution(Pos,Direction,Damage)
@@ -1498,12 +1437,55 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 		if trace.StartSolid then
 			self:WorldBulletSolution(data.endpos,Direction,DamageMath)
 		else
-			self:ShootBullet(DamageMath, 1, 0, data.endpos,Direction,false,HitEnt)
+			EnableCustomTracers = false
+			EnableOriginalTracers = false
+			--print("SHOOTING WORLD BULLET")
+			self:ShootBullet(DamageMath, 1, 0, data.endpos,Direction,HitEnt)
 		end
 	end
 
 
 end
+
+function SWEP:TracerCreation(origin,start,direction,HitEntity)
+
+	if self.EnableCustomTracer then
+		local TracerData = self:GenerateEffectData(origin,start,HitEntity,true)
+		util.Effect( "bur_css_bullet_01", TracerData )
+	end
+
+	if self.CustomShootEffectsTable then
+		local TracerData = self:GenerateEffectData(origin,start,HitEntity,false)
+		for num,effectname in pairs(self.CustomShootEffectsTable) do
+			util.Effect( effectname, TracerData )
+		end
+	end
+
+end
+
+function SWEP:GenerateEffectData(origin,start,HitEntity,IsCSSTracer)
+
+	local Data = EffectData()
+	Data:SetOrigin( origin )
+	Data:SetStart( start )
+	if HitEntity == self.Owner then
+		Data:SetAttachment( 1 )
+		Data:SetEntity( self.Weapon )
+	else
+		Data:SetAttachment( 0 )
+		Data:SetEntity( NULL )
+	end	
+	
+	if IsCSSTracer then
+		Data:SetMagnitude(self.Primary.Damage)
+		Data:SetRadius(self.DamageFalloff)
+	end
+
+	return Data
+
+end
+
+
 
 if SERVER then
 	util.AddNetworkString("CSS_GunSounds")

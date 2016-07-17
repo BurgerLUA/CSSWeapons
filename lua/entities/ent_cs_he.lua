@@ -77,7 +77,7 @@ function ENT:Detonate(self,pos)
 			effectdata:SetRadius( 5000 )
 		util.Effect( "Explosion", effectdata)
 
-		if self.Owner then
+		if self.Owner and self.Owner ~= NULL then
 			util.BlastDamage(self, self.Owner, pos, math.floor( GetConVar("sv_css_he_radius"):GetFloat() ), math.floor( GetConVar("sv_css_he_damage"):GetFloat() ) )
 		end
 		

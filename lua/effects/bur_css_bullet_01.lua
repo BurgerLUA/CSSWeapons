@@ -1,10 +1,13 @@
 -- Copied from garry's tooltracer
 
-EFFECT.BeamMat = Material( "effects/blooddrop001" )
+EFFECT.BeamMat = Material( "effects/spark" )
+--EFFECT.SmokeMat = Material( "trails/smoke" )
 
 function EFFECT:Init( data )
 
 	local Magnitude = data:GetMagnitude()
+	local Range = data:GetRadius()
+	
 	self.Position = data:GetStart()
 	self.WeaponEnt = data:GetEntity()
 	self.Attachment = data:GetAttachment()
@@ -12,22 +15,32 @@ function EFFECT:Init( data )
 	self.EndPos = data:GetOrigin()
 	self.Direction = (self.StartPos - self.EndPos):GetNormalized()
 	self.Distance = self.StartPos:Distance(self.EndPos)
-	--self.BulletSpeed = 2000 * (0.5 + (Magnitude/30) * 0.5)-- Units per second
-	self.BulletSpeed = 100
-	self.Width = Magnitude*0.1
-	self.Length = Magnitude*1.5
-	self.FadeTime = data:GetRadius()
+	self.Width = ((Magnitude*50)^0.30)*0.3
+	self.Length = (Range*0.03)^1
+	
+	--local Size = self.Width*self.Length
+	local Ratio = self.Length/self.Width
+
+	self.BulletSpeed = math.Clamp(Ratio * 100,2000,6000) + 1000
+	self.FadeTime = Range
 	self.MaxFade = GetConVar("sv_css_damagefalloff_scale"):GetFloat()
-	
-	local ConvertMath = (self.Length/self.Distance)
-	
-	self.PositionPercent = -ConvertMath
-	
+	self.PositionPercent = -(self.Length/self.Distance)
 	self:SetRenderBoundsWS( self.StartPos, self.EndPos )
+	
+	-- Copied from Garrysmod Arrow Widget
+	if self.WeaponEnt and self.WeaponEnt ~= NULL and not self.WeaponEnt:IsCarriedByLocalPlayer() then
+		local Distance, Position, WhatIsThis = util.DistanceToLine(self.StartPos,self.EndPos,EyePos())
+		local SoundSize = 256*self.Width
+		if Distance <= SoundSize then
+			local VolumeMod = 1 - (Distance/SoundSize)
+			sound.Play("Bullets.DefaultNearmiss",Position,75,100,VolumeMod)
+		end
+	end
 
 end
 
 function EFFECT:Think()
+	self.PositionPercent = self.PositionPercent + (self.BulletSpeed/self.Distance)*FrameTime()
 	return self.PositionPercent < 1
 end
 
@@ -35,28 +48,20 @@ function EFFECT:Render()
 
 	if self.PositionPercent > 1 then return end
 	
-	self.PositionPercent = self.PositionPercent + (self.BulletSpeed/self.Distance)*FrameTime()
-	local RenderPos = LerpVector(self.PositionPercent,self.StartPos,self.EndPos)
-
-	
-	
-	
 	local DistanceTraveled = self.PositionPercent * self.Distance
-	
 	local AlphaMath = (1 - self.MaxFade) + math.min(1, ( (self.FadeTime) / math.max(1,DistanceTraveled) ))*self.MaxFade
-	
-	local ConvertMath = (self.Length/self.Distance) * (AlphaMath)
-	
+	local ConvertMath = ( (self.Length*AlphaMath)/self.Distance )
 	local MinPos = LerpVector(math.Clamp(self.PositionPercent,0,1),self.StartPos,self.EndPos)
 	local MaxPos = LerpVector(math.Clamp( (self.PositionPercent + ConvertMath),0,1),self.StartPos,self.EndPos)
+	--local TotalScale = MinPos:Distance(MaxPos) / (self.Length*AlphaMath)
 	
+	--local BulletChange = (1-AlphaMath)*FrameTime()*3000
 	
+	--self.BulletSpeed = math.Clamp(self.BulletSpeed - BulletChange,1000,6000)
 	
-
-
-	local TotalScale = MinPos:Distance(MaxPos) / self.Length
+	--print(self.BulletSpeed)
 	
 	render.SetMaterial( self.BeamMat )
-	render.DrawBeam( MinPos , MaxPos, self.Width, 1 - TotalScale, 1, Color(255,255,255,AlphaMath*255) )
+	render.DrawBeam( MinPos , MaxPos, self.Width * AlphaMath,0, 1, Color(255,255,255,AlphaMath*255) )
 
 end

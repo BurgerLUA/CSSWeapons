@@ -638,7 +638,9 @@ function SWEP:Holster(nextweapon)
 			self:SetNextHolster( -1 )
 			self:SetForceHolster(true)
 			if SERVER then
-				self.Owner:SelectWeapon( NextWeapon:GetClass() )
+				if self.Owner and self.Owner ~= NULL and NextWeapon and NextWeapon ~= NULL then
+					self.Owner:SelectWeapon( NextWeapon:GetClass() )
+				end
 			end
 			return false
 		else
@@ -1343,7 +1345,9 @@ function SWEP:ShootPhysicalObject(Source,Cone)
 		SafeRemoveEntity(Bullet)
 	end
 
-	self:TracerCreation(Source + Dir*100,Source,Dir,self.Owner)
+	if IsFirstTimePredicted() then
+		self:TracerCreation(Source + Dir*100,Source,Dir,self.Owner)
+	end
 
 end
 
@@ -1373,7 +1377,9 @@ end
 
 function SWEP:BulletCallback(Damage,Direction,HitEnt,attacker,tr,dmginfo)
 
-	self:TracerCreation(tr.HitPos,tr.StartPos,Direction,HitEnt)
+	if IsFirstTimePredicted() then
+		self:TracerCreation(tr.HitPos,tr.StartPos,Direction,HitEnt)
+	end
 
 	if attacker:IsPlayer() then
 	
@@ -1389,7 +1395,9 @@ function SWEP:BulletCallback(Damage,Direction,HitEnt,attacker,tr,dmginfo)
 		end
 
 		if GetConVarNumber("sv_css_enable_penetration") == 1 then
-			self:WorldBulletSolution(tr.HitPos,Direction,Damage)
+			if not (HitEnt:IsPlayer() and HitEnt ~= self.Owner) then
+				self:WorldBulletSolution(tr.HitPos,Direction,Damage)
+			end
 		end
 		
 		if SERVER then
@@ -1439,8 +1447,18 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 		else
 			EnableCustomTracers = false
 			EnableOriginalTracers = false
-			--print("SHOOTING WORLD BULLET")
 			self:ShootBullet(DamageMath, 1, 0, data.endpos,Direction,HitEnt)
+			
+			local BackTraceData = {}
+			BackTraceData.start = Pos + Direction
+			BackTraceData.endpos = Pos - Direction*Amount
+			
+			local BackTrace = util.TraceLine(BackTraceData)
+			
+			if IsFirstTimePredicted() then
+				self:BulletEffect(BackTrace.HitPos,BackTrace.StartPos,BackTrace.Entity,BackTrace.SurfaceProps)
+			end
+			
 		end
 	end
 
@@ -1469,7 +1487,14 @@ function SWEP:GenerateEffectData(origin,start,HitEntity,IsCSSTracer)
 	Data:SetOrigin( origin )
 	Data:SetStart( start )
 	if HitEntity == self.Owner then
-		Data:SetAttachment( 1 )
+	
+		if self.HasDual and self:GetIsLeftFire() then
+			Data:SetAttachment( 2 )
+		else
+			Data:SetAttachment( 1 )
+		end
+	
+
 		Data:SetEntity( self.Weapon )
 	else
 		Data:SetAttachment( 0 )
@@ -1543,8 +1568,6 @@ if CLIENT then
 
 
 end
-
-
 
 function SWEP:BulletEffect(HitPos,StartPos,HitEntity,SurfaceProp)
 	
@@ -1776,31 +1799,13 @@ function SWEP:Think()
 	self:IdleThink()
 	
 	if (CLIENT or IsSingleplayer) then
-	
-		--local FOVMOD = math.max(30,90 - self.Owner:GetFOV(),GetConVarNumber("cl_css_viewmodel_fov") + self.AddFOV)
-		
-		--[[
-		if self.Owner:SteamID() == "STEAM_0:0:15446066" then
-			--FOVMOD = math.max(30,self.Owner:GetFOV(),GetConVarNumber("cl_css_viewmodel_fov") + self.AddFOV)
-			FOVMOD = self.Owner:GetFOV()
-		end
-		--]]
-		--[[
-		if self.HasScope and self:GetZoomed() and not self.IgnoreScopeHide then
-			FOVMOD = 100
-		end
-		--]]
 		
 		local FOVMOD = ( (90 + GetConVarNumber("cl_css_viewmodel_fov"))/2 + self.AddFOV) * 0.75
 		
 		if self.HasScope and self:GetZoomed() and not self.IgnoreScopeHide then
 			FOVMOD = 120
 		end
-		
-		
-		
-		
-		
+
 		self.ViewModelFOV = FOVMOD
 		
 		self:HandleBoltZoomMod()

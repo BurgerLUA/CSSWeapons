@@ -122,7 +122,7 @@ function CSS_DropWeapon(ply,weapon)
 
 					dropped:Spawn()
 					dropped:Activate()
-					dropped:GetPhysicsObject():SetVelocity(ply:GetForward()*100)
+					dropped:GetPhysicsObject():SetVelocity(ply:EyeAngles():Forward()*100)
 
 				end
 			

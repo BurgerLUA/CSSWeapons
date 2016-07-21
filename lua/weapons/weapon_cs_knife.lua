@@ -6,10 +6,10 @@ end
 SWEP.Category				= "Counter-Strike"
 SWEP.PrintName				= "COMBAT KNIFE"
 SWEP.Base					= "weapon_cs_base"
-SWEP.WeaponType				= "Free"
+SWEP.WeaponType				= "Melee"
 
 SWEP.Cost					= 0
-SWEP.CSSMoveSpeed				= 250
+SWEP.CSSMoveSpeed			= 250
 
 SWEP.Spawnable				= true
 SWEP.AdminOnly				= false
@@ -57,6 +57,8 @@ SWEP.MeleeSoundFleshSmall	= Sound("Weapon_Knife.Hit")
 SWEP.MeleeSoundFleshLarge	= Sound("Weapon_Knife.Stab")
 
 SWEP.DamageFalloff			= 40
+SWEP.MeleeRange				= 40
+SWEP.MeleeDelay				= 0.1
 
 function SWEP:PrimaryAttack()
 	if self:IsUsing() then return end
@@ -85,6 +87,7 @@ function SWEP:Deploy()
 	self.Owner:DrawViewModel(true)
 	self:SendWeaponAnim(ACT_VM_DRAW)
 	self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration())	
+	self:CheckInventory()
 	return true
 end
 

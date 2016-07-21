@@ -291,8 +291,8 @@ SWEP.ZoomOutSound			= Sound("weapons/zoom.wav")
 SWEP.CrosshairOverrideMat	= nil
 SWEP.CrosshairOverrideSize	= nil
 
-SWEP.EnableCustomTracer	= true
-SWEP.CustomTracerColor	= Color(255,255,0,255)
+SWEP.EnableCustomTracer		= true
+SWEP.CustomTracerColor		= Color(255,255,0,255)
 
 SWEP.CustomShootEffectsTable = nil
 
@@ -318,6 +318,12 @@ SWEP.DelayOverride			= false
 
 SWEP.EnableDropping 		= true
 
+SWEP.UsesBlocking			= false
+
+SWEP.MeleeDelay				= 0.05
+--SWEP.MeleeDecal				= "ManhackCut"
+SWEP.MeleeDamageType		= DMG_SLASH
+SWEP.MeleeRange				= 40
 
 -- I know what this is
 SWEP.DrawAmmo				= true
@@ -394,6 +400,10 @@ function SWEP:SetupDataTables( )
 	self:SetNextHolster(-1)
 	self:NetworkVar("Float",12,"NextIdle")
 	self:SetNextIdle(0)
+	self:NetworkVar("Float",13,"NextMelee")
+	self:SetNextMelee(0)
+	self:NetworkVar("Float",14,"NextMeleeDamage")
+	self:SetNextMeleeDamage(0)
 
 	self:NetworkVar("Float",31,"SpecialFloat") -- For Special Stuff
 	self:SetSpecialFloat(0)
@@ -431,12 +441,17 @@ function SWEP:SetupDataTables( )
 	self:SetForceHolster( false )
 	self:NetworkVar("Bool",12,"SharedZoom")
 	self:SetSharedZoom( false )
-	
+	self:NetworkVar("Bool",13,"ShouldMelee")
+	self:SetShouldMelee( false )
+	self:NetworkVar("Bool",14,"IsAttacking")
+	self:SetIsAttacking( false )
 	
 	
 	
 	self:NetworkVar("Entity",1,"NextHolsterWeapon")
 	self:SetNextHolsterWeapon( nil )
+	self:NetworkVar("Entity",2,"NextMeleeEnt")
+	self:SetNextMeleeEnt( nil )
 	
 end
 
@@ -562,29 +577,7 @@ function SWEP:Deploy()
 
 	self:SetZoomed(false)
 
-	if SERVER then
-		if GetConVarNumber("sv_css_limit_equipped") == 1 then
-			for k,v in pairs (self.Owner:GetWeapons()) do
-				if v.BurgerBase ~= nil then
-					if v ~= self then
-						if self.WeaponType == v.WeaponType and not (v.WeaponType == "Free" or v.WeaponType == "Throwable") then
-							CSS_DropWeapon(self.Owner,v)
-						end
-					end
-				end
-			end
-		elseif GetConVarNumber("sv_css_limit_equipped") == 2 then
-			for k,v in pairs (self.Owner:GetWeapons()) do
-				if v.BurgerBase ~= nil then
-					if v ~= self then
-						if self.Slot == v.Slot and not (v.WeaponType == "Free" or v.WeaponType == "Throwable") then
-							CSS_DropWeapon(self.Owner,v)
-						end
-					end
-				end
-			end
-		end
-	end
+	self:CheckInventory()
 
 	if IsValid(self.Owner:GetHands()) then
 		self.Owner:GetHands():SetMaterial("")
@@ -616,6 +609,34 @@ function SWEP:Deploy()
 	return true
 	
 end
+
+function SWEP:CheckInventory()
+	if SERVER then
+		if GetConVarNumber("sv_css_limit_equipped") == 1 then
+			for k,v in pairs (self.Owner:GetWeapons()) do
+				if v.BurgerBase ~= nil then
+					if v ~= self then
+						if self.WeaponType == v.WeaponType and not (v.WeaponType == "Free" or v.WeaponType == "Throwable") then
+							print("DROP WEAPON PLEASE")
+							CSS_DropWeapon(self.Owner,v)
+						end
+					end
+				end
+			end
+		elseif GetConVarNumber("sv_css_limit_equipped") == 2 then
+			for k,v in pairs (self.Owner:GetWeapons()) do
+				if v.BurgerBase ~= nil then
+					if v ~= self then
+						if self.Slot == v.Slot and not (v.WeaponType == "Free" or v.WeaponType == "Throwable") then
+							CSS_DropWeapon(self.Owner,v)
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
 
 function SWEP:Holster(nextweapon)
 
@@ -1341,8 +1362,10 @@ function SWEP:ShootPhysicalObject(Source,Cone)
 		Bullet:SetOwner(self.Owner)
 		Bullet:Spawn()
 		Bullet:Activate()
+		--print("HELLO?")
 	else
 		SafeRemoveEntity(Bullet)
+		error("WARNING: INVALID ENTITY: " .. Bullet)
 	end
 
 	if IsFirstTimePredicted() then
@@ -1795,6 +1818,7 @@ function SWEP:Think()
 	self:HandleBurstFireShoot() -- don't predict, ever
 	self:HandleReloadThink() -- don't predict, ever
 	self:SpareThink()
+	self:SwingThink()
 	self:HolsterThink()
 	self:IdleThink()
 	
@@ -2494,23 +2518,25 @@ end
 
 function SWEP:SwitchToPrimary()
 
-	if self.Owner:IsBot() then
-		if SERVER then
-			local Weapons = self.Owner:GetWeapons()
-			
-			local WeaponFound = false
-			
-			for k,v in pairs(Weapons) do
-				if not WeaponFound and self.Owner:HasWeapon(v:GetClass()) and v.Category == "Counter-Strike" then
-					self.Owner:SetActiveWeapon(v)
-					self.Owner:DrawWorldModel( true )
-					WeaponFound = true
+	if self.Owner and self.Owner ~= NULL then
+		if self.Owner:IsBot() then
+			if SERVER then
+				local Weapons = self.Owner:GetWeapons()
+				
+				local WeaponFound = false
+				
+				for k,v in pairs(Weapons) do
+					if not WeaponFound and self.Owner:HasWeapon(v:GetClass()) and v.Category == "Counter-Strike" then
+						self.Owner:SetActiveWeapon(v)
+						self.Owner:DrawWorldModel( true )
+						WeaponFound = true
+					end
 				end
+				
 			end
-			
+		else
+			self.Owner:ConCommand("lastinv")
 		end
-	else
-		self.Owner:ConCommand("lastinv")
 	end
 	
 end
@@ -2571,14 +2597,57 @@ function SWEP:QuickKnife()
 
 end
 
-function SWEP:NewSwing(damage,entoverride)
+function SWEP:NewSwing(damage,entoverride,delayoverride)
+
+
+	if self.MeleeDelay > 0 then
+		self:SetShouldMelee(true)
+		self:SetNextMeleeDamage(damage)
+		if delayoverride then
+			self:SetNextMelee(CurTime() + delayoverride)
+		else
+			self:SetNextMelee(CurTime() + self.MeleeDelay)
+		end
+		self:SetNextMeleeEnt(entoverride)
+		self:EmitGunSound(self.MeleeSoundMiss)
+	else
+		local Returner = self:Swing(damage,entoverride)
+		if not Returner then
+			self:EmitGunSound(self.MeleeSoundMiss)
+		end
+		return Returner
+	end
+	
+end
+
+function SWEP:SwingThink()
+
+	if self:GetShouldMelee() and self:GetNextMelee() <= CurTime() then
+	
+		if self:GetNextMeleeEnt() then
+			self:Swing(self:GetNextMeleeDamage(),self:GetNextMeleeEnt())	
+		else
+			self:Swing(self:GetNextMeleeDamage())
+		end
+			
+		self:SetShouldMelee(false)
+		self:SetNextMeleeDamage(0)
+		self:SetNextMelee(0)
+		self:SetNextMeleeEnt(nil)
+		
+	end
+
+end
+
+function SWEP:Swing(damage,entoverride)
 
 	if self.Owner:IsPlayer() then
 		self.Owner:LagCompensation( true )
 	end
 	
-	if entoverride then
-		self:NewSendHitEvent(entoverride,damage)
+	if entoverride and entoverride ~= NULL then
+	
+		self:NewSendHitEvent(entoverride,damage,nil)
 		
 		if self.Owner:IsPlayer() then
 			self.Owner:LagCompensation( false )
@@ -2590,7 +2659,7 @@ function SWEP:NewSwing(damage,entoverride)
 		local Data = {}
 
 		Data.start = self.Owner:GetShootPos()
-		Data.endpos = self.Owner:GetShootPos() + self.Owner:EyeAngles():Forward()*75
+		Data.endpos = self.Owner:GetShootPos() + self.Owner:EyeAngles():Forward() * (self.MeleeRange)
 		Data.filter = self.Owner
 		Data.mins = Vector( -8 , -8 , -8 )
 		Data.maxs = Vector( 8 , 8 , 8 )
@@ -2601,11 +2670,11 @@ function SWEP:NewSwing(damage,entoverride)
 
 		if Trace.Hit then
 			HasHitTarget = Trace.Entity
-			self:NewSendHitEvent(Trace.Entity,damage)
-		else
-			self:EmitGunSound(self.MeleeSoundMiss)
+		else		
 			HasHitTarget = nil
 		end
+		
+		self:NewSendHitEvent(HasHitTarget,damage,Data)
 		
 		if self.Owner:IsPlayer() then
 			self.Owner:LagCompensation( false )
@@ -2616,9 +2685,9 @@ function SWEP:NewSwing(damage,entoverride)
 
 end
 
-function SWEP:NewSendHitEvent(victim,damage)
+function SWEP:NewSendHitEvent(victim,damage,TraceData)
 
-	if victim:IsPlayer() or victim:IsNPC() then
+	if victim and victim ~= NULL and (victim:IsPlayer() or victim:IsNPC()) then
 							
 		local VictimAngles = victim:EyeAngles()
 		local AttackerAngles = self.Owner:EyeAngles()
@@ -2634,33 +2703,22 @@ function SWEP:NewSendHitEvent(victim,damage)
 		
 		local ShouldDamage = true
 		
-		if victim and victim:IsPlayer() then
-	
-			VictimWeapon = victim:GetActiveWeapon()
+		VictimWeapon = victim:GetActiveWeapon()
 
-			if VictimWeapon and VictimWeapon ~= NULL then
-				if VictimWeapon.EnableBlocking then
-				
-					local VictimKeyDown = VictimWeapon:GetIsBlocking()
-				
-					if VictimKeyDown and VictimWeapon:GetNextSecondaryFire() <= CurTime() then
-
-						local Range = 90
-					
-						if Yaw > 180 - Range/2 and Yaw < 180 + Range/2 then
-							VictimWeapon:BlockDamage(damage*2)
-							self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*3)
-							VictimWeapon:SetNextSecondaryFire(CurTime() + self.Primary.Delay*0.25)
-							
-							self:EmitGunSound("weapons/samurai/tf_katana_impact_object_02.wav")
-							
-							ShouldDamage = false
-						end
-						
+		if VictimWeapon and VictimWeapon ~= NULL then
+			if VictimWeapon.WeaponType == "Melee" then
+				local VictimKeyDown = VictimWeapon:GetIsBlocking() or VictimWeapon:GetShouldMelee()
+				if VictimKeyDown and VictimWeapon:GetNextSecondaryFire() <= CurTime() then
+					local Range = 90
+					if Yaw > 180 - Range/2 and Yaw < 180 + Range/2 then
+						VictimWeapon:BlockDamage(damage,self.Owner)
+						self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*3)
+						VictimWeapon:SetNextSecondaryFire(CurTime() + self.Primary.Delay*0.25)
+						self:EmitGunSound("weapons/samurai/tf_katana_impact_object_02.wav")
+						ShouldDamage = false
 					end
 				end
 			end
-
 		end
 
 		if ShouldDamage then
@@ -2671,28 +2729,80 @@ function SWEP:NewSendHitEvent(victim,damage)
 		end
 
 	else
-		self:NewStabDamage(damage, victim)
+	
+		local NewTraceData = {}
+		
+		NewTraceData.start = TraceData.start
+		NewTraceData.endpos = TraceData.endpos + (TraceData.endpos - TraceData.start):GetNormalized()*20
+		NewTraceData.filter = TraceData.filter
+		
+		local NewTraceResult = util.TraceLine(NewTraceData)
+	
+	
+		if IsFirstTimePredicted() then
+			--util.Decal(self.MeleeDecal,NewTraceResult.HitPos - NewTraceResult.HitNormal ,NewTraceResult.HitPos + NewTraceResult.HitNormal)
+			
+			if NewTraceResult.Hit then
+			
+				local effect = EffectData()
+				effect:SetOrigin(NewTraceResult.HitPos)
+				effect:SetStart(NewTraceResult.HitPos + NewTraceResult.HitNormal)
+				effect:SetNormal(NewTraceResult.HitNormal)
+				effect:SetDamageType(self.MeleeDamageType)
+				
+				if victim and victim ~= NULL then
+					if CLIENT then
+						effect:SetEntity(victim)
+					else
+						effect:SetEntIndex(victim:EntIndex())
+					end
+				end
+				
+				util.Effect("Impact", effect)
+				
+				self:NewStabDamage(damage, victim)
+
+			else
+				if self.MeleeDelay == 0 then
+					self:EmitGunSound(self.MeleeSoundMiss)
+				end
+			end
+			
+		end
+		
+		
+		
 	end
 
 end
 
 function SWEP:NewStabDamage(damage, victim)
 
-	if damage <= self.Primary.Damage then
-		self:EmitGunSound(self.MeleeSoundFleshSmall)
-	else
-		self:EmitGunSound(self.MeleeSoundFleshLarge)
-	end
+	if victim and victim ~= NULL then
 
-	local dmginfo = DamageInfo()
-	dmginfo:SetDamage( damage )
-	dmginfo:SetDamageType( DMG_SLASH )
-	dmginfo:SetAttacker( self.Owner )
-	dmginfo:SetInflictor( self )
-	dmginfo:SetDamageForce( self.Owner:GetForward() )
+		if (victim:IsPlayer() or victim:IsNPC()) then
+			if damage <= self.Primary.Damage then
+				self:EmitGunSound(self.MeleeSoundFleshSmall)
+			else
+				self:EmitGunSound(self.MeleeSoundFleshLarge)
+			end
+		else
+			self:EmitGunSound(self.MeleeSoundWallHit)
+		end
 		
-	if SERVER then
-		victim:TakeDamageInfo( dmginfo )
+		local dmginfo = DamageInfo()
+		dmginfo:SetDamage( damage )
+		dmginfo:SetDamageType( self.MeleeDamageType )
+		dmginfo:SetAttacker( self.Owner )
+		dmginfo:SetInflictor( self )
+		dmginfo:SetDamageForce( self.Owner:GetForward() )
+			
+		if SERVER then
+			victim:TakeDamageInfo( dmginfo )
+		end
+		
+	else
+		self:EmitGunSound(self.MeleeSoundWallHit)
 	end
 	
 end
@@ -2710,7 +2820,7 @@ function SWEP:NewStabFleshEffect(victim)
 	effect:SetFlags(3)
 	effect:SetScale(6)
 	effect:SetColor(0)
-	effect:SetDamageType(DMG_SLASH)
+	effect:SetDamageType(self.MeleeDamageType)
 		
 	if CLIENT then
 		effect:SetEntity(victim)
@@ -2728,19 +2838,26 @@ end
 
 function SWEP:GetActivities()
 
-	local ent = self
+	if CLIENT then
 
-	local k, v, t
+		local ent = self
 
-	t = { }
+		local k, v, t
 
-	for k, v in ipairs( ent:GetSequenceList( ) ) do
-		table.insert( t, { id = k, act = ent:GetSequenceActivity( k ), actname = ent:GetSequenceActivityName( k ) } )
+		t = { }
+
+		for k, v in ipairs( ent:GetSequenceList( ) ) do
+			table.insert( t, { id = k, act = ent:GetSequenceActivity( k ), actname = ent:GetSequenceActivityName( k ) } )
+		end
+
+		PrintTable(t)
+		print("--------------------")
+		PrintTable(self:GetSequenceList())
+		
 	end
-
-	PrintTable(t)
   
 end
+
 
 function SWEP:SendSequence(anim)
 	local vm = self.Owner:GetViewModel()

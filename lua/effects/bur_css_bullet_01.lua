@@ -1,7 +1,7 @@
 -- Copied from garry's tooltracer
 
 EFFECT.BeamMat = Material( "effects/spark" )
---EFFECT.SmokeMat = Material( "trails/smoke" )
+EFFECT.SmokeMat = Material( "trails/smoke" )
 
 function EFFECT:Init( data )
 
@@ -18,7 +18,6 @@ function EFFECT:Init( data )
 	self.Width = ((Magnitude*50)^0.30)*0.3
 	self.Length = (Range*0.03)^1
 	
-	--local Size = self.Width*self.Length
 	local Ratio = self.Length/self.Width
 
 	self.BulletSpeed = math.Clamp(Ratio * 100,2000,6000) + 1000
@@ -41,17 +40,20 @@ end
 
 function EFFECT:Think()
 	self.PositionPercent = self.PositionPercent + (self.BulletSpeed/self.Distance)*FrameTime()
+	--return self.PositionPercent < 2*self.Width
 	return self.PositionPercent < 1
 end
 
 function EFFECT:Render()
 
-	if self.PositionPercent > 1 then return end
+	
 	
 	local DistanceTraveled = self.PositionPercent * self.Distance
 	local AlphaMath = (1 - self.MaxFade) + math.min(1, ( (self.FadeTime) / math.max(1,DistanceTraveled) ))*self.MaxFade
 	local ConvertMath = ( (self.Length*AlphaMath)/self.Distance )
 	local MinPos = LerpVector(math.Clamp(self.PositionPercent,0,1),self.StartPos,self.EndPos)
+	--local SmokeMinPos = LerpVector(math.Clamp(self.PositionPercent - 1,0,1),self.StartPos,self.EndPos)
+	
 	local MaxPos = LerpVector(math.Clamp( (self.PositionPercent + ConvertMath),0,1),self.StartPos,self.EndPos)
 	--local TotalScale = MinPos:Distance(MaxPos) / (self.Length*AlphaMath)
 	
@@ -61,7 +63,21 @@ function EFFECT:Render()
 	
 	--print(self.BulletSpeed)
 	
-	render.SetMaterial( self.BeamMat )
-	render.DrawBeam( MinPos , MaxPos, self.Width * AlphaMath,0, 1, Color(255,255,255,AlphaMath*255) )
+	if self.PositionPercent <= 1 then
+		render.SetMaterial( self.BeamMat )
+		render.DrawBeam( MinPos , MaxPos, self.Width * AlphaMath,0, 1, Color(255,255,255,AlphaMath*255) )
+	end
 
+	local SmokeMul = self.PositionPercent/(2*self.Width)
+	
+	--[[
+	local SmokeOffset = Vector(0,0,self.PositionPercent)*1
+	local SmokeInverse = (1-SmokeMul)
+	
+	render.SetMaterial( self.SmokeMat )
+	render.DrawBeam( self.StartPos + SmokeOffset , MaxPos + SmokeOffset, self.Width*SmokeMul*2,0, 1, Color(255,255,255,25 * SmokeInverse ) )
+	--]]
+	
+	
+	
 end

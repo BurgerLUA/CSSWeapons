@@ -1,7 +1,10 @@
 -- Copied from garry's tooltracer
 
-EFFECT.BeamMat = Material( "effects/spark" )
-EFFECT.SmokeMat = Material( "trails/smoke" )
+EFFECT.BulletMats = {}
+EFFECT.BulletMats[1] = Material( "effects/spark" )
+EFFECT.BulletMats[2] = Material( "effects/gunshiptracer")
+EFFECT.BulletMats[3] = Material( "effects/laser_tracer" )
+
 
 function EFFECT:Init( data )
 
@@ -17,6 +20,7 @@ function EFFECT:Init( data )
 	self.Distance = self.StartPos:Distance(self.EndPos)
 	self.Width = ((Magnitude*50)^0.30)*0.3
 	self.Length = (Range*0.03)^1
+	self.DamageType = data:GetDamageType()
 	
 	local Ratio = self.Length/self.Width
 
@@ -27,7 +31,7 @@ function EFFECT:Init( data )
 	self:SetRenderBoundsWS( self.StartPos, self.EndPos )
 	
 	-- Copied from Garrysmod Arrow Widget
-	if self.WeaponEnt and self.WeaponEnt ~= NULL and not self.WeaponEnt:IsCarriedByLocalPlayer() then
+	if self.WeaponEnt and self.WeaponEnt ~= NULL and (!self.WeaponEnt:IsWeapon() or !self.WeaponEnt:IsCarriedByLocalPlayer()) then
 		local Distance, Position, WhatIsThis = util.DistanceToLine(self.StartPos,self.EndPos,EyePos())
 		local SoundSize = 256*self.Width
 		if Distance <= SoundSize then
@@ -64,8 +68,15 @@ function EFFECT:Render()
 	--print(self.BulletSpeed)
 	
 	if self.PositionPercent <= 1 then
-		render.SetMaterial( self.BeamMat )
+	
+		if self.BulletMats[self.DamageType] then
+			render.SetMaterial( self.BulletMats[self.DamageType] )
+		else
+			render.SetMaterial( self.BulletMats[DMG_BULLET] )
+		end
+
 		render.DrawBeam( MinPos , MaxPos, self.Width * AlphaMath,0, 1, Color(255,255,255,AlphaMath*255) )
+		
 	end
 
 	local SmokeMul = self.PositionPercent/(2*self.Width)

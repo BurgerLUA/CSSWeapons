@@ -30,32 +30,9 @@ function ENT:Initialize()
 end
 
 function ENT:PhysicsCollide(data, physobj)
-
-	if SERVER then
-	
-		if self:GetVelocity():Length() > 50 then
-		
-			self:EmitSound(self.BounceSound)
-			
-			if self:GetVelocity():Length() > 100 then
-				if data.HitEntity and data.HitEntity:Health() then
-
-					local dmginfo = DamageInfo()
-					
-					dmginfo:SetDamage(10)
-					dmginfo:SetAttacker(self.Owner or self)
-					dmginfo:SetInflictor(self)
-					dmginfo:SetDamageType(DMG_CRUSH)
-				
-					data.HitEntity:TakeDamageInfo(dmginfo)
-					
-				end
-			end
-
-		end
-
+	if self:GetVelocity():Length() > 50 then
+		self:EmitSound(self.BounceSound)
 	end
-	
 end
 
 function ENT:Think()

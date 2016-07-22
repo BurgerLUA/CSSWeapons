@@ -216,6 +216,11 @@ SWEP.Primary.Automatic 		= true
 
 SWEP.DamageFalloff			= 10000
 
+SWEP.DamageType				= 1
+
+-- 1 = Normal
+-- 2 = Ar2
+
 SWEP.FatalHeadshot			= false
 
 SWEP.ReloadSound 			= nil
@@ -606,9 +611,18 @@ function SWEP:Deploy()
 		self:SetNextPrimaryFire(CurTime() + self.Owner:GetViewModel():SequenceDuration() )
 	end
 	
+	self:SpecialDeploy()
+	
 	return true
 	
 end
+
+function SWEP:SpecialDeploy()
+
+
+end
+
+
 
 function SWEP:CheckInventory()
 	if SERVER then
@@ -740,7 +754,7 @@ function SWEP:GetZoomed()
 end
 
 function SWEP:PrimaryAttack()
-	
+
 	if self:GetIsShotgunReload() and self:GetIsReloading() and not self.Owner:IsBot() then
 		self:FinishShotgunReload()
 	end
@@ -1365,7 +1379,7 @@ function SWEP:ShootPhysicalObject(Source,Cone)
 		--print("HELLO?")
 	else
 		SafeRemoveEntity(Bullet)
-		error("WARNING: INVALID ENTITY: " .. Bullet)
+		--error("WARNING: INVALID ENTITY: " .. Bullet)
 	end
 
 	if IsFirstTimePredicted() then
@@ -1527,6 +1541,7 @@ function SWEP:GenerateEffectData(origin,start,HitEntity,IsCSSTracer)
 	if IsCSSTracer then
 		Data:SetMagnitude(self.Primary.Damage)
 		Data:SetRadius(self.DamageFalloff)
+		Data:SetDamageType(self.DamageType)
 	end
 
 	return Data
@@ -1748,11 +1763,11 @@ function SWEP:GetViewModelPosition( pos, ang )
 		self.fIronTime = CurTime()
 		
 		if ( bIron ) then 
-			self.SwayScale 	= 0.1
-			self.BobScale 	= 0.1
+			self.SwayScale 	= self.VelConeMul * 0.5
+			self.BobScale 	= self.VelConeMul * 0.5
 		else 
-			self.SwayScale 	= 1
-			self.BobScale 	= 1
+			self.SwayScale 	= self.VelConeMul * 0.5
+			self.BobScale 	= self.VelConeMul * 0.5
 		end
 	
 	end
@@ -2714,6 +2729,8 @@ function SWEP:NewSendHitEvent(victim,damage,TraceData)
 						VictimWeapon:BlockDamage(damage,self.Owner)
 						self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*3)
 						VictimWeapon:SetNextSecondaryFire(CurTime() + self.Primary.Delay*0.25)
+						self:SetShouldMelee(false)
+						VictimWeapon:SetShouldMelee(false)
 						self:EmitGunSound("weapons/samurai/tf_katana_impact_object_02.wav")
 						ShouldDamage = false
 					end
@@ -2795,7 +2812,7 @@ function SWEP:NewStabDamage(damage, victim)
 		dmginfo:SetDamageType( self.MeleeDamageType )
 		dmginfo:SetAttacker( self.Owner )
 		dmginfo:SetInflictor( self )
-		dmginfo:SetDamageForce( self.Owner:GetForward() )
+		--dmginfo:SetDamageForce( self.Owner:GetForward() )
 			
 		if SERVER then
 			victim:TakeDamageInfo( dmginfo )

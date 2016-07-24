@@ -248,12 +248,143 @@ end
 
 concommand.Add("cssplayersettings", CSSClientsideWeaponSettings)
 
+local ContextMenuIsOpen = false
+
 function CSS_ContextMenuOpen()
+	ContextMenuIsOpen = true
+end
 
-	--CSSClientsideWeaponSettings()
+hook.Add("OnContextMenuOpen","CSS Open Context Menu",CSS_ContextMenuOpen)
 
+function CSS_ContextMenuClose()
+	ContextMenuIsOpen = false
+end
+
+hook.Add("OnContextMenuClose","CSS Close Context Menu",CSS_ContextMenuClose)
+
+
+
+
+
+function CSS_ContextMenuHUDPaint()
+
+	if ContextMenuIsOpen == true then
+	
+		local ply = LocalPlayer()
+		local x = ScrW()
+		local y = ScrH()
+		local BasePosX = x*0.1
+		local BasePosY = y*0.1
+		local Font = DermaLarge
+		local FontSize = 36
+		
+		local weapon = ply:GetActiveWeapon()
+		
+		if weapon and weapon ~= NULL and weapon.Base == "weapon_cs_base" then
+		
+			
+			-- Start Data
+			
+				local Name = language.GetPhrase(weapon.Primary.Ammo .. "_ammo") .. " " .. weapon.PrintName .. " | " .. weapon.Category
+				
+				local Damage = 0
+				if weapon.WeaponType == "Melee" then
+					Damage = weapon.Primary.Damage
+				else
+					Damage = GetConVar("sv_css_damage_scale"):GetFloat() * weapon.Primary.Damage * weapon.Primary.NumShots
+				end
+				
+				Damage = math.Round(Damage, 2 )
+				
+
+				local BaseAccuracy = 0.1
+				local Accuracy = (BaseAccuracy - math.Clamp(weapon.Primary.Cone,0,BaseAccuracy)) / BaseAccuracy
+				
+				Accuracy = math.Round(Accuracy, 2 )
+				
+				
+				local FullRange = weapon.DamageFalloff
+				local BaseRange = FullRange*2
+				local PartialRange = weapon.DamageFalloff
+				local ViewDistance = ply:GetEyeTrace().HitPos:Distance(EyePos())
+				local MatterScale = GetConVar("sv_css_damagefalloff_scale"):GetFloat()
+				
+				
+			-- End Data
+		
+			draw.RoundedBox( 8, ScrW()*0.1 - FontSize , ScrH()*0.1 - FontSize, ScrW()*0.8 + FontSize*2, ScrH()*0.8 + FontSize*2, Color(0,0,0,100 ) )
+		
+		
+		
+			surface.SetFont( "DermaLarge" )
+			surface.SetTextColor( Color(239,184,55,255) )
+			surface.SetDrawColor( 239,184,55, 100 )
+			draw.NoTexture()
+				
+		
+		
+				surface.SetTextPos( BasePosX,BasePosY  )
+				surface.DrawText( Name )
+				surface.DrawRect( BasePosX, BasePosY + FontSize, BasePosX*3, 2 )
+				
+				
+				-- Damage
+				surface.DrawRect( BasePosX, BasePosY + FontSize*2, BasePosX*3, FontSize )
+				surface.DrawRect( BasePosX, BasePosY + FontSize*2, BasePosX*3 * math.Clamp((Damage/100),0,1), FontSize )
+				surface.SetTextPos( BasePosX,BasePosY + FontSize*2  )
+				surface.DrawText( " Damage: " .. Damage)
+				
+				-- Accuracy
+				surface.DrawRect( BasePosX, BasePosY + FontSize*4, BasePosX*3, FontSize )
+				surface.DrawRect( BasePosX, BasePosY + FontSize*4, BasePosX*3 * Accuracy, FontSize )
+				surface.SetTextPos( BasePosX,BasePosY + FontSize*4 )
+				surface.DrawText( " Accuracy: " .. Accuracy*100 .. "%")
+				
+				-- Range
+				surface.DrawRect( BasePosX, BasePosY + FontSize*6, BasePosX*3, FontSize )
+				surface.DrawRect( BasePosX, BasePosY + FontSize*6, BasePosX*3 * 0.5, FontSize )
+				surface.SetTextPos( BasePosX,BasePosY + FontSize*6 )
+				surface.DrawText( " Range: " .. math.Round(FullRange * (19.05)*0.01,2) .. " meters")
+				
+				
+				
+				local PolyBaseX = BasePosX + (BasePosX*3 * 0.5)
+				local PolyBaseY = BasePosY + FontSize*6
+				
+				
+				local TriAngle = {
+					{x = PolyBaseX,y = PolyBaseY},
+					{x = PolyBaseX + BasePosX*3*0.5*(1-MatterScale),y = PolyBaseY + FontSize*(1-MatterScale)},
+					{x = PolyBaseX,y = PolyBaseY + FontSize*(1-MatterScale)},
+				}
+				surface.DrawPoly( TriAngle )
+				
+				surface.DrawRect( PolyBaseX, PolyBaseY + FontSize * ( 1 - MatterScale), BasePosX*1.5 , FontSize*MatterScale )
+				
+				
+
+				surface.SetDrawColor( 255,0,0, 255 )
+				surface.DrawRect( BasePosX + BasePosX*3*math.Clamp(ViewDistance/(BaseRange),0,1), BasePosY + FontSize*6, 2, FontSize )
+				surface.SetDrawColor( 239,184,55, 100 )
+				surface.SetTextColor( Color(255,0,0,255) )
+				surface.SetTextPos( BasePosX + BasePosX*3*math.Clamp(ViewDistance/(BaseRange),0,1),BasePosY + FontSize*6 )	
+				
+				local DamageScale = math.min( (2) - (ViewDistance/FullRange),1)
+				
+				
+				surface.DrawText( math.Clamp(DamageScale * Damage,Damage * MatterScale,Damage) )
+
+			
+				
+				
+		end
+	
+	end
 
 end
 
-hook.Add("ContextMenuOpen","CSS Context Menu",CSS_ContextMenuOpen)
+hook.Add("HUDPaint","CSS_ContextMenuHUDPaint",CSS_ContextMenuHUDPaint)
+
+
+
 

@@ -50,8 +50,6 @@ end
 
 function EFFECT:Render()
 
-	
-	
 	local DistanceTraveled = self.PositionPercent * self.Distance
 	local AlphaMath = (1 - self.MaxFade) + math.min(1, ( (self.FadeTime) / math.max(1,DistanceTraveled) ))*self.MaxFade
 	local ConvertMath = ( (self.Length*AlphaMath)/self.Distance )

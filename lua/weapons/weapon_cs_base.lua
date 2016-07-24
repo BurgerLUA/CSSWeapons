@@ -334,8 +334,6 @@ SWEP.MeleeRange				= 40
 SWEP.DrawAmmo				= true
 SWEP.DrawCrosshair			= false
 SWEP.Weight					= 0
-SWEP.AutoSwitchTo			= false
-SWEP.AutoSwitchFrom			= false
 
 SWEP.Secondary.Ammo 		= "none"
 SWEP.Secondary.SpareClip	= 0
@@ -409,12 +407,18 @@ function SWEP:SetupDataTables( )
 	self:SetNextMelee(0)
 	self:NetworkVar("Float",14,"NextMeleeDamage")
 	self:SetNextMeleeDamage(0)
+	self:NetworkVar("Float",15,"BulletsPerSecond")
+	self:SetBulletsPerSecond(0)
+	self:NetworkVar("Float",16,"ClashTime")
+	self:SetClashTime(0)
+	
 
 	self:NetworkVar("Float",31,"SpecialFloat") -- For Special Stuff
 	self:SetSpecialFloat(0)
 
 	self:NetworkVar("Int",0,"BulletQueue")
 	self:SetBulletQueue(0)
+
 
 	self:NetworkVar("Bool",0,"IsReloading")
 	self:SetIsReloading( false )
@@ -914,8 +918,22 @@ function SWEP:PreShootBullet() -- Should be predicted
 		Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
 	end
 	
+	self:SetBulletsPerSecond( self:GetBulletsPerSecond() + 1 )
+	
 	if Shots == 1 then
-		self:ShootBullet(Damage,1,Cone,Source,Direction,self.Owner)
+	
+		--math.randomseed( math.ceil(self:GetBulletsPerSecond()) )
+		local Multi01 = math.random(-100,100) / 100
+		--math.randomseed( math.ceil(self:GetBulletsPerSecond()) + 100 )
+		local Multi02 = math.random(-100,100) / 100
+		--math.randomseed( math.ceil(self:GetBulletsPerSecond()) + 1000 )
+		local Multi03 = math.random(-100,100) / 100
+	
+		local RandAngle = Angle(Cone*Multi01*45,Cone*Multi02*45,Cone*Multi03*45)
+		local UselessVector, UsefulAngle = WorldToLocal(Vector(0,0,0), self.Owner:EyeAngles() , Vector(0,0,0), RandAngle )
+		local NewDirection = ( UsefulAngle + self.Owner:GetPunchAngle() ):Forward()
+		self:ShootBullet(Damage,1,0,Source,NewDirection,self.Owner)
+
 	else
 		for i=1, Shots do
 		
@@ -1390,6 +1408,7 @@ end
 
 
 function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastEntity)
+
 	if self and self.BulletEnt then
 		if SERVER then
 			self:ShootPhysicalObject(Source,Cone)
@@ -1403,7 +1422,7 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastEntity)
 		bullet.Dir		= Direction
 		bullet.AmmoType = self.Primary.Ammo
 		bullet.HullSize = 0
-		bullet.Tracer = 0
+		bullet.Tracer 	= 0
 		bullet.Force	= nil
 		bullet.Callback = function(attacker,tr,dmginfo)
 			self:BulletCallback(Damage,Direction,LastEntity,attacker,tr,dmginfo)
@@ -1412,44 +1431,61 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastEntity)
 	end
 end
 
-function SWEP:BulletCallback(Damage,Direction,HitEnt,attacker,tr,dmginfo)
+function SWEP:BulletCallback(Damage,Direction,PreviousHitEntity,attacker,tr,dmginfo)
 
-	if IsFirstTimePredicted() then
-		self:TracerCreation(tr.HitPos,tr.StartPos,Direction,HitEnt)
-	end
+	local CurrentHitEntity = tr.Entity
 
-	if attacker:IsPlayer() then
+	--if IsFirstTimePredicted() then
 	
-		local Weapon = attacker:GetActiveWeapon()
-
-		if Weapon and Weapon.DamageFalloff then
-			if Weapon.DamageFalloff > 0 then
-				local Distance = tr.StartPos:Distance(tr.HitPos)
-				local DamageMul = math.Clamp(GetConVarNumber("sv_css_damagefalloff_scale"),0,1)
-				local DFMod = (1 - DamageMul) + math.min(1, ( (Weapon.DamageFalloff) / Distance ))*DamageMul
-				dmginfo:ScaleDamage(DFMod)
+		--[[
+		--if CLIENT then
+			if self.Owner:SteamID() == "STEAM_0:0:15446066" then
+				print("BulletCallback:",PreviousHitEntity,CurrentHitEntity)
 			end
-		end
-
-		if GetConVarNumber("sv_css_enable_penetration") == 1 then
-			if not (HitEnt:IsPlayer() and HitEnt ~= self.Owner) then
-				self:WorldBulletSolution(tr.HitPos,Direction,Damage)
-			end
-		end
+		--end
+		--]]
 		
-		if SERVER then
-			if tr.Entity:GetClass() == "prop_vehicle_prisoner_pod" or tr.Entity:IsVehicle() then
-				if tr.Entity:GetDriver() ~= NULL then
-					tr.Entity:GetDriver():TakeDamageInfo(dmginfo)
+		if IsFirstTimePredicted() then
+			self:TracerCreation(tr.HitPos,tr.StartPos,Direction,PreviousHitEntity)
+		end
+
+		if attacker:IsPlayer() then
+		
+			local Weapon = attacker:GetActiveWeapon()
+
+			if Weapon and Weapon.DamageFalloff then
+				if Weapon.DamageFalloff > 0 then
+				
+					local MatterScale = GetConVar("sv_css_damagefalloff_scale"):GetFloat()
+				
+					local Falloff = Weapon.DamageFalloff
+					local Distance = tr.StartPos:Distance(tr.HitPos)
+					local DamageScale = math.Clamp(math.min( (2) - (Distance/Falloff),1),0,1)
+					
+					dmginfo:SetDamage(self.Primary.Damage*DamageScale,self.Primary.Damage*MatterScale,self.Primary.Damage)
+					
 				end
 			end
-		end
-		
-	end
 
+			if GetConVarNumber("sv_css_enable_penetration") == 1 then
+				self:WorldBulletSolution(tr.HitPos,Direction,Damage,CurrentHitEntity)
+			end
+			
+			if SERVER then
+				if tr.Entity:GetClass() == "prop_vehicle_prisoner_pod" or CurrentHitEntity:IsVehicle() then
+					if CurrentHitEntity:GetDriver() ~= NULL then
+						CurrentHitEntity:GetDriver():TakeDamageInfo(dmginfo)
+					end
+				end
+			end
+			
+		end
+
+	--end
+	
 end
 
-function SWEP:WorldBulletSolution(Pos,Direction,Damage)
+function SWEP:WorldBulletSolution(Pos,Direction,Damage,PreviousHitEntity)
 
 	local Amount = 3
 	
@@ -1459,7 +1495,13 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 	data.endpos = Pos + Direction*Amount
 	
 	local trace = util.TraceLine(data)
-	local HitEnt = trace.Entity
+	local CurrentHitEntity = trace.Entity
+	
+	--[[
+	if self.Owner:SteamID() == "STEAM_0:0:15446066" then
+		print("BulletCallback:",PreviousHitEntity,CurrentHitEntity)
+	end
+	--]]
 	
 	local MatMul = 1
 	local mat = trace.MatType
@@ -1479,12 +1521,12 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage)
 	local DamageMath = math.Round(Damage - (GetConVarNumber("sv_css_penetration_scale")*MatMul*math.max(0.1,self.PenetrationLossMul)*Amount),2)
 	
 	if DamageMath > 0 then
-		if trace.StartSolid then
-			self:WorldBulletSolution(data.endpos,Direction,DamageMath)
+		if trace.StartSolid or (PreviousHitEntity == CurrentHitEntity) then
+			self:WorldBulletSolution(data.endpos,Direction,DamageMath,CurrentHitEntity)
 		else
 			EnableCustomTracers = false
 			EnableOriginalTracers = false
-			self:ShootBullet(DamageMath, 1, 0, data.endpos,Direction,HitEnt)
+			self:ShootBullet(DamageMath, 1, 0, data.endpos,Direction,CurrentHitEntity)
 			
 			local BackTraceData = {}
 			BackTraceData.start = Pos + Direction
@@ -1762,13 +1804,8 @@ function SWEP:GetViewModelPosition( pos, ang )
 		self.bLastIron = bIron 
 		self.fIronTime = CurTime()
 		
-		if ( bIron ) then 
-			self.SwayScale 	= self.VelConeMul * 0.5
-			self.BobScale 	= self.VelConeMul * 0.5
-		else 
-			self.SwayScale 	= self.VelConeMul * 0.5
-			self.BobScale 	= self.VelConeMul * 0.5
-		end
+		self.SwayScale 	= math.Clamp(self.VelConeMul * 0.5,0.5,2)
+		self.BobScale 	= math.Clamp(self.VelConeMul * 0.5,0.5,2)
 	
 	end
 	
@@ -1836,6 +1873,7 @@ function SWEP:Think()
 	self:SwingThink()
 	self:HolsterThink()
 	self:IdleThink()
+	self:HandleBulletsPerSecond()
 	
 	if (CLIENT or IsSingleplayer) then
 		
@@ -1856,6 +1894,12 @@ function SWEP:Think()
 	
 	end
 	
+end
+
+function SWEP:HandleBulletsPerSecond()
+	if self:GetCoolTime() <= CurTime() then
+		self:SetBulletsPerSecond( math.Clamp(self:GetBulletsPerSecond() - FrameTime(),0,100) )
+	end
 end
 
 function SWEP:IdleThink()
@@ -2533,6 +2577,7 @@ end
 
 function SWEP:SwitchToPrimary()
 
+	
 	if self.Owner and self.Owner ~= NULL then
 		if self.Owner:IsBot() then
 			if SERVER then
@@ -2549,10 +2594,11 @@ function SWEP:SwitchToPrimary()
 				end
 				
 			end
-		else
+		elseif SERVER or (CLIENT and self.Owner == LocalPlayer()) then
 			self.Owner:ConCommand("lastinv")
 		end
 	end
+	
 	
 end
 
@@ -2612,8 +2658,11 @@ function SWEP:QuickKnife()
 
 end
 
-function SWEP:NewSwing(damage,entoverride,delayoverride)
+function SWEP:NewSwing(damage,delay,entoverride,delayoverride)
 
+	if delay then
+		self:SetClashTime(CurTime() + delay)
+	end
 
 	if self.MeleeDelay > 0 then
 		self:SetShouldMelee(true)
@@ -2722,15 +2771,19 @@ function SWEP:NewSendHitEvent(victim,damage,TraceData)
 
 		if VictimWeapon and VictimWeapon ~= NULL then
 			if VictimWeapon.WeaponType == "Melee" then
-				local VictimKeyDown = VictimWeapon:GetIsBlocking() or VictimWeapon:GetShouldMelee()
-				if VictimKeyDown and VictimWeapon:GetNextSecondaryFire() <= CurTime() then
+				if (VictimWeapon:GetIsBlocking() and VictimWeapon:GetNextSecondaryFire() <= CurTime()) or ( VictimWeapon:GetClashTime() >= CurTime() and math.abs(VictimWeapon:GetClashTime() - self:GetClashTime()) > self.MeleeDelay ) then
+				
+					
+					
+				
+				
+				
+				
 					local Range = 90
 					if Yaw > 180 - Range/2 and Yaw < 180 + Range/2 then
 						VictimWeapon:BlockDamage(damage,self.Owner)
-						self:SetNextPrimaryFire(CurTime() + self.Primary.Delay*3)
-						VictimWeapon:SetNextSecondaryFire(CurTime() + self.Primary.Delay*0.25)
 						self:SetShouldMelee(false)
-						VictimWeapon:SetShouldMelee(false)
+						VictimWeapon:SetShouldMelee(false)	
 						self:EmitGunSound("weapons/samurai/tf_katana_impact_object_02.wav")
 						ShouldDamage = false
 					end
@@ -2790,6 +2843,11 @@ function SWEP:NewSendHitEvent(victim,damage,TraceData)
 		
 		
 	end
+
+end
+
+function SWEP:BlockDamage()
+
 
 end
 

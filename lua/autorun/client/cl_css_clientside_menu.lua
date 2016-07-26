@@ -192,7 +192,7 @@ function CSSClientsideWeaponSettings()
 			DermaTitle[k]:SetText( Table["name"] )
 			DermaTitle[k]:SizeToContents()			
 			DermaObj[k]:SetWide( Base1:GetWide() - 10 - 20 )
-			DermaObj[k]:SetValue(GetConVarNumber(Table["command"]))
+			DermaObj[k]:SetValue(GetConVar(Table["command"]):GetFloat())
 			DermaObj[k]:SetMin( Table["min"] ) -- Minimum number of the slider
 			DermaObj[k]:SetMax( Table["max"] ) -- Maximum number of the slider
 			DermaObj[k]:SetDecimals( Table["decimals"] ) -- Sets a decimal. Zero means it's a whole number
@@ -223,10 +223,10 @@ function CSSClientsideWeaponSettings()
 			DermaObj[k]:SetWangs( true )
 			
 			DermaObj[k]:SetColor( Color( 
-								GetConVarNumber("cl_css_crosshair_color_r"), 
-								GetConVarNumber("cl_css_crosshair_color_g"), 
-								GetConVarNumber("cl_css_crosshair_color_b"),
-								GetConVarNumber("cl_css_crosshair_color_a") 
+								GetConVar("cl_css_crosshair_color_r"):GetFloat(), 
+								GetConVar("cl_css_crosshair_color_g"):GetFloat(), 
+								GetConVar("cl_css_crosshair_color_b"):GetFloat(),
+								GetConVar("cl_css_crosshair_color_a"):GetFloat() 
 								) )
 			
 			DermaObj[k]:SetConVarR("cl_css_crosshair_color_r")
@@ -248,33 +248,30 @@ end
 
 concommand.Add("cssplayersettings", CSSClientsideWeaponSettings)
 
-local ContextMenuIsOpen = false
+CSS_ContextMenuIsOpen = false
 
 function CSS_ContextMenuOpen()
-	ContextMenuIsOpen = true
+	CSS_ContextMenuIsOpen = true
 end
 
 hook.Add("OnContextMenuOpen","CSS Open Context Menu",CSS_ContextMenuOpen)
 
 function CSS_ContextMenuClose()
-	ContextMenuIsOpen = false
+	CSS_ContextMenuIsOpen = false
 end
 
 hook.Add("OnContextMenuClose","CSS Close Context Menu",CSS_ContextMenuClose)
 
 
-
-
-
 function CSS_ContextMenuHUDPaint()
 
-	if ContextMenuIsOpen == true then
+	if CSS_ContextMenuIsOpen == true then
 	
 		local ply = LocalPlayer()
 		local x = ScrW()
 		local y = ScrH()
-		local BasePosX = x*0.1
-		local BasePosY = y*0.1
+		local BasePosX = 192
+		local BasePosY = 108
 		local Font = DermaLarge
 		local FontSize = 36
 		
@@ -284,25 +281,50 @@ function CSS_ContextMenuHUDPaint()
 		
 			
 			-- Start Data
-			
+				
+				-- Name
 				local Name = language.GetPhrase(weapon.Primary.Ammo .. "_ammo") .. " " .. weapon.PrintName .. " | " .. weapon.Category
 				
+				-- ClipSize
+				
+				local ClipSize = weapon.Primary.ClipSize
+				
+				
+				-- Damage
 				local Damage = 0
 				if weapon.WeaponType == "Melee" then
 					Damage = weapon.Primary.Damage
 				else
 					Damage = GetConVar("sv_css_damage_scale"):GetFloat() * weapon.Primary.Damage * weapon.Primary.NumShots
 				end
-				
 				Damage = math.Round(Damage, 2 )
 				
-
+				-- Firerate
+				
+				local Delay = weapon.Primary.Delay
+				local RPM = (1/Delay)*60
+				
+				-- DPS
+				local ClipMod = ClipSize
+				if ClipMod == -1 then
+					ClipMod = 100000		
+				end
+				local DPS = math.min( (1/Delay) * Damage , Damage * ClipMod)
+				
+				
+				-- Kill Time
+				local KillTime = ( (math.ceil(100/Damage) - 1) * (Delay) )
+				
+				-- Accuracy
+				local Cone = weapon.Primary.Cone
+				local NewCone = weapon:HandleCone(Cone,false)
 				local BaseAccuracy = 0.1
-				local Accuracy = (BaseAccuracy - math.Clamp(weapon.Primary.Cone,0,BaseAccuracy)) / BaseAccuracy
+				local Accuracy = (BaseAccuracy - math.Clamp(NewCone,0,BaseAccuracy)) / BaseAccuracy
+				Accuracy = math.Round(Accuracy, 2 )			
 				
-				Accuracy = math.Round(Accuracy, 2 )
 				
-				
+
+				-- Range
 				local FullRange = weapon.DamageFalloff
 				local BaseRange = FullRange*2
 				local PartialRange = weapon.DamageFalloff
@@ -312,71 +334,105 @@ function CSS_ContextMenuHUDPaint()
 				
 			-- End Data
 		
-			draw.RoundedBox( 8, ScrW()*0.1 - FontSize , ScrH()*0.1 - FontSize, ScrW()*0.8 + FontSize*2, ScrH()*0.8 + FontSize*2, Color(0,0,0,100 ) )
+			draw.RoundedBox( 8, ScrW()*0.1 - FontSize , ScrH()*0.1 - FontSize, BasePosX*3 + FontSize*2, FontSize*15, Color(0,0,0,200 ) )
 		
-		
+			local TextColor = Color(239,184,55,255)
+			local PrimaryColor = Color(239,184,55,100)
+			local SecondaryColor = TextColor
 		
 			surface.SetFont( "DermaLarge" )
-			surface.SetTextColor( Color(239,184,55,255) )
-			surface.SetDrawColor( 239,184,55, 100 )
+			surface.SetTextColor( TextColor )
+			surface.SetDrawColor( PrimaryColor )
 			draw.NoTexture()
 				
-		
-		
+				-- Title
+				local PosNumber = 0
 				surface.SetTextPos( BasePosX,BasePosY  )
 				surface.DrawText( Name )
 				surface.DrawRect( BasePosX, BasePosY + FontSize, BasePosX*3, 2 )
 				
-				
 				-- Damage
-				surface.DrawRect( BasePosX, BasePosY + FontSize*2, BasePosX*3, FontSize )
-				surface.DrawRect( BasePosX, BasePosY + FontSize*2, BasePosX*3 * math.Clamp((Damage/100),0,1), FontSize )
-				surface.SetTextPos( BasePosX,BasePosY + FontSize*2  )
-				surface.DrawText( " Damage: " .. Damage)
+				PosNumber = PosNumber + 2
+				surface.DrawRect( BasePosX, BasePosY + FontSize*PosNumber, BasePosX*3, FontSize )
+				surface.DrawRect( BasePosX, BasePosY + FontSize*PosNumber, BasePosX*3 * math.Clamp((Damage/100),0,1), FontSize )
+				surface.SetTextPos( BasePosX,BasePosY + FontSize*PosNumber  )
+				surface.DrawText( " Damage: " .. math.Round(Damage))
+				
+				-- Firerate
+				PosNumber = PosNumber + 2
+				surface.DrawRect( BasePosX, BasePosY + FontSize*PosNumber, BasePosX*3, FontSize )
+				surface.DrawRect( BasePosX, BasePosY + FontSize*PosNumber, BasePosX*3 * math.Clamp((RPM/1000),0,1), FontSize )
+				surface.SetTextPos( BasePosX,BasePosY + FontSize*PosNumber  )
+				surface.DrawText( " RPM: " .. math.Round(RPM))
+				
+				-- Damage Per Second
+				PosNumber = PosNumber + 2
+				surface.DrawRect( BasePosX, BasePosY + FontSize*PosNumber, BasePosX*3, FontSize )
+				surface.DrawRect( BasePosX, BasePosY + FontSize*PosNumber, BasePosX*3 * math.Clamp(DPS/600,0,1), FontSize )
+				surface.SetTextPos( BasePosX,BasePosY + FontSize*PosNumber  )
+				surface.DrawText( " DPS: " .. math.Round(DPS,2))
+				
+				-- Kill Time
+				PosNumber = PosNumber + 2
+				surface.DrawRect( BasePosX, BasePosY + FontSize*PosNumber, BasePosX*3, FontSize )
+	
+				surface.SetDrawColor( SecondaryColor )
+				surface.SetTextColor( SecondaryColor )
+				surface.SetFont( "DermaDefault" )
+				
+				if Delay > 0.05 then
+					for i=0, 1/Delay do
+						local XPos = BasePosX + i*Delay*BasePosX*3
+						surface.DrawRect( XPos, BasePosY + FontSize*PosNumber, 2, FontSize )
+						draw.SimpleText( math.Round(Delay,2)*i .. "(" .. (i+1)*math.Round(Damage,2) .. ")", "DermaDefault", XPos,BasePosY + FontSize*PosNumber + FontSize,TextColor,TEXT_ALIGN_CENTER,TEXT_ALIGN_TOP)
+					end
+				end
+				surface.SetFont( "DermaLarge" )
+				surface.SetTextColor( TextColor )
+				surface.SetDrawColor( PrimaryColor )
+				
+				surface.DrawRect( BasePosX, BasePosY + FontSize*PosNumber, BasePosX*3 * math.Clamp(KillTime/1,0,1), FontSize )
+				surface.SetTextPos( BasePosX,BasePosY + FontSize*PosNumber  )
+				surface.DrawText( " Kill Time: " .. math.Round(KillTime,2) .. " seconds")
+				
+
+				
 				
 				-- Accuracy
-				surface.DrawRect( BasePosX, BasePosY + FontSize*4, BasePosX*3, FontSize )
-				surface.DrawRect( BasePosX, BasePosY + FontSize*4, BasePosX*3 * Accuracy, FontSize )
-				surface.SetTextPos( BasePosX,BasePosY + FontSize*4 )
+				PosNumber = PosNumber + 2
+				surface.DrawRect( BasePosX, BasePosY + FontSize*PosNumber, BasePosX*3, FontSize )
+				surface.DrawRect( BasePosX, BasePosY + FontSize*PosNumber, BasePosX*3 * Accuracy, FontSize )
+				surface.SetTextPos( BasePosX,BasePosY + FontSize*PosNumber )
 				surface.DrawText( " Accuracy: " .. Accuracy*100 .. "%")
 				
 				-- Range
-				surface.DrawRect( BasePosX, BasePosY + FontSize*6, BasePosX*3, FontSize )
-				surface.DrawRect( BasePosX, BasePosY + FontSize*6, BasePosX*3 * 0.5, FontSize )
-				surface.SetTextPos( BasePosX,BasePosY + FontSize*6 )
-				surface.DrawText( " Range: " .. math.Round(FullRange * (19.05)*0.01,2) .. " meters")
+				PosNumber = PosNumber + 2
+				surface.DrawRect( BasePosX, BasePosY + FontSize*PosNumber, BasePosX*3, FontSize )
+				surface.DrawRect( BasePosX, BasePosY + FontSize*PosNumber, BasePosX*3 * 0.5, FontSize )
+				surface.SetTextPos( BasePosX,BasePosY + FontSize*PosNumber )
 				
 				
-				
+				surface.DrawText( " Range: " .. math.Round(FullRange/(64/1.22),2) .. " meters")
 				local PolyBaseX = BasePosX + (BasePosX*3 * 0.5)
-				local PolyBaseY = BasePosY + FontSize*6
-				
-				
+				local PolyBaseY = BasePosY + FontSize*PosNumber
 				local TriAngle = {
 					{x = PolyBaseX,y = PolyBaseY},
 					{x = PolyBaseX + BasePosX*3*0.5*(1-MatterScale),y = PolyBaseY + FontSize*(1-MatterScale)},
 					{x = PolyBaseX,y = PolyBaseY + FontSize*(1-MatterScale)},
 				}
 				surface.DrawPoly( TriAngle )
-				
 				surface.DrawRect( PolyBaseX, PolyBaseY + FontSize * ( 1 - MatterScale), BasePosX*1.5 , FontSize*MatterScale )
-				
-				
-
-				surface.SetDrawColor( 255,0,0, 255 )
-				surface.DrawRect( BasePosX + BasePosX*3*math.Clamp(ViewDistance/(BaseRange),0,1), BasePosY + FontSize*6, 2, FontSize )
-				surface.SetDrawColor( 239,184,55, 100 )
-				surface.SetTextColor( Color(255,0,0,255) )
-				surface.SetTextPos( BasePosX + BasePosX*3*math.Clamp(ViewDistance/(BaseRange),0,1),BasePosY + FontSize*6 )	
-				
+				surface.SetDrawColor( SecondaryColor )
+				surface.DrawRect( BasePosX + BasePosX*3*math.Clamp(ViewDistance/(BaseRange),0,1), BasePosY + FontSize*PosNumber, 2, FontSize )
+				--surface.SetTextColor( SecondaryColor )
+				--surface.SetTextPos( BasePosX + BasePosX*3*math.Clamp(ViewDistance/(BaseRange),0,1),BasePosY + FontSize*PosNumber )	
 				local DamageScale = math.min( (2) - (ViewDistance/FullRange),1)
 				
+				draw.SimpleText(math.Round(math.Clamp(DamageScale * Damage,Damage * MatterScale,Damage),2) .. " Damage", "DermaDefault", BasePosX + BasePosX*3*math.Clamp(ViewDistance/(BaseRange),0,1),BasePosY + FontSize*PosNumber + FontSize,TextColor,TEXT_ALIGN_CENTER,TEXT_ALIGN_TOP)
 				
-				surface.DrawText( math.Clamp(DamageScale * Damage,Damage * MatterScale,Damage) )
+				
+				surface.SetDrawColor( PrimaryColor )				
 
-			
-				
-				
 		end
 	
 	end

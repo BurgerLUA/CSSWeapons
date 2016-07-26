@@ -54,8 +54,10 @@ SWEP.HasDownRecoil			= false
 SWEP.HasIronSights 			= false
 SWEP.EnableIronCross		= false
 SWEP.HasGoodSights			= false
-SWEP.IronSightTime			= 0
-SWEP.IronSightsPos 			= Vector(-6, 0, -4)
-SWEP.IronSightsAng 			= Vector(0, 0, 0)
+SWEP.IronSightTime			= 0.25
+SWEP.IronSightsPos 			= Vector(-7, -5, 2)
+SWEP.IronSightsAng 			= Vector(0, 0, -30)
 
 SWEP.DamageFalloff			= 4000
+
+SWEP.ZoomDelay				= 0.25

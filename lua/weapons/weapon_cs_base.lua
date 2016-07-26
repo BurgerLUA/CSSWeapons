@@ -165,6 +165,8 @@ if CLIENT then
 	language.Add("css_hegrenade_ammo","HE Grenade")
 	language.Add("css_flashgrenade_ammo","Flash Grenade")
 	language.Add("css_smokegrenade_ammo","Smoke Grenade")
+	
+	language.Add("none_ammo", "" )
 
 	surface.CreateFont( "csd",{font = "csd",size = 64,weight = 0})
 end
@@ -293,6 +295,8 @@ SWEP.ColorOverlay			= Color(0,0,0,0) -- Color Overlay when Zoomed
 SWEP.ZoomInSound			= Sound("weapons/zoom.wav")
 SWEP.ZoomOutSound			= Sound("weapons/zoom.wav")
 
+SWEP.ZoomDelay				= 0
+
 SWEP.CrosshairOverrideMat	= nil
 SWEP.CrosshairOverrideSize	= nil
 
@@ -411,8 +415,15 @@ function SWEP:SetupDataTables( )
 	self:SetBulletsPerSecond(0)
 	self:NetworkVar("Float",16,"ClashTime")
 	self:SetClashTime(0)
+	self:NetworkVar("Float",17,"ScopeOffsetX")
+	self:SetScopeOffsetX(0)
+	self:NetworkVar("Float",18,"ScopeOffsetY")
+	self:SetScopeOffsetY(0)
+	--[[
+	self:NetworkVar("Float",19,"ZoomOverlayDelay")
+	self:SetZoomOverlayDelay(0)
+	--]]
 	
-
 	self:NetworkVar("Float",31,"SpecialFloat") -- For Special Stuff
 	self:SetSpecialFloat(0)
 
@@ -454,8 +465,6 @@ function SWEP:SetupDataTables( )
 	self:SetShouldMelee( false )
 	self:NetworkVar("Bool",14,"IsAttacking")
 	self:SetIsAttacking( false )
-	
-	
 	
 	self:NetworkVar("Entity",1,"NextHolsterWeapon")
 	self:SetNextHolsterWeapon( nil )
@@ -503,7 +512,7 @@ function SWEP:Initialize()
 	
 	
 	if (CLIENT or IsSingleplayer) then
-		if GetConVarNumber("cl_css_customslots") == 1 then
+		if GetConVar("cl_css_customslots"):GetFloat() == 1 then
 			if self.WeaponType == "Primary" then
 				self.Slot = 2
 			elseif self.WeaponType == "Secondary" then
@@ -554,7 +563,7 @@ function SWEP:SpecialInitialize()
 end
 
 function SWEP:EquipAmmo(ply)
-	if GetConVarNumber("sv_css_ammo_givespare") == 1 or self.WeaponType == "Equipment" then
+	if GetConVar("sv_css_ammo_givespare"):GetFloat() == 1 or self.WeaponType == "Equipment" then
 		ply:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
 	elseif self.WeaponType == "Throwable" then
 		ply:GiveAmmo(1,self.Primary.Ammo,false)
@@ -566,11 +575,11 @@ function SWEP:OwnerChanged()
 		timer.Simple(0.1, function()
 			if self.AlreadyGiven == false then
 			
-				if GetConVarNumber("sv_css_ammo_loaded") == 1 then
+				if GetConVar("sv_css_ammo_loaded"):GetFloat() == 1 then
 					self:SetClip1(self.Primary.ClipSize)
 				end
 
-				if GetConVarNumber("sv_css_ammo_givespare") == 1 then
+				if GetConVar("sv_css_ammo_givespare"):GetFloat() == 1 then
 					if self.Owner:IsPlayer() then
 						self.Owner:GiveAmmo(self.Primary.SpareClip,self.Primary.Ammo,false)
 					end
@@ -630,7 +639,7 @@ end
 
 function SWEP:CheckInventory()
 	if SERVER then
-		if GetConVarNumber("sv_css_limit_equipped") == 1 then
+		if GetConVar("sv_css_limit_equipped"):GetFloat() == 1 then
 			for k,v in pairs (self.Owner:GetWeapons()) do
 				if v.BurgerBase ~= nil then
 					if v ~= self then
@@ -641,7 +650,7 @@ function SWEP:CheckInventory()
 					end
 				end
 			end
-		elseif GetConVarNumber("sv_css_limit_equipped") == 2 then
+		elseif GetConVar("sv_css_limit_equipped"):GetFloat() == 2 then
 			for k,v in pairs (self.Owner:GetWeapons()) do
 				if v.BurgerBase ~= nil then
 					if v ~= self then
@@ -900,6 +909,12 @@ function SWEP:AfterZoom()
 	end
 end
 
+function SWEP:GetScopeSway(Cone) 
+	local x = math.sin(CurTime()*0.5)*Cone*0.5*0.5
+	local y = math.cos(CurTime())*Cone*0.5
+	return x,y
+end
+
 function SWEP:PreShootBullet() -- Should be predicted
 
 	local Damage = self.Primary.Damage
@@ -910,46 +925,46 @@ function SWEP:PreShootBullet() -- Should be predicted
 	if IsFirstTimePredicted() then
 		Cone = self:HandleCone(self.Primary.Cone,false)
 	end
-	
-	local Source = self.Owner:GetShootPos()
-	local Direction = self.Owner:GetAimVector()
-	
-	if self.Owner:IsPlayer() then
-		Direction = (self.Owner:EyeAngles() + self.Owner:GetPunchAngle()):Forward()
-	end
-	
+
 	self:SetBulletsPerSecond( self:GetBulletsPerSecond() + 1 )
 	
+	local Source = self.Owner:GetShootPos()
+	local ShootDir = self.Owner:GetAimVector()
+	
+	if self.Owner:IsPlayer() then
+		ShootDir = self.Owner:GetEyeTrace().Normal
+	end
+	
+	local NormalAngle = ShootDir:Angle()
+	local WithPunchAngles = (NormalAngle + self.Owner:GetPunchAngle())
+	WithPunchAngles:Normalize()
+
 	if Shots == 1 then
-	
-		--math.randomseed( math.ceil(self:GetBulletsPerSecond()) )
 		local Multi01 = math.random(-100,100) / 100
-		--math.randomseed( math.ceil(self:GetBulletsPerSecond()) + 100 )
 		local Multi02 = math.random(-100,100) / 100
-		--math.randomseed( math.ceil(self:GetBulletsPerSecond()) + 1000 )
-		local Multi03 = math.random(-100,100) / 100
-	
-		local RandAngle = Angle(Cone*Multi01*45,Cone*Multi02*45,Cone*Multi03*45)
-		local UselessVector, UsefulAngle = WorldToLocal(Vector(0,0,0), self.Owner:EyeAngles() , Vector(0,0,0), RandAngle )
-		local NewDirection = ( UsefulAngle + self.Owner:GetPunchAngle() ):Forward()
-		self:ShootBullet(Damage,1,0,Source,NewDirection,self.Owner)
-
+		local RandAngle = Angle(Cone*Multi01*45,Cone*Multi02*45,0)
+		local NewVector, NewAngle = LocalToWorld(Vector(0,0,0),WithPunchAngles,Vector(0,0,0),RandAngle)
+		self:ShootBullet(Damage,Shots,0,Source,	NewAngle:Forward(),self.Owner)
 	else
-		for i=1, Shots do
+		local ConeMinusPrimary = Cone - self.Primary.Cone
+		local Multi01 = math.random(-100,100) / 100
+		local Multi02 = math.random(-100,100) / 100
+		local RandAngle = Angle(ConeMinusPrimary*Multi01*45,ConeMinusPrimary*Multi02*45,0)
+		local NewVector, NewAngle = LocalToWorld(Vector(0,0,0),WithPunchAngles,Vector(0,0,0),RandAngle)
 		
-			math.randomseed( os.time() + i*math.random(-100,100) )
-			
-			local Multi01 = math.random(-100,100) / 100
-			local Multi02 = math.random(-100,100) / 100
-			local Multi03 = math.random(-100,100) / 100
-			
-			local RandAngle = Angle(Cone*Multi01*45,Cone*Multi02*45,Cone*Multi03*45)
-			local UselessVector, UsefulAngle = WorldToLocal(Vector(0,0,0), self.Owner:EyeAngles() , Vector(0,0,0), RandAngle )
-			local NewDirection = ( UsefulAngle + self.Owner:GetPunchAngle() ):Forward()
-
-			self:ShootBullet(Damage,1,0,Source,NewDirection,self.Owner)
-			
+		NewAngle:Normalize()
+		
+		for i=1, Shots do 
+			math.randomseed(CurTime() + i)
+			local NewMulti01 = math.random(-100,100) / 100
+			math.randomseed(CurTime() + i + Shots)
+			local NewMulti02 = math.random(-100,100) / 100
+			local NewRandAngle = Angle(self.Primary.Cone*NewMulti01*45,self.Primary.Cone*NewMulti02*45,0) + NewAngle
+			NewRandAngle:Normalize()
+			self:ShootBullet(Damage,Shots,0,Source,NewRandAngle:Forward(),self.Owner)
 		end
+		
+		
 	end
 	
 	if IsFirstTimePredicted() then
@@ -1032,6 +1047,8 @@ end
 
 function SWEP:HandleCone(Cone,IsCrosshair)
 
+	--IsCrosshair = false
+
 	Cone = self:SpecialCone(Cone,IsCrosshair)
 
 	if (self.HasBurstFire or self.AlwaysBurst) then
@@ -1043,16 +1060,12 @@ function SWEP:HandleCone(Cone,IsCrosshair)
 			Cone = Cone*0.9
 		end
 	end
-
-	local Velocity = self.Owner:GetVelocity():Length() 
-	
-	if (!self.Owner:IsOnGround() and !(self.Owner:WaterLevel() > 0)) then
-		Velocity = 400
-	elseif self.Owner:IsPlayer() and self.Owner:Crouching() then
+		
+	if self.Owner:IsPlayer() and self.Owner:Crouching() then
 		Cone = Cone * 0.75
 	end
 	
-	Cone = Cone * GetConVarNumber("sv_css_cone_scale")
+	Cone = Cone * GetConVar("sv_css_cone_scale"):GetFloat()
 	
 	if (CLIENT) and IsCrosshair and not IsSingleplayer  then
 		Cone = Cone + (self.ClientCoolDown*self.HeatMul*0.01)
@@ -1060,13 +1073,26 @@ function SWEP:HandleCone(Cone,IsCrosshair)
 		Cone = Cone + (self:GetCoolDown()*self.HeatMul*0.01)
 	end
 	
-	local VelCone = math.Clamp( ( (Velocity * self.VelConeMul * GetConVarNumber("sv_css_velcone_scale")) ^ 1.75 ) * 0.000001, 0, 0.1)
+	local VelCone = self:GetMovementIntensity()
 	
 	Cone = Cone + VelCone
 
 	return Cone
 
 end
+
+function SWEP:GetMovementVelocity()
+	local Velocity = self.Owner:GetVelocity():Length() 
+	if (!self.Owner:IsOnGround() and !(self.Owner:WaterLevel() > 0)) then
+		Velocity = 400
+	end
+	return Velocity
+end
+
+function SWEP:GetMovementIntensity()
+	return math.Clamp( ( (self:GetMovementVelocity() * self.VelConeMul * GetConVar("sv_css_velcone_scale"):GetFloat()) ^ 1.75 ) * 0.000001, 0, 0.1)
+end
+
 
 function SWEP:SecondaryAttack()
 	
@@ -1170,17 +1196,21 @@ function SWEP:HandleZoom(delay)
 	if not (IsFirstTimePredicted() or IsSingleplayer) then return end
 	if not self:CanBoltZoom() then return end
 	--if self:IsBusy() then return end
-	
-
 
 	if self:GetZoomed() then
 		self:SetZoomed(false)		
 		if self.HasScope then
 			self.Owner:EmitSound(self.ZoomOutSound,0.01)
+			if self.ZoomDelay > 0 then
+				self:SetZoomOverlayDelay(0)
+			end
 		end
 	else
 		if self.HasScope then
 			self.Owner:EmitSound(self.ZoomInSound,0.01)
+			if self.ZoomDelay > 0 then
+				self:SetZoomOverlayDelay(CurTime() + self.ZoomDelay)
+			end
 		end
 		self:SetZoomed(true)
 	end
@@ -1248,7 +1278,7 @@ function SWEP:CanPrimaryAttack()
 end
 
 function SWEP:GetRecoilMath()
-	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*self.Primary.Delay*1.875*GetConVarNumber("sv_css_recoil_scale")
+	return self.Primary.Damage*self.Primary.NumShots*self.RecoilMul*self.Primary.Delay*1.875*GetConVar("sv_css_recoil_scale"):GetFloat()
 end
 
 function SWEP:GetRecoilFinal()
@@ -1342,7 +1372,7 @@ function SWEP:GetHeatMath(Damage,Shots)
 		BurstMod = self.BurstHeatMul
 	end
 	
-	local CoolDown = DamageMod*ConeMod*WeightMod*GetConVarNumber("sv_css_heat_scale")*BurstMod
+	local CoolDown = DamageMod*ConeMod*WeightMod*GetConVar("sv_css_heat_scale"):GetFloat()*BurstMod
 	
 	return CoolDown
 	
@@ -1357,7 +1387,7 @@ function SWEP:AddHeat(Damage,Shots)
 	--]]
 	
 	local CoolDown = self:GetHeatMath(Damage,Shots)
-	local CoolTime = (self.Primary.Delay + 0.1)*GetConVarNumber("sv_css_cooltime_scale")*self.CoolMul
+	local CoolTime = (self.Primary.Delay + 0.1)*GetConVar("sv_css_cooltime_scale"):GetFloat()*self.CoolMul
 	
 	if self.HasBurstFire and self:GetIsBurst() then
 		CoolTime = CoolTime * self.BurstCoolMul
@@ -1415,8 +1445,8 @@ function SWEP:ShootBullet(Damage, Shots, Cone, Source, Direction,LastEntity)
 		end
 	else
 		local bullet = {}
-		bullet.Damage	= Damage * GetConVarNumber("sv_css_damage_scale")
-		bullet.Num		= Shots
+		bullet.Damage	= Damage * GetConVar("sv_css_damage_scale"):GetFloat()
+		bullet.Num		= 1
 		bullet.Spread	= Vector(Cone, Cone, 0)
 		bullet.Src		= Source
 		bullet.Dir		= Direction
@@ -1434,55 +1464,45 @@ end
 function SWEP:BulletCallback(Damage,Direction,PreviousHitEntity,attacker,tr,dmginfo)
 
 	local CurrentHitEntity = tr.Entity
-
-	--if IsFirstTimePredicted() then
-	
-		--[[
-		--if CLIENT then
-			if self.Owner:SteamID() == "STEAM_0:0:15446066" then
-				print("BulletCallback:",PreviousHitEntity,CurrentHitEntity)
-			end
-		--end
-		--]]
 		
-		if IsFirstTimePredicted() then
-			self:TracerCreation(tr.HitPos,tr.StartPos,Direction,PreviousHitEntity)
+	if IsFirstTimePredicted() then
+		self:TracerCreation(tr.HitPos,tr.StartPos,Direction,PreviousHitEntity)
+	end
+
+	if attacker:IsPlayer() then
+	
+		local Weapon = attacker:GetActiveWeapon()
+
+		if Weapon and Weapon.DamageFalloff then
+			if Weapon.DamageFalloff > 0 then
+			
+				local MatterScale = GetConVar("sv_css_damagefalloff_scale"):GetFloat()
+			
+				local Falloff = Weapon.DamageFalloff
+				local Distance = tr.StartPos:Distance(tr.HitPos)
+				local DamageScale = math.Clamp(math.min( (2) - (Distance/Falloff),1),0,1)
+
+				dmginfo:ScaleDamage(math.Clamp(DamageScale,MatterScale,1))
+				
+			end
 		end
 
-		if attacker:IsPlayer() then
-		
-			local Weapon = attacker:GetActiveWeapon()
-
-			if Weapon and Weapon.DamageFalloff then
-				if Weapon.DamageFalloff > 0 then
-				
-					local MatterScale = GetConVar("sv_css_damagefalloff_scale"):GetFloat()
-				
-					local Falloff = Weapon.DamageFalloff
-					local Distance = tr.StartPos:Distance(tr.HitPos)
-					local DamageScale = math.Clamp(math.min( (2) - (Distance/Falloff),1),0,1)
-					
-					dmginfo:SetDamage(self.Primary.Damage*DamageScale,self.Primary.Damage*MatterScale,self.Primary.Damage)
-					
-				end
-			end
-
-			if GetConVarNumber("sv_css_enable_penetration") == 1 then
+		if GetConVar("sv_css_enable_penetration"):GetFloat() == 1 then
+			if not CurrentHitEntity:IsPlayer() then
 				self:WorldBulletSolution(tr.HitPos,Direction,Damage,CurrentHitEntity)
 			end
-			
-			if SERVER then
-				if tr.Entity:GetClass() == "prop_vehicle_prisoner_pod" or CurrentHitEntity:IsVehicle() then
-					if CurrentHitEntity:GetDriver() ~= NULL then
-						CurrentHitEntity:GetDriver():TakeDamageInfo(dmginfo)
-					end
+		end
+		
+		if SERVER then
+			if tr.Entity:GetClass() == "prop_vehicle_prisoner_pod" or CurrentHitEntity:IsVehicle() then
+				if CurrentHitEntity:GetDriver() ~= NULL then
+					CurrentHitEntity:GetDriver():TakeDamageInfo(dmginfo)
 				end
 			end
-			
 		end
+		
+	end
 
-	--end
-	
 end
 
 function SWEP:WorldBulletSolution(Pos,Direction,Damage,PreviousHitEntity)
@@ -1496,12 +1516,6 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage,PreviousHitEntity)
 	
 	local trace = util.TraceLine(data)
 	local CurrentHitEntity = trace.Entity
-	
-	--[[
-	if self.Owner:SteamID() == "STEAM_0:0:15446066" then
-		print("BulletCallback:",PreviousHitEntity,CurrentHitEntity)
-	end
-	--]]
 	
 	local MatMul = 1
 	local mat = trace.MatType
@@ -1518,7 +1532,7 @@ function SWEP:WorldBulletSolution(Pos,Direction,Damage,PreviousHitEntity)
 		MatMul = 10
 	end
 
-	local DamageMath = math.Round(Damage - (GetConVarNumber("sv_css_penetration_scale")*MatMul*math.max(0.1,self.PenetrationLossMul)*Amount),2)
+	local DamageMath = math.Round(Damage - (GetConVar("sv_css_penetration_scale"):GetFloat()*MatMul*math.max(0.1,self.PenetrationLossMul)*Amount),2)
 	
 	if DamageMath > 0 then
 		if trace.StartSolid or (PreviousHitEntity == CurrentHitEntity) then
@@ -1750,7 +1764,7 @@ function SWEP:Reload()
 	end
 	
 	if SERVER then
-		if GetConVarNumber("sv_css_enable_mags") == 1 then
+		if GetConVar("sv_css_enable_mags"):GetFloat() == 1 then
 			timer.Simple(self.MagDelayMod, function()
 				if self.GetMagModel and self.HasMagIn then
 				
@@ -1797,7 +1811,7 @@ function SWEP:GetViewModelPosition( pos, ang )
 	
 	if ( !self.IronSightsPos ) then return pos, ang end
 	
-	local bIron = self:GetZoomed() or (self.EnableBlocking and self.Owner:KeyDown(IN_ATTACK2) ) or self:GetSharedZoom()
+	local bIron = self:GetZoomed() or (self.EnableBlocking and self.Owner:KeyDown(IN_ATTACK2) ) or self:GetSharedZoom() or self.WasZoomed
 	
 	if ( bIron != self.bLastIron ) then
 	
@@ -1874,13 +1888,16 @@ function SWEP:Think()
 	self:HolsterThink()
 	self:IdleThink()
 	self:HandleBulletsPerSecond()
+	self:HandleZoomDelay()
 	
 	if (CLIENT or IsSingleplayer) then
 		
-		local FOVMOD = ( (90 + GetConVarNumber("cl_css_viewmodel_fov"))/2 + self.AddFOV) * 0.75
+		local FOVMOD = ( (90 + GetConVar("cl_css_viewmodel_fov"):GetFloat())/2 + self.AddFOV) * 0.75
 		
 		if self.HasScope and self:GetZoomed() and not self.IgnoreScopeHide then
-			FOVMOD = 120
+			if self.ZoomDelay <= 0 or self:GetZoomOverlayDelay() == -1 then
+				FOVMOD = 120
+			end
 		end
 
 		self.ViewModelFOV = FOVMOD
@@ -1894,6 +1911,26 @@ function SWEP:Think()
 	
 	end
 	
+end
+
+if CLIENT then
+	SWEP.ZoomOverlayDelay = 0
+end
+
+function SWEP:GetZoomOverlayDelay()
+	return self.ZoomOverlayDelay
+end
+
+function SWEP:SetZoomOverlayDelay(num)
+	self.ZoomOverlayDelay = num
+end
+
+function SWEP:HandleZoomDelay()
+	if CLIENT then
+		if self:GetZoomOverlayDelay() > 0 and self:GetZoomOverlayDelay() <= CurTime()  then
+			self:SetZoomOverlayDelay(-1)
+		end
+	end
 end
 
 function SWEP:HandleBulletsPerSecond()
@@ -2056,7 +2093,7 @@ end
 
 function SWEP:HandleCoolDown()
 
-	local CoolMul = GetConVarNumber("sv_css_cooldown_scale")*0.1*self.CoolSpeedMul
+	local CoolMul = GetConVar("sv_css_cooldown_scale"):GetFloat()*0.1*self.CoolSpeedMul
 	
 	if self:GetCoolTime() <= CurTime() then
 		if self:GetCoolDown() ~= 0 then
@@ -2077,10 +2114,12 @@ end
 function SWEP:HandleZoomMod()
 	if not IsSingleplayer then
 		if self:GetZoomed() then
-			if self.HasIronSights then
-				self.ZoomMod = math.min(self.ZoomMod + 0.015*6,1)
-			else
-				self.ZoomMod = 1
+			if self.ZoomDelay <= 0 or self:GetZoomOverlayDelay() == -1 then
+				if self.HasIronSights then
+					self.ZoomMod = math.min(self.ZoomMod + 0.015*6,1)
+				else
+					self.ZoomMod = 1
+				end
 			end
 		else
 			if self.HasIronSights then
@@ -2180,19 +2219,19 @@ function SWEP:DrawHUDBackground()
 
 	end
 	
-	local length = GetConVarNumber("cl_css_crosshair_length")
+	local length = GetConVar("cl_css_crosshair_length"):GetFloat()
 	local width = 1
 	
 	local fovbonus = self.DesiredFOV / self.Owner:GetFOV()
 
-	local r = GetConVarNumber("cl_css_crosshair_color_r")
-	local g = GetConVarNumber("cl_css_crosshair_color_g")
-	local b = GetConVarNumber("cl_css_crosshair_color_b")
-	local a = GetConVarNumber("cl_css_crosshair_color_a")
+	local r = GetConVar("cl_css_crosshair_color_r"):GetFloat()
+	local g = GetConVar("cl_css_crosshair_color_g"):GetFloat()
+	local b = GetConVar("cl_css_crosshair_color_b"):GetFloat()
+	local a = GetConVar("cl_css_crosshair_color_a"):GetFloat()
 	
 	local VelCone = self.Owner:GetVelocity():Length()*0.0001
 	
-	if GetConVarNumber("cl_css_crosshair_dynamic") == 0 then
+	if GetConVar("cl_css_crosshair_dynamic"):GetFloat() == 0 then
 		Cone = math.Clamp(self.Primary.Cone*900,0,x/2)
 	else
 		Cone = math.Clamp(self:HandleCone(self.Primary.Cone,true) * 900,0,x/2)*fovbonus
@@ -2201,13 +2240,13 @@ function SWEP:DrawHUDBackground()
 	local ConeToSend = Cone
 	
 	if not IsSingleplayer then
-		if GetConVarNumber("cl_css_crosshair_smoothing") == 1 then
+		if GetConVar("cl_css_crosshair_smoothing"):GetFloat() == 1 then
 		
 			if not self.StoredCrosshair then
 				self.StoredCrosshair = Cone
 			end
 			
-			local SmoothingMul = GetConVarNumber("cl_css_crosshair_smoothing_mul") * 0.015 * fovbonus
+			local SmoothingMul = GetConVar("cl_css_crosshair_smoothing_mul"):GetFloat() * 0.015 * fovbonus
 			
 			if Cone > self.StoredCrosshair then
 				self.StoredCrosshair = math.min(Cone,self.StoredCrosshair + 500 * SmoothingMul )
@@ -2222,17 +2261,18 @@ function SWEP:DrawHUDBackground()
 	
 	if self.HasScope then
 		if self:GetZoomed() then
+			if self.ZoomDelay <= 0 or self:GetZoomOverlayDelay() == -1 then
 		
-			if LocalPlayer():ShouldDrawLocalPlayer() then
-				self:DrawCustomCrosshair(x,y,ConeToSend,length,width,r,g,b,a)
-			else
-				self:DrawCustomScope(x,y,ConeToSend,r,g,b,a)
+				if LocalPlayer():ShouldDrawLocalPlayer() then
+					self:DrawCustomCrosshair(x,y,ConeToSend,length,width,r,g,b,a)
+				else
+					self:DrawCustomScope(x,y,ConeToSend,r,g,b,a)
+				end
+				
+				if not self.IgnoreScopeHide then
+					self.Owner:DrawViewModel(false)	
+				end
 			end
-			
-			if not self.IgnoreScopeHide then
-				self.Owner:DrawViewModel(false)	
-			end
-
 		else
 			self.Owner:DrawViewModel(true)
 		end
@@ -2253,20 +2293,24 @@ function SWEP:DrawCustomCrosshair(x,y,Cone,length,width,r,g,b,a)
 	local WRound = math.floor(width/2)
 	local LRound = math.floor(length/2)
 	
+	if CSS_ContextMenuIsOpen then
+		XRound, YRound = self:ClientCursorClamp()
+	end
+
 	if self.CrosshairOverrideMat then
 		surface.SetDrawColor(Color(255,255,255,255))
 		surface.SetMaterial(self.CrosshairOverrideMat)
 		surface.DrawTexturedRectRotated(XRound,YRound,self.CrosshairOverrideSize,self.CrosshairOverrideSize,0)
 	else
 	
-		local SizeOffset = GetConVarNumber("cl_css_crosshair_offset")
+		local SizeOffset = GetConVar("cl_css_crosshair_offset"):GetFloat()
 		local FinalCone = math.floor( math.Max(Cone,WRound*2,LRound/2) + SizeOffset )
 		
-		local CrosshairShadow = GetConVarNumber("cl_css_crosshair_shadow")
-		local CrosshairStyle = GetConVarNumber("cl_css_crosshair_style")
-		local CrosshairDot = GetConVarNumber("cl_css_crosshair_dot")
+		local CrosshairShadow = GetConVar("cl_css_crosshair_shadow"):GetFloat()
+		local CrosshairStyle = GetConVar("cl_css_crosshair_style"):GetFloat()
+		local CrosshairDot = GetConVar("cl_css_crosshair_dot"):GetFloat()
 		
-		if !self:GetZoomed() or self.EnableIronCross or ( GetConVarNumber("cl_css_crosshair_neversights") == 1 and not self.HasScope) then
+		if !self:GetZoomed() or self.EnableIronCross or ( GetConVar("cl_css_crosshair_neversights"):GetFloat() == 1 and not self.HasScope) then
 
 			if  WRound == 0 then
 			
@@ -2398,35 +2442,129 @@ function SWEP:DrawSpecial(ConeToSend)
 
 end
 
+if CLIENT then
+	SWEP.DynamicScopeDesiredOffsetX = 0
+	SWEP.DynamicScopeDesiredOffsetY = 0
+	SWEP.DynamicScopeOffsetX = 0
+	SWEP.DynamicScopeOffsetY = 0
+	
+	SWEP.ScopeMoveTime = 0
+	SWEP.ScopeMoveTimeStored = 0
+end
+
 function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 
 	local space = 1
 	
-	if self.ColorOverlay.a > 0 then
-		surface.SetDrawColor(self.ColorOverlay)
-		surface.DrawRect(0, 0, x, y )
+	local PositionOffsetX = 0
+	local PositionOffsetY = 0
+	
+	if CSS_ContextMenuIsOpen then
+		PositionOffsetX, PositionOffsetY = self:ClientCursorClamp()
+		PositionOffsetX = PositionOffsetX - x/2
+		PositionOffsetY = PositionOffsetY - y/2	
+	end
+
+	--[[
+	local XSub = 100*FrameTime()
+	local YSub = 100*FrameTime()
+
+	if self.DynamicScopeDesiredOffsetX > 0 and self.DynamicScopeDesiredOffsetX - XSub > 0 then
+		self.DynamicScopeDesiredOffsetX = self.DynamicScopeDesiredOffsetX - XSub
+	elseif self.DynamicScopeDesiredOffsetX < 0 and self.DynamicScopeDesiredOffsetX - XSub < 0 then
+		self.DynamicScopeDesiredOffsetX = self.DynamicScopeDesiredOffsetX + XSub
+	else
+		self.DynamicScopeDesiredOffsetX = 0
 	end
 	
+	if self.DynamicScopeDesiredOffsetY > 0 and self.DynamicScopeDesiredOffsetY - YSub > 0 then
+		self.DynamicScopeDesiredOffsetY = self.DynamicScopeDesiredOffsetY - YSub
+	elseif self.DynamicScopeDesiredOffsetY < 0 and self.DynamicScopeDesiredOffsetY - YSub < 0 then
+		self.DynamicScopeDesiredOffsetY = self.DynamicScopeDesiredOffsetY + YSub
+	else
+		self.DynamicScopeDesiredOffsetY = 0
+	end
+
+	self.DynamicScopeOffsetX = self.DynamicScopeOffsetX - (self.DynamicScopeOffsetX - self.DynamicScopeDesiredOffsetX)*FrameTime()
+	self.DynamicScopeOffsetY = self.DynamicScopeOffsetY - (self.DynamicScopeOffsetY - self.DynamicScopeDesiredOffsetY)*FrameTime()
 	
+	
+	PositionOffsetX = PositionOffsetX + self.DynamicScopeOffsetX
+	PositionOffsetY = PositionOffsetY + self.DynamicScopeOffsetY
+	--]]
+	
+	--[[
+	local MoveVel = self:GetMovementVelocity()
+	
+
+	if MoveVel ~= 0 then
+		self.ScopeMoveTime = self.ScopeMoveTime + 1*math.pi*FrameTime()
+		self.ScopeMoveTimeStored = math.sin(self.ScopeMoveTime)*50
+	else 
+		if self.ScopeMoveTimeStored > 0 then
+			self.ScopeMoveTimeStored = math.Clamp(self.ScopeMoveTimeStored - FrameTime(),0,1)
+		elseif self.ScopeMoveTimeStored < 0 then
+			self.ScopeMoveTimeStored = math.Clamp(self.ScopeMoveTimeStored + FrameTime(),-1,0)
+		else
+			self.ScopeMoveTimeStored = 0
+		end
+	end
+	
+	PositionOffsetX = PositionOffsetX + self.ScopeMoveTimeStored
+	--]]
+	
+	--[[
+	local Size = math.Clamp(Cone,3,x/2*0.33)/2
+	
+	local OffsetX = math.sin(CurTime())*Size
+	local OffsetY = math.cos(CurTime())*Size
+	
+	self.DynamicScopeOffsetX = self.DynamicScopeOffsetX - (self.DynamicScopeOffsetX - OffsetX)*FrameTime()*10
+	self.DynamicScopeOffsetY = self.DynamicScopeOffsetY - (self.DynamicScopeOffsetY - OffsetY)*FrameTime()*10
+	
+	PositionOffsetX = PositionOffsetX + self.DynamicScopeOffsetX
+	PositionOffsetY = PositionOffsetY + self.DynamicScopeOffsetY
+	--]]
+	
+	if self.ColorOverlay.a > 0 then
+		surface.SetDrawColor(self.ColorOverlay)
+		surface.DrawRect(0-x/2 + PositionOffsetX, 0-y/2 + PositionOffsetY, x*2, y*2 )
+	end
 	
 	if self.CustomScope == nil then
 	
 		if self.EnableDefaultScope then
 			surface.SetDrawColor(Color(0,0,0))
 			surface.SetMaterial(Material("gui/sniper_corner"))
-			surface.DrawTexturedRectRotated(x/2 - y/4,y/2 - y/4,y/2 + space,y/2 + space,0-180-180)
-			surface.DrawTexturedRectRotated(x/2 - y/4,y/2 + y/4,y/2 + space,y/2 + space,90-180-180)
-			surface.DrawTexturedRectRotated(x/2 + y/4,y/2 + y/4,y/2 + space,y/2 + space,180-180-180)
-			surface.DrawTexturedRectRotated(x/2 + y/4,y/2 - y/4,y/2 + space,y/2 + space,270-180-180)
+			
+			--[[
+			surface.DrawTexturedRectRotated(x/2 - y/4 + PositionOffsetX,y/2 - y/4 + PositionOffsetY,y/2 + space,y/2 + space,0-180-180)
+			surface.DrawTexturedRectRotated(x/2 - y/4 + PositionOffsetX,y/2 + y/4 + PositionOffsetY,y/2 + space,y/2 + space,90-180-180)
+			surface.DrawTexturedRectRotated(x/2 + y/4 + PositionOffsetX,y/2 + y/4 + PositionOffsetY,y/2 + space,y/2 + space,180-180-180)
+			surface.DrawTexturedRectRotated(x/2 + y/4 + PositionOffsetX,y/2 - y/4 + PositionOffsetY,y/2 + space,y/2 + space,270-180-180)
+			--]]
+			
+			local CenterX = x/2
+			local ScopeSize = y
+			local ScopeSegmentSize = ScopeSize/2
+			
+			
+			surface.DrawTexturedRectRotated(CenterX - ScopeSegmentSize/2 + PositionOffsetX,ScopeSegmentSize - ScopeSegmentSize/2 + PositionOffsetY,ScopeSegmentSize + space,ScopeSegmentSize + space,0-180-180)
+			surface.DrawTexturedRectRotated(CenterX - ScopeSegmentSize/2 + PositionOffsetX,ScopeSegmentSize + ScopeSegmentSize/2 + PositionOffsetY,ScopeSegmentSize + space,ScopeSegmentSize + space,90-180-180)
+			surface.DrawTexturedRectRotated(CenterX + ScopeSegmentSize/2 + PositionOffsetX,ScopeSegmentSize + ScopeSegmentSize/2 + PositionOffsetY,ScopeSegmentSize + space,ScopeSegmentSize + space,180-180-180)
+			surface.DrawTexturedRectRotated(CenterX + ScopeSegmentSize/2 + PositionOffsetX,ScopeSegmentSize - ScopeSegmentSize/2 + PositionOffsetY,ScopeSegmentSize + space,ScopeSegmentSize + space,270-180-180)
+			
+			
+			
 		end
 		
 		if self.ZoomAmount > 6 then
 			surface.SetDrawColor(Color(0,0,0))
-			surface.DrawLine(x/2,0,x/2,y)
-			surface.DrawLine(0,y/2,x,y/2)
+			surface.DrawLine(x/2 + PositionOffsetX,0 + PositionOffsetY,x/2 + PositionOffsetX,y + PositionOffsetY)
+			surface.DrawLine(0 + PositionOffsetX,y/2 + PositionOffsetY,x + PositionOffsetX,y/2 + PositionOffsetY)
 		else
 			if !self.EnableIronCross then
-				surface.DrawCircle( x/2, y/2, 1 , Color(r,g,b,a) )
+				surface.DrawCircle( x/2 + PositionOffsetX, y/2 + PositionOffsetY, 1 , Color(r,g,b,a) )
 			end
 		end
 		
@@ -2440,12 +2578,12 @@ function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 	
 		surface.SetDrawColor(self.CustomScopeCOverride)
 		surface.SetMaterial(self.CustomScope)
-		surface.DrawTexturedRectRotated(x/2,y/2,Size,Size,0)
+		surface.DrawTexturedRectRotated(x/2 + PositionOffsetX,y/2 + PositionOffsetY,Size,Size,0)
 		
 		if self.EnableDefaultScope then
 			surface.SetDrawColor(Color(0,0,0,255))
 			surface.SetMaterial(Material("vgui/scope_lens"))
-			surface.DrawTexturedRectRotated(x/2,y/2,y,y,0)
+			surface.DrawTexturedRectRotated(x/2 + PositionOffsetX,y/2 + PositionOffsetY,y,y,0)
 		end
 		
 	end
@@ -2454,18 +2592,38 @@ function SWEP:DrawCustomScope(x,y,Cone,r,g,b,a)
 		local Size = math.Clamp(Cone,3,x/2*0.33)
 				
 		if Size > 6 then
-			surface.DrawCircle( x/2, y/2, Size , Color(r,g,b,a) )
+			surface.DrawCircle( x/2 + PositionOffsetX, y/2 + PositionOffsetY, Size , Color(r,g,b,a) )
 		end
 	end
 
 	if self.EnableDefaultScope then
 		surface.SetDrawColor(Color(0,0,0))
-		surface.SetMaterial(Material("vgui/gfx/vgui/solid_background"))
-		surface.DrawTexturedRectRotated(x/4 - y/4,y/2,x/2 - y/2,y,0)
-		surface.DrawTexturedRectRotated(x - x/4 + y/4,y/2,x/2 - y/2,y,0)
+		
+		local CenterX = x/2
+		local ScopeSize = y
+		local ScopeSegmentSize = ScopeSize/2
+		
+		surface.DrawRect( 0 + PositionOffsetX, 0 + PositionOffsetY, CenterX - ScopeSegmentSize, ScopeSize ) -- Left
+		surface.DrawRect( CenterX + ScopeSegmentSize + PositionOffsetX, 0 + PositionOffsetY, CenterX - ScopeSegmentSize, ScopeSize ) -- Right
+
 	end
 	
+	surface.SetDrawColor(Color(0,0,0))
+	
+	surface.DrawRect( x + PositionOffsetX, 0 + PositionOffsetY, x, y) -- Right
+	surface.DrawRect(-x + PositionOffsetX, 0 + PositionOffsetY, x, y) -- Left
+	surface.DrawRect( -x + PositionOffsetX, y + PositionOffsetY, x*3, y) -- Bottom
+	surface.DrawRect( -x + PositionOffsetX, -y + PositionOffsetY, x*3, y) -- Top
+	
 end
+
+function SWEP:ClientCursorClamp()
+	local x,y = input.GetCursorPos()
+	x = math.Clamp(x,0,ScrW())
+	y = math.Clamp(y,0,ScrH())
+	return x,y
+end
+
 
 function SWEP:HUDShouldDraw( element )
 
@@ -2485,7 +2643,7 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 	
 		local Ammo = language.GetPhrase( self.Primary.Ammo .. "_ammo" )
 	
-		local Damage = math.floor(self.Primary.NumShots * self.Primary.Damage * GetConVarNumber("sv_css_damage_scale"))	
+		local Damage = math.floor(self.Primary.NumShots * self.Primary.Damage * GetConVar("sv_css_damage_scale"):GetFloat())	
 		
 		local Delay = self.Primary.Delay
 		
@@ -2503,7 +2661,7 @@ function SWEP:PrintWeaponInfo( x, y, alpha )
 		
 		local ClipDamage = Damage * ClipSize
 		local DPS = math.min(ClipDamage,math.floor(( 1 / Delay) * Damage ))
-		local Cone = math.Round((self.Primary.Cone * GetConVarNumber("sv_css_cone_scale")) * (360/1),2)
+		local Cone = math.Round((self.Primary.Cone * GetConVar("sv_css_cone_scale"):GetFloat()) * (360/1),2)
 		local Recoil = math.Round(self:GetRecoilMath() * 0.25,2)
 		local KillTime = math.Round((math.ceil(100/Damage) - 1) * (Delay),2)
 		local MissKillTime = math.Round( ( (math.ceil(100/Damage) - 1) * (Delay) ) + Delay,2)
@@ -2772,13 +2930,6 @@ function SWEP:NewSendHitEvent(victim,damage,TraceData)
 		if VictimWeapon and VictimWeapon ~= NULL then
 			if VictimWeapon.WeaponType == "Melee" then
 				if (VictimWeapon:GetIsBlocking() and VictimWeapon:GetNextSecondaryFire() <= CurTime()) or ( VictimWeapon:GetClashTime() >= CurTime() and math.abs(VictimWeapon:GetClashTime() - self:GetClashTime()) > self.MeleeDelay ) then
-				
-					
-					
-				
-				
-				
-				
 					local Range = 90
 					if Yaw > 180 - Range/2 and Yaw < 180 + Range/2 then
 						VictimWeapon:BlockDamage(damage,self.Owner)

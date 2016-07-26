@@ -112,3 +112,20 @@ hook.Add("PostPlayerDraw","CSS_HiddenFunction",CSS_HiddenFunction)
 
 
 
+function CSS_PlayerFootStep(ply,pos,foot,sound,volume,filter)
+	--[[
+	if IsValid(ply) then
+		local Weapon = ply:GetActiveWeapon()	
+		if IsValid(Weapon) then
+			if Weapon:IsScripted() and Weapon.Base == "weapon_cs_base" then
+				Weapon.DynamicScopeDesiredOffsetX = (foot - 0.5)*2 * 100
+				Weapon.DynamicScopeDesiredOffsetY = math.random(-1,1) * 100
+			end
+		end
+	end
+	--]]
+end
+
+hook.Add("PlayerFootstep","CSS_PlayerFootStep",CSS_PlayerFootStep)
+
+

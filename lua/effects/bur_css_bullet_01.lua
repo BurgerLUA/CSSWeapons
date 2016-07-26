@@ -5,6 +5,7 @@ EFFECT.BulletMats[1] = Material( "effects/spark" )
 EFFECT.BulletMats[2] = Material( "effects/gunshiptracer")
 EFFECT.BulletMats[3] = Material( "effects/laser_tracer" )
 
+EFFECT.SmokeTrailMat = Material("trails/smoke")
 
 function EFFECT:Init( data )
 
@@ -25,6 +26,7 @@ function EFFECT:Init( data )
 	local Ratio = self.Length/self.Width
 
 	self.BulletSpeed = math.Clamp(Ratio * 100,2000,6000) + 1000
+	--self.BulletSpeed = 30
 	self.FadeTime = Range
 	self.MaxFade = GetConVar("sv_css_damagefalloff_scale"):GetFloat()
 	self.PositionPercent = -(self.Length/self.Distance)
@@ -51,19 +53,11 @@ end
 function EFFECT:Render()
 
 	local DistanceTraveled = self.PositionPercent * self.Distance
-	local AlphaMath = (1 - self.MaxFade) + math.min(1, ( (self.FadeTime) / math.max(1,DistanceTraveled) ))*self.MaxFade
-	local ConvertMath = ( (self.Length*AlphaMath)/self.Distance )
+	local AlphaMath = math.Clamp(math.min( (2) - (DistanceTraveled/self.FadeTime),1),self.MaxFade,1)
 	local MinPos = LerpVector(math.Clamp(self.PositionPercent,0,1),self.StartPos,self.EndPos)
-	--local SmokeMinPos = LerpVector(math.Clamp(self.PositionPercent - 1,0,1),self.StartPos,self.EndPos)
-	
+	local SmokeMinPos = LerpVector(math.Clamp(self.PositionPercent - 1,0,1),self.StartPos,self.EndPos)
+	local ConvertMath = ( (self.Length*AlphaMath)/self.Distance )
 	local MaxPos = LerpVector(math.Clamp( (self.PositionPercent + ConvertMath),0,1),self.StartPos,self.EndPos)
-	--local TotalScale = MinPos:Distance(MaxPos) / (self.Length*AlphaMath)
-	
-	--local BulletChange = (1-AlphaMath)*FrameTime()*3000
-	
-	--self.BulletSpeed = math.Clamp(self.BulletSpeed - BulletChange,1000,6000)
-	
-	--print(self.BulletSpeed)
 	
 	if self.PositionPercent <= 1 then
 	
@@ -73,20 +67,26 @@ function EFFECT:Render()
 			render.SetMaterial( self.BulletMats[DMG_BULLET] )
 		end
 
-		render.DrawBeam( MinPos , MaxPos, self.Width * AlphaMath,0, 1, Color(255,255,255,AlphaMath*255) )
+		render.DrawBeam( MinPos , MaxPos, self.Width,0, 1, Color(255,255,255,255) )
 		
 	end
-
-	local SmokeMul = self.PositionPercent/(2*self.Width)
 	
 	--[[
+	local SmokeMul = self.PositionPercent/(2*self.Width)
+	
+
 	local SmokeOffset = Vector(0,0,self.PositionPercent)*1
 	local SmokeInverse = (1-SmokeMul)
 	
-	render.SetMaterial( self.SmokeMat )
-	render.DrawBeam( self.StartPos + SmokeOffset , MaxPos + SmokeOffset, self.Width*SmokeMul*2,0, 1, Color(255,255,255,25 * SmokeInverse ) )
-	--]]
+	local Size = self.Length 
 	
+
+	
+	
+	render.SetMaterial( self.SmokeTrailMat )
+	render.DrawBeam( self.StartPos + SmokeOffset , MaxPos + SmokeOffset, self.Width*SmokeMul*2,0, 1, Color(255,255,255, math.max(0,Size) * SmokeInverse ) )
+	--]]
+
 	
 	
 end
